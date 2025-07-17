@@ -218,7 +218,7 @@ def bets_view():
             'cancelled_bets': Bet.query.filter_by(status='cancelled').count()
         }
         
-        return render_template('bets.html',
+        return render_template('admin/bets.html',
                              bets=bets,
                              stats=stats,
                              status_filter=status_filter)
@@ -226,7 +226,7 @@ def bets_view():
     except Exception as e:
         logger.error(f"Error loading bets view: {e}")
         flash(f'Error loading bets view: {str(e)}', 'error')
-        return render_template('bets.html',
+        return render_template('admin/bets.html',
                              bets=None,
                              stats={},
                              status_filter='all')
@@ -250,14 +250,14 @@ def oracles_view():
             'pending_submissions': OracleSubmission.query.filter_by(is_consensus=False).count()
         }
         
-        return render_template('oracles.html',
+        return render_template('admin/oracles.html',
                              submissions=submissions,
                              stats=stats)
         
     except Exception as e:
         logger.error(f"Error loading oracles view: {e}")
         flash(f'Error loading oracles view: {str(e)}', 'error')
-        return render_template('oracles.html',
+        return render_template('admin/oracles.html',
                              submissions=None,
                              stats={})
 
@@ -284,7 +284,7 @@ def time_sync_view():
             'unreconciled_entries': total_entries - reconciled_entries
         }
         
-        return render_template('time_sync.html',
+        return render_template('admin/time_sync.html',
                              time_status=time_status,
                              recent_entries=recent_entries,
                              stats=stats)
@@ -292,7 +292,7 @@ def time_sync_view():
     except Exception as e:
         logger.error(f"Error loading time sync view: {e}")
         flash(f'Error loading time sync view: {str(e)}', 'error')
-        return render_template('time_sync.html',
+        return render_template('admin/time_sync.html',
                              time_status={},
                              recent_entries=[],
                              stats={})

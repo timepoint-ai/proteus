@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Bets Management - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Bets Management</h1>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bets</h5>
+                    <h3 class="text-primary">{{ stats.total_bets or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Active Bets</h5>
+                    <h3 class="text-success">{{ stats.active_bets or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Resolved Bets</h5>
+                    <h3 class="text-info">{{ stats.resolved_bets or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Cancelled Bets</h5>
+                    <h3 class="text-warning">{{ stats.cancelled_bets or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filter Bets</h5>
+                    <form method="GET" class="d-flex gap-2">
+                        <select name="status" class="form-select">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                            <option value="resolved" {% if status_filter == 'resolved' %}selected{% endif %}>Resolved</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bets Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Bets List</h5>
+                </div>
+                <div class="card-body">
+                    {% if bets and bets.items %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Actor</th>
+                                    <th>Prediction</th>
+                                    <th>Creator</th>
+                                    <th>Initial Stake</th>
+                                    <th>Currency</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>End Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bet in bets.items %}
+                                <tr>
+                                    <td>{{ bet.id }}</td>
+                                    <td>
+                                        {% if bet.actor %}
+                                            {{ bet.actor.name }}
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 200px;" title="{{ bet.predicted_text }}">
+                                            {{ bet.predicted_text or 'No prediction' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ bet.creator_wallet[:10] }}...{{ bet.creator_wallet[-8:] if bet.creator_wallet else 'N/A' }}</small>
+                                    </td>
+                                    <td>{{ bet.initial_stake_amount or 0 }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ bet.currency or 'N/A' }}</span>
+                                    </td>
+                                    <td>
+                                        {% if bet.status == 'active' %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% elif bet.status == 'resolved' %}
+                                            <span class="badge bg-info">Resolved</span>
+                                        {% elif bet.status == 'cancelled' %}
+                                            <span class="badge bg-warning">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ bet.status or 'Unknown' }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ bet.created_at.strftime('%Y-%m-%d %H:%M') if bet.created_at else 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        <small>{{ bet.end_time.strftime('%Y-%m-%d %H:%M') if bet.end_time else 'N/A' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewBetDetails({{ bet.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if bet.status == 'active' %}
+                                            <button class="btn btn-outline-warning" onclick="cancelBet({{ bet.id }})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if bets.pages > 1 %}
+                    <nav aria-label="Bets pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if bets.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.bets_view', page=bets.prev_num, status=status_filter) }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for page_num in bets.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != bets.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin.bets_view', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if bets.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.bets_view', page=bets.next_num, status=status_filter) }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-dice fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No bets found</h5>
+                        <p class="text-muted">No bets match your current filter criteria.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bet Details Modal -->
+<div class="modal fade" id="betDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bet Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="betDetailsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewBetDetails(betId) {
+    const modal = new bootstrap.Modal(document.getElementById('betDetailsModal'));
+    const content = document.getElementById('betDetailsContent');
+    
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch bet details via API
+    fetch(`/api/bets/${betId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Bet ID:</dt>
+                            <dd class="col-sm-8">${data.id}</dd>
+                            <dt class="col-sm-4">Actor:</dt>
+                            <dd class="col-sm-8">${data.actor_name || 'Unknown'}</dd>
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8">
+                                <span class="badge bg-${data.status === 'active' ? 'success' : data.status === 'resolved' ? 'info' : 'warning'}">
+                                    ${data.status}
+                                </span>
+                            </dd>
+                            <dt class="col-sm-4">Creator:</dt>
+                            <dd class="col-sm-8"><small>${data.creator_wallet}</small></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Financial Information</h6>
+                        <dl class="row">
+                            <dt class="col-sm-4">Initial Stake:</dt>
+                            <dd class="col-sm-8">${data.initial_stake_amount} ${data.currency}</dd>
+                            <dt class="col-sm-4">Currency:</dt>
+                            <dd class="col-sm-8">${data.currency}</dd>
+                            <dt class="col-sm-4">Platform Fee:</dt>
+                            <dd class="col-sm-8">${data.platform_fee || 0} ${data.currency}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Prediction Text</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-text">${data.predicted_text || 'No prediction text available'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${data.actual_text ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Actual Text</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-text">${data.actual_text}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        })
+        .catch(error => {
+            content.innerHTML = `<div class="alert alert-danger">Error loading bet details: ${error.message}</div>`;
+        });
+}
+
+function cancelBet(betId) {
+    if (confirm('Are you sure you want to cancel this bet?')) {
+        fetch(`/api/bets/${betId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error cancelling bet: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error cancelling bet: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}
