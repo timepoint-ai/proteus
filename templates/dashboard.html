@@ -315,7 +315,7 @@
     <div class="col-12">
         <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>
-            Dashboard auto-refreshes every 30 seconds. Last updated: <span id="last-updated">{{ moment().format('HH:mm:ss') }}</span>
+            Dashboard auto-refreshes every 30 seconds. Last updated: <span id="last-updated">Loading...</span>
         </div>
     </div>
 </div>
@@ -388,6 +388,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Set initial time
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    
     // Auto-refresh functionality
     setInterval(function() {
         fetch('/admin/api/stats')

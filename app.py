@@ -55,6 +55,12 @@ def create_app():
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     
+    # Root route redirect to admin dashboard
+    @app.route('/')
+    def index():
+        from flask import redirect, url_for
+        return redirect(url_for('admin.dashboard'))
+    
     # Create database tables
     with app.app_context():
         import models
