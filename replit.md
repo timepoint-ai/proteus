@@ -116,3 +116,17 @@ Preferred communication style: Simple, everyday language.
 - **Network Security**: Secure inter-node communication
 
 The system is designed to be highly distributed with fault tolerance, automatic reconciliation, and real-time consensus mechanisms for managing linguistic prediction markets across a network of nodes.
+
+## Recent Changes (July 17, 2025)
+
+### Clockchain Timeline Enhancement
+- Replaced "Time Sync" navigation with "Clockchain" 
+- Transformed timeline from metadata view to content-focused display showing:
+  - Actor names and predicted statements prominently
+  - Time windows for each prediction
+  - Total bet volumes and competing submission counts
+  - Links to detailed submission pages
+- Created individual submission detail pages at `/clockchain/submission/<id>`
+- Extended default timeline range to 1440 hours (60 days) with maximum range up to 10,000,000 hours
+- Added performance optimization limiting records to 200 max with indicators when more data exists
+- Added convenient time range presets (1 day, 1 week, 1 month, 2 months, 1 year, 5 years)

@@ -18,20 +18,36 @@ def clockchain_view():
         # Get current Pacific time
         time_status = time_sync_service.get_time_health_status()
         
-        # Get time range parameters
-        hours_before = request.args.get('hours_before', 24, type=int)
-        hours_after = request.args.get('hours_after', 24, type=int)
+        # Get time range parameters (default 1440 hours = 60 days)
+        hours_before = request.args.get('hours_before', 1440, type=int)
+        hours_after = request.args.get('hours_after', 1440, type=int)
+        
+        # Limit to reasonable maximum to prevent memory issues
+        max_hours = 10000000
+        hours_before = min(hours_before, max_hours)
+        hours_after = min(hours_after, max_hours)
         
         # Calculate time range
         current_time = datetime.utcnow()
         start_time = current_time - timedelta(hours=hours_before)
         end_time = current_time + timedelta(hours=hours_after)
         
-        # Get all active and recent bets in the time range
+        # Get all active and recent bets in the time range (limit to prevent overload)
+        max_records = 200  # Limit number of records to load
+        
+        # First count total records
+        total_count = Bet.query.filter(
+            ((Bet.start_time <= end_time) & (Bet.end_time >= start_time)) |
+            (Bet.created_at.between(start_time, end_time))
+        ).count()
+        
+        # Then get limited records
         bets_in_range = Bet.query.filter(
             ((Bet.start_time <= end_time) & (Bet.end_time >= start_time)) |
             (Bet.created_at.between(start_time, end_time))
-        ).order_by(Bet.start_time).all()
+        ).order_by(Bet.start_time).limit(max_records).all()
+        
+        has_more_records = total_count > max_records
         
         # Group bets by actor and time period
         timeline_segments = []
@@ -108,7 +124,10 @@ def clockchain_view():
                              min_time_ms=min_time_ms,
                              max_time_ms=max_time_ms,
                              active_bet_count=active_bet_count,
-                             total_bet_volume=str(total_bet_volume))
+                             total_bet_volume=str(total_bet_volume),
+                             total_count=total_count,
+                             displayed_count=len(bets_in_range),
+                             has_more_records=has_more_records)
         
     except Exception as e:
         logger.error(f"Error loading clockchain view: {e}")

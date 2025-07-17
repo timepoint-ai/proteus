@@ -29,14 +29,24 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Time Range</h5>
+                    <div class="mb-3">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(24, 24)">1 Day</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(168, 168)">1 Week</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(720, 720)">1 Month</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(1440, 1440)">2 Months</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(8760, 8760)">1 Year</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(43800, 43800)">5 Years</button>
+                        </div>
+                    </div>
                     <form id="timeRangeForm" class="row g-3">
                         <div class="col-md-4">
                             <label for="hoursBefore" class="form-label">Hours Before Now</label>
-                            <input type="number" class="form-control" id="hoursBefore" name="hours_before" value="{{ hours_before }}" min="1" max="168">
+                            <input type="number" class="form-control" id="hoursBefore" name="hours_before" value="{{ hours_before }}" min="1" max="10000000">
                         </div>
                         <div class="col-md-4">
                             <label for="hoursAfter" class="form-label">Hours After Now</label>
-                            <input type="number" class="form-control" id="hoursAfter" name="hours_after" value="{{ hours_after }}" min="1" max="168">
+                            <input type="number" class="form-control" id="hoursAfter" name="hours_after" value="{{ hours_after }}" min="1" max="10000000">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">&nbsp;</label>
@@ -62,9 +72,20 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Linguistic Prediction Timeline</h5>
+                    <h5 class="card-title mb-0">
+                        Linguistic Prediction Timeline
+                        {% if has_more_records %}
+                        <span class="badge bg-warning float-end">
+                            Showing {{ displayed_count }} of {{ total_count }} submissions
+                        </span>
+                        {% elif total_count > 0 %}
+                        <span class="badge bg-secondary float-end">
+                            {{ total_count }} submissions
+                        </span>
+                        {% endif %}
+                    </h5>
                 </div>
-                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 1200px; min-height: 600px;">
+                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 1500px; min-height: 800px;">
                     <!-- Current Time Marker -->
                     <div class="position-absolute w-100" style="top: 50%; transform: translateY(-50%); z-index: 100;">
                         <div class="d-flex align-items-center">
@@ -189,6 +210,16 @@
                             <p class="text-muted">Try adjusting the time range to see more predictions</p>
                         </div>
                         {% endif %}
+                        
+                        {% if has_more_records %}
+                        <div class="text-center py-3">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Showing only the first {{ displayed_count }} submissions out of {{ total_count }} total.
+                                Consider narrowing your time range for better performance.
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -295,6 +326,41 @@ function positionTimelineSegments() {
     }
 }
 
+// Set time range helper
+function setTimeRange(hoursBefore, hoursAfter) {
+    document.getElementById('hoursBefore').value = hoursBefore;
+    document.getElementById('hoursAfter').value = hoursAfter;
+    document.getElementById('timeRangeForm').submit();
+}
+
+// Format large hour counts
+function formatHours(hours) {
+    if (hours >= 8760) {
+        const years = Math.floor(hours / 8760);
+        const remainingHours = hours % 8760;
+        if (remainingHours > 0) {
+            const days = Math.floor(remainingHours / 24);
+            return `${years} year${years > 1 ? 's' : ''}, ${days} day${days > 1 ? 's' : ''}`;
+        }
+        return `${years} year${years > 1 ? 's' : ''}`;
+    } else if (hours >= 168) {
+        const weeks = Math.floor(hours / 168);
+        const days = Math.floor((hours % 168) / 24);
+        if (days > 0) {
+            return `${weeks} week${weeks > 1 ? 's' : ''}, ${days} day${days > 1 ? 's' : ''}`;
+        }
+        return `${weeks} week${weeks > 1 ? 's' : ''}`;
+    } else if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        if (remainingHours > 0) {
+            return `${days} day${days > 1 ? 's' : ''}, ${remainingHours} hour${remainingHours > 1 ? 's' : ''}`;
+        }
+        return `${days} day${days > 1 ? 's' : ''}`;
+    }
+    return `${hours} hour${hours > 1 ? 's' : ''}`;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Update time every second
@@ -305,6 +371,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reposition on window resize
     window.addEventListener('resize', positionTimelineSegments);
+    
+    // Display formatted time ranges
+    const hoursBefore = {{ hours_before }};
+    const hoursAfter = {{ hours_after }};
+    
+    // Add a helper text showing the actual time range
+    const rangeInfo = document.createElement('small');
+    rangeInfo.className = 'text-muted d-block mt-2';
+    rangeInfo.innerHTML = `Showing ${formatHours(hoursBefore)} before and ${formatHours(hoursAfter)} after current time`;
+    document.querySelector('.card-title').parentElement.appendChild(rangeInfo);
 });
 
 // Auto-refresh every 60 seconds
