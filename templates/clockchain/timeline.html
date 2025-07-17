@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Clockchain Timeline - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Clockchain Timeline</h1>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="refreshTimeline()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <a href="/" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Range Controls -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Time Range</h5>
+                    <form id="timeRangeForm" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="hoursBefore" class="form-label">Hours Before Now</label>
+                            <input type="number" class="form-control" id="hoursBefore" name="hours_before" value="{{ hours_before }}" min="1" max="168">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="hoursAfter" class="form-label">Hours After Now</label>
+                            <input type="number" class="form-control" id="hoursAfter" name="hours_after" value="{{ hours_after }}" min="1" max="168">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block w-100">Update Range</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Current Pacific Time</h5>
+                    <h3 class="text-primary" id="currentTime">{{ time_status.current_time or 'Loading...' }}</h3>
+                    <small class="text-muted">Milliseconds: <span id="currentMs">{{ current_time_ms }}</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Bets Summary -->
+    {% if active_bets %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Active Bets</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for bet in active_bets[:6] %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ bet.actor }}</h6>
+                                    <p class="card-text small">{{ bet.predicted_text }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Ends: {{ bet.end_time }}</small>
+                                        <span class="badge bg-info">{{ bet.stake_count }} stakes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Timeline View -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Synthetic Time Ledger</h5>
+                </div>
+                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 800px;">
+                    <!-- Current Time Marker -->
+                    <div class="position-absolute w-100" style="top: 50%; transform: translateY(-50%); z-index: 10;">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                            <span class="badge bg-danger mx-2">NOW</span>
+                            <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline Events -->
+                    <div class="timeline-container" style="position: relative; padding: 20px 0;">
+                        {% for event in timeline_events %}
+                        <div class="timeline-event mb-3" data-timestamp="{{ event.timestamp_ms }}">
+                            <div class="row">
+                                <div class="col-2 text-end">
+                                    <small class="text-muted">{{ event.timestamp }}</small>
+                                </div>
+                                <div class="col-1 text-center">
+                                    <div class="timeline-marker bg-{{ 'success' if event.reconciled else 'warning' }}" style="width: 12px; height: 12px; border-radius: 50%; margin: 0 auto;"></div>
+                                </div>
+                                <div class="col-9">
+                                    <div class="card {{ 'border-success' if event.reconciled else 'border-warning' }}">
+                                        <div class="card-body py-2">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="card-subtitle mb-1">
+                                                        <span class="badge bg-secondary">{{ event.type }}</span>
+                                                        {% if event.type == 'bet_created' and event.bet_details %}
+                                                            <span class="text-primary">{{ event.bet_details.actor }}</span> - 
+                                                            {{ event.bet_details.amount }} {{ event.bet_details.currency }}
+                                                        {% elif event.type == 'stake_placed' and event.stake_details %}
+                                                            <span class="text-info">{{ event.stake_details.position }}</span> on 
+                                                            <span class="text-primary">{{ event.stake_details.actor }}</span> - 
+                                                            {{ event.stake_details.amount }} {{ event.stake_details.currency }}
+                                                        {% elif event.type == 'oracle_submission' and event.oracle_details %}
+                                                            Oracle for <span class="text-primary">{{ event.oracle_details.actor }}</span>
+                                                            {% if event.oracle_details.consensus %}
+                                                                <span class="badge bg-success">Consensus</span>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </h6>
+                                                    {% if event.type == 'bet_created' and event.bet_details %}
+                                                        <p class="card-text small mb-0">{{ event.bet_details.predicted_text }}</p>
+                                                    {% elif event.type == 'oracle_submission' and event.oracle_details %}
+                                                        <p class="card-text small mb-0">{{ event.oracle_details.submitted_text }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text-end">
+                                                    <small class="text-muted">Node: {{ event.node.operator_id }}</small><br>
+                                                    {% if not event.reconciled %}
+                                                        <span class="badge bg-warning">Unreconciled</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if not timeline_events %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No events in selected time range</h5>
+                            <p class="text-muted">Try adjusting the time range to see more events</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-container {
+    position: relative;
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: calc(16.666% + 6px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--bs-gray-400);
+}
+
+.timeline-event {
+    transition: all 0.3s ease;
+}
+
+.timeline-event:hover {
+    transform: translateX(5px);
+}
+
+.timeline-marker {
+    position: relative;
+    z-index: 5;
+}
+</style>
+
+<script>
+// Auto-refresh current time
+function updateCurrentTime() {
+    fetch('/api/time-status')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                document.getElementById('currentTime').textContent = data.current_time || 'N/A';
+                document.getElementById('currentMs').textContent = new Date().getTime();
+            }
+        })
+        .catch(error => {
+            console.error('Error updating time:', error);
+        });
+}
+
+// Refresh timeline
+function refreshTimeline() {
+    location.reload();
+}
+
+// Handle time range form
+document.getElementById('timeRangeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const params = new URLSearchParams(formData);
+    window.location.href = `/clockchain?${params.toString()}`;
+});
+
+// Calculate relative positions for events
+function positionTimelineEvents() {
+    const currentMs = {{ current_time_ms }};
+    const events = document.querySelectorAll('.timeline-event');
+    
+    events.forEach(event => {
+        const eventMs = parseInt(event.dataset.timestamp);
+        const diffMs = eventMs - currentMs;
+        const diffHours = diffMs / (1000 * 60 * 60);
+        
+        // Position relative to NOW marker (which is at 50%)
+        // Each hour = 2% of container height
+        const topPercent = 50 - (diffHours * 2);
+        event.style.position = 'relative';
+        event.style.top = `${topPercent}%`;
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Update time every second
+    setInterval(updateCurrentTime, 1000);
+    
+    // Position events on timeline
+    positionTimelineEvents();
+});
+
+// Auto-refresh every 30 seconds
+setInterval(refreshTimeline, 30000);
+</script>
+{% endblock %}

@@ -10,7 +10,7 @@ from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from services.text_analysis import TextAnalysisService
 from services.node_communication import NodeCommunicationService
-from models import Bet, Stake, Actor, NodeOperator, Transaction, OracleSubmission
+from models import Bet, Stake, Actor, NodeOperator, Transaction, OracleSubmission, SyntheticTimeEntry
 from app import db
 from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils
@@ -405,6 +405,248 @@ def submit_oracle_statement():
     except Exception as e:
         logger.error(f"Error submitting oracle statement: {e}")
         return jsonify({'error': 'Failed to submit oracle statement'}), 500
+
+@api_bp.route('/bets/<bet_id>', methods=['GET'])
+def get_bet_details(bet_id):
+    """Get detailed information about a specific bet"""
+    try:
+        bet = Bet.query.get(bet_id)
+        if not bet:
+            return jsonify({'error': 'Bet not found'}), 404
+            
+        actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
+        stakes = Stake.query.filter_by(bet_id=bet_id).all()
+        
+        return jsonify({
+            'id': str(bet.id),
+            'creator_wallet': bet.creator_wallet,
+            'actor_name': actor.name if actor else 'Unknown',
+            'predicted_text': bet.predicted_text,
+            'actual_text': bet.actual_text,
+            'start_time': bet.start_time.isoformat() if bet.start_time else None,
+            'end_time': bet.end_time.isoformat() if bet.end_time else None,
+            'oracle_wallets': json.loads(bet.oracle_wallets) if bet.oracle_wallets else [],
+            'initial_stake_amount': str(bet.initial_stake_amount),
+            'currency': bet.currency,
+            'transaction_hash': bet.transaction_hash,
+            'status': bet.status,
+            'platform_fee': str(bet.platform_fee) if bet.platform_fee else '0',
+            'levenshtein_distance': bet.levenshtein_distance,
+            'resolution_text': bet.resolution_text,
+            'resolution_time': bet.resolution_time.isoformat() if bet.resolution_time else None,
+            'created_at': bet.created_at.isoformat() if bet.created_at else None,
+            'stakes_count': len(stakes),
+            'total_volume': str(sum(s.amount for s in stakes))
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting bet details: {e}")
+        return jsonify({'error': 'Failed to get bet details'}), 500
+
+@api_bp.route('/bets/<bet_id>/cancel', methods=['POST'])
+def cancel_bet(bet_id):
+    """Cancel a bet (admin only)"""
+    try:
+        bet = Bet.query.get(bet_id)
+        if not bet:
+            return jsonify({'error': 'Bet not found'}), 404
+            
+        if bet.status != 'active':
+            return jsonify({'error': 'Can only cancel active bets'}), 400
+            
+        bet.status = 'cancelled'
+        db.session.commit()
+        
+        # Create time entry
+        ledger_service.create_time_entry('bet_cancelled', {
+            'bet_id': str(bet.id),
+            'cancelled_at': datetime.utcnow().isoformat()
+        })
+        
+        return jsonify({'success': True, 'message': 'Bet cancelled successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error cancelling bet: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to cancel bet'}), 500
+
+@api_bp.route('/oracle_submissions/<submission_id>', methods=['GET'])
+def get_oracle_submission_details(submission_id):
+    """Get details about a specific oracle submission"""
+    try:
+        submission = OracleSubmission.query.get(submission_id)
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+            
+        return jsonify({
+            'id': str(submission.id),
+            'bet_id': str(submission.bet_id),
+            'oracle_wallet': submission.oracle_wallet,
+            'submitted_text': submission.submitted_text,
+            'signature': submission.signature,
+            'votes_for': submission.votes_for,
+            'votes_against': submission.votes_against,
+            'is_consensus': submission.is_consensus,
+            'created_at': submission.created_at.isoformat() if submission.created_at else None
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting oracle submission details: {e}")
+        return jsonify({'error': 'Failed to get submission details'}), 500
+
+@api_bp.route('/oracle_submissions/<submission_id>/vote', methods=['POST'])
+def vote_on_oracle_submission(submission_id):
+    """Vote on an oracle submission"""
+    try:
+        data = request.get_json()
+        vote = data.get('vote')
+        
+        if vote not in ['for', 'against']:
+            return jsonify({'error': 'Invalid vote. Must be "for" or "against"'}), 400
+            
+        submission = OracleSubmission.query.get(submission_id)
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+            
+        if submission.is_consensus:
+            return jsonify({'error': 'Consensus already reached'}), 400
+            
+        # Update vote counts
+        if vote == 'for':
+            submission.votes_for += 1
+        else:
+            submission.votes_against += 1
+            
+        # Check if consensus is reached (simple majority)
+        total_votes = submission.votes_for + submission.votes_against
+        if total_votes >= 3 and submission.votes_for > submission.votes_against:
+            submission.is_consensus = True
+            
+            # Trigger bet resolution if consensus reached
+            bet = Bet.query.get(submission.bet_id)
+            if bet and bet.status == 'active':
+                oracle_service.resolve_bet(submission.bet_id)
+                
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Vote recorded successfully',
+            'votes_for': submission.votes_for,
+            'votes_against': submission.votes_against,
+            'is_consensus': submission.is_consensus
+        })
+        
+    except Exception as e:
+        logger.error(f"Error voting on oracle submission: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to record vote'}), 500
+
+@api_bp.route('/time_entries/<entry_id>', methods=['GET'])
+def get_time_entry_details(entry_id):
+    """Get details about a specific time entry"""
+    try:
+        entry = SyntheticTimeEntry.query.get(entry_id)
+        if not entry:
+            return jsonify({'error': 'Entry not found'}), 404
+            
+        return jsonify({
+            'id': str(entry.id),
+            'node_id': str(entry.node_id),
+            'timestamp_ms': entry.timestamp_ms,
+            'entry_type': entry.entry_type,
+            'entry_data': entry.entry_data,
+            'signature': entry.signature,
+            'reconciled': entry.reconciled,
+            'created_at': entry.created_at.isoformat() if entry.created_at else None
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting time entry details: {e}")
+        return jsonify({'error': 'Failed to get entry details'}), 500
+
+@api_bp.route('/time_entries/<entry_id>/reconcile', methods=['POST'])
+def reconcile_time_entry(entry_id):
+    """Reconcile a specific time entry"""
+    try:
+        entry = SyntheticTimeEntry.query.get(entry_id)
+        if not entry:
+            return jsonify({'error': 'Entry not found'}), 404
+            
+        if entry.reconciled:
+            return jsonify({'error': 'Entry already reconciled'}), 400
+            
+        entry.reconciled = True
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Entry reconciled successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error reconciling time entry: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to reconcile entry'}), 500
+
+@api_bp.route('/time-sync/force', methods=['POST'])
+def force_time_sync():
+    """Force time synchronization across all nodes"""
+    try:
+        # Get all active nodes
+        active_nodes = NodeOperator.query.filter_by(status='active').all()
+        
+        # Broadcast time sync request
+        node_comm_service.broadcast_message({
+            'type': 'time_sync_request',
+            'timestamp': datetime.utcnow().isoformat(),
+            'requester': 'admin'
+        })
+        
+        return jsonify({
+            'success': True,
+            'message': f'Time sync request sent to {len(active_nodes)} nodes'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error forcing time sync: {e}")
+        return jsonify({'error': 'Failed to force time sync'}), 500
+
+@api_bp.route('/time-sync/reconcile', methods=['POST'])
+def reconcile_all_time_entries():
+    """Reconcile all pending time entries"""
+    try:
+        # Get all unreconciled entries
+        unreconciled = SyntheticTimeEntry.query.filter_by(reconciled=False).all()
+        
+        reconciled_count = 0
+        for entry in unreconciled:
+            entry.reconciled = True
+            reconciled_count += 1
+            
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'reconciled_count': reconciled_count,
+            'message': f'Successfully reconciled {reconciled_count} entries'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error reconciling time entries: {e}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to reconcile entries'}), 500
+
+@api_bp.route('/time-status', methods=['GET'])
+def get_time_status():
+    """Get current time synchronization status"""
+    try:
+        time_status = time_sync_service.get_time_health_status()
+        return jsonify(time_status)
+        
+    except Exception as e:
+        logger.error(f"Error getting time status: {e}")
+        return jsonify({'error': 'Failed to get time status'}), 500
 
 @api_bp.route('/oracle/vote', methods=['POST'])
 def vote_on_oracle():

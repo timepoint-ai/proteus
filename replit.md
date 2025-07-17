@@ -2,7 +2,13 @@
 
 ## Overview
 
-This is a Flask-based distributed node operator application for the Clockchain network. The system implements a linguistic prediction market where nodes participate in consensus mechanisms, oracle services, and blockchain validation. The application manages time-based betting markets on predicted speeches from public figures using deterministic speech generation and automated resolution.
+This is a Flask-based distributed node operator application for the Clockchain network. The system implements a linguistic prediction market where nodes participate in consensus mechanisms, oracle services, and blockchain validation.
+
+### Key Concepts:
+- **Submissions**: Initial predictions where users bet that a certain actor will say certain words in a specific time block. These are transactions that must pay fees to node operators and require the initial user to make a bet on their own submission.
+- **Bets**: Secondary market where other users express confidence in competing submissions for the same actors. These compare Levenshtein distances, not binary outcomes.
+- **Resolution**: Oracle validates the source and uses Levenshtein distance (stripping punctuation) to measure how close actual text is to predicted text within the timeframe.
+- **Immutable Ledger**: The Synthetic Time Ledger is immutable once started - Time Sync does not adjust the ledger, it only ensures nodes are synchronized.
 
 ## User Preferences
 
@@ -27,11 +33,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Core Services
 1. **Consensus Service**: Manages node voting and network consensus
-2. **Oracle Service**: Handles oracle submissions and validation
-3. **Blockchain Service**: Validates ETH/BTC transactions
-4. **Ledger Service**: Manages synthetic time ledger entries
-5. **Time Sync Service**: Provides Pacific Time synchronization
-6. **Text Analysis Service**: Calculates speech similarity using Levenshtein distance
+2. **Oracle Service**: Validates source authenticity and performs Levenshtein analysis on submitted texts
+3. **Blockchain Service**: Validates ETH/BTC transactions for submissions and bets
+4. **Ledger Service**: Manages immutable synthetic time ledger entries
+5. **Time Sync Service**: Ensures node synchronization (does not modify ledger)
+6. **Text Analysis Service**: Calculates speech similarity using Levenshtein distance (punctuation stripped)
 7. **Node Communication**: WebSocket-based inter-node communication
 
 ### Data Models
@@ -53,11 +59,12 @@ Preferred communication style: Simple, everyday language.
 
 1. **Node Registration**: New nodes register and undergo consensus voting
 2. **Actor Management**: Public figures are added and voted on by nodes
-3. **Bet Creation**: Users create prediction bets with oracle assignments
-4. **Oracle Submission**: Oracles submit actual speech data
-5. **Consensus Validation**: Network validates oracle submissions
-6. **Automatic Resolution**: Bets resolve based on text similarity analysis
-7. **Transaction Recording**: All actions recorded in synthetic time ledger
+3. **Submission Creation**: Users submit predictions (betting that actor will say specific text in time window)
+4. **Bet Placement**: Other users place bets on competing submissions based on confidence
+5. **Oracle Validation**: Oracles validate actual speech source and perform Levenshtein analysis
+6. **Consensus Validation**: Network validates oracle submissions through voting
+7. **Automatic Resolution**: Submissions resolve based on lowest Levenshtein distance within timeframe
+8. **Transaction Recording**: All actions recorded in immutable synthetic time ledger
 
 ## External Dependencies
 
