@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Node Dashboard
+    </h1>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="triggerReconciliation()">
+            <i class="fas fa-sync me-1"></i>
+            Reconcile Network
+        </button>
+        <button class="btn btn-secondary" onclick="syncTimeLedger()">
+            <i class="fas fa-clock me-1"></i>
+            Sync Time Ledger
+        </button>
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.active_nodes }}</div>
+            <div class="metric-label">Active Nodes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.total_bets }}</div>
+            <div class="metric-label">Total Bets</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.total_stakes }}</div>
+            <div class="metric-label">Total Stakes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.pending_transactions }}</div>
+            <div class="metric-label">Pending Transactions</div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Metrics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.active_oracles }}</div>
+            <div class="metric-label">Active Oracles</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-value">{{ stats.time_entries }}</div>
+            <div class="metric-label">Time Ledger Entries</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-value" id="network-health">--</div>
+            <div class="metric-label">Network Health</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Network Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Transaction Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="transactionChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bet me-2"></i>
+                    Recent Bets
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Creator</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bet in recent_bets %}
+                            <tr>
+                                <td>
+                                    <div class="hash-display">{{ bet.creator_wallet[:8] }}...</div>
+                                </td>
+                                <td>{{ bet.stake_amount }} {{ bet.stake_currency }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if bet.status == 'resolved' else 'primary' if bet.status == 'active' else 'secondary' }}">
+                                        {{ bet.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-coins me-2"></i>
+                    Recent Stakes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Staker</th>
+                                <th>Amount</th>
+                                <th>Position</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stake in recent_stakes %}
+                            <tr>
+                                <td>
+                                    <div class="hash-display">{{ stake.staker_wallet[:8] }}...</div>
+                                </td>
+                                <td>{{ stake.amount }} {{ stake.currency }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if stake.position == 'for' else 'danger' }}">
+                                        {{ stake.position }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Recent Transactions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Hash</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_transactions %}
+                            <tr>
+                                <td>
+                                    <div class="hash-display">{{ tx.tx_hash[:8] }}...</div>
+                                </td>
+                                <td>{{ tx.amount }} {{ tx.currency }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'danger' }}">
+                                        {{ tx.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Messages -->
+<div class="mt-4">
+    <div id="status-messages" class="alert alert-info" style="display: none;">
+        <i class="fas fa-info-circle me-2"></i>
+        <span id="status-text"></span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    // Initialize charts
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    const activityChart = new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: ['1h', '2h', '3h', '4h', '5h', '6h'],
+            datasets: [{
+                label: 'Bets',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'var(--bs-primary)',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Stakes',
+                data: [7, 11, 5, 8, 3, 7],
+                borderColor: 'var(--bs-success)',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+
+    const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+    const transactionChart = new Chart(transactionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Confirmed', 'Pending', 'Failed'],
+            datasets: [{
+                data: [85, 12, 3],
+                backgroundColor: [
+                    'var(--bs-success)',
+                    'var(--bs-warning)',
+                    'var(--bs-danger)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Network operations
+    function triggerReconciliation() {
+        showStatus('Starting network reconciliation...', 'info');
+        
+        fetch('/admin/api/network/reconcile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'started') {
+                showStatus('Network reconciliation started successfully', 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showStatus('Error starting reconciliation: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showStatus('Error: ' + error.message, 'error');
+        });
+    }
+
+    function syncTimeLedger() {
+        showStatus('Starting time ledger synchronization...', 'info');
+        
+        fetch('/admin/api/time/sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'started') {
+                showStatus('Time ledger sync started successfully', 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showStatus('Error starting sync: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showStatus('Error: ' + error.message, 'error');
+        });
+    }
+
+    function showStatus(message, type) {
+        const statusDiv = document.getElementById('status-messages');
+        const statusText = document.getElementById('status-text');
+        
+        statusDiv.className = `alert alert-${type === 'error' ? 'danger' : type}`;
+        statusText.textContent = message;
+        statusDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Update stats periodically
+    setInterval(updateStats, 30000);
+    
+    function updateStats() {
+        fetch('/admin/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update network health
+            const healthElement = document.getElementById('network-health');
+            const healthPercentage = Math.round((data.nodes.active / data.nodes.total) * 100);
+            healthElement.textContent = healthPercentage + '%';
+            healthElement.style.color = healthPercentage > 80 ? 'var(--bs-success)' : 
+                                      healthPercentage > 60 ? 'var(--bs-warning)' : 'var(--bs-danger)';
+        })
+        .catch(error => {
+            console.error('Error updating stats:', error);
+        });
+    }
+</script>
+{% endblock %}

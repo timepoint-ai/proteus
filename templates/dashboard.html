@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Node Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Active Nodes</h5>
+                        <h2 class="mb-0">{{ stats.active_nodes or 0 }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-server fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Active Bets</h5>
+                        <h2 class="mb-0">{{ stats.active_bets or 0 }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-dice fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Stakes</h5>
+                        <h2 class="mb-0">{{ stats.total_stakes or 0 }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-coins fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Transactions</h5>
+                        <h2 class="mb-0">{{ stats.total_transactions or 0 }}</h2>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exchange-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-network-wired me-2"></i>
+                    Network Health
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if network_health %}
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Health Score</small>
+                            <div class="h5">{{ "%.1f" | format(network_health.network_health * 100) }}%</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Online Nodes</small>
+                            <div class="h5">{{ network_health.online_nodes }}/{{ network_health.active_nodes }}</div>
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ network_health.network_health * 100 }}%">
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No network health data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Time Sync Status
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if time_status %}
+                    <div class="row">
+                        <div class="col-12">
+                            <small class="text-muted">Current Time</small>
+                            <div class="h6">{{ time_status.current_time or 'N/A' }}</div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <small class="text-muted">Sync Status</small>
+                            <div class="h6">
+                                <span class="badge bg-{{ 'success' if time_status.sync_status == 'healthy' else 'warning' }}">
+                                    {{ time_status.sync_status.title() }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No time sync data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-book me-2"></i>
+                    Ledger Status
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if ledger_summary %}
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Total Entries</small>
+                            <div class="h5">{{ ledger_summary.total_entries }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Reconciled</small>
+                            <div class="h5">{{ ledger_summary.reconciled_entries }}</div>
+                        </div>
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ ledger_summary.reconciliation_rate * 100 }}%">
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ "%.1f" | format(ledger_summary.reconciliation_rate * 100) }}% reconciled</small>
+                {% else %}
+                    <p class="text-muted">No ledger data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-dice me-2"></i>
+                    Recent Bets
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_bets %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Creator</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bet in recent_bets %}
+                                <tr>
+                                    <td>
+                                        <small class="text-muted">{{ bet.creator_wallet[:10] }}...</small>
+                                    </td>
+                                    <td>
+                                        <small>{{ bet.initial_stake_amount }} {{ bet.currency }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if bet.status == 'active' else 'secondary' }}">
+                                            {{ bet.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ bet.created_at.strftime('%H:%M') }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent bets</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Recent Transactions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in recent_transactions %}
+                                <tr>
+                                    <td>
+                                        <small>{{ tx.transaction_type.replace('_', ' ').title() }}</small>
+                                    </td>
+                                    <td>
+                                        <small>{{ tx.amount }} {{ tx.currency }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' }}">
+                                            {{ tx.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ tx.created_at.strftime('%H:%M') }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent transactions</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Network Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="networkChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Transaction Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="transactionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-refresh indicator -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Dashboard auto-refreshes every 30 seconds. Last updated: <span id="last-updated">{{ moment().format('HH:mm:ss') }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Network Activity Chart
+    const networkCtx = document.getElementById('networkChart').getContext('2d');
+    const networkChart = new Chart(networkCtx, {
+        type: 'line',
+        data: {
+            labels: ['1h ago', '50m ago', '40m ago', '30m ago', '20m ago', '10m ago', 'Now'],
+            datasets: [{
+                label: 'Active Nodes',
+                data: [{{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}, {{ network_health.active_nodes or 0 }}],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Online Nodes',
+                data: [{{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}, {{ network_health.online_nodes or 0 }}],
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Transaction Distribution Chart
+    const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+    const transactionChart = new Chart(transactionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Stake', 'Payout', 'Fee', 'Bet Creation'],
+            datasets: [{
+                data: [40, 30, 20, 10],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Auto-refresh functionality
+    setInterval(function() {
+        fetch('/admin/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                // Update stats without full page reload
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            })
+            .catch(error => console.error('Error fetching stats:', error));
+    }, 30000); // 30 seconds
+});
+</script>
+{% endblock %}

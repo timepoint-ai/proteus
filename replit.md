@@ -1,0 +1,111 @@
+# Clockchain Node Operator
+
+## Overview
+
+This is a Flask-based distributed node operator application for the Clockchain network. The system implements a linguistic prediction market where nodes participate in consensus mechanisms, oracle services, and blockchain validation. The application manages time-based betting markets on predicted speeches from public figures using deterministic speech generation and automated resolution.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Backend Architecture
+- **Flask Application**: Main web framework with SQLAlchemy ORM
+- **Database**: SQLite with PostgreSQL support via SQLAlchemy
+- **Task Queue**: Celery with Redis as broker and result backend
+- **Caching**: Redis for distributed caching and real-time communication
+- **Time Management**: Custom Pacific Time synchronization service
+
+### Frontend Architecture
+- **Templates**: Jinja2 templates with Bootstrap for responsive UI
+- **JavaScript**: Vanilla JS with Chart.js for data visualization
+- **CSS**: Custom admin dashboard styling with Bootstrap theming
+- **Real-time Updates**: WebSocket connections for live data
+
+## Key Components
+
+### Core Services
+1. **Consensus Service**: Manages node voting and network consensus
+2. **Oracle Service**: Handles oracle submissions and validation
+3. **Blockchain Service**: Validates ETH/BTC transactions
+4. **Ledger Service**: Manages synthetic time ledger entries
+5. **Time Sync Service**: Provides Pacific Time synchronization
+6. **Text Analysis Service**: Calculates speech similarity using Levenshtein distance
+7. **Node Communication**: WebSocket-based inter-node communication
+
+### Data Models
+- **NodeOperator**: Network node management
+- **Actor**: Public figures for speech prediction
+- **Bet**: Prediction market bets
+- **Stake**: User stakes in betting markets
+- **Transaction**: Blockchain transaction records
+- **OracleSubmission**: Oracle data submissions
+- **SyntheticTimeEntry**: Time ledger entries
+
+### Background Tasks
+- **Network Reconciliation**: Periodic data synchronization
+- **Consensus Processing**: Node proposal handling
+- **Time Ledger Sync**: Distributed time synchronization
+- **Oracle Processing**: Oracle submission validation
+
+## Data Flow
+
+1. **Node Registration**: New nodes register and undergo consensus voting
+2. **Actor Management**: Public figures are added and voted on by nodes
+3. **Bet Creation**: Users create prediction bets with oracle assignments
+4. **Oracle Submission**: Oracles submit actual speech data
+5. **Consensus Validation**: Network validates oracle submissions
+6. **Automatic Resolution**: Bets resolve based on text similarity analysis
+7. **Transaction Recording**: All actions recorded in synthetic time ledger
+
+## External Dependencies
+
+### Core Dependencies
+- **Flask**: Web framework and routing
+- **SQLAlchemy**: Database ORM with PostgreSQL/SQLite support
+- **Celery**: Distributed task queue system
+- **Redis**: Message broker and caching layer
+- **Web3**: Ethereum blockchain interaction
+- **Levenshtein**: Text similarity calculations
+- **Cryptography**: Digital signatures and encryption
+
+### Frontend Dependencies
+- **Bootstrap**: UI framework with dark theme support
+- **Chart.js**: Data visualization and metrics
+- **Font Awesome**: Icon library
+- **WebSocket**: Real-time communication
+
+### Blockchain Integration
+- **Ethereum**: ETH transaction validation via Web3
+- **Bitcoin**: BTC transaction validation via REST API
+- **Infura**: Ethereum RPC provider support
+
+## Deployment Strategy
+
+### Environment Configuration
+- **Development**: SQLite database with local Redis
+- **Production**: PostgreSQL with distributed Redis cluster
+- **Docker**: Containerized deployment support
+- **Environment Variables**: Secure configuration management
+
+### Service Components
+- **Web Server**: Flask application with Gunicorn
+- **Worker Processes**: Celery workers for background tasks
+- **Database**: PostgreSQL with connection pooling
+- **Cache Layer**: Redis cluster for distributed caching
+- **Load Balancer**: Nginx for request distribution
+
+### Monitoring and Logging
+- **Logging**: Structured logging with multiple levels
+- **Health Checks**: API endpoints for service monitoring
+- **Metrics**: Network statistics and performance tracking
+- **Admin Dashboard**: Web-based node management interface
+
+### Security Considerations
+- **Authentication**: Node-based authentication system
+- **Encryption**: RSA key pairs for message signing
+- **Validation**: Input validation and sanitization
+- **Network Security**: Secure inter-node communication
+
+The system is designed to be highly distributed with fault tolerance, automatic reconciliation, and real-time consensus mechanisms for managing linguistic prediction markets across a network of nodes.

@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Network Status - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">
+            <i class="fas fa-network-wired me-2"></i>
+            Network Status
+        </h1>
+    </div>
+</div>
+
+<!-- Network Health Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Network Health</h5>
+                <div class="h2 text-{{ 'success' if consensus_health.network_health > 0.7 else 'warning' if consensus_health.network_health > 0.3 else 'danger' }}">
+                    {{ "%.1f" | format(consensus_health.network_health * 100) }}%
+                </div>
+                <div class="progress mt-2">
+                    <div class="progress-bar bg-{{ 'success' if consensus_health.network_health > 0.7 else 'warning' if consensus_health.network_health > 0.3 else 'danger' }}" 
+                         role="progressbar" style="width: {{ consensus_health.network_health * 100 }}%">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Active Nodes</h5>
+                <div class="h2 text-primary">{{ consensus_health.active_nodes or 0 }}</div>
+                <small class="text-muted">{{ consensus_health.total_nodes or 0 }} total</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Online Nodes</h5>
+                <div class="h2 text-success">{{ consensus_health.online_nodes or 0 }}</div>
+                <small class="text-muted">Last 5 minutes</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Consensus Threshold</h5>
+                <div class="h2 text-info">{{ "%.0f" | format(consensus_health.consensus_threshold * 100) }}%</div>
+                <small class="text-muted">Required for consensus</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Connection Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plug me-2"></i>
+                    Connection Status
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if connection_status %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>This Node</h6>
+                            <p><strong>Node ID:</strong> {{ connection_status.node_id }}</p>
+                            <p><strong>Service Status:</strong> 
+                                <span class="badge bg-{{ 'success' if connection_status.service_running else 'danger' }}">
+                                    {{ 'Running' if connection_status.service_running else 'Stopped' }}
+                                </span>
+                            </p>
+                            <p><strong>Connected Nodes:</strong> {{ connection_status.connection_count }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Connected Nodes</h6>
+                            {% if connection_status.connected_nodes %}
+                                <ul class="list-unstyled">
+                                    {% for node_id in connection_status.connected_nodes %}
+                                        <li>
+                                            <i class="fas fa-circle text-success me-1"></i>
+                                            {{ node_id }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">No active connections</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Connection status not available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Node List -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-server me-2"></i>
+                    Network Nodes
+                </h5>
+                <form action="{{ url_for('admin.restart_communication') }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-redo me-1"></i>
+                        Restart Communication
+                    </button>
+                </form>
+            </div>
+            <div class="card-body">
+                {% if nodes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Node ID</th>
+                                    <th>Address</th>
+                                    <th>Status</th>
+                                    <th>Last Seen</th>
+                                    <th>Public Key</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for node in nodes %}
+                                <tr>
+                                    <td>
+                                        <code>{{ node.operator_id }}</code>
+                                        {% if node.operator_id == config.NODE_OPERATOR_ID %}
+                                            <span class="badge bg-primary ms-1">This Node</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ node.node_address }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if node.status == 'active' else 'warning' if node.status == 'pending' else 'danger' }}">
+                                            {{ node.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if node.last_seen %}
+                                                {{ node.last_seen.strftime('%Y-%m-%d %H:%M:%S') }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <code class="small">{{ node.public_key[:20] }}...</code>
+                                    </td>
+                                    <td>
+                                        {% if node.status == 'pending' %}
+                                            <button class="btn btn-sm btn-success me-1" 
+                                                    onclick="voteOnNode('{{ node.operator_id }}', 'approve')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" 
+                                                    onclick="voteOnNode('{{ node.operator_id }}', 'reject')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No nodes found</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Metrics -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Network Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if latest_metrics %}
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Total Volume (ETH)</small>
+                            <div class="h6">{{ latest_metrics.total_volume_eth or 0 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Total Volume (BTC)</small>
+                            <div class="h6">{{ latest_metrics.total_volume_btc or 0 }}</div>
+                        </div>
+                        <div class="col-6 mt-3">
+                            <small class="text-muted">Platform Fees (ETH)</small>
+                            <div class="h6">{{ latest_metrics.platform_fees_eth or 0 }}</div>
+                        </div>
+                        <div class="col-6 mt-3">
+                            <small class="text-muted">Platform Fees (BTC)</small>
+                            <div class="h6">{{ latest_metrics.platform_fees_btc or 0 }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No metrics available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Network Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="networkActivityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Network Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <form action="{{ url_for('admin.update_metrics') }}" method="post">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Update Metrics
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <form action="{{ url_for('admin.restart_communication') }}" method="post">
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="fas fa-redo me-2"></i>
+                                Restart Communication
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-info w-100" onclick="refreshNetworkStatus()">
+                            <i class="fas fa-sync me-2"></i>
+                            Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Vote on node function
+function voteOnNode(nodeId, vote) {
+    if (confirm(`Are you sure you want to ${vote} node ${nodeId}?`)) {
+        // In a real implementation, this would make an API call to vote
+        alert(`Vote ${vote} for node ${nodeId} would be submitted`);
+    }
+}
+
+// Refresh network status
+function refreshNetworkStatus() {
+    fetch('/admin/api/network-health')
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error refreshing network status:', error);
+            alert('Failed to refresh network status');
+        });
+}
+
+// Initialize network activity chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('networkActivityChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['6h ago', '5h ago', '4h ago', '3h ago', '2h ago', '1h ago', 'Now'],
+            datasets: [{
+                label: 'Active Nodes',
+                data: [{{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}, {{ consensus_health.active_nodes or 0 }}],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'Online Nodes',
+                data: [{{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}, {{ consensus_health.online_nodes or 0 }}],
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+// Auto-refresh network status every 30 seconds
+setInterval(function() {
+    fetch('/admin/api/network-health')
+        .then(response => response.json())
+        .then(data => {
+            // Update health percentage
+            const healthElements = document.querySelectorAll('[data-health]');
+            healthElements.forEach(el => {
+                el.textContent = `${(data.network_health * 100).toFixed(1)}%`;
+            });
+        })
+        .catch(error => console.error('Error updating network health:', error));
+}, 30000);
+</script>
+{% endblock %}

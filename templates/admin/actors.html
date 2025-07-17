@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Actors - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-users me-2"></i>
+        Actor Directory
+    </h1>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="refreshActors()">
+            <i class="fas fa-sync me-1"></i>
+            Refresh
+        </button>
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addActorModal">
+            <i class="fas fa-plus me-1"></i>
+            Add Actor
+        </button>
+    </div>
+</div>
+
+<!-- Actor Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-success">{{ actors|selectattr('approved', 'equalto', True)|list|length }}</div>
+            <div class="metric-label">Approved Actors</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-warning">{{ actors|selectattr('approved', 'equalto', False)|list|length }}</div>
+            <div class="metric-label">Pending Approval</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-info">{{ actors|selectattr('is_unknown', 'equalto', True)|list|length }}</div>
+            <div class="metric-label">Unknown Actors</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ actors|length }}</div>
+            <div class="metric-label">Total Actors</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Options -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="known">Known Actors</option>
+                    <option value="unknown">Unknown Actors</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search by name...">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i>
+                    Apply Filters
+                </button>
+                <a href="{{ url_for('admin.actors') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>
+                    Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Actors Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            Actor Directory
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Wallet</th>
+                        <th>Votes</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for actor in actors %}
+                    <tr>
+                        <td>
+                            <strong>{{ actor.name }}</strong>
+                            {% if actor.is_unknown %}
+                                <span class="badge bg-warning ms-2">Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px;">
+                                {{ actor.description or 'No description' }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'warning' if actor.is_unknown else 'primary' }}">
+                                {{ 'Unknown' if actor.is_unknown else 'Known' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if actor.wallet_address %}
+                                <div class="hash-display">{{ actor.wallet_address[:8] }}...</div>
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-1">{{ actor.votes_for }}</span>
+                                <span class="badge bg-danger">{{ actor.votes_against }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if actor.approved else 'warning' }}">
+                                {{ 'Approved' if actor.approved else 'Pending' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="timestamp">{{ actor.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                        </td>
+                        <td>
+                            {% if not actor.approved %}
+                                <div class="btn-group btn-group-sm">
+                                    <form method="POST" action="{{ url_for('admin.vote_actor', actor_id=actor.id) }}" class="d-inline">
+                                        <input type="hidden" name="vote" value="for">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.vote_actor', actor_id=actor.id) }}" class="d-inline">
+                                        <input type="hidden" name="vote" value="against">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-primary" onclick="showActorDetails('{{ actor.id }}')">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Actor Modal -->
+<div class="modal fade" id="addActorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Actor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addActorForm">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Wallet Address</label>
+                        <input type="text" class="form-control" name="wallet_address" placeholder="0x...">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_unknown" id="isUnknown">
+                            <label class="form-check-label" for="isUnknown">
+                                Mark as Unknown Actor
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                            Unknown actors are clearly marked and can be excluded from searches.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitActor()">Add Actor</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actor Details Modal -->
+<div class="modal fade" id="actorDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actor Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="actorDetailsContent">
+                    <!-- Actor details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function refreshActors() {
+        location.reload();
+    }
+
+    function submitActor() {
+        const form = document.getElementById('addActorForm');
+        const formData = new FormData(form);
+        
+        // This would typically make an API call to add the actor
+        alert('Add actor functionality would be implemented here');
+        
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('addActorModal')).hide();
+    }
+
+    function showActorDetails(actorId) {
+        const modal = new bootstrap.Modal(document.getElementById('actorDetailsModal'));
+        document.getElementById('actorDetailsContent').innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading actor details...</p>
+            </div>
+        `;
+        
+        modal.show();
+        
+        // Simulate API call to get actor details
+        setTimeout(() => {
+            document.getElementById('actorDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Actor Information</h6>
+                        <p><strong>ID:</strong> ${actorId}</p>
+                        <p><strong>Name:</strong> Sample Actor</p>
+                        <p><strong>Type:</strong> <span class="badge bg-primary">Known</span></p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">Approved</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Voting History</h6>
+                        <p><strong>Votes For:</strong> 8</p>
+                        <p><strong>Votes Against:</strong> 2</p>
+                        <p><strong>Approval Rate:</strong> 80%</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Related Bets</h6>
+                        <p><strong>Total Bets:</strong> 15</p>
+                        <p><strong>Active Bets:</strong> 3</p>
+                        <p><strong>Resolved Bets:</strong> 12</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Metadata</h6>
+                        <pre class="bg-light p-2 rounded"><code>{"category": "politician", "verified": true}</code></pre>
+                    </div>
+                </div>
+            `;
+        }, 1000);
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshActors, 30000);
+</script>
+{% endblock %}

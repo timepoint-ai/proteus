@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-exchange-alt me-2"></i>
+        Transactions
+    </h1>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="refreshTransactions()">
+            <i class="fas fa-sync me-1"></i>
+            Refresh
+        </button>
+        <button class="btn btn-secondary" onclick="exportTransactions()">
+            <i class="fas fa-download me-1"></i>
+            Export
+        </button>
+    </div>
+</div>
+
+<!-- Transaction Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-success">{{ transactions.items|selectattr('status', 'equalto', 'confirmed')|list|length }}</div>
+            <div class="metric-label">Confirmed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-warning">{{ transactions.items|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+            <div class="metric-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-danger">{{ transactions.items|selectattr('status', 'equalto', 'failed')|list|length }}</div>
+            <div class="metric-label">Failed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ transactions.total }}</div>
+            <div class="metric-label">Total</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Currency</label>
+                <select name="currency" class="form-select">
+                    <option value="">All Currencies</option>
+                    <option value="ETH">ETH</option>
+                    <option value="BTC">BTC</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from_date" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to_date" class="form-control">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-1"></i>
+                    Apply Filters
+                </button>
+                <a href="{{ url_for('admin.transactions') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i>
+                    Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            Transaction History
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Transaction Hash</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Amount</th>
+                        <th>Platform Fee</th>
+                        <th>Status</th>
+                        <th>Confirmations</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions.items %}
+                    <tr>
+                        <td>
+                            <div class="hash-display">{{ tx.tx_hash[:16] }}...</div>
+                        </td>
+                        <td>
+                            <div class="hash-display">{{ tx.from_address[:8] }}...</div>
+                        </td>
+                        <td>
+                            <div class="hash-display">{{ tx.to_address[:8] }}...</div>
+                        </td>
+                        <td>
+                            <strong>{{ tx.amount }}</strong>
+                            <span class="text-muted">{{ tx.currency }}</span>
+                        </td>
+                        <td>
+                            {% if tx.platform_fee %}
+                                {{ tx.platform_fee }} {{ tx.currency }}
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'danger' }}">
+                                {{ tx.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if tx.confirmations %}
+                                {{ tx.confirmations }}
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="timestamp">{{ tx.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showTransactionDetails('{{ tx.id }}')">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            {% if tx.status == 'pending' %}
+                                <button class="btn btn-sm btn-outline-secondary" onclick="checkTransaction('{{ tx.id }}')">
+                                    <i class="fas fa-sync"></i>
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if transactions.pages > 1 %}
+        <nav aria-label="Transaction pagination">
+            <ul class="pagination justify-content-center">
+                {% if transactions.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.transactions', page=transactions.prev_num) }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in transactions.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != transactions.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.transactions', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if transactions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.transactions', page=transactions.next_num) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transaction Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="transactionDetailsContent">
+                    <!-- Transaction details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function refreshTransactions() {
+        location.reload();
+    }
+
+    function exportTransactions() {
+        // This would typically generate a CSV or JSON export
+        alert('Export functionality would be implemented here');
+    }
+
+    function showTransactionDetails(txId) {
+        const modal = new bootstrap.Modal(document.getElementById('transactionDetailsModal'));
+        document.getElementById('transactionDetailsContent').innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading transaction details...</p>
+            </div>
+        `;
+        
+        modal.show();
+        
+        // Simulate API call to get transaction details
+        setTimeout(() => {
+            document.getElementById('transactionDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Transaction Information</h6>
+                        <p><strong>ID:</strong> ${txId}</p>
+                        <p><strong>Block Number:</strong> 12345678</p>
+                        <p><strong>Gas Used:</strong> 21000</p>
+                        <p><strong>Gas Price:</strong> 20 gwei</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Blockchain Details</h6>
+                        <p><strong>Network:</strong> Ethereum Mainnet</p>
+                        <p><strong>Block Hash:</strong> 0x1234...5678</p>
+                        <p><strong>Nonce:</strong> 42</p>
+                        <p><strong>Transaction Index:</strong> 5</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Related Records</h6>
+                        <p><strong>Bet ID:</strong> bet-123456</p>
+                        <p><strong>Stake ID:</strong> stake-789012</p>
+                        <p><strong>Time Ledger Entry:</strong> entry-345678</p>
+                    </div>
+                </div>
+            `;
+        }, 1000);
+    }
+
+    function checkTransaction(txId) {
+        // This would trigger a re-validation of the transaction
+        alert('Re-checking transaction status...');
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshTransactions, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,366 @@
+import logging
+import json
+from datetime import datetime
+from typing import Dict, Any, List, Optional
+from decimal import Decimal
+from app import db, redis_client
+from models import SyntheticTimeEntry, Transaction, Bet, Stake, NetworkMetrics
+from services.time_sync import TimeSyncService
+from utils.crypto import CryptoUtils
+from config import Config
+
+logger = logging.getLogger(__name__)
+
+class LedgerService:
+    def __init__(self):
+        self.time_sync = TimeSyncService()
+        self.crypto_utils = CryptoUtils()
+        
+    def create_time_entry(self, entry_type: str, entry_data: Dict[str, Any]) -> bool:
+        """Create a new synthetic time ledger entry"""
+        try:
+            # Get current Pacific time in milliseconds
+            pacific_time_ms = self.time_sync.get_pacific_time_ms()
+            
+            # Serialize entry data
+            entry_data_json = json.dumps(entry_data, default=str)
+            
+            # Create signature
+            signature_data = f"{pacific_time_ms}:{entry_type}:{entry_data_json}"
+            signature = self.crypto_utils.sign_message(signature_data)
+            
+            # Get current node
+            from models import NodeOperator
+            current_node = NodeOperator.query.filter_by(
+                operator_id=Config.NODE_OPERATOR_ID
+            ).first()
+            
+            if not current_node:
+                logger.error("Current node not found in database")
+                return False
+            
+            # Create time entry
+            time_entry = SyntheticTimeEntry(
+                timestamp_ms=pacific_time_ms,
+                entry_type=entry_type,
+                entry_data=entry_data_json,
+                node_id=current_node.id,
+                signature=signature
+            )
+            
+            db.session.add(time_entry)
+            db.session.commit()
+            
+            # Store in Redis for real-time access
+            redis_key = f"time_entry:{pacific_time_ms}:{current_node.id}"
+            redis_client.setex(redis_key, 3600, entry_data_json)  # 1 hour expiry
+            
+            logger.info(f"Created time entry: {entry_type} at {pacific_time_ms}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error creating time entry: {e}")
+            db.session.rollback()
+            return False
+            
+    def reconcile_time_entries(self, start_time_ms: int, end_time_ms: int) -> bool:
+        """Reconcile time entries between nodes for a given time range"""
+        try:
+            # Get all entries in time range
+            entries = SyntheticTimeEntry.query.filter(
+                SyntheticTimeEntry.timestamp_ms >= start_time_ms,
+                SyntheticTimeEntry.timestamp_ms <= end_time_ms,
+                SyntheticTimeEntry.reconciled == False
+            ).all()
+            
+            if not entries:
+                logger.info(f"No entries to reconcile in range {start_time_ms} - {end_time_ms}")
+                return True
+                
+            # Group entries by timestamp and type
+            entry_groups = {}
+            for entry in entries:
+                key = f"{entry.timestamp_ms}:{entry.entry_type}"
+                if key not in entry_groups:
+                    entry_groups[key] = []
+                entry_groups[key].append(entry)
+                
+            # Process each group
+            reconciled_count = 0
+            for key, group in entry_groups.items():
+                if self._reconcile_entry_group(group):
+                    reconciled_count += 1
+                    
+            logger.info(f"Reconciled {reconciled_count} entry groups")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error reconciling time entries: {e}")
+            return False
+            
+    def _reconcile_entry_group(self, entries: List[SyntheticTimeEntry]) -> bool:
+        """Reconcile a group of entries with the same timestamp and type"""
+        try:
+            if not entries:
+                return True
+                
+            # For single entry, just mark as reconciled
+            if len(entries) == 1:
+                entries[0].reconciled = True
+                db.session.commit()
+                return True
+                
+            # For multiple entries, need consensus
+            entry_data_counts = {}
+            for entry in entries:
+                data_hash = self.crypto_utils.hash_data(entry.entry_data)
+                if data_hash not in entry_data_counts:
+                    entry_data_counts[data_hash] = []
+                entry_data_counts[data_hash].append(entry)
+                
+            # Find consensus data (majority)
+            consensus_data = None
+            max_count = 0
+            
+            for data_hash, data_entries in entry_data_counts.items():
+                if len(data_entries) > max_count:
+                    max_count = len(data_entries)
+                    consensus_data = data_entries[0].entry_data
+                    
+            # Mark entries as reconciled based on consensus
+            for entry in entries:
+                if entry.entry_data == consensus_data:
+                    entry.reconciled = True
+                else:
+                    # Log discrepancy
+                    logger.warning(f"Entry discrepancy from node {entry.node_id}: expected {consensus_data}, got {entry.entry_data}")
+                    
+            db.session.commit()
+            logger.info(f"Reconciled {len(entries)} entries with consensus")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error reconciling entry group: {e}")
+            db.session.rollback()
+            return False
+            
+    def record_transaction(self, transaction_data: Dict[str, Any]) -> bool:
+        """Record a blockchain transaction in the ledger"""
+        try:
+            # Check if transaction already exists
+            existing = Transaction.query.filter_by(
+                transaction_hash=transaction_data['hash']
+            ).first()
+            
+            if existing:
+                logger.info(f"Transaction {transaction_data['hash']} already recorded")
+                return True
+                
+            # Calculate platform fee
+            amount = Decimal(str(transaction_data['amount']))
+            platform_fee = amount * Decimal(str(Config.PLATFORM_FEE_RATE))
+            
+            # Create transaction record
+            transaction = Transaction(
+                transaction_hash=transaction_data['hash'],
+                from_address=transaction_data['from'],
+                to_address=transaction_data['to'],
+                amount=amount,
+                currency=transaction_data['currency'],
+                transaction_type=transaction_data['type'],
+                related_bet_id=transaction_data.get('bet_id'),
+                platform_fee=platform_fee,
+                status='confirmed',
+                block_number=transaction_data.get('block_number')
+            )
+            
+            db.session.add(transaction)
+            db.session.commit()
+            
+            # Create time entry
+            time_entry_data = {
+                'transaction_hash': transaction_data['hash'],
+                'type': transaction_data['type'],
+                'amount': str(amount),
+                'currency': transaction_data['currency'],
+                'platform_fee': str(platform_fee)
+            }
+            
+            self.create_time_entry('transaction', time_entry_data)
+            
+            logger.info(f"Recorded transaction: {transaction_data['hash']}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error recording transaction: {e}")
+            db.session.rollback()
+            return False
+            
+    def calculate_platform_fees(self, start_time: datetime, end_time: datetime) -> Dict[str, Decimal]:
+        """Calculate platform fees for a time period"""
+        try:
+            fees = db.session.query(
+                Transaction.currency,
+                db.func.sum(Transaction.platform_fee).label('total_fee')
+            ).filter(
+                Transaction.created_at >= start_time,
+                Transaction.created_at <= end_time,
+                Transaction.status == 'confirmed'
+            ).group_by(Transaction.currency).all()
+            
+            result = {}
+            for currency, total_fee in fees:
+                result[currency] = Decimal(str(total_fee or 0))
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error calculating platform fees: {e}")
+            return {}
+            
+    def get_ledger_summary(self) -> Dict[str, Any]:
+        """Get a summary of the current ledger state"""
+        try:
+            # Get basic counts
+            total_entries = SyntheticTimeEntry.query.count()
+            reconciled_entries = SyntheticTimeEntry.query.filter_by(reconciled=True).count()
+            total_transactions = Transaction.query.count()
+            
+            # Get volume by currency
+            volume_eth = db.session.query(
+                db.func.sum(Transaction.amount)
+            ).filter(
+                Transaction.currency == 'ETH',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            volume_btc = db.session.query(
+                db.func.sum(Transaction.amount)
+            ).filter(
+                Transaction.currency == 'BTC',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            # Get fees
+            fees_eth = db.session.query(
+                db.func.sum(Transaction.platform_fee)
+            ).filter(
+                Transaction.currency == 'ETH',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            fees_btc = db.session.query(
+                db.func.sum(Transaction.platform_fee)
+            ).filter(
+                Transaction.currency == 'BTC',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            return {
+                'total_entries': total_entries,
+                'reconciled_entries': reconciled_entries,
+                'reconciliation_rate': reconciled_entries / max(total_entries, 1),
+                'total_transactions': total_transactions,
+                'volume_eth': str(volume_eth),
+                'volume_btc': str(volume_btc),
+                'fees_eth': str(fees_eth),
+                'fees_btc': str(fees_btc),
+                'last_reconciliation': self._get_last_reconciliation_time()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting ledger summary: {e}")
+            return {
+                'total_entries': 0,
+                'reconciled_entries': 0,
+                'reconciliation_rate': 0.0,
+                'total_transactions': 0,
+                'volume_eth': '0',
+                'volume_btc': '0',
+                'fees_eth': '0',
+                'fees_btc': '0',
+                'last_reconciliation': None
+            }
+            
+    def _get_last_reconciliation_time(self) -> Optional[str]:
+        """Get the timestamp of the last reconciliation"""
+        try:
+            last_entry = SyntheticTimeEntry.query.filter_by(
+                reconciled=True
+            ).order_by(SyntheticTimeEntry.timestamp_ms.desc()).first()
+            
+            if last_entry:
+                return self.time_sync.ms_to_pacific_time(last_entry.timestamp_ms).isoformat()
+            else:
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error getting last reconciliation time: {e}")
+            return None
+            
+    def update_network_metrics(self):
+        """Update network metrics"""
+        try:
+            # Get current metrics
+            from models import NodeOperator
+            active_nodes = NodeOperator.query.filter_by(status='active').count()
+            total_bets = Bet.query.count()
+            total_stakes = Stake.query.count()
+            
+            # Calculate volumes
+            volume_eth = db.session.query(
+                db.func.sum(Transaction.amount)
+            ).filter(
+                Transaction.currency == 'ETH',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            volume_btc = db.session.query(
+                db.func.sum(Transaction.amount)
+            ).filter(
+                Transaction.currency == 'BTC',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            # Calculate fees
+            fees_eth = db.session.query(
+                db.func.sum(Transaction.platform_fee)
+            ).filter(
+                Transaction.currency == 'ETH',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            fees_btc = db.session.query(
+                db.func.sum(Transaction.platform_fee)
+            ).filter(
+                Transaction.currency == 'BTC',
+                Transaction.status == 'confirmed'
+            ).scalar() or 0
+            
+            # Calculate consensus accuracy
+            total_reconciled = SyntheticTimeEntry.query.filter_by(reconciled=True).count()
+            total_entries = SyntheticTimeEntry.query.count()
+            consensus_accuracy = total_reconciled / max(total_entries, 1)
+            
+            # Create metrics record
+            metrics = NetworkMetrics(
+                active_nodes=active_nodes,
+                total_bets=total_bets,
+                total_stakes=total_stakes,
+                total_volume_eth=Decimal(str(volume_eth)),
+                total_volume_btc=Decimal(str(volume_btc)),
+                platform_fees_eth=Decimal(str(fees_eth)),
+                platform_fees_btc=Decimal(str(fees_btc)),
+                consensus_accuracy=consensus_accuracy
+            )
+            
+            db.session.add(metrics)
+            db.session.commit()
+            
+            logger.info("Updated network metrics")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error updating network metrics: {e}")
+            db.session.rollback()
+            return False

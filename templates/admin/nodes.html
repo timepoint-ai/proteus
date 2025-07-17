@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Nodes - Clockchain Node Operator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-server me-2"></i>
+        Node Operators
+    </h1>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="refreshNodes()">
+            <i class="fas fa-sync me-1"></i>
+            Refresh
+        </button>
+        <button class="btn btn-secondary" onclick="discoverNodes()">
+            <i class="fas fa-search me-1"></i>
+            Discover Nodes
+        </button>
+    </div>
+</div>
+
+<!-- Node Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-success">{{ nodes|selectattr('status', 'equalto', 'active')|list|length }}</div>
+            <div class="metric-label">Active Nodes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-warning">{{ nodes|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+            <div class="metric-label">Pending Approval</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value text-danger">{{ nodes|selectattr('status', 'equalto', 'inactive')|list|length }}</div>
+            <div class="metric-label">Inactive Nodes</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-value">{{ nodes|length }}</div>
+            <div class="metric-label">Total Nodes</div>
+        </div>
+    </div>
+</div>
+
+<!-- Nodes Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            Node Operators
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Operator ID</th>
+                        <th>Public Key</th>
+                        <th>Votes</th>
+                        <th>Last Heartbeat</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for node in nodes %}
+                    <tr>
+                        <td>
+                            <span class="node-status {{ node.status }}"></span>
+                            <span class="badge bg-{{ 'success' if node.status == 'active' else 'warning' if node.status == 'pending' else 'danger' }}">
+                                {{ node.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="hash-display">{{ node.operator_id }}</div>
+                        </td>
+                        <td>
+                            <div class="hash-display">{{ node.public_key[:16] }}...</div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-1">{{ node.votes_for }}</span>
+                                <span class="badge bg-danger">{{ node.votes_against }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if node.last_heartbeat %}
+                                <div class="timestamp">{{ node.last_heartbeat.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                            {% else %}
+                                <span class="text-muted">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if node.status == 'pending' %}
+                                <div class="btn-group btn-group-sm">
+                                    <form method="POST" action="{{ url_for('admin.vote_node', node_id=node.id) }}" class="d-inline">
+                                        <input type="hidden" name="vote" value="for">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.vote_node', node_id=node.id) }}" class="d-inline">
+                                        <input type="hidden" name="vote" value="against">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showNodeDetails('{{ node.id }}')">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Node Details Modal -->
+<div class="modal fade" id="nodeDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Node Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="nodeDetailsContent">
+                    <!-- Node details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Discovery Modal -->
+<div class="modal fade" id="discoveryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Network Discovery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="discoveryContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Discovering nodes...</span>
+                        </div>
+                        <p class="mt-2">Discovering network nodes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function refreshNodes() {
+        location.reload();
+    }
+
+    function showNodeDetails(nodeId) {
+        // This would typically make an API call to get node details
+        const modal = new bootstrap.Modal(document.getElementById('nodeDetailsModal'));
+        document.getElementById('nodeDetailsContent').innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading node details...</p>
+            </div>
+        `;
+        
+        modal.show();
+        
+        // Simulate API call
+        setTimeout(() => {
+            document.getElementById('nodeDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Node Information</h6>
+                        <p><strong>ID:</strong> ${nodeId}</p>
+                        <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
+                        <p><strong>Uptime:</strong> 99.9%</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Network Stats</h6>
+                        <p><strong>Heartbeats:</strong> 1,234</p>
+                        <p><strong>Sync Operations:</strong> 456</p>
+                        <p><strong>Votes Cast:</strong> 12</p>
+                    </div>
+                </div>
+            `;
+        }, 1000);
+    }
+
+    function discoverNodes() {
+        const modal = new bootstrap.Modal(document.getElementById('discoveryModal'));
+        modal.show();
+        
+        // Simulate network discovery
+        setTimeout(() => {
+            document.getElementById('discoveryContent').innerHTML = `
+                <h6>Discovered Nodes</h6>
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>node-1.clockchain.net</strong>
+                            <br>
+                            <small class="text-muted">192.168.1.100:5000</small>
+                        </div>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>node-2.clockchain.net</strong>
+                            <br>
+                            <small class="text-muted">192.168.1.101:5000</small>
+                        </div>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>node-3.clockchain.net</strong>
+                            <br>
+                            <small class="text-muted">192.168.1.102:5000</small>
+                        </div>
+                        <span class="badge bg-warning">Unreachable</span>
+                    </div>
+                </div>
+            `;
+        }, 2000);
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshNodes, 30000);
+</script>
+{% endblock %}
