@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from models import SyntheticTimeEntry, Bet, Stake, Transaction, OracleSubmission, NodeOperator, Actor
 from sqlalchemy import desc
+from app import db
 import json
 import logging
 from datetime import datetime, timedelta
@@ -26,108 +27,101 @@ def clockchain_view():
         start_time = current_time - timedelta(hours=hours_before)
         end_time = current_time + timedelta(hours=hours_after)
         
-        # Convert to milliseconds for query
-        start_ms = int(start_time.timestamp() * 1000)
-        end_ms = int(end_time.timestamp() * 1000)
+        # Get all active and recent bets in the time range
+        bets_in_range = Bet.query.filter(
+            ((Bet.start_time <= end_time) & (Bet.end_time >= start_time)) |
+            (Bet.created_at.between(start_time, end_time))
+        ).order_by(Bet.start_time).all()
         
-        # Get time entries in range
-        time_entries = SyntheticTimeEntry.query.filter(
-            SyntheticTimeEntry.timestamp_ms.between(start_ms, end_ms)
-        ).order_by(desc(SyntheticTimeEntry.timestamp_ms)).all()
-        
-        # Process entries for display
-        timeline_events = []
-        for entry in time_entries:
-            event_data = json.loads(entry.entry_data) if entry.entry_data else {}
+        # Group bets by actor and time period
+        timeline_segments = []
+        for bet in bets_in_range:
+            actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
             
-            # Get related node info
-            node = NodeOperator.query.get(entry.node_id) if entry.node_id else None
+            # Get all stakes for this bet
+            stakes = Stake.query.filter_by(bet_id=bet.id).all()
+            total_volume = sum(stake.amount for stake in stakes)
             
-            # Parse event type and create display data
-            event = {
-                'id': str(entry.id),
-                'timestamp_ms': entry.timestamp_ms,
-                'timestamp': datetime.fromtimestamp(entry.timestamp_ms / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-                'type': entry.entry_type,
-                'node': {
-                    'id': str(node.id) if node else None,
-                    'operator_id': node.operator_id if node else 'Unknown',
-                    'address': node.node_address[:10] + '...' if node else 'Unknown'
+            # Get competing submissions (other bets for same actor in overlapping time)
+            competing_bets = Bet.query.filter(
+                Bet.id != bet.id,
+                Bet.actor_id == bet.actor_id,
+                Bet.start_time <= bet.end_time,
+                Bet.end_time >= bet.start_time
+            ).all()
+            
+            segment = {
+                'id': str(bet.id),
+                'actor': {
+                    'id': str(actor.id) if actor else None,
+                    'name': actor.name if actor else 'Unknown',
+                    'is_unknown': actor.is_unknown if actor else True
                 },
-                'data': event_data,
-                'reconciled': entry.reconciled,
-                'signature': entry.signature[:20] + '...' if entry.signature else None
+                'predicted_text': bet.predicted_text,
+                'start_time': bet.start_time,
+                'end_time': bet.end_time,
+                'start_ms': int(bet.start_time.timestamp() * 1000) if bet.start_time else 0,
+                'end_ms': int(bet.end_time.timestamp() * 1000) if bet.end_time else 0,
+                'initial_stake': str(bet.initial_stake_amount),
+                'currency': bet.currency,
+                'status': bet.status,
+                'creator_wallet': bet.creator_wallet[:10] + '...' if bet.creator_wallet else '',
+                'stake_count': len(stakes),
+                'total_volume': str(total_volume),
+                'competing_count': len(competing_bets),
+                'competing_bets': [{
+                    'id': str(cb.id),
+                    'predicted_text': cb.predicted_text[:50] + '...' if len(cb.predicted_text) > 50 else cb.predicted_text,
+                    'creator': cb.creator_wallet[:10] + '...',
+                    'volume': str(sum(s.amount for s in Stake.query.filter_by(bet_id=cb.id).all()))
+                } for cb in competing_bets[:3]]  # Show max 3 competitors
             }
             
-            # Add type-specific details
-            if entry.entry_type == 'bet_created' and 'bet_id' in event_data:
-                bet = Bet.query.get(event_data['bet_id'])
-                if bet:
-                    actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
-                    event['bet_details'] = {
-                        'actor': actor.name if actor else 'Unknown',
-                        'predicted_text': bet.predicted_text[:50] + '...' if len(bet.predicted_text) > 50 else bet.predicted_text,
-                        'amount': str(bet.initial_stake_amount),
-                        'currency': bet.currency
-                    }
-                    
-            elif entry.entry_type == 'stake_placed' and 'stake_id' in event_data:
-                stake = Stake.query.get(event_data['stake_id'])
-                if stake and stake.bet:
-                    actor = Actor.query.get(stake.bet.actor_id) if stake.bet.actor_id else None
-                    event['stake_details'] = {
-                        'bet_id': str(stake.bet_id),
-                        'actor': actor.name if actor else 'Unknown',
-                        'amount': str(stake.amount),
-                        'currency': stake.currency,
-                        'position': stake.position
-                    }
-                    
-            elif entry.entry_type == 'oracle_submission' and 'submission_id' in event_data:
-                submission = OracleSubmission.query.get(event_data['submission_id'])
-                if submission and submission.bet:
-                    actor = Actor.query.get(submission.bet.actor_id) if submission.bet.actor_id else None
-                    event['oracle_details'] = {
-                        'bet_id': str(submission.bet_id),
-                        'actor': actor.name if actor else 'Unknown',
-                        'submitted_text': submission.submitted_text[:50] + '...' if len(submission.submitted_text) > 50 else submission.submitted_text,
-                        'consensus': submission.is_consensus
-                    }
-                    
-            timeline_events.append(event)
+            # Add resolution info if available
+            if bet.status == 'resolved':
+                segment['resolution'] = {
+                    'actual_text': bet.resolution_text,
+                    'levenshtein_distance': bet.levenshtein_distance,
+                    'resolution_time': bet.resolution_time.isoformat() if bet.resolution_time else None
+                }
+                
+            timeline_segments.append(segment)
         
-        # Get active bets for context
-        active_bets = Bet.query.filter_by(status='active').order_by(desc(Bet.created_at)).limit(10).all()
+        # Sort segments by start time
+        timeline_segments.sort(key=lambda x: x['start_ms'])
         
-        # Process active bets
-        active_bets_data = []
-        for bet in active_bets:
-            actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
-            active_bets_data.append({
-                'id': str(bet.id),
-                'actor': actor.name if actor else 'Unknown',
-                'predicted_text': bet.predicted_text[:50] + '...' if len(bet.predicted_text) > 50 else bet.predicted_text,
-                'end_time': bet.end_time.strftime('%Y-%m-%d %H:%M') if bet.end_time else 'Unknown',
-                'stake_count': Stake.query.filter_by(bet_id=bet.id).count()
-            })
+        # Calculate timeline boundaries
+        min_time_ms = int(start_time.timestamp() * 1000)
+        max_time_ms = int(end_time.timestamp() * 1000)
+        current_time_ms = int(current_time.timestamp() * 1000)
+        
+        # Get aggregate statistics
+        active_bet_count = Bet.query.filter_by(status='active').count()
+        total_bet_volume = db.session.query(db.func.sum(Stake.amount)).scalar() or 0
         
         return render_template('clockchain/timeline.html',
                              time_status=time_status,
-                             timeline_events=timeline_events,
-                             active_bets=active_bets_data,
+                             timeline_segments=timeline_segments,
                              hours_before=hours_before,
                              hours_after=hours_after,
-                             current_time_ms=int(current_time.timestamp() * 1000))
+                             current_time_ms=current_time_ms,
+                             min_time_ms=min_time_ms,
+                             max_time_ms=max_time_ms,
+                             active_bet_count=active_bet_count,
+                             total_bet_volume=str(total_bet_volume))
         
     except Exception as e:
         logger.error(f"Error loading clockchain view: {e}")
         return render_template('clockchain/timeline.html',
                              time_status={},
-                             timeline_events=[],
-                             active_bets=[],
+                             timeline_segments=[],
                              hours_before=24,
                              hours_after=24,
-                             current_time_ms=0)
+                             current_time_ms=0,
+                             min_time_ms=0,
+                             max_time_ms=0,
+                             active_bet_count=0,
+                             total_bet_volume='0')
 
 @clockchain_bp.route('/api/clockchain/events')
 def get_clockchain_events():
@@ -164,3 +158,108 @@ def get_clockchain_events():
     except Exception as e:
         logger.error(f"Error getting clockchain events: {e}")
         return jsonify({'error': 'Failed to get events'}), 500
+
+@clockchain_bp.route('/clockchain/submission/<submission_id>')
+def submission_detail(submission_id):
+    """Display detailed view of a single submission"""
+    try:
+        # Get the bet/submission
+        bet = Bet.query.get(submission_id)
+        if not bet:
+            flash('Submission not found', 'error')
+            return redirect(url_for('clockchain.clockchain_view'))
+            
+        actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
+        
+        # Get all stakes on this bet
+        stakes = Stake.query.filter_by(bet_id=submission_id).order_by(desc(Stake.created_at)).all()
+        
+        # Process stakes with more details
+        stakes_data = []
+        for stake in stakes:
+            stakes_data.append({
+                'id': str(stake.id),
+                'staker_wallet': stake.staker_wallet,
+                'amount': str(stake.amount),
+                'currency': stake.currency,
+                'position': stake.position,
+                'transaction_hash': stake.transaction_hash,
+                'created_at': stake.created_at.strftime('%Y-%m-%d %H:%M:%S') if stake.created_at else ''
+            })
+            
+        # Get competing submissions
+        competing_bets = []
+        if bet.actor_id:
+            competing = Bet.query.filter(
+                Bet.id != bet.id,
+                Bet.actor_id == bet.actor_id,
+                Bet.start_time <= bet.end_time,
+                Bet.end_time >= bet.start_time
+            ).all()
+            
+            for cb in competing:
+                cb_stakes = Stake.query.filter_by(bet_id=cb.id).all()
+                competing_bets.append({
+                    'id': str(cb.id),
+                    'creator_wallet': cb.creator_wallet,
+                    'predicted_text': cb.predicted_text,
+                    'start_time': cb.start_time.strftime('%Y-%m-%d %H:%M') if cb.start_time else '',
+                    'end_time': cb.end_time.strftime('%Y-%m-%d %H:%M') if cb.end_time else '',
+                    'status': cb.status,
+                    'stake_count': len(cb_stakes),
+                    'total_volume': str(sum(s.amount for s in cb_stakes))
+                })
+                
+        # Get oracle submissions for this bet
+        oracle_submissions = OracleSubmission.query.filter_by(bet_id=submission_id).order_by(desc(OracleSubmission.created_at)).all()
+        
+        # Calculate totals
+        total_volume = sum(stake.amount for stake in stakes)
+        
+        submission_data = {
+            'id': str(bet.id),
+            'creator_wallet': bet.creator_wallet,
+            'actor': {
+                'id': str(actor.id) if actor else None,
+                'name': actor.name if actor else 'Unknown',
+                'is_unknown': actor.is_unknown if actor else True
+            },
+            'predicted_text': bet.predicted_text,
+            'start_time': bet.start_time,
+            'end_time': bet.end_time,
+            'initial_stake_amount': str(bet.initial_stake_amount),
+            'currency': bet.currency,
+            'transaction_hash': bet.transaction_hash,
+            'status': bet.status,
+            'oracle_wallets': json.loads(bet.oracle_wallets) if bet.oracle_wallets else [],
+            'platform_fee': str(bet.platform_fee) if bet.platform_fee else '0',
+            'created_at': bet.created_at,
+            'stakes': stakes_data,
+            'total_volume': str(total_volume),
+            'stake_count': len(stakes),
+            'competing_submissions': competing_bets,
+            'oracle_submissions': [{
+                'id': str(os.id),
+                'oracle_wallet': os.oracle_wallet,
+                'submitted_text': os.submitted_text,
+                'votes_for': os.votes_for,
+                'votes_against': os.votes_against,
+                'is_consensus': os.is_consensus,
+                'created_at': os.created_at.strftime('%Y-%m-%d %H:%M:%S') if os.created_at else ''
+            } for os in oracle_submissions]
+        }
+        
+        # Add resolution info if available
+        if bet.status == 'resolved':
+            submission_data['resolution'] = {
+                'text': bet.resolution_text,
+                'levenshtein_distance': bet.levenshtein_distance,
+                'resolution_time': bet.resolution_time
+            }
+            
+        return render_template('clockchain/submission_detail.html', submission=submission_data)
+        
+    except Exception as e:
+        logger.error(f"Error loading submission detail: {e}")
+        flash('Error loading submission details', 'error')
+        return redirect(url_for('clockchain.clockchain_view'))

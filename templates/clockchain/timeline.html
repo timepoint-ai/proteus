@@ -9,6 +9,9 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3">Clockchain Timeline</h1>
                 <div class="d-flex gap-2">
+                    <div class="text-muted">
+                        <i class="fas fa-chart-line"></i> Active Bets: {{ active_bet_count }} | Total Volume: {{ total_bet_volume }} ETH
+                    </div>
                     <button class="btn btn-primary" onclick="refreshTimeline()">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
@@ -54,47 +57,16 @@
         </div>
     </div>
 
-    <!-- Active Bets Summary -->
-    {% if active_bets %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Active Bets</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for bet in active_bets[:6] %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-primary">
-                                <div class="card-body">
-                                    <h6 class="card-subtitle mb-2 text-muted">{{ bet.actor }}</h6>
-                                    <p class="card-text small">{{ bet.predicted_text }}</p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">Ends: {{ bet.end_time }}</small>
-                                        <span class="badge bg-info">{{ bet.stake_count }} stakes</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     <!-- Timeline View -->
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Synthetic Time Ledger</h5>
+                    <h5 class="card-title mb-0">Linguistic Prediction Timeline</h5>
                 </div>
-                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 800px;">
+                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 1200px; min-height: 600px;">
                     <!-- Current Time Marker -->
-                    <div class="position-absolute w-100" style="top: 50%; transform: translateY(-50%); z-index: 10;">
+                    <div class="position-absolute w-100" style="top: 50%; transform: translateY(-50%); z-index: 100;">
                         <div class="d-flex align-items-center">
                             <div class="bg-danger" style="height: 2px; flex: 1;"></div>
                             <span class="badge bg-danger mx-2">NOW</span>
@@ -102,51 +74,107 @@
                         </div>
                     </div>
                     
-                    <!-- Timeline Events -->
-                    <div class="timeline-container" style="position: relative; padding: 20px 0;">
-                        {% for event in timeline_events %}
-                        <div class="timeline-event mb-3" data-timestamp="{{ event.timestamp_ms }}">
+                    <!-- Timeline Segments -->
+                    <div class="timeline-container" style="position: relative; padding: 50px 0; min-height: 100%;">
+                        {% for segment in timeline_segments %}
+                        <div class="timeline-segment" 
+                             data-start="{{ segment.start_ms }}" 
+                             data-end="{{ segment.end_ms }}"
+                             data-bet-id="{{ segment.id }}"
+                             style="position: absolute; left: 0; right: 0;">
                             <div class="row">
                                 <div class="col-2 text-end">
-                                    <small class="text-muted">{{ event.timestamp }}</small>
+                                    <small class="text-muted">
+                                        {{ segment.start_time.strftime('%m/%d %H:%M') }}<br>
+                                        to<br>
+                                        {{ segment.end_time.strftime('%m/%d %H:%M') }}
+                                    </small>
                                 </div>
                                 <div class="col-1 text-center">
-                                    <div class="timeline-marker bg-{{ 'success' if event.reconciled else 'warning' }}" style="width: 12px; height: 12px; border-radius: 50%; margin: 0 auto;"></div>
+                                    <div class="timeline-line" style="position: relative; height: 100%; min-height: 80px;">
+                                        <div class="bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }}" 
+                                             style="position: absolute; left: 50%; transform: translateX(-50%); width: 4px; height: 100%;">
+                                        </div>
+                                        <div class="timeline-marker bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }}" 
+                                             style="width: 16px; height: 16px; border-radius: 50%; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-9">
-                                    <div class="card {{ 'border-success' if event.reconciled else 'border-warning' }}">
-                                        <div class="card-body py-2">
-                                            <div class="d-flex justify-content-between align-items-start">
+                                    <div class="card mb-3 {{ 'border-success' if segment.status == 'resolved' else 'border-primary' if segment.status == 'active' else '' }}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
-                                                    <h6 class="card-subtitle mb-1">
-                                                        <span class="badge bg-secondary">{{ event.type }}</span>
-                                                        {% if event.type == 'bet_created' and event.bet_details %}
-                                                            <span class="text-primary">{{ event.bet_details.actor }}</span> - 
-                                                            {{ event.bet_details.amount }} {{ event.bet_details.currency }}
-                                                        {% elif event.type == 'stake_placed' and event.stake_details %}
-                                                            <span class="text-info">{{ event.stake_details.position }}</span> on 
-                                                            <span class="text-primary">{{ event.stake_details.actor }}</span> - 
-                                                            {{ event.stake_details.amount }} {{ event.stake_details.currency }}
-                                                        {% elif event.type == 'oracle_submission' and event.oracle_details %}
-                                                            Oracle for <span class="text-primary">{{ event.oracle_details.actor }}</span>
-                                                            {% if event.oracle_details.consensus %}
-                                                                <span class="badge bg-success">Consensus</span>
-                                                            {% endif %}
-                                                        {% endif %}
+                                                    <h5 class="card-title mb-1">
+                                                        <span class="text-primary">{{ segment.actor.name }}</span>
+                                                        <span class="badge bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }} ms-2">
+                                                            {{ segment.status }}
+                                                        </span>
+                                                    </h5>
+                                                    <h6 class="card-subtitle text-muted">
+                                                        Submission by {{ segment.creator_wallet }}
                                                     </h6>
-                                                    {% if event.type == 'bet_created' and event.bet_details %}
-                                                        <p class="card-text small mb-0">{{ event.bet_details.predicted_text }}</p>
-                                                    {% elif event.type == 'oracle_submission' and event.oracle_details %}
-                                                        <p class="card-text small mb-0">{{ event.oracle_details.submitted_text }}</p>
-                                                    {% endif %}
                                                 </div>
                                                 <div class="text-end">
-                                                    <small class="text-muted">Node: {{ event.node.operator_id }}</small><br>
-                                                    {% if not event.reconciled %}
-                                                        <span class="badge bg-warning">Unreconciled</span>
+                                                    <h4 class="mb-0">{{ segment.total_volume }} {{ segment.currency }}</h4>
+                                                    <small class="text-muted">Total Volume</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="prediction-text mb-3">
+                                                <strong>Predicted Text:</strong>
+                                                <div class="bg-light p-2 rounded mt-1">
+                                                    <em>"{{ segment.predicted_text }}"</em>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if segment.resolution %}
+                                            <div class="resolution-info mb-3">
+                                                <strong>Resolution:</strong>
+                                                <div class="bg-light p-2 rounded mt-1">
+                                                    <div>Actual: <em>"{{ segment.resolution.actual_text }}"</em></div>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-info">Levenshtein Distance: {{ segment.resolution.levenshtein_distance }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="badge bg-secondary">Initial Stake: {{ segment.initial_stake }} {{ segment.currency }}</span>
+                                                    <span class="badge bg-info">{{ segment.stake_count }} bets placed</span>
+                                                    {% if segment.competing_count > 0 %}
+                                                        <span class="badge bg-warning">{{ segment.competing_count }} competing submissions</span>
+                                                    {% endif %}
+                                                </div>
+                                                <a href="/clockchain/submission/{{ segment.id }}" class="btn btn-sm btn-outline-primary">
+                                                    View Details <i class="fas fa-arrow-right"></i>
+                                                </a>
+                                            </div>
+                                            
+                                            {% if segment.competing_bets %}
+                                            <div class="competing-submissions mt-3">
+                                                <small class="text-muted">Competing Submissions:</small>
+                                                <div class="list-group list-group-flush mt-1">
+                                                    {% for comp in segment.competing_bets %}
+                                                    <div class="list-group-item p-2">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <small>{{ comp.creator }} - "{{ comp.predicted_text }}"</small>
+                                                            </div>
+                                                            <small class="text-muted">{{ comp.volume }} {{ segment.currency }}</small>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                    {% if segment.competing_count > 3 %}
+                                                    <div class="list-group-item p-2 text-center">
+                                                        <small class="text-muted">+{{ segment.competing_count - 3 }} more competing submissions</small>
+                                                    </div>
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -154,11 +182,11 @@
                         </div>
                         {% endfor %}
                         
-                        {% if not timeline_events %}
+                        {% if not timeline_segments %}
                         <div class="text-center py-5">
                             <i class="fas fa-clock fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No events in selected time range</h5>
-                            <p class="text-muted">Try adjusting the time range to see more events</p>
+                            <h5 class="text-muted">No submissions in selected time range</h5>
+                            <p class="text-muted">Try adjusting the time range to see more predictions</p>
                         </div>
                         {% endif %}
                     </div>
@@ -173,27 +201,28 @@
     position: relative;
 }
 
-.timeline-container::before {
-    content: '';
-    position: absolute;
-    left: calc(16.666% + 6px);
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: var(--bs-gray-400);
-}
-
-.timeline-event {
+.timeline-segment {
     transition: all 0.3s ease;
 }
 
-.timeline-event:hover {
-    transform: translateX(5px);
+.timeline-segment:hover {
+    z-index: 50;
 }
 
-.timeline-marker {
+.timeline-segment .card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.timeline-line {
     position: relative;
-    z-index: 5;
+}
+
+.prediction-text {
+    font-size: 0.95rem;
+}
+
+.competing-submissions {
+    border-top: 1px solid var(--bs-gray-300);
 }
 </style>
 
@@ -226,22 +255,44 @@ document.getElementById('timeRangeForm').addEventListener('submit', function(e) 
     window.location.href = `/clockchain?${params.toString()}`;
 });
 
-// Calculate relative positions for events
-function positionTimelineEvents() {
+// Calculate relative positions for timeline segments
+function positionTimelineSegments() {
     const currentMs = {{ current_time_ms }};
-    const events = document.querySelectorAll('.timeline-event');
+    const minMs = {{ min_time_ms }};
+    const maxMs = {{ max_time_ms }};
+    const container = document.querySelector('.timeline-container');
+    const containerHeight = container.offsetHeight;
+    const segments = document.querySelectorAll('.timeline-segment');
     
-    events.forEach(event => {
-        const eventMs = parseInt(event.dataset.timestamp);
-        const diffMs = eventMs - currentMs;
-        const diffHours = diffMs / (1000 * 60 * 60);
+    // Calculate scale: map time range to container height
+    const timeRange = maxMs - minMs;
+    const pixelsPerMs = containerHeight / timeRange;
+    
+    segments.forEach(segment => {
+        const startMs = parseInt(segment.dataset.start);
+        const endMs = parseInt(segment.dataset.end);
         
-        // Position relative to NOW marker (which is at 50%)
-        // Each hour = 2% of container height
-        const topPercent = 50 - (diffHours * 2);
-        event.style.position = 'relative';
-        event.style.top = `${topPercent}%`;
+        // Calculate position from top of container
+        const startOffset = (startMs - minMs) * pixelsPerMs;
+        const height = (endMs - startMs) * pixelsPerMs;
+        
+        // Apply positioning
+        segment.style.top = `${startOffset}px`;
+        segment.style.height = `${Math.max(height, 100)}px`; // Minimum height for visibility
+        
+        // Adjust line height
+        const line = segment.querySelector('.timeline-line');
+        if (line) {
+            line.style.height = '100%';
+        }
     });
+    
+    // Position NOW marker
+    const nowMarker = document.querySelector('[style*="top: 50%"]');
+    if (nowMarker) {
+        const nowOffset = (currentMs - minMs) * pixelsPerMs;
+        nowMarker.style.top = `${nowOffset}px`;
+    }
 }
 
 // Initialize
@@ -249,11 +300,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update time every second
     setInterval(updateCurrentTime, 1000);
     
-    // Position events on timeline
-    positionTimelineEvents();
+    // Position segments on timeline
+    positionTimelineSegments();
+    
+    // Reposition on window resize
+    window.addEventListener('resize', positionTimelineSegments);
 });
 
-// Auto-refresh every 30 seconds
-setInterval(refreshTimeline, 30000);
+// Auto-refresh every 60 seconds
+setInterval(refreshTimeline, 60000);
 </script>
 {% endblock %}

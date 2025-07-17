@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Details - {{ submission.actor.name }} - Clockchain{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Submission Details</h1>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('clockchain.clockchain_view') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Timeline
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Overview -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Prediction Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Actor</h6>
+                            <h4 class="text-primary">{{ submission.actor.name }}</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <span class="badge bg-{{ 'success' if submission.status == 'resolved' else 'primary' if submission.status == 'active' else 'secondary' }} fs-6">
+                                {{ submission.status|upper }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Predicted Text</h6>
+                        <div class="bg-light p-3 rounded">
+                            <em class="fs-5">"{{ submission.predicted_text }}"</em>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Time Window</h6>
+                            <p>
+                                <i class="fas fa-calendar-alt"></i> {{ submission.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                                <i class="fas fa-arrow-down"></i><br>
+                                <i class="fas fa-calendar-check"></i> {{ submission.end_time.strftime('%Y-%m-%d %H:%M') }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Submission Info</h6>
+                            <p>
+                                <strong>Creator:</strong> {{ submission.creator_wallet[:10] }}...{{ submission.creator_wallet[-6:] }}<br>
+                                <strong>Initial Stake:</strong> {{ submission.initial_stake_amount }} {{ submission.currency }}<br>
+                                <strong>Created:</strong> {{ submission.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if submission.resolution %}
+                    <div class="mt-3 border-top pt-3">
+                        <h6>Resolution</h6>
+                        <div class="bg-light p-3 rounded">
+                            <p class="mb-2"><strong>Actual Text:</strong> <em>"{{ submission.resolution.text }}"</em></p>
+                            <p class="mb-0">
+                                <span class="badge bg-info">Levenshtein Distance: {{ submission.resolution.levenshtein_distance }}</span>
+                                <small class="text-muted ms-2">Resolved: {{ submission.resolution.resolution_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Bet Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h2 class="text-primary mb-0">{{ submission.total_volume }} {{ submission.currency }}</h2>
+                        <p class="text-muted">Total Volume</p>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="mb-0">{{ submission.stake_count }}</h4>
+                            <small class="text-muted">Total Bets</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="mb-0">{{ submission.competing_submissions|length }}</h4>
+                            <small class="text-muted">Competing</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Transaction Details</h5>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">Transaction Hash</small>
+                    <div class="font-monospace small">{{ submission.transaction_hash[:20] }}...{{ submission.transaction_hash[-20:] }}</div>
+                    
+                    <hr>
+                    
+                    <small class="text-muted">Platform Fee</small>
+                    <div>{{ submission.platform_fee }} {{ submission.currency }}</div>
+                    
+                    <hr>
+                    
+                    <small class="text-muted">Oracle Wallets</small>
+                    <div class="small">
+                        {% for wallet in submission.oracle_wallets %}
+                            <div class="mb-1">{{ wallet[:10] }}...{{ wallet[-6:] }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bets on this Submission -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Bets on this Submission ({{ submission.stake_count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if submission.stakes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Bettor</th>
+                                    <th>Amount</th>
+                                    <th>Position</th>
+                                    <th>Transaction</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stake in submission.stakes %}
+                                <tr>
+                                    <td>{{ stake.staker_wallet[:10] }}...{{ stake.staker_wallet[-6:] }}</td>
+                                    <td>{{ stake.amount }} {{ stake.currency }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if stake.position == 'for' else 'danger' }}">
+                                            {{ stake.position }}
+                                        </span>
+                                    </td>
+                                    <td class="font-monospace small">{{ stake.transaction_hash[:15] }}...</td>
+                                    <td>{{ stake.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No bets placed on this submission yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competing Submissions -->
+    {% if submission.competing_submissions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Competing Submissions for {{ submission.actor.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for comp in submission.competing_submissions %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">
+                                        {{ comp.creator_wallet[:10] }}...{{ comp.creator_wallet[-6:] }}
+                                        <span class="badge bg-{{ 'success' if comp.status == 'resolved' else 'primary' if comp.status == 'active' else 'secondary' }} float-end">
+                                            {{ comp.status }}
+                                        </span>
+                                    </h6>
+                                    <p class="card-text">
+                                        <em>"{{ comp.predicted_text }}"</em>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            {{ comp.start_time }} - {{ comp.end_time }}
+                                        </small>
+                                        <div class="text-end">
+                                            <strong>{{ comp.total_volume }} ETH</strong><br>
+                                            <small>{{ comp.stake_count }} bets</small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('clockchain.submission_detail', submission_id=comp.id) }}" class="btn btn-sm btn-outline-secondary mt-2">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Oracle Submissions -->
+    {% if submission.oracle_submissions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Oracle Submissions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Oracle</th>
+                                    <th>Submitted Text</th>
+                                    <th>Votes</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for os in submission.oracle_submissions %}
+                                <tr>
+                                    <td>{{ os.oracle_wallet[:10] }}...{{ os.oracle_wallet[-6:] }}</td>
+                                    <td><em>"{{ os.submitted_text[:50] }}{% if os.submitted_text|length > 50 %}...{% endif %}"</em></td>
+                                    <td>
+                                        <span class="badge bg-success">{{ os.votes_for }}</span>
+                                        <span class="badge bg-danger">{{ os.votes_against }}</span>
+                                    </td>
+                                    <td>
+                                        {% if os.is_consensus %}
+                                            <span class="badge bg-success">Consensus</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ os.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
