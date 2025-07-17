@@ -51,9 +51,11 @@ def create_app():
     # Register blueprints
     from routes.api import api_bp
     from routes.admin import admin_bp
+    from routes.test_data import test_data_bp
     
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(test_data_bp, url_prefix='/test_data')
     
     # Root route redirect to admin dashboard
     @app.route('/')
