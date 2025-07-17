@@ -130,3 +130,19 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 - Extended default timeline range to 1440 hours (60 days) with maximum range up to 10,000,000 hours
 - Added performance optimization limiting records to 200 max with indicators when more data exists
 - Added convenient time range presets (1 day, 1 week, 1 month, 2 months, 1 year, 5 years)
+
+### Comprehensive Documentation (July 17, 2025)
+- Created detailed README.md with user-focused documentation including:
+  - Clear project overview and key features
+  - Quick start guide with installation steps
+  - Usage instructions for admin dashboard and timeline
+  - Configuration options and deployment guide
+  - Troubleshooting section
+- Created extensive ENGINEERING.md with developer-focused documentation including:
+  - Complete architecture overview with visual diagrams
+  - Detailed system design principles
+  - In-depth component and service descriptions
+  - Consensus mechanism and text analysis algorithm details
+  - Security architecture and performance optimization strategies
+  - Testing, deployment, and monitoring guidelines
+  - Development workflow and future enhancements
