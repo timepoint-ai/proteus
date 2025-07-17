@@ -85,24 +85,28 @@
                         {% endif %}
                     </h5>
                 </div>
-                <div class="card-body" style="position: relative; overflow-y: auto; max-height: 1500px; min-height: 800px;">
-                    <!-- Current Time Marker -->
-                    <div class="position-absolute w-100" style="top: 50%; transform: translateY(-50%); z-index: 100;">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-danger" style="height: 2px; flex: 1;"></div>
-                            <span class="badge bg-danger mx-2">NOW</span>
-                            <div class="bg-danger" style="height: 2px; flex: 1;"></div>
-                        </div>
-                    </div>
-                    
+                <div class="card-body" style="overflow-y: auto; max-height: none;">
                     <!-- Timeline Segments -->
-                    <div class="timeline-container" style="position: relative; padding: 50px 0; min-height: 100%;">
+                    <div class="timeline-container" style="position: relative; padding: 20px 0;">
+                        {% set now_marker_shown = false %}
                         {% for segment in timeline_segments %}
-                        <div class="timeline-segment" 
+                        
+                        {% if not now_marker_shown and segment.start_ms > current_time_ms %}
+                            {% set now_marker_shown = true %}
+                            <!-- Current Time Marker -->
+                            <div class="w-100 my-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                                    <span class="badge bg-danger mx-2">NOW</span>
+                                    <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="timeline-segment mb-4" 
                              data-start="{{ segment.start_ms }}" 
                              data-end="{{ segment.end_ms }}"
-                             data-bet-id="{{ segment.id }}"
-                             style="position: absolute; left: 0; right: 0;">
+                             data-bet-id="{{ segment.id }}">
                             <div class="row">
                                 <div class="col-2 text-end">
                                     <small class="text-muted">
@@ -112,13 +116,8 @@
                                     </small>
                                 </div>
                                 <div class="col-1 text-center">
-                                    <div class="timeline-line" style="position: relative; height: 100%; min-height: 80px;">
-                                        <div class="bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }}" 
-                                             style="position: absolute; left: 50%; transform: translateX(-50%); width: 4px; height: 100%;">
-                                        </div>
-                                        <div class="timeline-marker bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }}" 
-                                             style="width: 16px; height: 16px; border-radius: 50%; position: absolute; top: 0; left: 50%; transform: translateX(-50%);">
-                                        </div>
+                                    <div class="timeline-marker bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }}" 
+                                         style="width: 16px; height: 16px; border-radius: 50%; margin: 0 auto; position: relative; z-index: 2;">
                                     </div>
                                 </div>
                                 <div class="col-9">
@@ -203,6 +202,17 @@
                         </div>
                         {% endfor %}
                         
+                        {% if not now_marker_shown %}
+                            <!-- Current Time Marker at end if all events are in the past -->
+                            <div class="w-100 my-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                                    <span class="badge bg-danger mx-2">NOW</span>
+                                    <div class="bg-danger" style="height: 2px; flex: 1;"></div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
                         {% if not timeline_segments %}
                         <div class="text-center py-5">
                             <i class="fas fa-clock fa-3x text-muted mb-3"></i>
@@ -232,20 +242,43 @@
     position: relative;
 }
 
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: calc(16.666% + 8px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--bs-gray-400);
+    z-index: 0;
+}
+
 .timeline-segment {
+    position: relative;
     transition: all 0.3s ease;
 }
 
 .timeline-segment:hover {
-    z-index: 50;
+    transform: translateX(5px);
+}
+
+.timeline-segment .card {
+    position: relative;
+    z-index: 1;
 }
 
 .timeline-segment .card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
 .timeline-line {
     position: relative;
+    height: auto !important;
+    min-height: 100px;
+}
+
+.timeline-marker {
+    z-index: 2;
 }
 
 .prediction-text {
@@ -286,45 +319,8 @@ document.getElementById('timeRangeForm').addEventListener('submit', function(e) 
     window.location.href = `/clockchain?${params.toString()}`;
 });
 
-// Calculate relative positions for timeline segments
-function positionTimelineSegments() {
-    const currentMs = {{ current_time_ms }};
-    const minMs = {{ min_time_ms }};
-    const maxMs = {{ max_time_ms }};
-    const container = document.querySelector('.timeline-container');
-    const containerHeight = container.offsetHeight;
-    const segments = document.querySelectorAll('.timeline-segment');
-    
-    // Calculate scale: map time range to container height
-    const timeRange = maxMs - minMs;
-    const pixelsPerMs = containerHeight / timeRange;
-    
-    segments.forEach(segment => {
-        const startMs = parseInt(segment.dataset.start);
-        const endMs = parseInt(segment.dataset.end);
-        
-        // Calculate position from top of container
-        const startOffset = (startMs - minMs) * pixelsPerMs;
-        const height = (endMs - startMs) * pixelsPerMs;
-        
-        // Apply positioning
-        segment.style.top = `${startOffset}px`;
-        segment.style.height = `${Math.max(height, 100)}px`; // Minimum height for visibility
-        
-        // Adjust line height
-        const line = segment.querySelector('.timeline-line');
-        if (line) {
-            line.style.height = '100%';
-        }
-    });
-    
-    // Position NOW marker
-    const nowMarker = document.querySelector('[style*="top: 50%"]');
-    if (nowMarker) {
-        const nowOffset = (currentMs - minMs) * pixelsPerMs;
-        nowMarker.style.top = `${nowOffset}px`;
-    }
-}
+// No longer need positioning function since we're using natural flow
+// Timeline segments are now positioned naturally in the document flow
 
 // Set time range helper
 function setTimeRange(hoursBefore, hoursAfter) {
@@ -365,12 +361,6 @@ function formatHours(hours) {
 document.addEventListener('DOMContentLoaded', function() {
     // Update time every second
     setInterval(updateCurrentTime, 1000);
-    
-    // Position segments on timeline
-    positionTimelineSegments();
-    
-    // Reposition on window resize
-    window.addEventListener('resize', positionTimelineSegments);
     
     // Display formatted time ranges
     const hoursBefore = {{ hours_before }};

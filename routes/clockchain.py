@@ -127,7 +127,8 @@ def clockchain_view():
                              total_bet_volume=str(total_bet_volume),
                              total_count=total_count,
                              displayed_count=len(bets_in_range),
-                             has_more_records=has_more_records)
+                             has_more_records=has_more_records,
+                             now_marker_shown=False)
         
     except Exception as e:
         logger.error(f"Error loading clockchain view: {e}")
