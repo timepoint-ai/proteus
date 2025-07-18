@@ -239,7 +239,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <form method="POST" action="{{ url_for('test_data.generate_test_data') }}">
                                 <input type="hidden" name="data_type" value="full_dataset">
                                 <button type="submit" class="btn btn-success w-100">
@@ -247,7 +247,7 @@
                                 </button>
                             </form>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <form method="POST" action="{{ url_for('test_data.clear_test_data') }}" 
                                   onsubmit="return confirm('Are you sure you want to clear ALL data? This action cannot be undone.');">
                                 <input type="hidden" name="data_type" value="all">
@@ -256,7 +256,14 @@
                                 </button>
                             </form>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
+                            <form method="POST" action="{{ url_for('test_data.create_timing_demonstration') }}">
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="fas fa-clock me-2"></i>Create Timing Demo
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-3 mb-3">
                             <a href="{{ url_for('test_data.second_node_simulator') }}" class="btn btn-info w-100">
                                 <i class="fas fa-server me-2"></i>Node Simulator
                             </a>
