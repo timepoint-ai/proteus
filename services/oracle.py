@@ -31,6 +31,12 @@ class OracleService:
                 logger.error(f"Bet {bet_id} is not active")
                 return False
                 
+            # CRITICAL: Check if bet's end time has passed
+            current_time = datetime.utcnow()
+            if current_time < bet.end_time:
+                logger.error(f"Cannot submit oracle statement for bet {bet_id} before end time: {bet.end_time}")
+                return False
+                
             # Check if oracle wallet is authorized
             oracle_wallets = json.loads(bet.oracle_wallets)
             if oracle_wallet not in oracle_wallets:
@@ -187,6 +193,12 @@ class OracleService:
         try:
             bet = Bet.query.get(bet_id)
             if not bet or bet.status != 'active':
+                return
+                
+            # CRITICAL: Ensure bet's end time has passed
+            current_time = datetime.utcnow()
+            if current_time < bet.end_time:
+                logger.error(f"Cannot finalize oracle voting for bet {bet_id} before end time: {bet.end_time}")
                 return
                 
             # Get all submissions for this bet

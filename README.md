@@ -18,9 +18,17 @@ Clockchain is a sophisticated distributed ledger platform for decentralized ling
 
 1. **Submission Creation**: Users create predictions by betting that a specific actor will say certain words within a time window
 2. **Secondary Market**: Other users can place bets on competing predictions for the same actor and timeframe
-3. **Oracle Validation**: When the time window expires, oracles submit the actual text spoken by the actor
-4. **Automatic Resolution**: The system compares all predictions using Levenshtein distance and resolves in favor of the closest match
-5. **Payout Distribution**: Stakes are distributed to winning participants minus platform fees
+3. **Oracle Validation**: **ONLY after the time window expires**, oracles can submit the actual text spoken by the actor
+4. **Time Consensus**: Nodes synchronize time to ensure oracle submissions are only accepted after predictions have expired
+5. **Automatic Resolution**: The system compares all predictions using Levenshtein distance and resolves in favor of the closest match
+6. **Payout Distribution**: Stakes are distributed to winning participants minus platform fees
+
+### Important: Time-Based Logic
+
+- **Oracle submissions are strictly prohibited before a bet's end time has passed**
+- The system enforces time consensus across all nodes to prevent premature resolutions
+- All times are synchronized using a distributed time consensus mechanism
+- The Synthetic Time Ledger is immutable - no retroactive modifications allowed
 
 ## Quick Start
 

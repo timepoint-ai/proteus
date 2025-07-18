@@ -66,6 +66,10 @@ def clockchain_view():
                 Bet.end_time >= bet.start_time
             ).all()
             
+            # Check if oracle submission is allowed
+            oracle_allowed = current_time >= bet.end_time if bet.end_time else False
+            time_until_oracle = max(0, (bet.end_time - current_time).total_seconds()) if bet.end_time and not oracle_allowed else 0
+            
             segment = {
                 'id': str(bet.id),
                 'actor': {
@@ -85,6 +89,8 @@ def clockchain_view():
                 'stake_count': len(stakes),
                 'total_volume': str(total_volume),
                 'competing_count': len(competing_bets),
+                'oracle_allowed': oracle_allowed,
+                'time_until_oracle': time_until_oracle,
                 'competing_bets': [{
                     'id': str(cb.id),
                     'predicted_text': cb.predicted_text[:50] + '...' if len(cb.predicted_text) > 50 else cb.predicted_text,

@@ -6,6 +6,7 @@ from services.network import NetworkService
 from services.time_ledger import TimeLedgerService
 from services.oracle import OracleService
 from services.blockchain import BlockchainService
+from services.time_consensus import TimeConsensusService
 from config import Config
 import logging
 from datetime import datetime, timedelta
@@ -338,6 +339,47 @@ def validate_data_integrity(self):
         logging.error(f"Error in data integrity validation: {e}")
         raise self.retry(exc=e, countdown=300, max_retries=2)
 
+@celery.task(bind=True)
+def synchronize_time_consensus(self):
+    """Synchronize time consensus across nodes"""
+    try:
+        with app.app_context():
+            logging.info("Starting time consensus synchronization")
+            
+            time_consensus_service = TimeConsensusService()
+            
+            # Broadcast time sync to network
+            time_consensus_service.broadcast_time_sync()
+            
+            # Get network time consensus
+            consensus = time_consensus_service.get_network_time_consensus()
+            
+            if consensus['consensus']:
+                logging.info(f"Time consensus achieved: {consensus['consensus_ratio']:.2%} nodes in sync")
+                
+                # Create time checkpoint if consensus is strong
+                if consensus['consensus_ratio'] >= 0.8:
+                    checkpoint_id = time_consensus_service.create_time_checkpoint()
+                    if checkpoint_id:
+                        logging.info(f"Created time checkpoint: {checkpoint_id}")
+                        
+            else:
+                logging.warning(f"Time consensus not achieved: {consensus}")
+                
+            # Schedule next sync
+            synchronize_time_consensus.apply_async(countdown=30)
+            
+            return {
+                'consensus': consensus['consensus'],
+                'consensus_ratio': consensus.get('consensus_ratio', 0),
+                'nodes_in_sync': consensus.get('nodes_in_sync', 0),
+                'average_time_diff': consensus.get('average_time_diff', 0)
+            }
+            
+    except Exception as e:
+        logging.error(f"Error in time consensus synchronization: {e}")
+        raise self.retry(exc=e, countdown=60, max_retries=3)
+
 # Periodic task scheduler
 @celery.task
 def schedule_periodic_tasks():
@@ -366,6 +408,9 @@ def schedule_periodic_tasks():
     
     # Validate data integrity every 30 minutes
     validate_data_integrity.apply_async(countdown=1800)
+    
+    # Synchronize time consensus every 30 seconds
+    synchronize_time_consensus.apply_async(countdown=30)
 
 # Initialize periodic tasks on startup
 with app.app_context():

@@ -117,9 +117,19 @@ Preferred communication style: Simple, everyday language.
 
 The system is designed to be highly distributed with fault tolerance, automatic reconciliation, and real-time consensus mechanisms for managing linguistic prediction markets across a network of nodes.
 
-## Recent Changes (July 17, 2025)
+## Recent Changes
 
-### Clockchain Timeline Enhancement
+### Critical Oracle Timing Fix (July 18, 2025)
+- **Fixed foundational logic error**: Oracle submissions were previously allowed before bet end_time
+- **Implemented strict time validation**: Oracle submissions now only accepted AFTER bet's end_time has passed
+- **Added TimeConsensusService**: New distributed time synchronization mechanism across nodes
+- **Updated timeline UI**: Shows oracle submission eligibility status and time until oracle is allowed
+- **Added background task**: Time consensus synchronization runs every 30 seconds
+- **Enhanced documentation**: Updated README and ENGINEERING docs to emphasize temporal integrity requirement
+
+### July 17, 2025 Changes
+
+#### Clockchain Timeline Enhancement
 - Replaced "Time Sync" navigation with "Clockchain" 
 - Transformed timeline from metadata view to content-focused display showing:
   - Actor names and predicted statements prominently
@@ -131,7 +141,7 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 - Added performance optimization limiting records to 200 max with indicators when more data exists
 - Added convenient time range presets (1 day, 1 week, 1 month, 2 months, 1 year, 5 years)
 
-### Comprehensive Documentation (July 17, 2025)
+#### Comprehensive Documentation
 - Created detailed README.md with user-focused documentation including:
   - Clear project overview and key features
   - Quick start guide with installation steps

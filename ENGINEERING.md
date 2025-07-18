@@ -143,11 +143,16 @@ Consensus types:
 
 #### OracleService (`services/oracle.py`)
 
-Handles prediction validation:
+Handles prediction validation with strict time enforcement:
 
 ```python
 class OracleService:
-    def submit_actual_text(bet_id, actual_text):
+    def submit_oracle_statement(bet_id, oracle_wallet, submitted_text, signature):
+        # CRITICAL: Check if bet's end time has passed
+        current_time = datetime.utcnow()
+        if current_time < bet.end_time:
+            return False  # Reject premature submissions
+        
         # Verify oracle authorization
         # Validate submission window
         # Store encrypted submission
@@ -155,6 +160,7 @@ class OracleService:
 ```
 
 Oracle features:
+- **Time-based validation**: Submissions only allowed after bet end_time
 - Multi-oracle requirement
 - Blind submission phase
 - Reveal and validate phase
@@ -196,6 +202,30 @@ Supported chains:
 - Ethereum (via Web3.py)
 - Bitcoin (via REST API)
 - Configurable confirmation requirements
+
+#### TimeConsensusService (`services/time_consensus.py`)
+
+Ensures distributed time synchronization:
+
+```python
+class TimeConsensusService:
+    def get_network_time_consensus():
+        # Query all active nodes
+        # Calculate time differentials
+        # Determine consensus threshold
+        # Return synchronized time
+    
+    def broadcast_time_sync():
+        # Broadcast current node time
+        # Collect network responses
+        # Update local time consensus
+```
+
+Features:
+- Distributed time agreement protocol
+- Byzantine fault tolerance
+- Time checkpoint creation
+- 30-second synchronization intervals
 
 ## Data Models
 

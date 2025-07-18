@@ -167,6 +167,17 @@
                                                     {% if segment.competing_count > 0 %}
                                                         <span class="badge bg-warning">{{ segment.competing_count }} competing submissions</span>
                                                     {% endif %}
+                                                    {% if segment.status == 'active' %}
+                                                        {% if segment.oracle_allowed %}
+                                                            <span class="badge bg-success">
+                                                                <i class="fas fa-check-circle"></i> Oracle submission allowed
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">
+                                                                <i class="fas fa-clock"></i> Oracle in {{ (segment.time_until_oracle / 3600)|round(1) }}h
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endif %}
                                                 </div>
                                                 <a href="/clockchain/submission/{{ segment.id }}" class="btn btn-sm btn-outline-primary">
                                                     View Details <i class="fas fa-arrow-right"></i>
