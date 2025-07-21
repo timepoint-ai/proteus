@@ -35,8 +35,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h5 class="card-title">Active Bets</h5>
-                        <h2 class="mb-0">{{ stats.active_bets or 0 }}</h2>
+                        <h5 class="card-title">Active Markets</h5>
+                        <h2 class="mb-0">{{ stats.active_markets or 0 }}</h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-dice fa-2x opacity-75"></i>
@@ -51,8 +51,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h5 class="card-title">Total Stakes</h5>
-                        <h2 class="mb-0">{{ stats.total_stakes or 0 }}</h2>
+                        <h5 class="card-title">Total Submissions</h5>
+                        <h2 class="mb-0">{{ stats.total_submissions or 0 }}</h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-coins fa-2x opacity-75"></i>
@@ -204,10 +204,10 @@
                                 {% for bet in recent_bets %}
                                 <tr>
                                     <td>
-                                        <small class="text-muted">{{ bet.creator_wallet[:10] }}...</small>
+                                        <small class="text-muted">{{ bet.bettor_wallet[:10] }}...</small>
                                     </td>
                                     <td>
-                                        <small>{{ bet.initial_stake_amount }} {{ bet.currency }}</small>
+                                        <small>{{ bet.amount }} {{ bet.currency }}</small>
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ 'success' if bet.status == 'active' else 'secondary' }}">
