@@ -10,7 +10,7 @@ from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from services.text_analysis import TextAnalysisService
 from services.node_communication import NodeCommunicationService
-from models import Bet, Stake, Actor, NodeOperator, Transaction, OracleSubmission, SyntheticTimeEntry
+from models import PredictionMarket, Submission, Bet, Actor, NodeOperator, Transaction, OracleSubmission, SyntheticTimeEntry
 from app import db
 from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils

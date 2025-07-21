@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 from app import db, redis_client
-from models import SyntheticTimeEntry, Transaction, Bet, Stake, NetworkMetrics
+from models import SyntheticTimeEntry, Transaction, PredictionMarket, Submission, Bet, NetworkMetrics
 from services.time_sync import TimeSyncService
 from utils.crypto import CryptoUtils
 from config import Config

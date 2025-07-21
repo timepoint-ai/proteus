@@ -1,217 +1,270 @@
 """
-Bet Resolution Service
-Handles the proper status workflow for bet resolution
+Market Resolution Service
+Handles the proper status workflow for market and bet resolution
 """
 
 import logging
 from datetime import datetime
 from decimal import Decimal
 from app import db
-from models import Bet, Stake, Transaction, OracleSubmission
+from models import PredictionMarket, Submission, Bet, Transaction, OracleSubmission
 from sqlalchemy import and_
 import uuid
 
 logger = logging.getLogger(__name__)
 
-class BetResolutionService:
-    """Service to handle bet resolution with proper status workflow"""
+class MarketResolutionService:
+    """Service to handle market resolution with proper status workflow"""
     
     def __init__(self):
         self.platform_fee_percentage = Decimal('0.05')  # 5% platform fee
     
-    def check_and_update_expired_bets(self):
-        """Check for active bets that have passed their end time and mark as expired"""
+    def check_and_update_expired_markets(self):
+        """Check for active markets that have passed their end time and mark as expired"""
         try:
             current_time = datetime.utcnow()
             
-            # Find all active bets that have passed their end time
-            expired_bets = Bet.query.filter(
+            # Find all active markets that have passed their end time
+            expired_markets = PredictionMarket.query.filter(
                 and_(
-                    Bet.status == 'active',
-                    Bet.end_time < current_time
+                    PredictionMarket.status == 'active',
+                    PredictionMarket.end_time < current_time
                 )
             ).all()
             
-            for bet in expired_bets:
-                bet.status = 'expired'
-                logger.info(f"Bet {bet.id} marked as expired")
+            for market in expired_markets:
+                market.status = 'expired'
+                logger.info(f"Market {market.id} marked as expired")
             
             db.session.commit()
-            return len(expired_bets)
+            return len(expired_markets)
             
         except Exception as e:
-            logger.error(f"Error updating expired bets: {e}")
+            logger.error(f"Error checking expired markets: {e}")
             db.session.rollback()
             return 0
     
-    def process_oracle_submission(self, bet_id, oracle_submission):
-        """Process an oracle submission and update bet status"""
+    def transition_market_to_validating(self, market_id: str) -> bool:
+        """Transition a market from expired to validating when oracle submits"""
         try:
-            bet = Bet.query.get(bet_id)
-            if not bet:
-                logger.error(f"Bet {bet_id} not found")
+            market = PredictionMarket.query.get(market_id)
+            if not market:
+                logger.error(f"Market {market_id} not found")
                 return False
-            
-            # Update bet status to validating if it's the first oracle submission
-            if bet.status == 'expired':
-                bet.status = 'validating'
-                db.session.commit()
-                logger.info(f"Bet {bet_id} moved to validating status")
-            
+                
+            if market.status != 'expired':
+                logger.error(f"Market {market_id} not in expired state")
+                return False
+                
+            market.status = 'validating'
+            db.session.commit()
+            logger.info(f"Market {market_id} transitioned to validating")
             return True
             
         except Exception as e:
-            logger.error(f"Error processing oracle submission: {e}")
+            logger.error(f"Error transitioning market to validating: {e}")
             db.session.rollback()
             return False
     
-    def resolve_bet(self, bet_id, winning_text, levenshtein_distance):
-        """
-        Resolve a bet with proper status transitions
-        1. Mark bet as resolved
-        2. Mark all stakes as won/lost
-        3. Create payout transactions for winners
-        4. Create platform fee transaction
-        """
+    def resolve_market(self, market_id: str, oracle_text: str = None) -> bool:
+        """Resolve a market after oracle consensus"""
         try:
-            bet = Bet.query.get(bet_id)
-            if not bet:
-                logger.error(f"Bet {bet_id} not found")
+            market = PredictionMarket.query.get(market_id)
+            if not market:
+                logger.error(f"Market {market_id} not found")
+                return False
+                
+            if market.status != 'validating':
+                logger.error(f"Market {market_id} not in validating state")
                 return False
             
-            if bet.status != 'validating':
-                logger.error(f"Bet {bet_id} not in validating status, cannot resolve")
+            # Check for oracle consensus
+            oracle_submission = OracleSubmission.query.filter_by(
+                market_id=market_id,
+                is_consensus=True,
+                status='consensus'
+            ).first()
+            
+            if not oracle_submission:
+                logger.error(f"No consensus oracle submission for market {market_id}")
                 return False
             
-            # Update bet resolution details
-            bet.status = 'resolved'
-            bet.resolution_text = winning_text
-            bet.levenshtein_distance = levenshtein_distance
-            bet.resolution_time = datetime.utcnow()
+            # Update market resolution
+            market.status = 'resolved'
+            market.resolution_text = oracle_submission.submitted_text
+            market.resolution_time = datetime.utcnow()
             
-            # Get all confirmed stakes for this bet
-            stakes = Stake.query.filter_by(bet_id=bet_id, status='confirmed').all()
-            
-            if not stakes:
-                logger.warning(f"No confirmed stakes found for bet {bet_id}")
-                db.session.commit()
-                return True
-            
-            # Calculate total pool and platform fee
-            total_pool = sum(Decimal(str(stake.amount)) for stake in stakes)
-            platform_fee = total_pool * self.platform_fee_percentage
-            distributable_pool = total_pool - platform_fee
-            
-            # Determine winners (for now, assuming all stakes are "for" the prediction)
-            # In a real system, you'd compare with competing bets
-            winning_stakes = [s for s in stakes if s.position == 'for']
-            losing_stakes = [s for s in stakes if s.position == 'against']
-            
-            # If no winners, platform keeps all
-            if not winning_stakes:
-                for stake in stakes:
-                    stake.status = 'lost'
+            # If null oracle, refund all bets
+            if oracle_submission.submitted_text is None:
+                market.winning_submission_id = None
+                self._process_refunds(market)
             else:
-                # Calculate payouts for winners
-                total_winning_amount = sum(Decimal(str(s.amount)) for s in winning_stakes)
-                
-                for stake in winning_stakes:
-                    stake.status = 'won'
-                    # Calculate proportional payout
-                    stake_proportion = Decimal(str(stake.amount)) / total_winning_amount
-                    stake.payout_amount = stake.amount + (distributable_pool * stake_proportion)
-                    
-                    # Create payout transaction
-                    payout_tx = Transaction()
-                    payout_tx.transaction_hash = f"payout_{uuid.uuid4().hex[:16]}"
-                    payout_tx.from_address = "platform_pool"
-                    payout_tx.to_address = stake.staker_wallet
-                    payout_tx.amount = stake.payout_amount
-                    payout_tx.currency = stake.currency
-                    payout_tx.transaction_type = 'payout'
-                    payout_tx.related_bet_id = bet_id
-                    payout_tx.status = 'confirmed'  # In production, this would start as pending
-                    payout_tx.created_at = datetime.utcnow()
-                    db.session.add(payout_tx)
-                    stake.payout_transaction_hash = payout_tx.transaction_hash
-                
-                # Mark losing stakes
-                for stake in losing_stakes:
-                    stake.status = 'lost'
+                # Find winning submission
+                winning_submission = self._find_winning_submission(market, oracle_submission.submitted_text)
+                if winning_submission:
+                    market.winning_submission_id = winning_submission.id
+                    self._process_payouts(market, winning_submission)
+                else:
+                    # No valid submissions, refund all
+                    self._process_refunds(market)
             
-            # Create platform fee transaction
-            if platform_fee > 0:
-                fee_tx = Transaction()
-                fee_tx.transaction_hash = f"fee_{uuid.uuid4().hex[:16]}"
-                fee_tx.from_address = "platform_pool"
-                fee_tx.to_address = "platform_treasury"
-                fee_tx.amount = platform_fee
-                fee_tx.currency = bet.currency
-                fee_tx.transaction_type = 'fee'
-                fee_tx.related_bet_id = bet_id
-                fee_tx.platform_fee = platform_fee
-                fee_tx.status = 'confirmed'  # In production, this would start as pending
-                fee_tx.created_at = datetime.utcnow()
-                db.session.add(fee_tx)
+            db.session.commit()
+            logger.info(f"Market {market.id} resolved successfully")
+            return True
             
-            # Update oracle submission status
-            oracle_submissions = OracleSubmission.query.filter_by(
-                bet_id=bet_id,
-                is_consensus=True
+        except Exception as e:
+            logger.error(f"Error resolving market: {e}")
+            db.session.rollback()
+            return False
+    
+    def _find_winning_submission(self, market: PredictionMarket, oracle_text: str) -> Submission:
+        """Find the submission with lowest Levenshtein distance"""
+        from services.text_analysis import TextAnalysisService
+        text_service = TextAnalysisService()
+        
+        submissions = Submission.query.filter_by(market_id=market.id).all()
+        
+        best_submission = None
+        lowest_distance = float('inf')
+        
+        for submission in submissions:
+            # Skip null submissions
+            if submission.predicted_text is None:
+                continue
+                
+            distance = text_service.calculate_levenshtein_distance(
+                submission.predicted_text,
+                oracle_text
+            )
+            
+            submission.levenshtein_distance = distance
+            
+            if distance < lowest_distance:
+                lowest_distance = distance
+                best_submission = submission
+        
+        if best_submission:
+            best_submission.is_winner = True
+            
+        return best_submission
+    
+    def _process_payouts(self, market: PredictionMarket, winning_submission: Submission):
+        """Process payouts for winning bets"""
+        try:
+            # Get all confirmed bets
+            all_bets = Bet.query.join(Submission).filter(
+                Submission.market_id == market.id,
+                Bet.status == 'confirmed'
             ).all()
             
-            for submission in oracle_submissions:
-                submission.status = 'consensus'
+            # Calculate total pot
+            total_pot = sum(bet.amount for bet in all_bets)
             
-            db.session.commit()
-            logger.info(f"Successfully resolved bet {bet_id}")
-            return True
+            # Deduct platform fee
+            platform_fee = total_pot * self.platform_fee_percentage
+            distributable_pot = total_pot - platform_fee
             
-        except Exception as e:
-            logger.error(f"Error resolving bet: {e}")
-            db.session.rollback()
-            return False
-    
-    def cancel_bet(self, bet_id, reason="Admin cancellation"):
-        """
-        Cancel a bet and refund all stakes
-        """
-        try:
-            bet = Bet.query.get(bet_id)
-            if not bet:
-                logger.error(f"Bet {bet_id} not found")
-                return False
+            # Get winning bets
+            winning_bets = [bet for bet in all_bets if bet.submission_id == winning_submission.id]
+            total_winning_amount = sum(bet.amount for bet in winning_bets)
             
-            if bet.status == 'resolved':
-                logger.error(f"Cannot cancel resolved bet {bet_id}")
-                return False
-            
-            bet.status = 'cancelled'
-            
-            # Refund all confirmed stakes
-            stakes = Stake.query.filter_by(bet_id=bet_id, status='confirmed').all()
-            
-            for stake in stakes:
-                stake.status = 'refunded'
+            if total_winning_amount > 0:
+                # Calculate payout ratio
+                payout_ratio = distributable_pot / total_winning_amount
                 
-                # Create refund transaction
-                refund_tx = Transaction()
-                refund_tx.transaction_hash = f"refund_{uuid.uuid4().hex[:16]}"
-                refund_tx.from_address = "platform_pool"
-                refund_tx.to_address = stake.staker_wallet
-                refund_tx.amount = stake.amount
-                refund_tx.currency = stake.currency
-                refund_tx.transaction_type = 'refund'
-                refund_tx.related_bet_id = bet_id
-                refund_tx.status = 'confirmed'  # In production, this would start as pending
-                refund_tx.created_at = datetime.utcnow()
-                db.session.add(refund_tx)
+                # Process winning bets
+                for bet in winning_bets:
+                    bet.payout_amount = bet.amount * payout_ratio
+                    bet.status = 'won'
+                    
+                    # Create payout transaction record
+                    self._create_payout_transaction(bet, platform_fee / len(winning_bets))
+            
+            # Mark losing bets
+            for bet in all_bets:
+                if bet.submission_id != winning_submission.id:
+                    bet.status = 'lost'
+                    bet.payout_amount = 0
+                    
+        except Exception as e:
+            logger.error(f"Error processing payouts: {e}")
+            raise
+    
+    def _process_refunds(self, market: PredictionMarket):
+        """Process refunds for all bets in a market"""
+        try:
+            # Get all confirmed bets
+            all_bets = Bet.query.join(Submission).filter(
+                Submission.market_id == market.id,
+                Bet.status == 'confirmed'
+            ).all()
+            
+            for bet in all_bets:
+                bet.status = 'refunded'
+                bet.payout_amount = bet.amount  # Full refund
+                
+                # Create refund transaction record
+                self._create_refund_transaction(bet)
+                
+        except Exception as e:
+            logger.error(f"Error processing refunds: {e}")
+            raise
+    
+    def _create_payout_transaction(self, bet: Bet, platform_fee_share: Decimal):
+        """Create a payout transaction record"""
+        transaction = Transaction(
+            transaction_hash=f"payout_{bet.id}_{uuid.uuid4().hex[:8]}",  # Mock for now
+            from_address="platform_wallet",  # Should be from config
+            to_address=bet.bettor_wallet,
+            amount=bet.payout_amount,
+            currency=bet.currency,
+            transaction_type='payout',
+            related_bet_id=bet.id,
+            platform_fee=platform_fee_share,
+            status='pending'  # Will be confirmed when blockchain tx completes
+        )
+        db.session.add(transaction)
+    
+    def _create_refund_transaction(self, bet: Bet):
+        """Create a refund transaction record"""
+        transaction = Transaction(
+            transaction_hash=f"refund_{bet.id}_{uuid.uuid4().hex[:8]}",  # Mock for now
+            from_address="platform_wallet",  # Should be from config
+            to_address=bet.bettor_wallet,
+            amount=bet.amount,
+            currency=bet.currency,
+            transaction_type='refund',
+            related_bet_id=bet.id,
+            platform_fee=0,
+            status='pending'  # Will be confirmed when blockchain tx completes
+        )
+        db.session.add(transaction)
+    
+    def process_pending_transactions(self):
+        """Process pending blockchain transactions"""
+        try:
+            from services.blockchain import BlockchainService
+            blockchain_service = BlockchainService()
+            
+            # Get pending transactions
+            pending_txs = Transaction.query.filter_by(status='pending').all()
+            
+            for tx in pending_txs:
+                # Check blockchain status (mock for now)
+                # In production, would check actual blockchain
+                tx.status = 'confirmed'
+                tx.block_number = 12345678  # Mock block number
+                
+                # Update bet payout status
+                if tx.related_bet_id:
+                    bet = Bet.query.get(tx.related_bet_id)
+                    if bet:
+                        bet.payout_transaction_hash = tx.transaction_hash
             
             db.session.commit()
-            logger.info(f"Successfully cancelled bet {bet_id}: {reason}")
-            return True
+            return len(pending_txs)
             
         except Exception as e:
-            logger.error(f"Error cancelling bet: {e}")
+            logger.error(f"Error processing pending transactions: {e}")
             db.session.rollback()
-            return False
+            return 0

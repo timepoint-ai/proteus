@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from models import SyntheticTimeEntry, Bet, Stake, Transaction, OracleSubmission, NodeOperator, Actor
+from models import SyntheticTimeEntry, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, NodeOperator, Actor
 from sqlalchemy import desc
 from app import db
 import json
@@ -36,75 +36,76 @@ def clockchain_view():
         max_records = 200  # Limit number of records to load
         
         # First count total records
-        total_count = Bet.query.filter(
-            ((Bet.start_time <= end_time) & (Bet.end_time >= start_time)) |
-            (Bet.created_at.between(start_time, end_time))
+        total_count = PredictionMarket.query.filter(
+            ((PredictionMarket.start_time <= end_time) & (PredictionMarket.end_time >= start_time)) |
+            (PredictionMarket.created_at.between(start_time, end_time))
         ).count()
         
         # Then get limited records
-        bets_in_range = Bet.query.filter(
-            ((Bet.start_time <= end_time) & (Bet.end_time >= start_time)) |
-            (Bet.created_at.between(start_time, end_time))
-        ).order_by(Bet.start_time).limit(max_records).all()
+        markets_in_range = PredictionMarket.query.filter(
+            ((PredictionMarket.start_time <= end_time) & (PredictionMarket.end_time >= start_time)) |
+            (PredictionMarket.created_at.between(start_time, end_time))
+        ).order_by(PredictionMarket.start_time).limit(max_records).all()
         
         has_more_records = total_count > max_records
         
-        # Group bets by actor and time period
+        # Group markets by actor and time period
         timeline_segments = []
-        for bet in bets_in_range:
-            actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
+        for market in markets_in_range:
+            actor = Actor.query.get(market.actor_id) if market.actor_id else None
             
-            # Get all stakes for this bet
-            stakes = Stake.query.filter_by(bet_id=bet.id).all()
-            total_volume = sum(stake.amount for stake in stakes)
+            # Get all submissions for this market
+            submissions = Submission.query.filter_by(market_id=market.id).all()
             
-            # Get competing submissions (other bets for same actor in overlapping time)
-            competing_bets = Bet.query.filter(
-                Bet.id != bet.id,
-                Bet.actor_id == bet.actor_id,
-                Bet.start_time <= bet.end_time,
-                Bet.end_time >= bet.start_time
-            ).all()
+            # Calculate total volume from all bets on all submissions
+            total_volume = 0
+            for submission in submissions:
+                bets = Bet.query.filter_by(submission_id=submission.id).all()
+                total_volume += sum(bet.amount for bet in bets)
             
-            # Check if oracle submission is allowed
-            oracle_allowed = current_time >= bet.end_time if bet.end_time else False
-            time_until_oracle = max(0, (bet.end_time - current_time).total_seconds()) if bet.end_time and not oracle_allowed else 0
+            # Get oracle status
+            oracle_allowed = current_time >= market.end_time if market.end_time else False
+            time_until_oracle = max(0, (market.end_time - current_time).total_seconds()) if market.end_time and not oracle_allowed else 0
             
+            # Build segment for each market
             segment = {
-                'id': str(bet.id),
+                'id': str(market.id),
                 'actor': {
                     'id': str(actor.id) if actor else None,
                     'name': actor.name if actor else 'Unknown',
                     'is_unknown': actor.is_unknown if actor else True
                 },
-                'predicted_text': bet.predicted_text,
-                'start_time': bet.start_time,
-                'end_time': bet.end_time,
-                'start_ms': int(bet.start_time.timestamp() * 1000) if bet.start_time else 0,
-                'end_ms': int(bet.end_time.timestamp() * 1000) if bet.end_time else 0,
-                'initial_stake': str(bet.initial_stake_amount),
-                'currency': bet.currency,
-                'status': bet.status,
-                'creator_wallet': bet.creator_wallet[:10] + '...' if bet.creator_wallet else '',
-                'stake_count': len(stakes),
+                'start_time': market.start_time,
+                'end_time': market.end_time,
+                'start_ms': int(market.start_time.timestamp() * 1000) if market.start_time else 0,
+                'end_ms': int(market.end_time.timestamp() * 1000) if market.end_time else 0,
+                'status': market.status,
+                'submission_count': len(submissions),
                 'total_volume': str(total_volume),
-                'competing_count': len(competing_bets),
                 'oracle_allowed': oracle_allowed,
                 'time_until_oracle': time_until_oracle,
-                'competing_bets': [{
-                    'id': str(cb.id),
-                    'predicted_text': cb.predicted_text[:50] + '...' if len(cb.predicted_text) > 50 else cb.predicted_text,
-                    'creator': cb.creator_wallet[:10] + '...',
-                    'volume': str(sum(s.amount for s in Stake.query.filter_by(bet_id=cb.id).all()))
-                } for cb in competing_bets[:3]]  # Show max 3 competitors
+                'submissions': []
             }
             
+            # Add submission details
+            for submission in submissions:
+                sub_data = {
+                    'id': str(submission.id),
+                    'predicted_text': submission.predicted_text if submission.predicted_text else '[No prediction]',
+                    'submission_type': submission.submission_type,
+                    'creator': submission.creator_wallet[:10] + '...' if submission.creator_wallet else '',
+                    'initial_stake': str(submission.initial_stake_amount),
+                    'currency': submission.currency,
+                    'is_winner': submission.is_winner
+                }
+                segment['submissions'].append(sub_data)
+            
             # Add resolution info if available
-            if bet.status == 'resolved':
+            if market.status == 'resolved':
                 segment['resolution'] = {
-                    'actual_text': bet.resolution_text,
-                    'levenshtein_distance': bet.levenshtein_distance,
-                    'resolution_time': bet.resolution_time.isoformat() if bet.resolution_time else None
+                    'actual_text': market.resolution_text,
+                    'resolution_time': market.resolution_time.isoformat() if market.resolution_time else None,
+                    'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None
                 }
                 
             timeline_segments.append(segment)
@@ -118,8 +119,8 @@ def clockchain_view():
         current_time_ms = int(current_time.timestamp() * 1000)
         
         # Get aggregate statistics
-        active_bet_count = Bet.query.filter_by(status='active').count()
-        total_bet_volume = db.session.query(db.func.sum(Stake.amount)).scalar() or 0
+        active_market_count = PredictionMarket.query.filter_by(status='active').count()
+        total_bet_volume = db.session.query(db.func.sum(Bet.amount)).scalar() or 0
         
         return render_template('clockchain/timeline.html',
                              time_status=time_status,
@@ -129,10 +130,10 @@ def clockchain_view():
                              current_time_ms=current_time_ms,
                              min_time_ms=min_time_ms,
                              max_time_ms=max_time_ms,
-                             active_bet_count=active_bet_count,
+                             active_bet_count=active_market_count,
                              total_bet_volume=str(total_bet_volume),
                              total_count=total_count,
-                             displayed_count=len(bets_in_range),
+                             displayed_count=len(markets_in_range),
                              has_more_records=has_more_records,
                              now_marker_shown=False)
         
@@ -147,7 +148,11 @@ def clockchain_view():
                              min_time_ms=0,
                              max_time_ms=0,
                              active_bet_count=0,
-                             total_bet_volume='0')
+                             total_bet_volume='0',
+                             total_count=0,
+                             displayed_count=0,
+                             has_more_records=False,
+                             now_marker_shown=False)
 
 @clockchain_bp.route('/api/clockchain/events')
 def get_clockchain_events():

@@ -10,12 +10,12 @@ from datetime import datetime, timedelta
 import random
 import uuid
 from decimal import Decimal
-from services.bet_resolution import BetResolutionService
+from services.bet_resolution import MarketResolutionService
 import logging
 
 logger = logging.getLogger(__name__)
 test_data_v2_bp = Blueprint('test_data_v2', __name__)
-resolution_service = BetResolutionService()
+resolution_service = MarketResolutionService()
 
 @test_data_v2_bp.route('/')
 def index():
@@ -38,9 +38,10 @@ def generate_proper_workflow():
     try:
         # Clear existing data
         db.session.query(Transaction).delete()
-        db.session.query(Stake).delete()
-        db.session.query(OracleSubmission).delete()
         db.session.query(Bet).delete()
+        db.session.query(OracleSubmission).delete()
+        db.session.query(Submission).delete()
+        db.session.query(PredictionMarket).delete()
         db.session.query(Actor).delete()
         db.session.query(NodeOperator).delete()
         db.session.commit()

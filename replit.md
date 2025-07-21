@@ -119,6 +119,20 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Complete Schema Redesign to Competitive Submission Architecture (July 21, 2025)
+- **Major Architecture Change**: Migrated from Bet→Stake model to PredictionMarket→Submission→Bet model
+- **New Data Model Structure**:
+  - PredictionMarket: Container for all predictions about an actor in a time window
+  - Submission: Individual predictions (original, competitor, or null) within a market
+  - Bet: Individual wagers placed on specific submissions
+- **Text Analysis Updates**: Preserved X.com-compatible formatting (punctuation, spacing, capitalization)
+- **Service Migration**: Updated all services (oracle_v2.py, bet_resolution_v2.py) to work with new schema
+- **Route Updates**: Changed admin routes from /bets to /markets, updated all templates
+- **Database Recreation**: Dropped old tables and created new schema with proper foreign key relationships
+- **Test Data Generation**: Created new test_data_new.py that generates competitive submission scenarios
+- **Clockchain Updates**: Modified timeline view to display markets with multiple submissions
+- **Navigation Updates**: Changed UI from "Bets" to "Markets" throughout application
+
 ### Status Workflow Redesign (July 21, 2025)
 - **Fixed critical status logic error**: Resolved bets can no longer have pending transactions
 - **Implemented comprehensive status workflow**: 

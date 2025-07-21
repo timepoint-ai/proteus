@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from sqlalchemy import func, desc
 from models import (
-    NodeOperator, Actor, Bet, Stake, Transaction, 
+    NodeOperator, Actor, PredictionMarket, Submission, Bet, Transaction, 
     OracleSubmission, SyntheticTimeEntry, NetworkMetrics
 )
 from app import db
@@ -36,9 +36,10 @@ def dashboard():
         stats = {
             'total_nodes': NodeOperator.query.count(),
             'active_nodes': NodeOperator.query.filter_by(status='active').count(),
+            'total_markets': PredictionMarket.query.count(),
+            'active_markets': PredictionMarket.query.filter_by(status='active').count(),
+            'total_submissions': Submission.query.count(),
             'total_bets': Bet.query.count(),
-            'active_bets': Bet.query.filter_by(status='active').count(),
-            'total_stakes': Stake.query.count(),
             'approved_actors': Actor.query.filter_by(status='approved').count(),
             'pending_actors': Actor.query.filter_by(status='pending').count(),
             'total_transactions': Transaction.query.count()
@@ -192,42 +193,45 @@ def actors_view():
                              pending_actors=[],
                              rejected_actors=[])
 
-@admin_bp.route('/bets')
-def bets_view():
-    """Bets monitoring view"""
+@admin_bp.route('/markets')
+def markets_view():
+    """Markets monitoring view"""
     try:
         page = request.args.get('page', 1, type=int)
         status_filter = request.args.get('status', 'all')
         per_page = 20
         
         # Build query
-        query = Bet.query
+        query = PredictionMarket.query
         if status_filter != 'all':
             query = query.filter_by(status=status_filter)
             
-        # Get bets with pagination
-        bets = query.order_by(desc(Bet.created_at)).paginate(
+        # Get markets with pagination
+        markets = query.order_by(desc(PredictionMarket.created_at)).paginate(
             page=page, per_page=per_page, error_out=False
         )
         
-        # Get bet statistics
+        # Get market statistics
         stats = {
-            'total_bets': Bet.query.count(),
-            'active_bets': Bet.query.filter_by(status='active').count(),
-            'resolved_bets': Bet.query.filter_by(status='resolved').count(),
-            'cancelled_bets': Bet.query.filter_by(status='cancelled').count()
+            'total_markets': PredictionMarket.query.count(),
+            'active_markets': PredictionMarket.query.filter_by(status='active').count(),
+            'expired_markets': PredictionMarket.query.filter_by(status='expired').count(),
+            'validating_markets': PredictionMarket.query.filter_by(status='validating').count(),
+            'resolved_markets': PredictionMarket.query.filter_by(status='resolved').count(),
+            'total_submissions': Submission.query.count(),
+            'total_bets': Bet.query.count()
         }
         
-        return render_template('admin/bets.html',
-                             bets=bets,
+        return render_template('admin/markets.html',
+                             markets=markets,
                              stats=stats,
                              status_filter=status_filter)
         
     except Exception as e:
-        logger.error(f"Error loading bets view: {e}")
-        flash(f'Error loading bets view: {str(e)}', 'error')
-        return render_template('admin/bets.html',
-                             bets=None,
+        logger.error(f"Error loading markets view: {e}")
+        flash(f'Error loading markets view: {str(e)}', 'error')
+        return render_template('admin/markets.html',
+                             markets=None,
                              stats={},
                              status_filter='all')
 
@@ -306,9 +310,10 @@ def api_stats():
         stats = {
             'total_nodes': NodeOperator.query.count(),
             'active_nodes': NodeOperator.query.filter_by(status='active').count(),
+            'total_markets': PredictionMarket.query.count(),
+            'active_markets': PredictionMarket.query.filter_by(status='active').count(),
+            'total_submissions': Submission.query.count(),
             'total_bets': Bet.query.count(),
-            'active_bets': Bet.query.filter_by(status='active').count(),
-            'total_stakes': Stake.query.count(),
             'total_transactions': Transaction.query.count(),
             'timestamp': datetime.utcnow().isoformat()
         }

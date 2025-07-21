@@ -6,7 +6,7 @@ import random
 import string
 from sqlalchemy import func, desc
 from models import (
-    NodeOperator, Actor, Bet, Stake, Transaction, 
+    NodeOperator, Actor, PredictionMarket, Submission, Bet, Transaction, 
     OracleSubmission, SyntheticTimeEntry, NetworkMetrics
 )
 from app import db
@@ -28,8 +28,9 @@ def test_data_dashboard():
     stats = {
         'total_nodes': NodeOperator.query.count(),
         'total_actors': Actor.query.count(),
+        'total_markets': PredictionMarket.query.count(),
+        'total_submissions': Submission.query.count(),
         'total_bets': Bet.query.count(),
-        'total_stakes': Stake.query.count(),
         'total_transactions': Transaction.query.count(),
         'total_oracle_submissions': OracleSubmission.query.count(),
         'total_network_metrics': NetworkMetrics.query.count(),

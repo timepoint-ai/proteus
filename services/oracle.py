@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from app import db
-from models import Bet, OracleSubmission, OracleVote, NodeOperator
+from models import PredictionMarket, Submission, OracleSubmission, OracleVote, NodeOperator, Bet
 from utils.crypto import CryptoUtils
 from services.node_communication import NodeCommunicationService
 from services.text_analysis import TextAnalysisService
@@ -17,72 +17,72 @@ class OracleService:
         self.node_comm = NodeCommunicationService()
         self.text_analysis = TextAnalysisService()
         
-    def submit_oracle_statement(self, bet_id: str, oracle_wallet: str, submitted_text: str, signature: str) -> bool:
-        """Submit an oracle statement for a bet"""
+    def submit_oracle_statement(self, market_id: str, oracle_wallet: str, submitted_text: Optional[str], signature: str) -> bool:
+        """Submit an oracle statement for a prediction market"""
         try:
-            # Get the bet
-            bet = Bet.query.get(bet_id)
-            if not bet:
-                logger.error(f"Bet {bet_id} not found")
+            # Get the market
+            market = PredictionMarket.query.get(market_id)
+            if not market:
+                logger.error(f"PredictionMarket {market_id} not found")
                 return False
                 
-            # Check if bet is still active
-            if bet.status != 'active':
-                logger.error(f"Bet {bet_id} is not active")
+            # Check if market is expired (not yet validating)
+            if market.status != 'expired':
+                logger.error(f"PredictionMarket {market_id} is not ready for oracle validation (status: {market.status})")
                 return False
                 
-            # CRITICAL: Check if bet's end time has passed
+            # CRITICAL: Check if market's end time has passed
             current_time = datetime.utcnow()
-            if current_time < bet.end_time:
-                logger.error(f"Cannot submit oracle statement for bet {bet_id} before end time: {bet.end_time}")
+            if current_time < market.end_time:
+                logger.error(f"Cannot submit oracle statement for market {market_id} before end time: {market.end_time}")
                 return False
                 
             # Check if oracle wallet is authorized
-            oracle_wallets = json.loads(bet.oracle_wallets)
+            oracle_wallets = json.loads(market.oracle_wallets)
             if oracle_wallet not in oracle_wallets:
-                logger.error(f"Oracle wallet {oracle_wallet} not authorized for bet {bet_id}")
+                logger.error(f"Oracle wallet {oracle_wallet} not authorized for market {market_id}")
                 return False
                 
             # Check if oracle has already submitted
             existing_submission = OracleSubmission.query.filter_by(
-                bet_id=bet_id,
+                market_id=market_id,
                 oracle_wallet=oracle_wallet
             ).first()
             
             if existing_submission:
-                logger.warning(f"Oracle {oracle_wallet} already submitted for bet {bet_id}")
+                logger.warning(f"Oracle {oracle_wallet} already submitted for market {market_id}")
                 return False
                 
             # Verify signature
-            message = f"{bet_id}:{submitted_text}"
+            message = f"{market_id}:{submitted_text if submitted_text else 'null'}"
             if not self.crypto_utils.verify_signature(message, signature, oracle_wallet):
                 logger.error(f"Invalid signature from oracle {oracle_wallet}")
                 return False
                 
-            # Create submission
+            # Create submission (submitted_text can be None for null oracle)
             submission = OracleSubmission(
-                bet_id=bet_id,
+                market_id=market_id,
                 oracle_wallet=oracle_wallet,
                 submitted_text=submitted_text,
                 signature=signature
             )
             
             db.session.add(submission)
-            db.session.commit()
             
-            # Broadcast submission to network
-            submission_data = {
-                'type': 'oracle_submission',
-                'bet_id': bet_id,
+            # Update market status to validating
+            market.status = 'validating'
+            
+            # Broadcast to network
+            self.node_comm.broadcast_oracle_submission({
+                'market_id': market_id,
                 'oracle_wallet': oracle_wallet,
                 'submitted_text': submitted_text,
                 'signature': signature,
                 'timestamp': datetime.utcnow().isoformat()
-            }
+            })
             
-            self.node_comm.broadcast_message(submission_data)
-            
-            logger.info(f"Oracle submission recorded: {oracle_wallet} -> {bet_id}")
+            db.session.commit()
+            logger.info(f"Oracle submission created for market {market_id}")
             return True
             
         except Exception as e:
@@ -104,18 +104,6 @@ class OracleService:
                 logger.error(f"Oracle submission {submission_id} not found")
                 return False
                 
-            # Get the bet
-            bet = Bet.query.get(submission.bet_id)
-            if not bet:
-                logger.error(f"Bet {submission.bet_id} not found")
-                return False
-                
-            # Check if voter is authorized (oracle wallet)
-            oracle_wallets = json.loads(bet.oracle_wallets)
-            if voter_wallet not in oracle_wallets:
-                logger.error(f"Voter {voter_wallet} not authorized")
-                return False
-                
             # Check if already voted
             existing_vote = OracleVote.query.filter_by(
                 submission_id=submission_id,
@@ -133,14 +121,14 @@ class OracleService:
                 return False
                 
             # Create vote
-            vote_record = OracleVote(
+            oracle_vote = OracleVote(
                 submission_id=submission_id,
                 voter_wallet=voter_wallet,
                 vote=vote,
                 signature=signature
             )
             
-            db.session.add(vote_record)
+            db.session.add(oracle_vote)
             
             # Update vote counts
             if vote == 'for':
@@ -148,12 +136,18 @@ class OracleService:
             else:
                 submission.votes_against += 1
                 
+            # Check if consensus reached
+            total_votes = submission.votes_for + submission.votes_against
+            if total_votes >= Config.MIN_ORACLE_VOTES:
+                consensus_ratio = submission.votes_for / total_votes
+                if consensus_ratio >= Config.CONSENSUS_THRESHOLD:
+                    submission.is_consensus = True
+                    submission.status = 'consensus'
+                    # Trigger market resolution
+                    self._resolve_market_with_oracle(submission.market, submission.submitted_text)
+                    
             db.session.commit()
-            
-            # Check if voting period expired or consensus reached
-            self._check_voting_completion(submission_id)
-            
-            logger.info(f"Oracle vote recorded: {voter_wallet} -> {vote} for submission {submission_id}")
+            logger.info(f"Oracle vote recorded: {voter_wallet} voted {vote} on submission {submission_id}")
             return True
             
         except Exception as e:
@@ -161,51 +155,44 @@ class OracleService:
             db.session.rollback()
             return False
             
-    def _check_voting_completion(self, submission_id: str):
-        """Check if voting is complete for a submission"""
+    def get_oracle_submissions(self, market_id: str) -> List[Dict[str, Any]]:
+        """Get all oracle submissions for a market"""
         try:
-            submission = OracleSubmission.query.get(submission_id)
-            if not submission:
-                return
-                
-            bet = Bet.query.get(submission.bet_id)
-            if not bet:
-                return
-                
-            # Check if voting timeout reached
-            voting_deadline = submission.created_at + timedelta(seconds=Config.ORACLE_VOTE_TIMEOUT)
-            if datetime.utcnow() > voting_deadline:
-                self._finalize_oracle_voting(bet.id)
-                return
-                
-            # Check if all oracles have voted
-            oracle_wallets = json.loads(bet.oracle_wallets)
-            total_votes = submission.votes_for + submission.votes_against
+            submissions = OracleSubmission.query.filter_by(market_id=market_id).all()
             
-            if total_votes >= len(oracle_wallets):
-                self._finalize_oracle_voting(bet.id)
+            result = []
+            for submission in submissions:
+                result.append({
+                    'id': str(submission.id),
+                    'oracle_wallet': submission.oracle_wallet,
+                    'submitted_text': submission.submitted_text,
+                    'votes_for': submission.votes_for,
+                    'votes_against': submission.votes_against,
+                    'is_consensus': submission.is_consensus,
+                    'status': submission.status,
+                    'created_at': submission.created_at.isoformat()
+                })
                 
+            return result
+            
         except Exception as e:
-            logger.error(f"Error checking voting completion: {e}")
+            logger.error(f"Error getting oracle submissions: {e}")
+            return []
             
-    def _finalize_oracle_voting(self, bet_id: str):
-        """Finalize oracle voting for a bet"""
+    def finalize_oracle_voting(self, market_id: str):
+        """Finalize oracle voting for a market"""
         try:
-            bet = Bet.query.get(bet_id)
-            if not bet or bet.status != 'active':
+            market = PredictionMarket.query.get(market_id)
+            if not market or market.status != 'validating':
+                logger.error(f"Market {market_id} not in validating state")
                 return
                 
-            # CRITICAL: Ensure bet's end time has passed
-            current_time = datetime.utcnow()
-            if current_time < bet.end_time:
-                logger.error(f"Cannot finalize oracle voting for bet {bet_id} before end time: {bet.end_time}")
-                return
-                
-            # Get all submissions for this bet
-            submissions = OracleSubmission.query.filter_by(bet_id=bet_id).all()
+            # Get all submissions
+            submissions = OracleSubmission.query.filter_by(market_id=market_id).all()
             
             if not submissions:
-                logger.warning(f"No oracle submissions for bet {bet_id}")
+                logger.warning(f"No oracle submissions for market {market_id}")
+                # Market stays in validating state
                 return
                 
             # Find submission with highest consensus
@@ -223,14 +210,15 @@ class OracleService:
             if best_submission and highest_consensus >= Config.CONSENSUS_THRESHOLD:
                 # Mark as consensus
                 best_submission.is_consensus = True
+                best_submission.status = 'consensus'
                 
-                # Resolve the bet
-                self._resolve_bet_with_oracle(bet, best_submission.submitted_text)
+                # Resolve the market
+                self._resolve_market_with_oracle(market, best_submission.submitted_text)
                 
-                logger.info(f"Oracle consensus reached for bet {bet_id}: {best_submission.submitted_text}")
+                logger.info(f"Oracle consensus reached for market {market_id}")
             else:
-                logger.warning(f"No oracle consensus reached for bet {bet_id}")
-                # Could implement fallback logic here
+                logger.warning(f"No oracle consensus reached for market {market_id}")
+                # Market stays in validating state
                 
             db.session.commit()
             
@@ -238,150 +226,124 @@ class OracleService:
             logger.error(f"Error finalizing oracle voting: {e}")
             db.session.rollback()
             
-    def _resolve_bet_with_oracle(self, bet: Bet, oracle_text: str):
-        """Resolve a bet using oracle text"""
+    def _resolve_market_with_oracle(self, market: PredictionMarket, oracle_text: Optional[str]):
+        """Resolve a market using oracle text"""
         try:
-            # Calculate Levenshtein distance
-            distance = self.text_analysis.calculate_levenshtein_distance(
-                bet.predicted_text,
-                oracle_text
-            )
+            # Update market with resolution text
+            market.resolution_text = oracle_text
+            market.resolution_time = datetime.utcnow()
             
-            # Calculate similarity percentage
-            max_len = max(len(bet.predicted_text), len(oracle_text))
-            similarity = 1 - (distance / max_len) if max_len > 0 else 1
+            # If oracle_text is None (null oracle), no submission wins
+            if oracle_text is None:
+                market.status = 'resolved'
+                market.winning_submission_id = None
+                self._process_market_refunds(market)
+                logger.info(f"Market {market.id} resolved with null oracle - all bets refunded")
+                return
             
-            # Update bet with resolution
-            bet.status = 'resolved'
-            bet.resolution_text = oracle_text
-            bet.levenshtein_distance = distance
-            bet.resolution_time = datetime.utcnow()
+            # Calculate Levenshtein distances for all submissions
+            submissions = Submission.query.filter_by(market_id=market.id).all()
             
-            # Determine if bet was successful (based on similarity threshold)
-            bet_successful = similarity >= Config.LEVENSHTEIN_THRESHOLD
+            best_submission = None
+            lowest_distance = float('inf')
             
-            # Process payouts
-            self._process_bet_payouts(bet, bet_successful)
+            for submission in submissions:
+                # Skip null submissions when oracle has text
+                if submission.predicted_text is None:
+                    continue
+                    
+                distance = self.text_analysis.calculate_levenshtein_distance(
+                    submission.predicted_text,
+                    oracle_text
+                )
+                
+                submission.levenshtein_distance = distance
+                
+                if distance < lowest_distance:
+                    lowest_distance = distance
+                    best_submission = submission
             
-            logger.info(f"Bet {bet.id} resolved with similarity {similarity:.2%}")
+            # Mark winner
+            if best_submission:
+                best_submission.is_winner = True
+                market.winning_submission_id = best_submission.id
+                market.status = 'resolved'
+                
+                # Process payouts
+                self._process_market_payouts(market, best_submission)
+                
+                logger.info(f"Market {market.id} resolved - winning submission: {best_submission.id} with distance {lowest_distance}")
+            else:
+                # No valid submissions (all were null)
+                market.status = 'resolved'
+                market.winning_submission_id = None
+                self._process_market_refunds(market)
+                logger.info(f"Market {market.id} resolved with no valid submissions - all bets refunded")
             
         except Exception as e:
-            logger.error(f"Error resolving bet with oracle: {e}")
+            logger.error(f"Error resolving market with oracle: {e}")
             
-    def _process_bet_payouts(self, bet: Bet, bet_successful: bool):
-        """Process payouts for a resolved bet"""
+    def _process_market_payouts(self, market: PredictionMarket, winning_submission: Submission):
+        """Process payouts for a resolved market"""
         try:
-            from models import Stake
             from services.blockchain import BlockchainService
-            
             blockchain_service = BlockchainService()
             
-            # Get all stakes for this bet
-            stakes = Stake.query.filter_by(bet_id=bet.id).all()
+            # Get all bets on the winning submission
+            winning_bets = Bet.query.filter_by(submission_id=winning_submission.id).all()
             
-            if not stakes:
-                logger.info(f"No stakes found for bet {bet.id}")
-                return
+            # Calculate total pot (all bets on all submissions)
+            all_bets = Bet.query.join(Submission).filter(Submission.market_id == market.id).all()
+            total_pot = sum(bet.amount for bet in all_bets if bet.status == 'confirmed')
+            
+            # Calculate total winning bets
+            total_winning_amount = sum(bet.amount for bet in winning_bets if bet.status == 'confirmed')
+            
+            if total_winning_amount > 0:
+                # Calculate payout ratio
+                payout_ratio = total_pot / total_winning_amount
                 
-            # Calculate total amounts for each position
-            total_for = sum(s.amount for s in stakes if s.position == 'for')
-            total_against = sum(s.amount for s in stakes if s.position == 'against')
-            total_pool = total_for + total_against
-            
-            # Determine winning and losing positions
-            if bet_successful:
-                winning_position = 'for'
-                winning_pool = total_for
-                losing_pool = total_against
-            else:
-                winning_position = 'against'
-                winning_pool = total_against
-                losing_pool = total_for
-                
-            # Calculate platform fee
-            platform_fee = blockchain_service.calculate_platform_fee(total_pool)
-            payout_pool = total_pool - platform_fee
-            
-            # Process payouts for winners
-            if winning_pool > 0:
-                for stake in stakes:
-                    if stake.position == winning_position:
-                        # Calculate proportional payout
-                        proportion = stake.amount / winning_pool
-                        payout = proportion * payout_pool
+                # Process each winning bet
+                for bet in winning_bets:
+                    if bet.status == 'confirmed':
+                        payout_amount = bet.amount * payout_ratio
+                        bet.payout_amount = payout_amount
+                        bet.status = 'won'
                         
-                        # Update stake with payout
-                        stake.payout_amount = payout
+                        # TODO: Process actual blockchain payout
+                        # bet.payout_transaction_hash = blockchain_service.send_payout(...)
                         
-                        # Note: In a real implementation, you would send the actual payout transaction
-                        # stake.payout_transaction_hash = blockchain_service.send_payout(stake.staker_wallet, payout, stake.currency)
-                        
-                        logger.info(f"Payout calculated for stake {stake.id}: {payout} {stake.currency}")
-                        
-            db.session.commit()
+                        logger.info(f"Bet {bet.id} won - payout: {payout_amount}")
             
-        except Exception as e:
-            logger.error(f"Error processing bet payouts: {e}")
-            db.session.rollback()
-            
-    def get_oracle_status(self, bet_id: str) -> Dict[str, Any]:
-        """Get oracle status for a bet"""
-        try:
-            bet = Bet.query.get(bet_id)
-            if not bet:
-                return {'error': 'Bet not found'}
-                
-            oracle_wallets = json.loads(bet.oracle_wallets)
-            submissions = OracleSubmission.query.filter_by(bet_id=bet_id).all()
-            
-            # Group submissions by oracle
-            oracle_status = {}
-            for wallet in oracle_wallets:
-                submission = next((s for s in submissions if s.oracle_wallet == wallet), None)
-                if submission:
-                    oracle_status[wallet] = {
-                        'submitted': True,
-                        'text': submission.submitted_text,
-                        'votes_for': submission.votes_for,
-                        'votes_against': submission.votes_against,
-                        'is_consensus': submission.is_consensus
-                    }
-                else:
-                    oracle_status[wallet] = {
-                        'submitted': False,
-                        'text': None,
-                        'votes_for': 0,
-                        'votes_against': 0,
-                        'is_consensus': False
-                    }
-                    
-            return {
-                'bet_id': bet_id,
-                'oracle_wallets': oracle_wallets,
-                'oracle_status': oracle_status,
-                'total_submissions': len(submissions),
-                'voting_deadline': (bet.created_at + timedelta(seconds=Config.ORACLE_VOTE_TIMEOUT)).isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting oracle status: {e}")
-            return {'error': 'Internal server error'}
-            
-    def cleanup_expired_votes(self):
-        """Clean up expired oracle votes"""
-        try:
-            cutoff_time = datetime.utcnow() - timedelta(seconds=Config.ORACLE_VOTE_TIMEOUT)
-            
-            # Find bets with expired voting
-            expired_bets = db.session.query(Bet).join(OracleSubmission).filter(
-                Bet.status == 'active',
-                OracleSubmission.created_at < cutoff_time
+            # Mark all losing bets
+            losing_bets = Bet.query.join(Submission).filter(
+                Submission.market_id == market.id,
+                Submission.id != winning_submission.id
             ).all()
             
-            for bet in expired_bets:
-                self._finalize_oracle_voting(bet.id)
-                
-            logger.info(f"Cleaned up {len(expired_bets)} expired oracle votes")
-            
+            for bet in losing_bets:
+                if bet.status == 'confirmed':
+                    bet.status = 'lost'
+                    logger.info(f"Bet {bet.id} lost")
+                    
         except Exception as e:
-            logger.error(f"Error cleaning up expired votes: {e}")
+            logger.error(f"Error processing market payouts: {e}")
+            
+    def _process_market_refunds(self, market: PredictionMarket):
+        """Process refunds for a market (null oracle or no valid submissions)"""
+        try:
+            # Get all bets for this market
+            all_bets = Bet.query.join(Submission).filter(Submission.market_id == market.id).all()
+            
+            for bet in all_bets:
+                if bet.status == 'confirmed':
+                    bet.status = 'refunded'
+                    bet.payout_amount = bet.amount  # Full refund
+                    
+                    # TODO: Process actual blockchain refund
+                    # bet.payout_transaction_hash = blockchain_service.send_refund(...)
+                    
+                    logger.info(f"Bet {bet.id} refunded - amount: {bet.amount}")
+                    
+        except Exception as e:
+            logger.error(f"Error processing market refunds: {e}")

@@ -11,22 +11,24 @@ class TextAnalysisService:
         self.levenshtein_threshold = Config.LEVENSHTEIN_THRESHOLD
         
     def clean_text(self, text: str) -> str:
-        """Clean text by removing punctuation and normalizing whitespace"""
+        """Clean text for X.com compatibility - preserve punctuation, spacing, capitalization"""
         try:
-            # Remove punctuation (keep only letters, numbers, and spaces)
-            cleaned = re.sub(r'[^\w\s]', '', text)
+            # Only remove control characters that can't be posted on X.com
+            # Preserve all standard punctuation, emojis, symbols
+            cleaned = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', text)  # Remove control characters
             
-            # Normalize whitespace
-            cleaned = ' '.join(cleaned.split())
+            # Normalize multiple spaces to single space but preserve line breaks
+            cleaned = re.sub(r'[ \t]+', ' ', cleaned)
+            cleaned = re.sub(r'\n+', '\n', cleaned)
             
-            # Convert to lowercase for comparison
-            cleaned = cleaned.lower()
+            # DO NOT convert to lowercase - preserve original capitalization
+            # DO NOT remove punctuation - it counts for dissimilarity
             
-            return cleaned
+            return cleaned.strip()
             
         except Exception as e:
             logger.error(f"Error cleaning text: {e}")
-            return text.lower()
+            return text
             
     def calculate_levenshtein_distance(self, text1: str, text2: str) -> int:
         """Calculate Levenshtein distance between two texts"""
