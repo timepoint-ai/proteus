@@ -249,8 +249,8 @@ def submission_detail(submission_id):
                 'transaction_type': tx.transaction_type,
                 'amount': str(tx.amount),
                 'currency': tx.currency,
-                'from_wallet': tx.from_wallet,
-                'to_wallet': tx.to_wallet,
+                'from_address': tx.from_address,
+                'to_address': tx.to_address,
                 'status': tx.status,
                 'created_at': tx.created_at.strftime('%Y-%m-%d %H:%M:%S') if tx.created_at else ''
             })
@@ -303,5 +303,5 @@ def submission_detail(submission_id):
         
     except Exception as e:
         logger.error(f"Error loading submission detail: {e}")
-        flash('Error loading submission details', 'error')
+        flash(f'Error loading submission details: {str(e)}', 'error')
         return redirect(url_for('clockchain.clockchain_view'))

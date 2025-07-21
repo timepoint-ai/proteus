@@ -297,8 +297,8 @@
                                 <tr>
                                     <td><span class="badge bg-secondary">{{ tx.transaction_type|title }}</span></td>
                                     <td><strong>{{ tx.amount }} {{ tx.currency }}</strong></td>
-                                    <td><small class="font-monospace">{{ tx.from_wallet[:8] }}...{{ tx.from_wallet[-4:] if tx.from_wallet else '' }}</small></td>
-                                    <td><small class="font-monospace">{{ tx.to_wallet[:8] }}...{{ tx.to_wallet[-4:] if tx.to_wallet else '' }}</small></td>
+                                    <td><small class="font-monospace">{{ tx.from_address[:8] }}...{{ tx.from_address[-4:] if tx.from_address else '' }}</small></td>
+                                    <td><small class="font-monospace">{{ tx.to_address[:8] }}...{{ tx.to_address[-4:] if tx.to_address else '' }}</small></td>
                                     <td><small class="font-monospace">{{ tx.transaction_hash[:10] }}...{{ tx.transaction_hash[-6:] if tx.transaction_hash else '' }}</small></td>
                                     <td><span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'danger' }}">{{ tx.status|title }}</span></td>
                                     <td><small>{{ tx.created_at }}</small></td>
