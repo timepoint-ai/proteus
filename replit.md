@@ -119,6 +119,26 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Test Transaction Generator Implementation (July 21, 2025)
+- **New Feature**: Added comprehensive test transaction generator for end-to-end blockchain testing
+- **Management Dashboard**: Created `/test_transactions` dashboard for managing test sessions
+- **Test Scenarios**: Implemented 3 pre-built scenarios with realistic actors and predictions:
+  - Elon Musk tweet prediction (10-minute window)
+  - Donald Trump Truth Social post (10-minute window)
+  - Taylor Swift album announcement (15-minute window)
+- **Mock Mode**: "Mock then actually push" strategy to prevent broken blockchain transactions
+- **Complete Lifecycle Testing**:
+  - Market creation with oracle configuration
+  - Multiple submission creation (original and competitors)
+  - Bet placement on submissions
+  - Time-based market expiration
+  - Oracle consensus submission
+  - Levenshtein-based market resolution
+  - Reward distribution and ledger reconciliation
+- **Session Management**: Real-time session tracking with transaction logs and progress indicators
+- **Wallet Configuration**: Added guide for configuring test wallets via Replit Secrets
+- **Future Integration**: Prepared for real ETH/BTC wallet integration when configured
+
 ### AI Agent API Implementation (July 21, 2025)
 - **New Feature**: Added rate-limited API for AI agents to create submissions in prediction markets
 - **API Endpoints**:

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Test Transaction Generator{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Test Transaction Generator</h1>
+    
+    <!-- Wallet Configuration Alert -->
+    {% if not has_test_wallets %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Configuration Required!</strong> Test wallets are not configured. 
+        <a href="{{ url_for('test_transactions.configure_wallets') }}" class="alert-link">Configure wallets</a> 
+        to enable real blockchain transactions.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+    
+    <!-- Test Scenarios -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">Available Test Scenarios</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for scenario in scenarios %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ scenario.actor }}</h5>
+                            <p class="card-text">{{ scenario.description }}</p>
+                            <ul class="list-unstyled small">
+                                <li><strong>Window:</strong> {{ scenario.window_minutes }} minutes</li>
+                                <li><strong>Oracles:</strong> {{ scenario.oracle_count }}</li>
+                                <li><strong>Initial Stake:</strong> {{ scenario.initial_stake }} ETH</li>
+                                <li><strong>Competitors:</strong> {{ scenario.competitor_stakes|length }}</li>
+                            </ul>
+                            <form action="{{ url_for('test_transactions.create_session') }}" method="POST">
+                                <input type="hidden" name="scenario_id" value="{{ scenario.id }}">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="mock_mode" value="true" checked>
+                                    <label class="form-check-label">
+                                        Mock Mode (no real blockchain)
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    Start Test Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Sessions -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Active Test Sessions</h3>
+            <span class="badge bg-primary">{{ active_sessions|length }} Active</span>
+        </div>
+        <div class="card-body">
+            {% if active_sessions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Session ID</th>
+                            <th>Scenario</th>
+                            <th>State</th>
+                            <th>Mode</th>
+                            <th>Created</th>
+                            <th>Errors</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in active_sessions %}
+                        <tr>
+                            <td><code>{{ session.id[:8] }}...</code></td>
+                            <td>{{ session.scenario.actor }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if session.state == 'completed' else 'warning' if 'error' in session.state else 'info' }}">
+                                    {{ session.state }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if session.mock_mode %}
+                                    <span class="badge bg-secondary">Mock</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Live</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ session.created_at.strftime('%H:%M:%S') }}</td>
+                            <td>
+                                {% if session.errors > 0 %}
+                                    <span class="badge bg-danger">{{ session.errors }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('test_transactions.session_detail', session_id=session.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No active test sessions. Start a new test scenario above.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}Test Session: {{ session_id[:8] }}...{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Test Session: {{ session_id[:8] }}...</h1>
+        <a href="{{ url_for('test_transactions.dashboard') }}" class="btn btn-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Session Info -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{{ session.scenario.actor }}: {{ session.scenario.description }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Current State:</strong>
+                            <span class="badge bg-{{ 'success' if session.state == 'completed' else 'warning' if 'error' in session.state else 'info' }}">
+                                {{ session.state }}
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Mode:</strong>
+                            {% if session.mock_mode %}
+                                <span class="badge bg-secondary">Mock</span>
+                            {% else %}
+                                <span class="badge bg-danger">Live Blockchain</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Created:</strong>
+                            {{ session.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                        </div>
+                    </div>
+                    
+                    {% if session.market %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Market ID:</strong> <code>{{ session.market_id }}</code>
+                        </div>
+                        <div class="col-md-6">
+                            {% if time_to_start and time_to_start > 0 %}
+                                <strong>Market starts in:</strong> 
+                                <span id="time-to-start" data-seconds="{{ time_to_start }}">{{ time_to_start|int }}s</span>
+                            {% elif time_to_end and time_to_end > 0 %}
+                                <strong>Market ends in:</strong> 
+                                <span id="time-to-end" data-seconds="{{ time_to_end }}">{{ time_to_end|int }}s</span>
+                            {% else %}
+                                <strong>Market Status:</strong> <span class="badge bg-secondary">Ended</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Test Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress-steps">
+                        <div class="step {{ 'completed' if session.state in ['market_created', 'submissions_created', 'bets_created', 'market_ended', 'oracles_submitted', 'resolved', 'completed'] else 'active' if session.state == 'initialized' else '' }}">
+                            1. Create Market
+                        </div>
+                        <div class="step {{ 'completed' if session.state in ['submissions_created', 'bets_created', 'market_ended', 'oracles_submitted', 'resolved', 'completed'] else 'active' if session.state == 'market_created' else '' }}">
+                            2. Create Submissions
+                        </div>
+                        <div class="step {{ 'completed' if session.state in ['bets_created', 'market_ended', 'oracles_submitted', 'resolved', 'completed'] else 'active' if session.state == 'submissions_created' else '' }}">
+                            3. Place Bets
+                        </div>
+                        <div class="step {{ 'completed' if session.state in ['market_ended', 'oracles_submitted', 'resolved', 'completed'] else 'active' if session.state == 'bets_created' else '' }}">
+                            4. Wait for Market End
+                        </div>
+                        <div class="step {{ 'completed' if session.state in ['oracles_submitted', 'resolved', 'completed'] else 'active' if session.state == 'market_ended' else '' }}">
+                            5. Oracle Submission
+                        </div>
+                        <div class="step {{ 'completed' if session.state in ['resolved', 'completed'] else 'active' if session.state == 'oracles_submitted' else '' }}">
+                            6. Resolve Market
+                        </div>
+                        <div class="step {{ 'completed' if session.state == 'completed' else 'active' if session.state == 'resolved' else '' }}">
+                            7. Reconcile Ledger
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Panel -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Actions</h4>
+        </div>
+        <div class="card-body">
+            <div id="action-panel">
+                {% if session.state == 'initialized' %}
+                    <button class="btn btn-primary" onclick="executeStep('create_market')">
+                        Create Prediction Market
+                    </button>
+                    <p class="mt-2 text-muted">This will create a new prediction market for "{{ session.scenario.description }}"</p>
+                {% elif session.state == 'market_created' %}
+                    <button class="btn btn-primary" onclick="executeStep('create_submissions')">
+                        Create Submissions
+                    </button>
+                    <p class="mt-2 text-muted">This will create {{ session.scenario.predicted_texts|length }} submissions with different predictions</p>
+                {% elif session.state == 'submissions_created' %}
+                    <button class="btn btn-primary" onclick="executeStep('create_bets')">
+                        Place Bets
+                    </button>
+                    <p class="mt-2 text-muted">This will place {{ session.scenario.bet_amounts|length }} bets on various submissions</p>
+                {% elif session.state == 'bets_created' %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button class="btn btn-warning" onclick="checkMarketStatus()">
+                                Check Market Status
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-danger" onclick="fastForwardMarket()">
+                                Fast Forward (Test Only)
+                            </button>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-muted">Wait for market to end or fast-forward time for testing</p>
+                {% elif session.state == 'market_ended' %}
+                    <button class="btn btn-primary" onclick="executeStep('submit_oracle_results')">
+                        Submit Oracle Results
+                    </button>
+                    <p class="mt-2 text-muted">Oracles will submit consensus on the actual outcome</p>
+                {% elif session.state == 'oracles_submitted' %}
+                    <button class="btn btn-primary" onclick="executeStep('resolve_market')">
+                        Resolve Market & Distribute Rewards
+                    </button>
+                    <p class="mt-2 text-muted">Calculate winners and distribute rewards based on Levenshtein distance</p>
+                {% elif session.state == 'resolved' %}
+                    <button class="btn btn-success" onclick="executeStep('reconcile')">
+                        Reconcile on Ledger
+                    </button>
+                    <p class="mt-2 text-muted">Final step: reconcile all transactions on the distributed ledger</p>
+                {% elif session.state == 'completed' %}
+                    <div class="alert alert-success">
+                        Test session completed successfully!
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div id="action-result" class="mt-3" style="display: none;">
+                <div class="alert alert-info">
+                    <strong>Processing...</strong> <span id="result-message"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transactions Log -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Transaction Log ({{ session.transactions|length }} transactions)</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Hash</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in session.transactions|reverse %}
+                        <tr>
+                            <td><span class="badge bg-secondary">{{ tx.type }}</span></td>
+                            <td><code>{{ tx.hash[:20] }}...</code></td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'info' }}">
+                                    {{ tx.status }}
+                                </span>
+                            </td>
+                            <td class="small">{{ tx.data|tojson|safe if tx.data else '-' }}</td>
+                            <td class="small">{{ tx.timestamp if tx.timestamp else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Errors -->
+    {% if session.errors %}
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Errors ({{ session.errors|length }})</h4>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                {% for error in session.errors %}
+                <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.step {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid #dee2e6;
+}
+
+.step.active {
+    background: #e3f2fd;
+    border-left-color: #2196f3;
+    font-weight: bold;
+}
+
+.step.completed {
+    background: #e8f5e9;
+    border-left-color: #4caf50;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+</style>
+
+<script>
+// Timer countdown
+function updateTimers() {
+    ['time-to-start', 'time-to-end'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            let seconds = parseInt(element.getAttribute('data-seconds'));
+            if (seconds > 0) {
+                seconds--;
+                element.setAttribute('data-seconds', seconds);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                element.textContent = `${minutes}m ${remainingSeconds}s`;
+                
+                if (seconds === 0) {
+                    location.reload();
+                }
+            }
+        }
+    });
+}
+
+setInterval(updateTimers, 1000);
+
+// Execute test steps
+function executeStep(step) {
+    const actionPanel = document.getElementById('action-panel');
+    const resultDiv = document.getElementById('action-result');
+    const resultMessage = document.getElementById('result-message');
+    
+    actionPanel.style.display = 'none';
+    resultDiv.style.display = 'block';
+    resultMessage.textContent = 'Executing ' + step.replace(/_/g, ' ') + '...';
+    
+    fetch(`/test_transactions/session/{{ session_id }}/${step}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultMessage.textContent = 'Success! Reloading...';
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            resultDiv.classList.remove('alert-info');
+            resultDiv.classList.add('alert-danger');
+            resultMessage.innerHTML = '<strong>Error:</strong> ' + (data.error || 'Unknown error');
+            actionPanel.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        resultDiv.classList.remove('alert-info');
+        resultDiv.classList.add('alert-danger');
+        resultMessage.innerHTML = '<strong>Error:</strong> ' + error.message;
+        actionPanel.style.display = 'block';
+    });
+}
+
+function checkMarketStatus() {
+    executeStep('wait_for_market_end');
+}
+
+function fastForwardMarket() {
+    if (confirm('Fast forward market to completion? This is for testing only.')) {
+        fetch(`/test_transactions/session/{{ session_id }}/wait_for_market_end`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'fast_forward=true'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
