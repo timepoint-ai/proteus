@@ -52,11 +52,13 @@ def create_app():
     from routes.api import api_bp
     from routes.admin import admin_bp
     from routes.test_data import test_data_bp
+    from routes.test_data_v2 import test_data_v2_bp
     from routes.clockchain import clockchain_bp
     
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(test_data_bp, url_prefix='/test_data')
+    app.register_blueprint(test_data_v2_bp, url_prefix='/test_data_v2')
     app.register_blueprint(clockchain_bp)
     
     # Root route redirect to admin dashboard

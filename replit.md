@@ -119,6 +119,18 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Status Workflow Redesign (July 21, 2025)
+- **Fixed critical status logic error**: Resolved bets can no longer have pending transactions
+- **Implemented comprehensive status workflow**: 
+  - Bets: active → expired → validating → resolved
+  - Stakes: pending → confirmed → won/lost/refunded
+  - Transactions: pending → confirmed/failed
+  - Oracle Submissions: pending → consensus/rejected
+- **Created BetResolutionService**: Handles proper status transitions and payout processing
+- **Updated data models**: Added status fields to Stakes and OracleSubmissions
+- **Created test_data_v2**: New test data generation that follows proper status workflow
+- **Documented new workflow**: Created STATUS_WORKFLOW.md with complete specification
+
 ### Critical Oracle Timing Fix (July 18, 2025)
 - **Fixed foundational logic error**: Oracle submissions were previously allowed before bet end_time
 - **Implemented strict time validation**: Oracle submissions now only accepted AFTER bet's end_time has passed

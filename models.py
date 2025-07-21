@@ -50,7 +50,7 @@ class Bet(db.Model):
     initial_stake_amount = db.Column(db.Numeric(20, 8), nullable=False)
     currency = db.Column(db.String(10), nullable=False)  # ETH, BTC
     transaction_hash = db.Column(db.String(128), nullable=False)
-    status = db.Column(db.String(20), default='active')  # active, resolved, cancelled
+    status = db.Column(db.String(20), default='active')  # active, expired, validating, resolved, cancelled
     resolution_text = db.Column(db.Text)
     levenshtein_distance = db.Column(db.Integer)
     resolution_time = db.Column(db.DateTime)
@@ -70,6 +70,7 @@ class Stake(db.Model):
     currency = db.Column(db.String(10), nullable=False)
     transaction_hash = db.Column(db.String(128), nullable=False)
     position = db.Column(db.String(10), nullable=False)  # 'for' or 'against'
+    status = db.Column(db.String(20), default='pending')  # pending, confirmed, won, lost, refunded
     payout_amount = db.Column(db.Numeric(20, 8))
     payout_transaction_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -84,6 +85,7 @@ class OracleSubmission(db.Model):
     signature = db.Column(db.Text, nullable=False)
     votes_for = db.Column(db.Integer, default=0)
     votes_against = db.Column(db.Integer, default=0)
+    status = db.Column(db.String(20), default='pending')  # pending, consensus, rejected
     is_consensus = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
