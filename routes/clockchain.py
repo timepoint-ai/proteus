@@ -61,6 +61,9 @@ def clockchain_view():
             oracle_allowed = current_time >= market.end_time if market.end_time else False
             time_until_oracle = max(0, (market.end_time - current_time).total_seconds()) if market.end_time and not oracle_allowed else 0
             
+            # Get the primary submission (original submission)
+            primary_submission = next((s for s in submissions if s.submission_type == 'original'), submissions[0] if submissions else None)
+            
             # Build segment for each market
             segment = {
                 'id': str(market.id),
@@ -76,12 +79,18 @@ def clockchain_view():
                 'status': market.status,
                 'submission_count': len(submissions),
                 'total_volume': str(total_volume),
+                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
+                'creator_wallet': primary_submission.creator_wallet[:10] + '...' if primary_submission and primary_submission.creator_wallet else 'Unknown',
+                'initial_stake': str(primary_submission.initial_stake_amount) if primary_submission else '0',
+                'stake_count': sum(len(Bet.query.filter_by(submission_id=sub.id).all()) for sub in submissions),
                 'oracle_allowed': oracle_allowed,
                 'time_until_oracle': time_until_oracle,
-                'submissions': []
+                'submissions': [],
+                'competing_bets': []
             }
             
-            # Add submission details
+            # Add submission details and competing submissions
             for submission in submissions:
                 sub_data = {
                     'id': str(submission.id),
@@ -93,6 +102,17 @@ def clockchain_view():
                     'is_winner': submission.is_winner
                 }
                 segment['submissions'].append(sub_data)
+                
+                # Add to competing bets if not the primary submission
+                if submission != primary_submission:
+                    bets = Bet.query.filter_by(submission_id=submission.id).all()
+                    volume = sum(bet.amount for bet in bets)
+                    segment['competing_bets'].append({
+                        'id': str(submission.id),
+                        'predicted_text': submission.predicted_text or '[No prediction]',
+                        'creator': submission.creator_wallet[:10] + '...' if submission.creator_wallet else 'Unknown',
+                        'volume': str(volume)
+                    })
             
             # Add resolution info if available
             if market.status == 'resolved':
@@ -184,75 +204,60 @@ def get_clockchain_events():
         logger.error(f"Error getting clockchain events: {e}")
         return jsonify({'error': 'Failed to get events'}), 500
 
+@clockchain_bp.route('/clockchain/market/<market_id>')
+def market_detail(market_id):
+    """Display detailed view of a prediction market"""
+    try:
+        market = PredictionMarket.query.get(market_id)
+        if not market:
+            flash('Market not found', 'error')
+            return redirect(url_for('clockchain.clockchain_view'))
+            
+        actor = Actor.query.get(market.actor_id) if market.actor_id else None
+        submissions = Submission.query.filter_by(market_id=market.id).all()
+        
+        # Get all bets for this market
+        all_bets = []
+        total_volume = 0
+        for submission in submissions:
+            bets = Bet.query.filter_by(submission_id=submission.id).all()
+            for bet in bets:
+                total_volume += bet.amount
+                all_bets.append({
+                    'submission': submission,
+                    'bet': bet,
+                    'submission_text': submission.predicted_text[:50] + '...' if submission.predicted_text and len(submission.predicted_text) > 50 else submission.predicted_text or '[No prediction]'
+                })
+        
+        return render_template('clockchain/market_detail.html',
+                             market=market,
+                             actor=actor,
+                             submissions=submissions,
+                             all_bets=all_bets,
+                             total_volume=total_volume)
+                             
+    except Exception as e:
+        logger.error(f"Error loading market detail: {e}")
+        flash('Error loading market details', 'error')
+        return redirect(url_for('clockchain.clockchain_view'))
+
+
 @clockchain_bp.route('/clockchain/submission/<submission_id>')
 def submission_detail(submission_id):
-    """Display detailed view of a single submission"""
+    """Display detailed view of a submission (redirects to market view)"""
     try:
-        # Get the bet/submission
-        bet = Bet.query.get(submission_id)
-        if not bet:
+        submission = Submission.query.get(submission_id)
+        if not submission:
             flash('Submission not found', 'error')
             return redirect(url_for('clockchain.clockchain_view'))
             
-        actor = Actor.query.get(bet.actor_id) if bet.actor_id else None
+        # Redirect to market detail view
+        return redirect(url_for('clockchain.market_detail', market_id=submission.market_id))
         
-        # Get all stakes on this bet
-        stakes = Stake.query.filter_by(bet_id=submission_id).order_by(desc(Stake.created_at)).all()
-        
-        # Process stakes with more details
-        stakes_data = []
-        for stake in stakes:
-            stakes_data.append({
-                'id': str(stake.id),
-                'staker_wallet': stake.staker_wallet,
-                'amount': str(stake.amount),
-                'currency': stake.currency,
-                'position': stake.position,
-                'transaction_hash': stake.transaction_hash,
-                'created_at': stake.created_at.strftime('%Y-%m-%d %H:%M:%S') if stake.created_at else ''
-            })
-            
-        # Get competing submissions
-        competing_bets = []
-        if bet.actor_id:
-            competing = Bet.query.filter(
-                Bet.id != bet.id,
-                Bet.actor_id == bet.actor_id,
-                Bet.start_time <= bet.end_time,
-                Bet.end_time >= bet.start_time
-            ).all()
-            
-            for cb in competing:
-                cb_stakes = Stake.query.filter_by(bet_id=cb.id).all()
-                competing_bets.append({
-                    'id': str(cb.id),
-                    'creator_wallet': cb.creator_wallet,
-                    'predicted_text': cb.predicted_text,
-                    'start_time': cb.start_time.strftime('%Y-%m-%d %H:%M') if cb.start_time else '',
-                    'end_time': cb.end_time.strftime('%Y-%m-%d %H:%M') if cb.end_time else '',
-                    'status': cb.status,
-                    'stake_count': len(cb_stakes),
-                    'total_volume': str(sum(s.amount for s in cb_stakes))
-                })
-                
-        # Get oracle submissions for this bet
-        oracle_submissions = OracleSubmission.query.filter_by(bet_id=submission_id).order_by(desc(OracleSubmission.created_at)).all()
-        
-        # Get related transactions
-        related_transactions = Transaction.query.filter_by(related_bet_id=submission_id).order_by(desc(Transaction.created_at)).all()
-        transactions_data = []
-        for tx in related_transactions:
-            transactions_data.append({
-                'id': str(tx.id),
-                'transaction_hash': tx.transaction_hash,
-                'transaction_type': tx.transaction_type,
-                'amount': str(tx.amount),
-                'currency': tx.currency,
-                'from_address': tx.from_address,
-                'to_address': tx.to_address,
-                'status': tx.status,
-                'created_at': tx.created_at.strftime('%Y-%m-%d %H:%M:%S') if tx.created_at else ''
-            })
+    except Exception as e:
+        logger.error(f"Error loading submission detail: {e}")
+        flash('Submission not found', 'error')
+        return redirect(url_for('clockchain.clockchain_view'))
         
         # Calculate totals
         total_volume = sum(stake.amount for stake in stakes)
