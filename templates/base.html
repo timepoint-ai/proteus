@@ -86,6 +86,13 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
+                                <a class="dropdown-item" href="{{ url_for('test_transactions.dashboard') }}">
+                                    <i class="fas fa-vial me-1"></i>
+                                    Test Transactions
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
                                 <form action="{{ url_for('admin.trigger_reconciliation') }}" method="post" class="d-inline">
                                     <button class="dropdown-item" type="submit">
                                         <i class="fas fa-sync me-1"></i>
