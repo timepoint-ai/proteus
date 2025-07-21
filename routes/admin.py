@@ -5,7 +5,8 @@ from decimal import Decimal
 from sqlalchemy import func, desc
 from models import (
     NodeOperator, Actor, PredictionMarket, Submission, Bet, Transaction, 
-    OracleSubmission, SyntheticTimeEntry, NetworkMetrics
+    OracleSubmission, SyntheticTimeEntry, NetworkMetrics,
+    AIAgentProfile, VerificationModule, BittensorIntegration, TransparencyAudit
 )
 from app import db
 from services.consensus import ConsensusService
@@ -14,6 +15,7 @@ from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from services.node_communication import NodeCommunicationService
 from services.blockchain import BlockchainService
+from services.ai_transparency import AITransparencyService
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,7 @@ oracle_service = OracleService()
 time_sync_service = TimeSyncService()
 node_comm_service = NodeCommunicationService()
 blockchain_service = BlockchainService()
+ai_transparency_service = AITransparencyService()
 
 @admin_bp.route('/')
 def dashboard():
@@ -301,6 +304,61 @@ def time_sync_view():
                              recent_entries=[],
                              stats={})
 
+@admin_bp.route('/ai_transparency')
+def ai_transparency_view():
+    """AI transparency monitoring view"""
+    try:
+        # Get statistics
+        stats = {
+            'ai_agents': AIAgentProfile.query.count(),
+            'bittensor_integrations': BittensorIntegration.query.count(),
+            'transparent_submissions': Submission.query.filter(Submission.ai_agent_id.isnot(None)).count(),
+            'total_bonuses': db.session.query(func.sum(Submission.total_reward_bonus)).scalar() or 0
+        }
+        
+        # Get AI agents with details
+        ai_agents = db.session.query(AIAgentProfile).outerjoin(
+            BittensorIntegration, AIAgentProfile.agent_id == BittensorIntegration.ai_agent_id
+        ).all()
+        
+        # Calculate statistics for each agent
+        for agent in ai_agents:
+            agent.total_submissions = Submission.query.filter_by(ai_agent_id=agent.agent_id).count()
+            agent.winning_submissions = Submission.query.filter_by(
+                ai_agent_id=agent.agent_id, 
+                is_winner=True
+            ).count()
+            agent.total_earned = db.session.query(func.sum(Submission.initial_stake_amount)).filter(
+                Submission.ai_agent_id == agent.agent_id,
+                Submission.is_winner == True
+            ).scalar() or 0
+            agent.bittensor = BittensorIntegration.query.filter_by(ai_agent_id=agent.agent_id).first()
+        
+        # Get recent submissions with transparency modules
+        recent_submissions = Submission.query.filter(
+            Submission.ai_agent_id.isnot(None)
+        ).order_by(desc(Submission.created_at)).limit(10).all()
+        
+        # Get recent transparency audits
+        recent_audits = TransparencyAudit.query.order_by(
+            desc(TransparencyAudit.created_at)
+        ).limit(10).all()
+        
+        return render_template('admin/ai_transparency.html',
+                             stats=stats,
+                             ai_agents=ai_agents,
+                             recent_submissions=recent_submissions,
+                             recent_audits=recent_audits)
+        
+    except Exception as e:
+        logger.error(f"Error loading AI transparency view: {e}")
+        flash(f'Error loading AI transparency view: {str(e)}', 'error')
+        return render_template('admin/ai_transparency.html',
+                             stats={},
+                             ai_agents=[],
+                             recent_submissions=[],
+                             recent_audits=[])
+
 # API endpoints for real-time updates
 
 @admin_bp.route('/api/stats')
@@ -360,6 +418,78 @@ def api_connection_status():
         return jsonify(status)
     except Exception as e:
         logger.error(f"Error getting connection status: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/ai_transparency/agent/<agent_id>')
+def api_agent_details(agent_id):
+    """Get AI agent details"""
+    try:
+        agent = AIAgentProfile.query.get(agent_id)
+        if not agent:
+            return jsonify({'error': 'Agent not found'}), 404
+            
+        # Calculate detailed statistics
+        total_submissions = Submission.query.filter_by(ai_agent_id=agent.agent_id).count()
+        winning_submissions = Submission.query.filter_by(
+            ai_agent_id=agent.agent_id, 
+            is_winner=True
+        ).count()
+        
+        # Get Bittensor info
+        bittensor = BittensorIntegration.query.filter_by(ai_agent_id=agent.agent_id).first()
+        
+        agent_data = {
+            'id': agent.id,
+            'agent_id': agent.agent_id,
+            'agent_name': agent.agent_name,
+            'organization': agent.organization,
+            'transparency_score': agent.transparency_score,
+            'transparency_level': agent.transparency_level,
+            'total_submissions': total_submissions,
+            'winning_submissions': winning_submissions,
+            'win_rate': round((winning_submissions / max(total_submissions, 1)) * 100, 1),
+            'average_accuracy': agent.average_accuracy,
+            'total_earned': float(db.session.query(func.sum(Submission.initial_stake_amount)).filter(
+                Submission.ai_agent_id == agent.agent_id,
+                Submission.is_winner == True
+            ).scalar() or 0),
+            'bittensor': {
+                'subnet_id': bittensor.subnet_id,
+                'neuron_type': bittensor.neuron_type,
+                'tao_staked': float(bittensor.tao_staked),
+                'yuma_score': float(bittensor.yuma_score)
+            } if bittensor else None
+        }
+        
+        return jsonify(agent_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting agent details: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/ai_transparency/audit/<audit_id>')
+def api_audit_details(audit_id):
+    """Get audit details"""
+    try:
+        audit = TransparencyAudit.query.get(audit_id)
+        if not audit:
+            return jsonify({'error': 'Audit not found'}), 404
+            
+        audit_data = {
+            'id': audit.id,
+            'agent_id': audit.agent_id,
+            'auditor_name': audit.auditor_name,
+            'audit_type': audit.audit_type,
+            'audit_passed': audit.audit_passed,
+            'findings': audit.findings,
+            'created_at': audit.created_at.isoformat(),
+            'expires_at': audit.expires_at.isoformat() if audit.expires_at else None
+        }
+        
+        return jsonify(audit_data)
+        
+    except Exception as e:
+        logger.error(f"Error getting audit details: {e}")
         return jsonify({'error': str(e)}), 500
 
 # Admin actions

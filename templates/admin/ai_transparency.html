@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}AI Transparency Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">AI Transparency Dashboard</h1>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">AI Agents</h5>
+                    <h2 class="mb-0">{{ stats.ai_agents }}</h2>
+                    <small>Registered AI agents</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Bittensor Integrations</h5>
+                    <h2 class="mb-0">{{ stats.bittensor_integrations }}</h2>
+                    <small>TAO network nodes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Transparent Submissions</h5>
+                    <h2 class="mb-0">{{ stats.transparent_submissions }}</h2>
+                    <small>With verification modules</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bonuses</h5>
+                    <h2 class="mb-0">{{ "%.2f"|format(stats.get('total_bonuses', 0)) }} ETH</h2>
+                    <small>Transparency rewards</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Agent Profiles -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">AI Agent Profiles</h3>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-primary" onclick="filterAgents('all')">All</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="filterAgents('bittensor')">Bittensor</button>
+                <button class="btn btn-sm btn-outline-primary" onclick="filterAgents('transparent')">Transparent</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="agentsTable">
+                    <thead>
+                        <tr>
+                            <th>Agent ID</th>
+                            <th>Name</th>
+                            <th>Organization</th>
+                            <th>Transparency Level</th>
+                            <th>Modules</th>
+                            <th>Submissions</th>
+                            <th>Win Rate</th>
+                            <th>Total Earned</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agent in ai_agents %}
+                        <tr data-agent-type="{% if agent.bittensor %}bittensor{% endif %} {% if agent.transparency_level > 0 %}transparent{% endif %}">
+                            <td>
+                                <code>{{ agent.agent_id[:20] }}...</code>
+                                {% if agent.bittensor %}
+                                <span class="badge bg-purple ms-1" title="Bittensor Subnet {{ agent.bittensor.subnet_id }}">
+                                    TAO
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ agent.agent_name or 'Unnamed' }}</td>
+                            <td>{{ agent.organization or '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress" style="width: 100px; height: 20px;">
+                                        <div class="progress-bar {% if agent.transparency_level == 4 %}bg-success{% elif agent.transparency_level >= 2 %}bg-info{% else %}bg-warning{% endif %}" 
+                                             style="width: {{ (agent.transparency_level / 4 * 100) }}%">
+                                            {{ agent.transparency_level }}/4
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if agent.open_source_commitment %}
+                                    <span class="badge bg-secondary" title="Open Source Code">OS</span>
+                                {% endif %}
+                                {% if agent.architecture_disclosure %}
+                                    <span class="badge bg-secondary" title="Architecture Disclosure">AD</span>
+                                {% endif %}
+                                {% if agent.reasoning_transparency %}
+                                    <span class="badge bg-secondary" title="Reasoning Transparency">RT</span>
+                                {% endif %}
+                                {% if agent.audit_participation %}
+                                    <span class="badge bg-secondary" title="Audit Participation">AU</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ agent.total_submissions }}</td>
+                            <td>
+                                {% if agent.total_submissions > 0 %}
+                                    {{ "%.1f"|format((agent.winning_submissions / agent.total_submissions * 100)) }}%
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.4f"|format(agent.total_earned or 0) }} ETH</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="viewAgentDetails('{{ agent.id }}')">
+                                    Details
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transparent Submissions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">Recent AI Agent Submissions with Transparency</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Submission ID</th>
+                            <th>Market</th>
+                            <th>AI Agent</th>
+                            <th>Prediction</th>
+                            <th>Verification Modules</th>
+                            <th>Bonus Rate</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in recent_submissions %}
+                        <tr>
+                            <td><code>{{ submission.id.hex[:8] }}</code></td>
+                            <td>
+                                <a href="/clockchain/submission/{{ submission.id }}">
+                                    {{ submission.market.actor.name }}
+                                </a>
+                            </td>
+                            <td>{{ submission.ai_agent_id[:20] if submission.ai_agent_id else 'Unknown' }}</td>
+                            <td class="text-truncate" style="max-width: 200px;" title="{{ submission.predicted_text }}">
+                                {{ submission.predicted_text }}
+                            </td>
+                            <td>
+                                {% for module in submission.verification_modules %}
+                                    <span class="badge bg-info">{{ module.module_type }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    +{{ "%.0f"|format(submission.total_reward_bonus * 100) }}%
+                                </span>
+                            </td>
+                            <td>{{ submission.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transparency Audits -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Recent Transparency Audits</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Agent</th>
+                            <th>Auditor</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Findings</th>
+                            <th>Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for audit in recent_audits %}
+                        <tr>
+                            <td>{{ audit.agent_profile.agent_name or audit.agent_id[:20] }}</td>
+                            <td>{{ audit.auditor_name }}</td>
+                            <td>{{ audit.audit_type }}</td>
+                            <td>
+                                {% if audit.audit_passed %}
+                                    <span class="badge bg-success">Passed</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audit.findings %}
+                                    <button class="btn btn-sm btn-secondary" onclick="viewAuditFindings('{{ audit.id }}')">
+                                        View
+                                    </button>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if audit.expires_at %}
+                                    {{ audit.expires_at.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agent Details Modal -->
+<div class="modal fade" id="agentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">AI Agent Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="agentDetailsContent">
+                <!-- Content loaded via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Findings Modal -->
+<div class="modal fade" id="auditFindingsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Audit Findings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="auditFindingsContent">
+                <!-- Content loaded via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterAgents(type) {
+    const rows = document.querySelectorAll('#agentsTable tbody tr');
+    rows.forEach(row => {
+        if (type === 'all') {
+            row.style.display = '';
+        } else {
+            const agentType = row.getAttribute('data-agent-type');
+            if (agentType && agentType.includes(type)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+    
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+function viewAgentDetails(agentId) {
+    fetch(`/admin/ai_transparency/agent/${agentId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('agentDetailsContent').innerHTML = formatAgentDetails(data);
+            new bootstrap.Modal(document.getElementById('agentDetailsModal')).show();
+        });
+}
+
+function viewAuditFindings(auditId) {
+    fetch(`/admin/ai_transparency/audit/${auditId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('auditFindingsContent').innerHTML = formatAuditFindings(data);
+            new bootstrap.Modal(document.getElementById('auditFindingsModal')).show();
+        });
+}
+
+function formatAgentDetails(agent) {
+    return `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Basic Information</h6>
+                <p><strong>ID:</strong> <code>${agent.agent_id}</code></p>
+                <p><strong>Name:</strong> ${agent.agent_name || 'Unnamed'}</p>
+                <p><strong>Organization:</strong> ${agent.organization || '-'}</p>
+                <p><strong>Transparency Score:</strong> ${agent.transparency_score}/100</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Performance Metrics</h6>
+                <p><strong>Total Submissions:</strong> ${agent.total_submissions}</p>
+                <p><strong>Winning Rate:</strong> ${agent.win_rate}%</p>
+                <p><strong>Average Accuracy:</strong> ${agent.average_accuracy}%</p>
+                <p><strong>Total Earned:</strong> ${agent.total_earned} ETH</p>
+            </div>
+        </div>
+        ${agent.bittensor ? `
+            <hr>
+            <h6>Bittensor Integration</h6>
+            <p><strong>Subnet:</strong> ${agent.bittensor.subnet_id}</p>
+            <p><strong>Neuron Type:</strong> ${agent.bittensor.neuron_type}</p>
+            <p><strong>TAO Staked:</strong> ${agent.bittensor.tao_staked}</p>
+            <p><strong>Yuma Score:</strong> ${agent.bittensor.yuma_score}</p>
+        ` : ''}
+    `;
+}
+
+function formatAuditFindings(audit) {
+    const findings = JSON.parse(audit.findings || '{}');
+    return `
+        <p><strong>Auditor:</strong> ${audit.auditor_name}</p>
+        <p><strong>Date:</strong> ${audit.created_at}</p>
+        <p><strong>Type:</strong> ${audit.audit_type}</p>
+        <hr>
+        <h6>Findings</h6>
+        <pre class="bg-light p-2">${JSON.stringify(findings, null, 2)}</pre>
+    `;
+}
+</script>
+
+<style>
+.badge.bg-purple {
+    background-color: #6f42c1;
+}
+</style>
+{% endblock %}

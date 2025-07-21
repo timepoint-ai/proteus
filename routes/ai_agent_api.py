@@ -18,7 +18,8 @@ from services.text_analysis import TextAnalysisService
 from services.blockchain import BlockchainService
 from services.ledger import LedgerService
 from services.node_communication import NodeCommunicationService
-from models import db, PredictionMarket, Submission, Actor, Transaction
+from services.ai_transparency import AITransparencyService
+from models import db, PredictionMarket, Submission, Actor, Transaction, AIAgentProfile, VerificationModule
 import uuid
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ text_analysis_service = TextAnalysisService()
 blockchain_service = BlockchainService()
 ledger_service = LedgerService()
 node_comm_service = NodeCommunicationService()
+ai_transparency_service = AITransparencyService()
 
 # Get platform fee from environment
 PLATFORM_FEE = Decimal(os.environ.get('PLATFORM_FEE', '0.07'))  # Default 7%
@@ -259,6 +261,25 @@ def create_submission():
         submission.initial_stake_amount = stake_amount
         submission.currency = data['currency']
         submission.transaction_hash = data['transaction_hash']
+        
+        # Check if this is an AI agent submission
+        if 'ai_agent_id' in data:
+            submission.is_ai_agent = True
+            submission.ai_agent_id = data['ai_agent_id']
+            
+            # Create or update AI agent profile
+            ai_profile = AIAgentProfile.query.filter_by(agent_id=data['ai_agent_id']).first()
+            if not ai_profile:
+                ai_profile = AIAgentProfile(
+                    agent_id=data['ai_agent_id'],
+                    agent_name=data.get('ai_agent_name'),
+                    organization=data.get('ai_agent_organization')
+                )
+                db.session.add(ai_profile)
+            
+            ai_profile.total_submissions = (ai_profile.total_submissions or 0) + 1
+            ai_profile.total_staked = (ai_profile.total_staked or Decimal('0')) + stake_amount
+        
         submission.created_at = datetime.utcnow()
         
         db.session.add(submission)
@@ -357,6 +378,132 @@ def calculate_fees():
     except Exception as e:
         logger.error(f"Error calculating fees: {e}")
         return jsonify({'error': 'Failed to calculate fees'}), 500
+
+@ai_agent_api_bp.route('/v1/submissions/<submission_id>/verification_modules', methods=['POST'])
+@limiter.limit("20 per minute")
+def submit_verification_modules(submission_id):
+    """Submit verification modules for an AI agent submission to earn transparency bonuses"""
+    try:
+        data = request.get_json()
+        
+        # Validate submission exists
+        submission = Submission.query.get(submission_id)
+        if not submission:
+            return jsonify({'error': 'Submission not found'}), 404
+        
+        if not submission.is_ai_agent:
+            return jsonify({'error': 'Submission is not from an AI agent'}), 400
+        
+        # Validate modules data
+        if 'modules' not in data or not isinstance(data['modules'], list):
+            return jsonify({'error': 'Missing or invalid modules data'}), 400
+        
+        # Process verification modules
+        success, result = ai_transparency_service.process_verification_modules(
+            submission_id, 
+            data['modules']
+        )
+        
+        if not success:
+            return jsonify({'error': result.get('error', 'Failed to process modules')}), 400
+        
+        return jsonify({
+            'submission_id': submission_id,
+            'processed_modules': result['processed_modules'],
+            'total_bonus': result['total_bonus'],
+            'transparency_level': result['transparency_level'],
+            'message': f"Successfully processed {len(result['processed_modules'])} verification modules"
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error submitting verification modules: {e}")
+        return jsonify({'error': 'Failed to submit verification modules'}), 500
+
+@ai_agent_api_bp.route('/v1/agents/<agent_id>/transparency_score', methods=['GET'])
+@limiter.limit("60 per minute")
+def get_agent_transparency_score(agent_id):
+    """Get transparency score and metrics for an AI agent"""
+    try:
+        score_data = ai_transparency_service.get_agent_transparency_score(agent_id)
+        return jsonify(score_data), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting transparency score: {e}")
+        return jsonify({'error': 'Failed to get transparency score'}), 500
+
+@ai_agent_api_bp.route('/v1/agents/<agent_id>/bittensor', methods=['POST'])
+@limiter.limit("10 per minute")
+def register_bittensor_integration(agent_id):
+    """Register Bittensor TAO integration for an AI agent"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['hotkey_address', 'signature']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Verify signature
+        message = f"bittensor_integration:{agent_id}:{data['hotkey_address']}"
+        if not crypto_utils.verify_signature(message, data['signature'], data['hotkey_address']):
+            return jsonify({'error': 'Invalid signature'}), 400
+        
+        # Process Bittensor integration
+        success, result = ai_transparency_service.process_bittensor_integration(
+            agent_id,
+            data
+        )
+        
+        if not success:
+            return jsonify({'error': result.get('error', 'Failed to register integration')}), 400
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        logger.error(f"Error registering Bittensor integration: {e}")
+        return jsonify({'error': 'Failed to register Bittensor integration'}), 500
+
+@ai_agent_api_bp.route('/v1/transparency/modules', methods=['GET'])
+@limiter.limit("60 per minute")
+def get_transparency_modules():
+    """Get available transparency modules and their bonus rates"""
+    modules = [
+        {
+            'module_type': 'open_source',
+            'name': 'Open Source Code Verification',
+            'description': 'Submit IPFS hashes or blockchain references to model weights, architecture, and training data',
+            'bonus_rate': '15%',
+            'required_data': ['ipfs_hash', 'blockchain_reference', 'model_architecture', 'training_data_hash']
+        },
+        {
+            'module_type': 'architecture',
+            'name': 'Architecture Disclosure',
+            'description': 'Provide detailed model architecture specifications and hyperparameters',
+            'bonus_rate': '20%',
+            'required_data': ['architecture_details', 'training_data_hash']
+        },
+        {
+            'module_type': 'reasoning',
+            'name': 'Reasoning Transparency',
+            'description': 'Submit step-by-step reasoning traces and computational proofs',
+            'bonus_rate': '25%',
+            'required_data': ['reasoning_trace', 'computational_proof']
+        },
+        {
+            'module_type': 'audit',
+            'name': 'Third-Party Audit',
+            'description': 'Provide verification from certified AI transparency auditors',
+            'bonus_rate': '35%',
+            'required_data': ['audit_report_hash', 'audit_details']
+        }
+    ]
+    
+    return jsonify({
+        'modules': modules,
+        'max_total_bonus': '95%',
+        'compound_bonus_info': 'Bonuses compound when multiple modules are used together'
+    })
 
 # Initialize limiter with app context
 def init_limiter(app):

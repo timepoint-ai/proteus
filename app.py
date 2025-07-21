@@ -54,6 +54,7 @@ def create_app():
     from routes.test_data import test_data_bp
     from routes.test_data_v2 import test_data_v2_bp
     from routes.test_data_new import test_data_new_bp
+    from routes.test_data_ai import test_data_ai_bp
     from routes.clockchain import clockchain_bp
     from routes.ai_agent_api import ai_agent_api_bp, init_limiter
     
@@ -62,6 +63,7 @@ def create_app():
     app.register_blueprint(test_data_bp, url_prefix='/test_data')
     app.register_blueprint(test_data_v2_bp, url_prefix='/test_data_v2')
     app.register_blueprint(test_data_new_bp, url_prefix='/test_data_new')
+    app.register_blueprint(test_data_ai_bp, url_prefix='/test_data_ai')
     app.register_blueprint(clockchain_bp)
     app.register_blueprint(ai_agent_api_bp, url_prefix='/ai_agent')
     
