@@ -35,17 +35,11 @@ def clockchain_view():
         # Get all active and recent bets in the time range (limit to prevent overload)
         max_records = 200  # Limit number of records to load
         
-        # First count total records
-        total_count = PredictionMarket.query.filter(
-            ((PredictionMarket.start_time <= end_time) & (PredictionMarket.end_time >= start_time)) |
-            (PredictionMarket.created_at.between(start_time, end_time))
-        ).count()
+        # Get all markets (simplified filtering for now)
+        total_count = PredictionMarket.query.count()
         
-        # Then get limited records
-        markets_in_range = PredictionMarket.query.filter(
-            ((PredictionMarket.start_time <= end_time) & (PredictionMarket.end_time >= start_time)) |
-            (PredictionMarket.created_at.between(start_time, end_time))
-        ).order_by(PredictionMarket.start_time).limit(max_records).all()
+        # Get all markets ordered by start time
+        markets_in_range = PredictionMarket.query.order_by(PredictionMarket.start_time).limit(max_records).all()
         
         has_more_records = total_count > max_records
         
