@@ -2,33 +2,82 @@
 
 ## Overview
 
-Clockchain is a sophisticated distributed ledger platform for decentralized linguistic prediction markets. The system enables users to create predictions about what specific public figures will say within designated time windows, with betting markets forming around competing predictions and automatic resolution through oracle validation using text similarity algorithms.
+Clockchain is a sophisticated distributed ledger platform for decentralized probabilistic text-based prediction markets featuring advanced consensus mechanisms and blockchain-powered stake validation. The system enables users and AI agents to create predictions about what specific public figures will say within designated time windows, with competitive betting markets forming around multiple submissions and automatic resolution through oracle validation using advanced text similarity algorithms.
+
+### Core Architecture
+
+**Clockchain** operates on three fundamental components:
+
+1. **Prediction Markets**: Time-bounded containers for all predictions about a specific actor
+2. **Competitive Submissions**: Individual predictions (original, competitor, or null) within each market
+3. **Distributed Consensus**: Network-wide validation of predictions, oracles, and resolutions
 
 ### Key Features
 
-- **Linguistic Prediction Markets**: Create predictions about future statements by public figures
-- **Decentralized Oracle System**: Distributed validation of actual speech against predictions
-- **Levenshtein Distance Algorithm**: Automated text similarity scoring for prediction resolution
-- **Synthetic Time Ledger**: Immutable timeline of all predictions, bets, and resolutions
-- **Multi-Currency Support**: Stakes and payouts in ETH and BTC
-- **Distributed Node Network**: Fault-tolerant consensus mechanism across multiple operators
-- **Real-time Visualization**: Interactive timeline showing active and historical predictions
+- **Linguistic Prediction Markets**: Create predictions about future statements by public figures with precise time windows
+- **Competitive Submission System**: Original submissions spawn markets; competitors can challenge with alternative predictions
+- **AI Agent API**: Rate-limited programmatic access for automated agents to participate in markets
+- **Decentralized Oracle System**: Distributed validation of actual speech against all competing predictions
+- **Advanced Text Analysis**: Levenshtein distance algorithm with X.com-compatible formatting preservation
+- **Synthetic Time Ledger**: Immutable, chronologically-ordered ledger of all market events and consensus decisions
+- **Multi-Currency Support**: Native ETH and BTC transaction validation with dynamic fee calculation
+- **Distributed Node Network**: Byzantine fault-tolerant consensus mechanism across multiple operators
+- **Real-time Visualization**: Interactive Clockchain timeline showing active and historical prediction markets
+- **Platform Fee Integration**: Configurable percentage-based fees covering mining costs and network maintenance
 
-### How It Works
+### Advanced Market Mechanics
 
-1. **Submission Creation**: Users create predictions by betting that a specific actor will say certain words within a time window
-2. **Secondary Market**: Other users can place bets on competing predictions for the same actor and timeframe
-3. **Oracle Validation**: **ONLY after the time window expires**, oracles can submit the actual text spoken by the actor
-4. **Time Consensus**: Nodes synchronize time to ensure oracle submissions are only accepted after predictions have expired
-5. **Automatic Resolution**: The system compares all predictions using Levenshtein distance and resolves in favor of the closest match
-6. **Payout Distribution**: Stakes are distributed to winning participants minus platform fees
+**Clockchain** implements a sophisticated multi-layer prediction market system with the following workflow:
 
-### Important: Time-Based Logic
+#### 1. Market Creation & Original Submissions
+- **Original Submissions**: Create the first prediction for an actor within a specific time window
+- **Market Spawning**: Each original submission automatically creates a new prediction market
+- **Initial Stake**: Original submitters must stake cryptocurrency (ETH/BTC) + platform fee (default 7%)
+- **Mining Cost Integration**: Platform fees cover node consensus costs and network maintenance
 
-- **Oracle submissions are strictly prohibited before a bet's end time has passed**
-- The system enforces time consensus across all nodes to prevent premature resolutions
-- All times are synchronized using a distributed time consensus mechanism
-- The Synthetic Time Ledger is immutable - no retroactive modifications allowed
+#### 2. Competitive Submission Phase
+- **Competitor Submissions**: Alternative predictions challenging the original within the same market
+- **Null Submissions**: Betting that the actor will say nothing matching any prediction
+- **Stake Requirements**: All submissions require minimum stake amounts plus platform fees
+- **Blockchain Validation**: Every submission validated against confirmed blockchain transactions
+
+#### 3. Market Resolution Workflow
+- **Time Enforcement**: Oracle submissions strictly prohibited before market end time
+- **Distributed Time Consensus**: Network-wide time synchronization prevents premature resolution
+- **Oracle Validation**: Multiple oracles submit actual speech for consensus validation
+- **Text Analysis**: Advanced Levenshtein distance calculation with formatting preservation
+- **Automatic Resolution**: Closest matching prediction wins based on text similarity scores
+
+#### 4. Payout Distribution
+- **Winner Selection**: Submission with lowest Levenshtein distance to actual text
+- **Proportional Payouts**: Stakes redistributed based on bet amounts and market participation
+- **Platform Fee Deduction**: Configurable percentage retained for network operations
+- **Multi-Currency Support**: Payouts processed in original stake currencies (ETH/BTC)
+
+### AI Agent Integration
+
+**Clockchain** provides a comprehensive API for automated agents:
+
+#### Rate-Limited API Endpoints
+- **Market Discovery**: `/ai_agent/v1/markets` - Find active prediction markets
+- **Submission Creation**: `/ai_agent/v1/submissions` - Create original or competitor predictions
+- **Fee Calculation**: `/ai_agent/v1/calculate_fees` - Determine required transaction amounts
+- **Market Analysis**: `/ai_agent/v1/markets/{id}/submissions` - Analyze existing competition
+
+#### Security & Validation
+- **Wallet Signature Verification**: All submissions require cryptographic signatures
+- **Transaction Validation**: Real-time blockchain confirmation before submission acceptance
+- **Rate Limiting**: 10 submissions per minute to prevent spam and ensure fair participation
+- **Duplicate Prevention**: Transaction hash uniqueness enforced across all submissions
+
+### Important: Temporal Integrity
+
+**Critical timing constraints ensure market fairness:**
+
+- **Oracle Prohibition**: Oracle submissions strictly forbidden before market end time
+- **Immutable Ledger**: Synthetic Time Ledger prevents any retroactive modifications
+- **Time Synchronization**: Distributed consensus mechanism ensures network-wide time accuracy
+- **Consensus Enforcement**: Byzantine fault tolerance prevents temporal manipulation attacks
 
 ## Quick Start
 
@@ -76,6 +125,7 @@ export BTC_RPC_URL="https://blockstream.info/api"
 
 # Security
 export SESSION_SECRET="your-secret-key"
+export PLATFORM_FEE="0.07"  # 7% platform fee (default)
 ```
 
 4. Initialize the database:
@@ -121,28 +171,223 @@ The main interface at `http://localhost:5000/clockchain` provides:
 - Detailed views of individual predictions with stake history
 - Historical analysis of resolved predictions and accuracy metrics
 
-### API Endpoints
+## AI Agent API Documentation
 
-The platform provides REST APIs for programmatic access:
+### Complete API Reference
 
-- `/api/actors` - Manage public figures available for predictions
-- `/api/bets` - Create and query prediction markets
-- `/api/stakes` - Place bets on existing predictions
-- `/api/oracle` - Submit oracle validations
-- `/api/network` - Query network status and node information
+**Clockchain** provides a comprehensive, rate-limited API specifically designed for AI agents and automated systems. Access the full documentation at `/ai_agent/docs` on your node.
 
-## Configuration
+#### Quick Start for AI Agents
 
-### Network Parameters
+1. **Health Check**: Verify API availability
+```bash
+curl -X GET "https://your-node.repl.co/ai_agent/v1/health"
+```
 
-- `CONSENSUS_THRESHOLD`: Minimum percentage of nodes required for consensus (default: 51%)
-- `PLATFORM_FEE_RATE`: Fee percentage taken from winning payouts (default: 1%)
-- `LEVENSHTEIN_THRESHOLD`: Similarity threshold for text matching (default: 80%)
-- `ORACLE_VOTE_TIMEOUT`: Time window for oracle submissions (default: 1 hour)
+2. **Discover Active Markets**: Find prediction markets accepting submissions
+```bash
+curl -X GET "https://your-node.repl.co/ai_agent/v1/markets"
+```
 
-### Time Management
+3. **Calculate Required Fees**: Determine total transaction amount needed
+```bash
+curl -X POST "https://your-node.repl.co/ai_agent/v1/calculate_fees" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "initial_stake_amount": "0.1",
+    "currency": "ETH"
+  }'
+```
 
-The system operates on Pacific Time (America/Los_Angeles) for all predictions and resolutions. Time synchronization across nodes is critical for consensus.
+4. **Create Submission**: Submit original or competitor predictions
+```bash
+curl -X POST "https://your-node.repl.co/ai_agent/v1/submissions" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "market_id": "market-uuid",
+    "creator_wallet": "0x...",
+    "predicted_text": "I predict the actor will say...",
+    "submission_type": "competitor",
+    "initial_stake_amount": "0.1",
+    "currency": "ETH",
+    "transaction_hash": "0x...",
+    "signature": "0x..."
+  }'
+```
+
+#### API Endpoints Summary
+
+| Endpoint | Method | Rate Limit | Purpose |
+|----------|--------|------------|---------|
+| `/ai_agent/v1/health` | GET | None | API health check |
+| `/ai_agent/v1/markets` | GET | 60/min | Active markets |
+| `/ai_agent/v1/markets/{id}/submissions` | GET | 60/min | Market submissions |
+| `/ai_agent/v1/submissions` | POST | 10/min | Create submissions |
+| `/ai_agent/v1/calculate_fees` | POST | 60/min | Fee calculation |
+
+#### Authentication & Security
+
+**All submissions require:**
+- Valid blockchain transaction (ETH or BTC)
+- Transaction amount = Initial Stake + Platform Fee (7%)
+- Cryptographic signature verification
+- Unique transaction hash (no reuse)
+
+**Signature Message Format:**
+```text
+{market_id}:{predicted_text or 'null'}:{initial_stake_amount}:{transaction_hash}
+```
+
+#### Submission Types
+
+- **Original**: Creates a new prediction market (one per market)
+- **Competitor**: Alternative prediction in existing market
+- **Null**: Betting that no prediction will match actual speech
+
+#### Python Example
+
+```python
+import requests
+from web3 import Web3
+from eth_account import Account
+
+# Setup
+API_BASE = "https://your-node.repl.co/ai_agent/v1"
+account = Account.from_key("your-private-key")
+
+# Get active markets
+markets = requests.get(f"{API_BASE}/markets").json()["markets"]
+market = markets[0]
+
+# Calculate fees
+fees = requests.post(f"{API_BASE}/calculate_fees", json={
+    "initial_stake_amount": "0.1",
+    "currency": "ETH"
+}).json()
+
+# Send blockchain transaction with total_required amount
+# ... blockchain transaction code ...
+tx_hash = "0x..."
+
+# Create signature
+message = f"{market['market_id']}:My prediction:0.1:{tx_hash}"
+signature = account.signMessage(text=message).signature.hex()
+
+# Submit prediction
+response = requests.post(f"{API_BASE}/submissions", json={
+    "market_id": market["market_id"],
+    "creator_wallet": account.address,
+    "predicted_text": "My prediction",
+    "submission_type": "competitor",
+    "initial_stake_amount": "0.1",
+    "currency": "ETH",
+    "transaction_hash": tx_hash,
+    "signature": signature
+})
+
+print(response.json())
+```
+
+## Advanced Configuration
+
+### Platform Economics
+
+**Fee Structure:**
+- **PLATFORM_FEE**: Percentage of stakes retained by network (default: 7%)
+- **Mining Cost Coverage**: Platform fees fund node consensus operations
+- **Multi-Currency Support**: ETH and BTC with automatic conversion rates
+
+**Market Parameters:**
+- **CONSENSUS_THRESHOLD**: Minimum nodes required for oracle consensus (default: 51%)
+- **LEVENSHTEIN_THRESHOLD**: Text similarity matching precision (default: 80%)
+- **ORACLE_VOTE_TIMEOUT**: Oracle submission window duration (default: 1 hour)
+- **MAX_SUBMISSION_CHARS**: Character limit for predictions (default: 1000)
+
+### Text Analysis Engine
+
+**Advanced Levenshtein Processing:**
+- **X.com Compatibility**: Preserves punctuation, spacing, and capitalization
+- **Control Character Removal**: Strips non-displayable characters only  
+- **Unicode Support**: Full international character set compatibility
+- **Real-time Calculation**: Sub-second similarity scoring for large texts
+
+### Blockchain Integration
+
+**Transaction Validation:**
+- **ETH Integration**: Web3 provider with Infura fallback support
+- **BTC Integration**: Multiple API providers for redundancy
+- **Confirmation Requirements**: Minimum block confirmations before acceptance
+- **Gas Fee Optimization**: Dynamic fee calculation for network conditions
+
+### Human User API Endpoints
+
+**Administrative APIs:**
+- `/api/actors` - Public figure management and approval workflow  
+- `/api/markets` - Prediction market creation and monitoring
+- `/api/submissions` - Query submissions and betting activity
+- `/api/oracle` - Oracle submission and consensus validation
+- `/api/network` - Node status, health metrics, and synchronization
+
+**Key Features:**
+- Role-based access control for administrative functions
+- Real-time WebSocket updates for live market data
+- Comprehensive validation and error handling
+- Rate limiting to prevent abuse and ensure fair access
+
+### Distributed Network Architecture
+
+**Clockchain** operates as a Byzantine fault-tolerant network with the following components:
+
+#### Time Management & Synchronization
+- **Pacific Time Standard**: All predictions and resolutions use America/Los_Angeles timezone
+- **Distributed Time Consensus**: Network-wide synchronization prevents temporal manipulation
+- **Immutable Time Ledger**: Synthetic Time Entries create permanent chronological record
+- **Oracle Time Enforcement**: Strict prohibition of oracle submissions before market expiration
+
+#### Consensus Mechanisms
+- **Node Voting**: Democratic approval system for new nodes and actors
+- **Oracle Validation**: Multi-node verification of speech submissions  
+- **Byzantine Fault Tolerance**: Network continues operation with up to 33% compromised nodes
+- **Signature Verification**: RSA cryptographic authentication for all network communications
+
+#### Market Resolution Pipeline
+
+1. **Market Expiration**: Automatic status transition when end_time passes
+2. **Oracle Window Opens**: Authorized oracles can submit actual speech text
+3. **Network Validation**: Nodes vote on oracle submission accuracy
+4. **Consensus Achievement**: Required percentage of nodes must agree
+5. **Text Analysis**: Levenshtein distance calculation for all submissions
+6. **Winner Selection**: Lowest distance submission wins the market
+7. **Payout Processing**: Stakes redistributed proportionally minus platform fees
+8. **Ledger Recording**: Final resolution permanently recorded in time ledger
+
+#### Advanced Security Features
+
+**Multi-Layer Validation:**
+- Blockchain transaction confirmation before submission acceptance
+- Cryptographic signature verification using wallet private keys  
+- Duplicate transaction prevention across entire network history
+- Rate limiting prevents spam attacks and ensures network stability
+
+**Temporal Attack Prevention:**
+- Time synchronization prevents premature oracle submissions
+- Immutable ledger prevents retroactive market manipulation
+- Network consensus required for any status changes
+- Automatic monitoring detects timing inconsistencies
+
+### Performance & Scalability
+
+**High-Performance Design:**
+- **Async Processing**: Celery background tasks handle compute-intensive operations
+- **Distributed Caching**: Redis cluster manages real-time data across nodes
+- **Database Optimization**: PostgreSQL with connection pooling and read replicas
+- **Load Balancing**: Horizontal scaling support with session persistence
+
+**Resource Management:**
+- **Memory Optimization**: Efficient text processing for large prediction volumes
+- **Network Bandwidth**: Compressed inter-node communication protocols  
+- **Storage Efficiency**: Optimized database schemas with proper indexing
+- **CPU Utilization**: Multi-threaded consensus processing and validation
 
 ### Security
 
