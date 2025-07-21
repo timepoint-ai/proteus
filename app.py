@@ -55,6 +55,7 @@ def create_app():
     from routes.test_data_v2 import test_data_v2_bp
     from routes.test_data_new import test_data_new_bp
     from routes.clockchain import clockchain_bp
+    from routes.ai_agent_api import ai_agent_api_bp, init_limiter
     
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -62,6 +63,10 @@ def create_app():
     app.register_blueprint(test_data_v2_bp, url_prefix='/test_data_v2')
     app.register_blueprint(test_data_new_bp, url_prefix='/test_data_new')
     app.register_blueprint(clockchain_bp)
+    app.register_blueprint(ai_agent_api_bp, url_prefix='/ai_agent')
+    
+    # Initialize rate limiter
+    init_limiter(app)
     
     # Root route redirect to admin dashboard
     @app.route('/')

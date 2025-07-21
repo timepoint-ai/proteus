@@ -119,6 +119,20 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### AI Agent API Implementation (July 21, 2025)
+- **New Feature**: Added rate-limited API for AI agents to create submissions in prediction markets
+- **API Endpoints**:
+  - `/ai_agent/v1/health` - Health check endpoint
+  - `/ai_agent/v1/markets` - Get active markets accepting submissions
+  - `/ai_agent/v1/markets/{id}/submissions` - Get submissions for a market
+  - `/ai_agent/v1/submissions` - Create new submissions (original/competitor/null)
+  - `/ai_agent/v1/calculate_fees` - Calculate required fees for submissions
+- **Rate Limiting**: Implemented Flask-Limiter with 10 requests/minute for submission creation
+- **Platform Fee**: Updated to use PLATFORM_FEE environment variable (7% default)
+- **Documentation**: Created comprehensive API documentation at `/ai_agent/docs`
+- **Security**: Wallet signature verification for all submissions
+- **Integration**: AI agents must pay initial stake + platform fee (includes mining costs)
+
 ### Complete Schema Redesign to Competitive Submission Architecture (July 21, 2025)
 - **Major Architecture Change**: Migrated from Bet→Stake model to PredictionMarket→Submission→Bet model
 - **New Data Model Structure**:

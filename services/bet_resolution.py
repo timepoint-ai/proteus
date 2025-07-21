@@ -3,6 +3,7 @@ Market Resolution Service
 Handles the proper status workflow for market and bet resolution
 """
 
+import os
 import logging
 from datetime import datetime
 from decimal import Decimal
@@ -17,7 +18,8 @@ class MarketResolutionService:
     """Service to handle market resolution with proper status workflow"""
     
     def __init__(self):
-        self.platform_fee_percentage = Decimal('0.05')  # 5% platform fee
+        # Get platform fee from environment variable (default 7%)
+        self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '0.07'))
     
     def check_and_update_expired_markets(self):
         """Check for active markets that have passed their end time and mark as expired"""
