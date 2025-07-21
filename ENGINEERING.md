@@ -7,15 +7,17 @@
 3. [Core Components](#core-components)
 4. [Data Models](#data-models)
 5. [Service Architecture](#service-architecture)
-6. [Consensus Mechanism](#consensus-mechanism)
-7. [Text Analysis Algorithm](#text-analysis-algorithm)
-8. [Blockchain Integration](#blockchain-integration)
-9. [Time Management](#time-management)
-10. [Security Architecture](#security-architecture)
-11. [Performance Optimization](#performance-optimization)
-12. [Testing Strategy](#testing-strategy)
-13. [Deployment Architecture](#deployment-architecture)
-14. [Monitoring and Observability](#monitoring-and-observability)
+6. [AI Transparency & Bittensor Integration](#ai-transparency--bittensor-integration)
+7. [Test Transaction Generator](#test-transaction-generator)
+8. [Consensus Mechanism](#consensus-mechanism)
+9. [Text Analysis Algorithm](#text-analysis-algorithm)
+10. [Blockchain Integration](#blockchain-integration)
+11. [Time Management](#time-management)
+12. [Security Architecture](#security-architecture)
+13. [Performance Optimization](#performance-optimization)
+14. [Testing Strategy](#testing-strategy)
+15. [Deployment Architecture](#deployment-architecture)
+16. [Monitoring and Observability](#monitoring-and-observability)
 
 ## Architecture Overview
 
@@ -24,22 +26,28 @@ Clockchain is built as a distributed, microservices-oriented application with th
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Frontend Layer                          │
-│  (Jinja2 Templates, Bootstrap, Chart.js, WebSockets)       │
+│ (Jinja2 Templates, Bootstrap, Chart.js, WebSockets,        │
+│  Test Transaction UI, AI Transparency Dashboard)           │
 ├─────────────────────────────────────────────────────────────┤
 │                    Application Layer                         │
-│  (Flask Routes, API Endpoints, WebSocket Handlers)         │
+│ (Flask Routes, AI Agent API, Test Transaction Manager,     │
+│  Admin Dashboard, WebSocket Handlers)                      │
 ├─────────────────────────────────────────────────────────────┤
 │                     Service Layer                            │
-│  (Business Logic, Consensus, Oracle, Text Analysis)        │
+│ (Business Logic, AI Transparency Service, Test Generator,  │
+│  Consensus, Oracle, Text Analysis, Verification Modules)   │
 ├─────────────────────────────────────────────────────────────┤
 │                  Infrastructure Layer                        │
-│  (Celery Tasks, Redis Cache, WebSocket Connections)        │
+│ (Celery Tasks, Redis Cache, WebSocket Connections,         │
+│  Rate Limiting, Session Management)                        │
 ├─────────────────────────────────────────────────────────────┤
 │                     Data Layer                               │
-│  (PostgreSQL, SQLAlchemy ORM, Redis Store)                 │
+│ (PostgreSQL, SQLAlchemy ORM, Redis Store,                  │
+│  AI Profiles, Verification Results, Test Sessions)         │
 ├─────────────────────────────────────────────────────────────┤
 │                   Blockchain Layer                           │
-│  (Ethereum Web3, Bitcoin API, Transaction Validation)      │
+│ (Ethereum Web3, Bitcoin API, Test Wallets,                 │
+│  Transaction Validation, Mock Transaction System)          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -121,6 +129,228 @@ Key relationships:
 - Transactions track all monetary flows
 
 ### Service Layer Architecture
+
+## AI Transparency & Bittensor Integration
+
+### Overview
+
+Clockchain integrates advanced AI transparency features to provide comprehensive verification and analysis of AI agent submissions. This system includes Bittensor TAO tracking, multi-layered verification modules, and real-time transparency dashboards.
+
+### Architecture Components
+
+#### AI Transparency Service (`services/ai_transparency.py`)
+
+Core service managing AI agent verification and transparency scoring:
+
+```python
+class AITransparencyService:
+    def create_ai_profile(self, agent_id, initial_tao_stake):
+        """Create new AI agent profile with Bittensor integration"""
+    
+    def run_verification_modules(self, submission_id):
+        """Execute all verification modules on a submission"""
+        
+    def update_transparency_score(self, agent_id):
+        """Recalculate overall transparency score"""
+        
+    def get_verification_stats(self):
+        """Return real-time verification statistics"""
+```
+
+#### Verification Modules
+
+**1. Relevance Verification Module**
+- Assesses prediction relevance to target actors and contexts
+- Uses contextual analysis to determine appropriateness
+- Scores submissions on 0-100 scale for relevance
+
+**2. NLP Analysis Module**
+- Advanced natural language processing for text quality
+- Grammar, syntax, and coherence assessment
+- Language model bias detection
+
+**3. Sentiment Analysis Module**
+- Emotional tone and sentiment classification
+- Bias detection in AI-generated content
+- Comparative analysis against human submissions
+
+**4. Bias Detection Module**
+- Systematic identification of AI model limitations
+- Training data bias assessment
+- Fairness and neutrality scoring
+
+### Data Models
+
+#### AI Profile Management
+```python
+class AIProfile(db.Model):
+    agent_id = db.Column(db.String(255), primary_key=True)
+    tao_wallet_address = db.Column(db.String(100))
+    total_tao_staked = db.Column(db.Numeric(20, 8))
+    performance_score = db.Column(db.Float)
+    transparency_score = db.Column(db.Float)
+    submission_count = db.Column(db.Integer)
+    verification_results = db.relationship('VerificationResult')
+```
+
+#### Verification Results
+```python
+class VerificationResult(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    ai_profile_id = db.Column(db.String(255))
+    module_name = db.Column(db.String(100))
+    score = db.Column(db.Float)
+    confidence = db.Column(db.Float)
+    details = db.Column(db.JSON)
+```
+
+### Transparency Dashboard
+
+Real-time dashboard at `/admin/ai_transparency` provides:
+
+- **Live Statistics**: Active AI agents, verification counts, average scores
+- **Performance Metrics**: Success rates, transparency scores, Bittensor integration
+- **Verification Results**: Detailed breakdown by module and scoring
+- **Agent Profiles**: Individual AI agent performance and history
+- **Audit Trails**: Complete verification history with timestamps
+
+## Test Transaction Generator
+
+### Overview
+
+Comprehensive end-to-end testing system for validating the complete Clockchain blockchain workflow. Implements a "mock-first" strategy to prevent real transaction failures while providing complete lifecycle testing.
+
+### Architecture Components
+
+#### Test Transaction Manager (`routes/test_transactions.py`)
+
+Core management system for test sessions:
+
+```python
+class TestTransactionManager:
+    def create_test_session(self, scenario_id, mock_mode=True):
+        """Initialize new test session with scenario"""
+        
+    def update_session_state(self, session_id, new_state, data=None):
+        """Update session state and data"""
+        
+    def mock_transaction(self, tx_type, tx_data):
+        """Create mock blockchain transaction"""
+```
+
+### Test Scenarios
+
+#### Pre-built Realistic Scenarios
+
+**1. Elon Musk Twitter Scenario**
+- 10-minute prediction window
+- Target text: "abc 123 xyz"
+- 3 oracle validators
+- Multiple competitor predictions with varying stakes
+
+**2. Donald Trump Truth Social Scenario**
+- 10-minute prediction window
+- Economy-related post predictions
+- Realistic bet amounts and competitor strategies
+
+**3. Taylor Swift Album Announcement**
+- 15-minute prediction window
+- New album release predictions
+- Extended timeframe for realistic social media patterns
+
+### Testing Workflow
+
+#### Complete Lifecycle Testing
+
+1. **Market Creation Phase**
+   ```python
+   # Create prediction market with oracle configuration
+   market = create_test_market(scenario, oracle_wallets)
+   ```
+
+2. **Submission Generation Phase**
+   ```python
+   # Generate original and competitor submissions
+   submissions = create_test_submissions(market, scenario)
+   ```
+
+3. **Bet Placement Phase**
+   ```python
+   # Distribute bets across submissions
+   bets = create_test_bets(submissions, scenario)
+   ```
+
+4. **Time Management Phase**
+   ```python
+   # Support for fast-forwarding in test mode
+   if test_mode:
+       fast_forward_market_expiration(market)
+   ```
+
+5. **Oracle Consensus Phase**
+   ```python
+   # Simulate oracle submissions with consensus
+   oracle_results = submit_test_oracle_consensus(market, winning_text)
+   ```
+
+6. **Market Resolution Phase**
+   ```python
+   # Calculate winners using Levenshtein distance
+   winner = resolve_market_with_text_analysis(market, oracle_results)
+   ```
+
+7. **Reward Distribution Phase**
+   ```python
+   # Process payouts and update balances
+   payouts = distribute_rewards(market, winner)
+   ```
+
+8. **Ledger Reconciliation Phase**
+   ```python
+   # Final reconciliation of all transactions
+   reconcile_test_session_ledger(session_id)
+   ```
+
+### Mock Transaction System
+
+#### Safe Testing Strategy
+
+```python
+def mock_transaction(self, tx_type, tx_data):
+    """Generate realistic mock transactions without blockchain interaction"""
+    return {
+        'hash': generate_mock_tx_hash(),
+        'type': tx_type,
+        'data': tx_data,
+        'status': 'mocked',
+        'gas_used': estimate_gas_usage(tx_type),
+        'timestamp': datetime.utcnow().isoformat()
+    }
+```
+
+#### Real Blockchain Integration
+
+For actual blockchain testing, configure test wallets via Replit Secrets:
+
+```bash
+TEST_WALLET_ADDRESS="0x..."       # Main test wallet
+TEST_WALLET_PRIVATE_KEY="0x..."   # Private key (test only)
+TEST_ORACLE_WALLETS='["0x..."]'   # Oracle wallet addresses
+TEST_NETWORK_RPC="https://..."    # Test network RPC
+TEST_CHAIN_ID="11155111"          # Sepolia testnet
+```
+
+### Session Management
+
+#### Real-time Progress Tracking
+
+Dashboard at `/test_transactions` provides:
+
+- **Session Overview**: Active test sessions with progress indicators
+- **Transaction Logs**: Real-time transaction history and status
+- **Error Tracking**: Comprehensive error logging and debugging
+- **Wallet Configuration**: Guide for setting up test wallets
+- **Scenario Management**: Selection and customization of test scenarios
 
 #### ConsensusService (`services/consensus.py`)
 

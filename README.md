@@ -17,6 +17,8 @@ Clockchain is a sophisticated distributed ledger platform for decentralized prob
 - **Linguistic Prediction Markets**: Create predictions about future statements by public figures with precise time windows
 - **Competitive Submission System**: Original submissions spawn markets; competitors can challenge with alternative predictions
 - **AI Agent API**: Rate-limited programmatic access for automated agents to participate in markets
+- **Test Transaction Generator**: Comprehensive end-to-end testing system for real blockchain transactions
+- **AI Transparency Module**: Bittensor TAO integration with multi-layered AI verification (Relevance, NLP, Sentiment, Bias)
 - **Decentralized Oracle System**: Distributed validation of actual speech against all competing predictions
 - **Advanced Text Analysis**: Levenshtein distance algorithm with X.com-compatible formatting preservation
 - **Synthetic Time Ledger**: Immutable, chronologically-ordered ledger of all market events and consensus decisions
@@ -69,6 +71,52 @@ Clockchain is a sophisticated distributed ledger platform for decentralized prob
 - **Transaction Validation**: Real-time blockchain confirmation before submission acceptance
 - **Rate Limiting**: 10 submissions per minute to prevent spam and ensure fair participation
 - **Duplicate Prevention**: Transaction hash uniqueness enforced across all submissions
+
+### Test Transaction Generator
+
+**Clockchain** includes a comprehensive testing system for validating the complete blockchain workflow:
+
+#### Pre-built Test Scenarios
+- **Elon Musk Twitter Prediction**: 10-minute window for "abc 123 xyz" tweet
+- **Donald Trump Truth Social**: 10-minute window for economy-related posts
+- **Taylor Swift Album Announcement**: 15-minute window for new album reveals
+
+#### Mock-First Strategy
+- **Safe Testing**: Mock mode prevents real blockchain transaction failures
+- **Complete Lifecycle**: Tests market creation through ledger reconciliation
+- **Session Management**: Real-time tracking of test progress and transaction logs
+- **Wallet Configuration**: Support for test wallets via Replit Secrets
+
+#### Testing Workflow
+1. **Market Creation**: Generate prediction markets with oracle configuration
+2. **Submission Generation**: Create original and competitor submissions with varying stakes
+3. **Bet Placement**: Distribute bets across submissions with realistic amounts
+4. **Time Management**: Support for fast-forwarding market expiration in test mode
+5. **Oracle Consensus**: Simulate oracle submissions with consensus validation
+6. **Market Resolution**: Calculate winners using Levenshtein distance analysis
+7. **Reward Distribution**: Process payouts and update wallet balances
+8. **Ledger Reconciliation**: Final reconciliation of all transactions
+
+### AI Transparency & Bittensor Integration
+
+**Clockchain** features advanced AI transparency and verification capabilities:
+
+#### AI Profile Management
+- **Bittensor TAO Integration**: Track AI agent performance and TAO token staking
+- **Performance Metrics**: Comprehensive scoring across multiple verification modules
+- **Agent Classification**: Automatic categorization by performance and behavior patterns
+
+#### Multi-layered Verification System
+- **Relevance Verification**: Assess prediction relevance to target actors and contexts
+- **NLP Analysis**: Advanced natural language processing for text quality assessment
+- **Sentiment Analysis**: Emotional tone and bias detection in AI-generated predictions
+- **Bias Detection**: Systematic identification of AI model biases and limitations
+
+#### Transparency Dashboard
+- **Real-time Statistics**: Live tracking of AI agent activity and performance
+- **Verification Results**: Detailed breakdown of AI transparency scores
+- **Audit Trails**: Complete history of AI agent submissions and verification outcomes
+- **Performance Analytics**: Trend analysis and comparative performance metrics
 
 ### Important: Temporal Integrity
 
@@ -161,6 +209,28 @@ Access the admin dashboard at `http://localhost:5000/admin` to:
 - Track transaction history and platform fees
 - Manage actors and approve new submissions
 - Configure node settings and consensus parameters
+- Access AI transparency dashboard with verification statistics
+
+### Test Transaction Generator
+
+Use the comprehensive testing system at `http://localhost:5000/test_transactions` to:
+
+- Create end-to-end test sessions with realistic scenarios
+- Test complete market lifecycle from creation to reconciliation
+- Monitor real-time transaction logs and session progress
+- Configure test wallets for blockchain integration testing
+- Validate oracle consensus and reward distribution mechanisms
+- Run mock-first strategy to prevent blockchain transaction failures
+
+### AI Agent API
+
+Access the programmatic interface at `http://localhost:5000/ai_agent/docs` to:
+
+- Review comprehensive API documentation
+- Create automated submissions with rate limiting
+- Calculate required fees and stake amounts
+- Monitor transaction status and market competition
+- Integrate AI agents with transparent verification
 
 ### Clockchain Timeline
 
@@ -302,6 +372,34 @@ print(response.json())
 - **LEVENSHTEIN_THRESHOLD**: Text similarity matching precision (default: 80%)
 - **ORACLE_VOTE_TIMEOUT**: Oracle submission window duration (default: 1 hour)
 - **MAX_SUBMISSION_CHARS**: Character limit for predictions (default: 1000)
+
+### Test Environment Configuration
+
+**Test Transaction Generator Settings:**
+
+For running end-to-end blockchain testing, configure the following Replit Secrets:
+
+```bash
+# Test Wallet Configuration
+TEST_WALLET_ADDRESS="0x1234..."  # Main test wallet address for market creation
+TEST_WALLET_PRIVATE_KEY="0xabcd..."  # Private key (keep secure, use test wallets only!)
+TEST_ORACLE_WALLETS='["0xaaaa...","0xbbbb...","0xcccc..."]'  # JSON array of oracle addresses
+
+# Test Network Configuration (Optional)
+TEST_NETWORK_RPC="https://eth-sepolia.g.alchemy.com/v2/YOUR-API-KEY"  # Test network RPC endpoint
+TEST_CHAIN_ID="11155111"  # Chain ID (11155111 for Sepolia testnet)
+```
+
+**Safety Guidelines:**
+- Only use test networks (Sepolia, Goerli) or local development networks
+- Never use mainnet wallets or wallets containing real funds
+- Test wallet private keys should be dedicated to testing only
+- Get free testnet ETH from faucets before running tests
+
+**Test Scenarios Available:**
+- **Elon Musk Tweet**: 10-minute prediction window for "abc 123 xyz"
+- **Trump Truth Social**: 10-minute window for economy-related posts  
+- **Taylor Swift Album**: 15-minute window for new album announcements
 
 ### Text Analysis Engine
 

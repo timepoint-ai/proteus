@@ -1,7 +1,7 @@
 # Clockchain Status Workflow Documentation
 
 ## Overview
-This document defines the logical status progression for all entities in the Clockchain system. Each entity has specific states that reflect its lifecycle and ensure consistency across the platform.
+This document defines the logical status progression for all entities in the Clockchain system, including the Test Transaction Generator and AI Transparency modules. Each entity has specific states that reflect its lifecycle and ensure consistency across the platform.
 
 ## Entity Status Definitions
 
@@ -73,6 +73,69 @@ pending → consensus
    - Determine winning stakes
 
 4. Upon resolution:
+   - Stakes transition to `won`/`lost`/`refunded`
+   - Payouts processed via blockchain transactions
+   
+## Test Transaction Generator Status Flow
+
+### Test Session Status
+Represents the lifecycle of end-to-end testing sessions.
+
+```
+initialized → market_created → submissions_created → bets_created → 
+market_ended → oracles_submitted → resolved → completed
+          ↘ error (at any stage)
+```
+
+- **initialized**: Session created, scenario loaded
+- **market_created**: Prediction market created with oracle configuration
+- **submissions_created**: Original and competitor submissions generated
+- **bets_created**: Bets distributed across submissions
+- **market_ended**: Market time window expired (or fast-forwarded in test mode)
+- **oracles_submitted**: Oracle consensus submissions received
+- **resolved**: Market resolved, winners calculated, rewards distributed
+- **completed**: All transactions reconciled on ledger
+- **error**: Session encountered unrecoverable error at any stage
+
+### Mock Transaction Status
+```
+mocked → logged → reconciled
+```
+
+- **mocked**: Transaction simulated without blockchain interaction
+- **logged**: Transaction recorded in session logs
+- **reconciled**: Transaction included in final ledger reconciliation
+
+## AI Transparency Status Flow
+
+### AI Profile Status
+```
+pending → active → suspended → terminated
+```
+
+- **pending**: AI profile created, awaiting initial verification
+- **active**: AI agent verified and participating in markets
+- **suspended**: Temporary suspension due to verification failures
+- **terminated**: Permanent removal from platform
+
+### Verification Result Status
+```
+processing → completed → failed
+```
+
+- **processing**: Verification module executing analysis
+- **completed**: Verification completed with score and confidence
+- **failed**: Verification failed due to technical or validation errors
+
+### Transparency Audit Status
+```
+scheduled → in_progress → completed → archived
+```
+
+- **scheduled**: Audit scheduled for AI agent
+- **in_progress**: Audit actively running verification modules
+- **completed**: Audit finished with final transparency score
+- **archived**: Historical audit data preserved for records
    - All confirmed stakes → `won` or `lost`
    - Create payout transactions for winners
    - Platform fee transactions created
