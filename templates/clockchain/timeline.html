@@ -143,7 +143,7 @@
                                             
                                             <div class="prediction-text mb-3">
                                                 <strong>Predicted Text:</strong>
-                                                <div class="bg-light p-2 rounded mt-1">
+                                                <div class="bg-dark text-white p-3 rounded mt-1 border">
                                                     <em>"{{ segment.predicted_text }}"</em>
                                                 </div>
                                             </div>
@@ -151,9 +151,9 @@
                                             {% if segment.resolution %}
                                             <div class="resolution-info mb-3">
                                                 <strong>Resolution:</strong>
-                                                <div class="bg-light p-2 rounded mt-1">
+                                                <div class="bg-success text-white p-3 rounded mt-1 border">
                                                     <div>Actual: <em>"{{ segment.resolution.actual_text }}"</em></div>
-                                                    <div class="mt-1">
+                                                    <div class="mt-2">
                                                         <span class="badge bg-info">Levenshtein Distance: {{ segment.resolution.levenshtein_distance }}</span>
                                                     </div>
                                                 </div>

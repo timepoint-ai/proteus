@@ -239,6 +239,22 @@ def submission_detail(submission_id):
         # Get oracle submissions for this bet
         oracle_submissions = OracleSubmission.query.filter_by(bet_id=submission_id).order_by(desc(OracleSubmission.created_at)).all()
         
+        # Get related transactions
+        related_transactions = Transaction.query.filter_by(related_bet_id=submission_id).order_by(desc(Transaction.created_at)).all()
+        transactions_data = []
+        for tx in related_transactions:
+            transactions_data.append({
+                'id': str(tx.id),
+                'transaction_hash': tx.transaction_hash,
+                'transaction_type': tx.transaction_type,
+                'amount': str(tx.amount),
+                'currency': tx.currency,
+                'from_wallet': tx.from_wallet,
+                'to_wallet': tx.to_wallet,
+                'status': tx.status,
+                'created_at': tx.created_at.strftime('%Y-%m-%d %H:%M:%S') if tx.created_at else ''
+            })
+        
         # Calculate totals
         total_volume = sum(stake.amount for stake in stakes)
         
@@ -258,12 +274,12 @@ def submission_detail(submission_id):
             'transaction_hash': bet.transaction_hash,
             'status': bet.status,
             'oracle_wallets': json.loads(bet.oracle_wallets) if bet.oracle_wallets else [],
-            'platform_fee': str(bet.platform_fee) if bet.platform_fee else '0',
             'created_at': bet.created_at,
             'stakes': stakes_data,
             'total_volume': str(total_volume),
             'stake_count': len(stakes),
             'competing_submissions': competing_bets,
+            'related_transactions': transactions_data,
             'oracle_submissions': [{
                 'id': str(os.id),
                 'oracle_wallet': os.oracle_wallet,

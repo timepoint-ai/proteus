@@ -7,7 +7,13 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3">Submission Details</h1>
+                <div>
+                    <h1 class="h3">Submission Details</h1>
+                    <div class="mt-2">
+                        <h2 class="text-primary mb-1">{{ submission.total_volume }} {{ submission.currency }}</h2>
+                        <p class="text-muted mb-0">Total Betting Volume</p>
+                    </div>
+                </div>
                 <div class="d-flex gap-2">
                     <a href="{{ url_for('clockchain.clockchain_view') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to Timeline
@@ -40,7 +46,7 @@
                     
                     <div class="mb-3">
                         <h6>Predicted Text</h6>
-                        <div class="bg-light p-3 rounded">
+                        <div class="bg-dark text-white p-3 rounded border">
                             <em class="fs-5">"{{ submission.predicted_text }}"</em>
                         </div>
                     </div>
@@ -67,11 +73,11 @@
                     {% if submission.resolution %}
                     <div class="mt-3 border-top pt-3">
                         <h6>Resolution</h6>
-                        <div class="bg-light p-3 rounded">
+                        <div class="bg-success text-white p-3 rounded border">
                             <p class="mb-2"><strong>Actual Text:</strong> <em>"{{ submission.resolution.text }}"</em></p>
                             <p class="mb-0">
                                 <span class="badge bg-info">Levenshtein Distance: {{ submission.resolution.levenshtein_distance }}</span>
-                                <small class="text-muted ms-2">Resolved: {{ submission.resolution.resolution_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <small class="text-light ms-2">Resolved: {{ submission.resolution.resolution_time.strftime('%Y-%m-%d %H:%M') }}</small>
                             </p>
                         </div>
                     </div>
@@ -111,11 +117,6 @@
                 <div class="card-body">
                     <small class="text-muted">Transaction Hash</small>
                     <div class="font-monospace small">{{ submission.transaction_hash[:20] }}...{{ submission.transaction_hash[-20:] }}</div>
-                    
-                    <hr>
-                    
-                    <small class="text-muted">Platform Fee</small>
-                    <div>{{ submission.platform_fee }} {{ submission.currency }}</div>
                     
                     <hr>
                     
@@ -258,6 +259,49 @@
                                         {% endif %}
                                     </td>
                                     <td>{{ os.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Related Transactions -->
+    {% if submission.related_transactions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Related Transactions ({{ submission.related_transactions|length }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Transaction Hash</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in submission.related_transactions %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ tx.transaction_type|title }}</span></td>
+                                    <td><strong>{{ tx.amount }} {{ tx.currency }}</strong></td>
+                                    <td><small class="font-monospace">{{ tx.from_wallet[:8] }}...{{ tx.from_wallet[-4:] if tx.from_wallet else '' }}</small></td>
+                                    <td><small class="font-monospace">{{ tx.to_wallet[:8] }}...{{ tx.to_wallet[-4:] if tx.to_wallet else '' }}</small></td>
+                                    <td><small class="font-monospace">{{ tx.transaction_hash[:10] }}...{{ tx.transaction_hash[-6:] if tx.transaction_hash else '' }}</small></td>
+                                    <td><span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'danger' }}">{{ tx.status|title }}</span></td>
+                                    <td><small>{{ tx.created_at }}</small></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
