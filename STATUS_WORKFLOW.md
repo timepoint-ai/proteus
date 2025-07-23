@@ -1,4 +1,4 @@
-# Clockchain Status Workflow Documentation
+**# Clockchain Status Workflow Documentation
 
 ## Overview
 This document defines the logical status progression for all entities in the Clockchain system, including the Test Transaction Generator and AI Transparency modules. Each entity has specific states that reflect its lifecycle and ensure consistency across the platform.
@@ -205,4 +205,4 @@ When generating test data, ensure:
 2. All transactions for resolved bets are confirmed
 3. Active bets only have pending/confirmed stakes
 4. No orphaned pending transactions for resolved bets
-5. Oracle submissions respect timing constraints
+5. Oracle submissions respect timing constraints**
