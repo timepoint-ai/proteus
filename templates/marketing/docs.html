@@ -1,0 +1,447 @@
+{% extends "marketing/base.html" %}
+
+{% block title %}Documentation - Clockchain{% endblock %}
+
+{% block extra_css %}
+<style>
+    .docs-nav {
+        position: sticky;
+        top: 100px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+    
+    .docs-nav a {
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        display: block;
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .docs-nav a:hover {
+        color: var(--text-light);
+        background: rgba(124, 58, 237, 0.1);
+    }
+    
+    .docs-nav a.active {
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+        background: rgba(124, 58, 237, 0.1);
+    }
+    
+    .docs-content {
+        padding: 2rem;
+    }
+    
+    .docs-section {
+        margin-bottom: 4rem;
+        padding-top: 2rem;
+    }
+    
+    .docs-section h2 {
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .docs-section h3 {
+        color: var(--secondary-color);
+        margin: 2rem 0 1rem;
+    }
+    
+    pre {
+        background: var(--darker-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+    }
+    
+    code {
+        color: var(--accent-color);
+        background: rgba(96, 165, 250, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+    
+    pre code {
+        background: none;
+        padding: 0;
+    }
+    
+    .architecture-diagram {
+        background: var(--darker-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+    
+    .status-flow {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        background: rgba(124, 58, 237, 0.2);
+        border: 1px solid var(--primary-color);
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .arrow {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <nav class="docs-nav">
+                <h5 class="mb-3">Documentation</h5>
+                <a href="#overview" class="active">Overview</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#api">API Documentation</a>
+                <a href="#status">Status Workflow</a>
+                <a href="#ai">AI Transparency</a>
+                <a href="#consensus">Consensus Mechanism</a>
+                <a href="#deployment">Deployment</a>
+            </nav>
+        </div>
+        
+        <!-- Main Documentation Content -->
+        <div class="col-lg-9">
+            <div class="docs-content">
+                <h1 class="display-5 fw-bold mb-4">Clockchain <span class="gradient-text">Documentation</span></h1>
+                
+                <!-- Overview Section -->
+                <section id="overview" class="docs-section">
+                    <h2>📖 Overview</h2>
+                    <p class="lead">
+                        Clockchain is a decentralized prediction market platform specifically designed for linguistic events. 
+                        Users can create markets predicting what public figures will say within specific time windows.
+                    </p>
+                    
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li><strong>Decentralized Consensus:</strong> Multi-node validation ensures market integrity</li>
+                        <li><strong>Temporal Integrity:</strong> Immutable time windows prevent manipulation</li>
+                        <li><strong>Levenshtein Algorithm:</strong> Mathematical text similarity for fair resolution</li>
+                        <li><strong>Blockchain Integration:</strong> ETH and BTC support for stakes and payouts</li>
+                        <li><strong>AI Transparency:</strong> Advanced verification for AI-generated predictions</li>
+                    </ul>
+                </section>
+                
+                <!-- Architecture Section -->
+                <section id="architecture" class="docs-section">
+                    <h2>🏗️ Architecture</h2>
+                    
+                    <div class="architecture-diagram">
+                        <h4>System Layers</h4>
+                        <pre style="text-align: left; font-size: 0.875rem;">
+┌─────────────────────────────────────────────────────────────┐
+│                      Frontend Layer                          │
+│ (Jinja2 Templates, Bootstrap, Chart.js, WebSockets)        │
+├─────────────────────────────────────────────────────────────┤
+│                    Application Layer                         │
+│ (Flask Routes, AI Agent API, Admin Dashboard)              │
+├─────────────────────────────────────────────────────────────┤
+│                     Service Layer                            │
+│ (Consensus, Oracle, Text Analysis, AI Verification)        │
+├─────────────────────────────────────────────────────────────┤
+│                  Infrastructure Layer                        │
+│ (Celery Tasks, Redis Cache, WebSocket Connections)         │
+├─────────────────────────────────────────────────────────────┤
+│                     Data Layer                               │
+│ (PostgreSQL, SQLAlchemy ORM, Redis Store)                  │
+├─────────────────────────────────────────────────────────────┤
+│                   Blockchain Layer                           │
+│ (Ethereum Web3, Bitcoin API, Transaction Validation)       │
+└─────────────────────────────────────────────────────────────┘
+                        </pre>
+                    </div>
+                    
+                    <h3>Core Components</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>🔗 Consensus Service</h5>
+                                <p>Manages node voting and network consensus for market decisions</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>🔮 Oracle Service</h5>
+                                <p>Validates source authenticity and performs text analysis</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>⛓️ Blockchain Service</h5>
+                                <p>Validates ETH/BTC transactions for stakes and payouts</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>📊 Text Analysis Service</h5>
+                                <p>Calculates Levenshtein distance for prediction accuracy</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- API Documentation Section -->
+                <section id="api" class="docs-section">
+                    <h2>🚀 API Documentation</h2>
+                    
+                    <h3>Authentication</h3>
+                    <p>All API endpoints require an API key passed in the <code>X-API-Key</code> header:</p>
+                    <pre><code>X-API-Key: your-api-key-here</code></pre>
+                    
+                    <h3>Rate Limiting</h3>
+                    <ul>
+                        <li>60 requests per minute for authenticated users</li>
+                        <li>10 requests per minute for unauthenticated users</li>
+                        <li>Burst limit of 100 requests</li>
+                    </ul>
+                    
+                    <h3>Core Endpoints</h3>
+                    
+                    <h4>Create Submission</h4>
+                    <pre><code>POST /ai_agent/submissions
+{
+    "actor_id": "actor-uuid",
+    "predicted_text": "The actual prediction text",
+    "start_time": "2025-01-01T00:00:00Z",
+    "end_time": "2025-12-31T23:59:59Z",
+    "eth_tx_hash": "0x123...",
+    "amount": "0.1"
+}</code></pre>
+                    
+                    <h4>Place Bet</h4>
+                    <pre><code>POST /ai_agent/bets
+{
+    "submission_id": "submission-uuid",
+    "amount": "0.05",
+    "currency": "ETH",
+    "tx_hash": "0x456..."
+}</code></pre>
+                    
+                    <h4>Get Market Status</h4>
+                    <pre><code>GET /api/markets/{market_id}/status
+
+Response:
+{
+    "status": "active|expired|validating|resolved",
+    "total_volume": "6.32 ETH",
+    "oracle_allowed": false,
+    "time_remaining": "2d 14h 32m"
+}</code></pre>
+                    
+                    <h3>WebSocket Events</h3>
+                    <p>Connect to <code>wss://your-node/ws</code> for real-time updates:</p>
+                    <ul>
+                        <li><code>market.created</code> - New market created</li>
+                        <li><code>bet.placed</code> - New bet placed</li>
+                        <li><code>oracle.submitted</code> - Oracle data submitted</li>
+                        <li><code>market.resolved</code> - Market resolved with winners</li>
+                    </ul>
+                </section>
+                
+                <!-- Status Workflow Section -->
+                <section id="status" class="docs-section">
+                    <h2>📊 Status Workflow</h2>
+                    
+                    <h3>Bet Status Flow</h3>
+                    <div class="status-flow">
+                        <span class="status-badge">active</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">expired</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">validating</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">resolved</span>
+                    </div>
+                    
+                    <h3>Stake Status Flow</h3>
+                    <div class="status-flow">
+                        <span class="status-badge">pending</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">confirmed</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">won/lost</span>
+                    </div>
+                    
+                    <h3>Oracle Submission Flow</h3>
+                    <div class="status-flow">
+                        <span class="status-badge">pending</span>
+                        <span class="arrow">→</span>
+                        <span class="status-badge">consensus/rejected</span>
+                    </div>
+                    
+                    <h3>Status Rules</h3>
+                    <ul>
+                        <li><strong>Oracle Timing:</strong> Submissions only allowed AFTER bet end_time</li>
+                        <li><strong>Resolution:</strong> Lowest Levenshtein distance wins</li>
+                        <li><strong>Payouts:</strong> 80% to winners, 20% platform fee</li>
+                        <li><strong>Refunds:</strong> Only if market is cancelled by consensus</li>
+                    </ul>
+                </section>
+                
+                <!-- AI Transparency Section -->
+                <section id="ai" class="docs-section">
+                    <h2>🤖 AI Transparency</h2>
+                    
+                    <h3>Verification Modules</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>📝 Relevance Verification</h5>
+                                <p>Assesses prediction relevance to target actors and contexts</p>
+                                <div class="tech-badge">Score: 0-100</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>🧠 NLP Analysis</h5>
+                                <p>Grammar, syntax, and coherence assessment</p>
+                                <div class="tech-badge">Language Models</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>💭 Sentiment Analysis</h5>
+                                <p>Emotional tone and sentiment classification</p>
+                                <div class="tech-badge">Bias Detection</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>⚖️ Bias Detection</h5>
+                                <p>Systematic identification of AI model limitations</p>
+                                <div class="tech-badge">Fairness Scoring</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Bittensor TAO Integration</h3>
+                    <ul>
+                        <li>Track AI agent performance with TAO token staking</li>
+                        <li>Performance metrics across verification modules</li>
+                        <li>Automatic agent classification by behavior</li>
+                        <li>Transparency dashboard with real-time stats</li>
+                    </ul>
+                </section>
+                
+                <!-- Consensus Section -->
+                <section id="consensus" class="docs-section">
+                    <h2>🤝 Consensus Mechanism</h2>
+                    
+                    <h3>Byzantine Fault Tolerance</h3>
+                    <p>The network uses a modified PBFT algorithm to achieve consensus:</p>
+                    <ul>
+                        <li>Minimum 2/3 nodes must agree for consensus</li>
+                        <li>Automatic leader election for proposal submission</li>
+                        <li>Time-bounded voting periods</li>
+                        <li>Cryptographic signatures on all votes</li>
+                    </ul>
+                    
+                    <h3>Time Synchronization</h3>
+                    <p>Critical for maintaining temporal integrity:</p>
+                    <ul>
+                        <li>Network Time Protocol (NTP) synchronization</li>
+                        <li>Median time consensus across nodes</li>
+                        <li>Maximum drift tolerance: 30 seconds</li>
+                        <li>Automatic resync every 5 minutes</li>
+                    </ul>
+                </section>
+                
+                <!-- Deployment Section -->
+                <section id="deployment" class="docs-section">
+                    <h2>🚢 Deployment</h2>
+                    
+                    <h3>Production Requirements</h3>
+                    <ul>
+                        <li>PostgreSQL 13+ with replication</li>
+                        <li>Redis 6+ cluster mode</li>
+                        <li>Python 3.11+ environment</li>
+                        <li>Nginx for load balancing</li>
+                        <li>SSL/TLS certificates</li>
+                    </ul>
+                    
+                    <h3>Environment Variables</h3>
+                    <pre><code>DATABASE_URL=postgresql://user:pass@host/db
+REDIS_URL=redis://localhost:6379
+SECRET_KEY=your-secret-key
+ETH_RPC_URL=https://mainnet.infura.io/v3/key
+BTC_API_KEY=your-btc-api-key</code></pre>
+                    
+                    <h3>Monitoring</h3>
+                    <ul>
+                        <li>Health check endpoint: <code>/api/health</code></li>
+                        <li>Metrics endpoint: <code>/api/metrics</code></li>
+                        <li>Admin dashboard: <code>/admin</code></li>
+                        <li>Structured logging with correlation IDs</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scrolling and active section highlighting
+    const sections = document.querySelectorAll('.docs-section');
+    const navLinks = document.querySelectorAll('.docs-nav a');
+    
+    function updateActiveSection() {
+        const scrollPosition = window.scrollY + 150;
+        
+        sections.forEach((section, index) => {
+            const top = section.offsetTop;
+            const bottom = top + section.offsetHeight;
+            
+            if (scrollPosition >= top && scrollPosition < bottom) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                navLinks[index].classList.add('active');
+            }
+        });
+    }
+    
+    window.addEventListener('scroll', updateActiveSection);
+    
+    // Smooth scroll to section
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if (targetSection) {
+                const offset = 100;
+                const targetPosition = targetSection.offsetTop - offset;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

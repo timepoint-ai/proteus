@@ -1,0 +1,468 @@
+{% extends "marketing/base.html" %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-graphic {
+        position: absolute;
+        right: -10%;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.1;
+        z-index: 0;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .email-form {
+        background: rgba(124, 58, 237, 0.1);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .infographic-section {
+        background-color: var(--darker-bg);
+        padding: 4rem 0;
+    }
+    
+    .timeline-step {
+        position: relative;
+        padding: 2rem;
+        border-left: 3px solid var(--primary-color);
+        margin-left: 2rem;
+    }
+    
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        left: -12px;
+        top: 2rem;
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        font-size: 24px;
+    }
+    
+    .example-card {
+        background: rgba(96, 165, 250, 0.1);
+        border: 1px solid rgba(96, 165, 250, 0.3);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .tech-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(124, 58, 237, 0.2);
+        border: 1px solid var(--primary-color);
+        border-radius: 20px;
+        font-size: 0.875rem;
+        margin: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 hero-content">
+                <h1 class="display-4 fw-bold mb-4">
+                    Predict the Future of <span class="gradient-text">Language</span>
+                </h1>
+                <p class="lead mb-4">
+                    Clockchain revolutionizes prediction markets by letting you bet on what public figures will say. 
+                    Powered by decentralized consensus, cryptographic proofs, and linguistic algorithms.
+                </p>
+                <div class="d-flex gap-3 mb-4">
+                    <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i> Enter Demo
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg">
+                        Learn More <i class="fas fa-arrow-down ms-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Email Capture Form -->
+                <div class="email-form">
+                    <h4 class="mb-3">🚀 Get Early Access</h4>
+                    <form action="{{ url_for('marketing.capture_email') }}" method="POST" class="row g-3">
+                        <div class="col-md-8">
+                            <input type="email" class="form-control form-control-lg" name="email" 
+                                   placeholder="your@email.com" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                Notify Me
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted mt-2 d-block">
+                        Join the waitlist for the mainnet launch. No spam, ever.
+                    </small>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <!-- Hero Graphic SVG -->
+                <svg class="hero-graphic" width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.6" />
+                            <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.6" />
+                        </linearGradient>
+                    </defs>
+                    <g transform="translate(300,300)">
+                        <!-- Interconnected nodes representing blockchain -->
+                        <circle r="200" fill="none" stroke="url(#heroGradient)" stroke-width="2" opacity="0.3"/>
+                        <circle r="150" fill="none" stroke="url(#heroGradient)" stroke-width="2" opacity="0.4"/>
+                        <circle r="100" fill="none" stroke="url(#heroGradient)" stroke-width="2" opacity="0.5"/>
+                        <circle r="50" fill="none" stroke="url(#heroGradient)" stroke-width="2" opacity="0.6"/>
+                        
+                        <!-- Clock hands -->
+                        <line x1="0" y1="0" x2="0" y2="-120" stroke="url(#heroGradient)" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="0" y1="0" x2="80" y2="0" stroke="url(#heroGradient)" stroke-width="4" stroke-linecap="round"/>
+                        
+                        <!-- Chain links -->
+                        <path d="M-150,-150 Q-170,-130 -150,-110 Q-130,-130 -150,-150" fill="none" stroke="url(#heroGradient)" stroke-width="3"/>
+                        <path d="M150,-150 Q170,-130 150,-110 Q130,-130 150,-150" fill="none" stroke="url(#heroGradient)" stroke-width="3"/>
+                        <path d="M-150,150 Q-170,130 -150,110 Q-130,130 -150,150" fill="none" stroke="url(#heroGradient)" stroke-width="3"/>
+                        <path d="M150,150 Q170,130 150,110 Q130,130 150,150" fill="none" stroke="url(#heroGradient)" stroke-width="3"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Philosophy Section -->
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">The Power of <span class="gradient-text">Linguistic Markets</span></h2>
+                <p class="lead">
+                    Words shape reality. In politics, business, and culture, what influential people say moves markets, 
+                    changes policies, and defines narratives. Clockchain creates a decentralized oracle for linguistic events,
+                    turning speech prediction into a powerful consensus mechanism.
+                </p>
+                <div class="mt-5">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="feature-icon mx-auto">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <h5>Collective Intelligence</h5>
+                                <p class="text-muted">
+                                    Harness the wisdom of crowds to predict linguistic events with unprecedented accuracy
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="feature-icon mx-auto">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h5>Cryptographic Truth</h5>
+                                <p class="text-muted">
+                                    Every prediction and outcome secured by blockchain consensus and mathematical proofs
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="feature-icon mx-auto">
+                                    <i class="fas fa-hourglass-half"></i>
+                                </div>
+                                <h5>Temporal Integrity</h5>
+                                <p class="text-muted">
+                                    Immutable time windows ensure fair markets with no retroactive manipulation
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Infographic -->
+<section id="how-it-works" class="infographic-section">
+    <div class="container">
+        <h2 class="display-5 fw-bold text-center mb-5">How <span class="gradient-text">Clockchain</span> Works</h2>
+        
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="timeline-step">
+                    <h4>1️⃣ Create a Prediction</h4>
+                    <p>Choose a public figure and predict what they'll say within a specific time window</p>
+                    <div class="example-card">
+                        <strong>Example:</strong> "Elon Musk will tweet about Mars colonization by 2026"
+                        <br><small class="text-muted">Time Window: Jan 1, 2025 - Dec 31, 2026</small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <h4>2️⃣ Market Formation</h4>
+                    <p>Other users create competing predictions and place stakes on their favorites</p>
+                    <div class="example-card">
+                        <strong>Competing predictions:</strong>
+                        <ul class="mb-0">
+                            <li>"We're making life multiplanetary"</li>
+                            <li>"Mars colony by 2030"</li>
+                            <li>"Humans on Mars this decade"</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <h4>3️⃣ Time Window Expires</h4>
+                    <p>Once the prediction window closes, oracle submissions become available</p>
+                    <div class="tech-badge">⏰ Temporal Lock Active</div>
+                    <div class="tech-badge">🔒 No Early Oracles</div>
+                    <div class="tech-badge">⛓️ Immutable Timeline</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <h4>4️⃣ Oracle Validation</h4>
+                    <p>Network nodes submit verified sources of what was actually said</p>
+                    <div class="example-card">
+                        <strong>Oracle Source:</strong> Official Twitter/X post
+                        <br><strong>Actual Text:</strong> "Making life multiplanetary is essential for humanity"
+                        <br><small class="text-muted">Verified by consensus across 15 nodes</small>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <h4>5️⃣ Levenshtein Analysis</h4>
+                    <p>Algorithm calculates text similarity between predictions and actual speech</p>
+                    <div class="example-card">
+                        <strong>Distance Scores:</strong>
+                        <ul class="mb-0">
+                            <li>"We're making life multiplanetary" → <span class="badge bg-success">Distance: 12</span></li>
+                            <li>"Mars colony by 2030" → <span class="badge bg-warning">Distance: 28</span></li>
+                            <li>"Humans on Mars this decade" → <span class="badge bg-danger">Distance: 35</span></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <h4>6️⃣ Automatic Resolution</h4>
+                    <p>Lowest Levenshtein distance wins. Smart contracts distribute rewards to winners</p>
+                    <div class="tech-badge">🏆 Winner Takes 80%</div>
+                    <div class="tech-badge">💰 20% Platform Fee</div>
+                    <div class="tech-badge">⚡ Instant Settlement</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('clockchain.clockchain_view') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-search me-2"></i> Explore Live Predictions
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Fun Examples Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="display-5 fw-bold text-center mb-5">Real-World <span class="gradient-text">Applications</span></h2>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <h5 class="mb-3">📈 Market Moving Statements</h5>
+                    <p>Predict Fed Chair statements about interest rates. Winners could hedge against market volatility.</p>
+                    <div class="example-card">
+                        <strong>Prediction:</strong> "Jerome Powell will say 'rates will remain elevated' in next FOMC"
+                        <br><strong>Potential Impact:</strong> $100B+ market movements
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <h5 class="mb-3">🎭 Cultural Moments</h5>
+                    <p>Bet on award show speeches, viral catchphrases, or celebrity announcements.</p>
+                    <div class="example-card">
+                        <strong>Prediction:</strong> "Taylor Swift will announce new album at the Grammys"
+                        <br><strong>Stakes:</strong> Fans vs. Skeptics battle it out
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <h5 class="mb-3">🏛️ Political Prophecies</h5>
+                    <p>Predict campaign promises, debate zingers, or policy announcements.</p>
+                    <div class="example-card">
+                        <strong>Prediction:</strong> "President will mention 'infrastructure' 5+ times in State of Union"
+                        <br><strong>Oracle:</strong> Official transcript validates
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <h5 class="mb-3">💡 Tech Predictions</h5>
+                    <p>Anticipate product launches, feature announcements, or industry pivots.</p>
+                    <div class="example-card">
+                        <strong>Prediction:</strong> "OpenAI will announce GPT-5 before Q3 2025"
+                        <br><strong>Resolution:</strong> Blog post timestamp decides
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technical Features -->
+<section class="section" style="background-color: var(--darker-bg);">
+    <div class="container">
+        <h2 class="display-5 fw-bold text-center mb-5">Built for <span class="gradient-text">Developers</span></h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <h5 class="mb-3"><i class="fas fa-code me-2"></i> API Documentation</h5>
+                    <p>Comprehensive REST API for programmatic access to all platform features</p>
+                    <div class="mt-3">
+                        <div class="tech-badge">Rate Limiting</div>
+                        <div class="tech-badge">WebSocket Events</div>
+                        <div class="tech-badge">JSON Responses</div>
+                    </div>
+                    <a href="{{ url_for('marketing.docs') }}#api" class="btn btn-sm btn-outline-light mt-3">
+                        View API Docs
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <h5 class="mb-3"><i class="fas fa-network-wired me-2"></i> Status Workflow</h5>
+                    <p>Transparent state machine for all entities with clear progression paths</p>
+                    <div class="mt-3">
+                        <div class="tech-badge">Bet Lifecycle</div>
+                        <div class="tech-badge">Oracle States</div>
+                        <div class="tech-badge">Transaction Flow</div>
+                    </div>
+                    <a href="{{ url_for('marketing.docs') }}#status" class="btn btn-sm btn-outline-light mt-3">
+                        View Workflow
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <h5 class="mb-3"><i class="fas fa-robot me-2"></i> AI Transparency</h5>
+                    <p>Advanced verification modules for AI-generated predictions with TAO integration</p>
+                    <div class="mt-3">
+                        <div class="tech-badge">Bittensor TAO</div>
+                        <div class="tech-badge">NLP Analysis</div>
+                        <div class="tech-badge">Bias Detection</div>
+                    </div>
+                    <a href="{{ url_for('marketing.docs') }}#ai" class="btn btn-sm btn-outline-light mt-3">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">Ready to Predict the Future?</h2>
+                <p class="lead mb-4">
+                    Join the revolution in decentralized prediction markets. 
+                    Test the platform today and be first when we launch on mainnet.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i> Launch Demo
+                    </a>
+                    <a href="https://x.com/seanmcdonaldxyz" target="_blank" class="btn btn-outline-light btn-lg">
+                        <i class="fab fa-x-twitter me-2"></i> Follow Updates
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const offset = 100; // Account for fixed header
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all cards and timeline steps
+    document.querySelectorAll('.card, .timeline-step').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+</script>
+{% endblock %}

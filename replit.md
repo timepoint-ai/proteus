@@ -119,6 +119,24 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Marketing Landing Page and Site Restructure (July 23, 2025)
+- **Created New Marketing Landing Page**: Professional blockchain-style landing page at root URL ('/')
+  - Demo banner indicating it's not a live site
+  - Email capture form with database storage (EmailCapture model)
+  - Comprehensive infographic explaining how Clockchain works
+  - Sections covering API documentation and status workflow
+  - Links to documentation page and demo
+  - Custom Clockchain SVG logo in header
+  - Authentic blockchain community design - technical, not splashy
+  - Philosophical explanation of prediction market power with real-world examples
+- **Route Restructuring**: 
+  - Root '/' now serves marketing landing page instead of redirecting to admin
+  - Admin dashboard moved to '/dashboard' route
+  - Created comprehensive documentation page at '/docs'
+  - Demo button redirects to Clockchain timeline view
+- **New Models**: Added EmailCapture model for storing email signups from landing page
+- **Design Philosophy**: Focused on authentic blockchain aesthetics with gradient accents, dark theme, and technical clarity
+
 ### Test Transaction Generator Implementation (July 21, 2025)
 - **New Feature**: Added comprehensive test transaction generator for end-to-end blockchain testing
 - **Management Dashboard**: Created `/test_transactions` dashboard for managing test sessions

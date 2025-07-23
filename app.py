@@ -58,7 +58,9 @@ def create_app():
     from routes.test_transactions import test_transactions_bp
     from routes.clockchain import clockchain_bp
     from routes.ai_agent_api import ai_agent_api_bp, init_limiter
+    from routes.marketing import marketing_bp
     
+    app.register_blueprint(marketing_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(test_data_bp, url_prefix='/test_data')
@@ -71,12 +73,6 @@ def create_app():
     
     # Initialize rate limiter
     init_limiter(app)
-    
-    # Root route redirect to admin dashboard
-    @app.route('/')
-    def index():
-        from flask import redirect, url_for
-        return redirect(url_for('admin.dashboard'))
     
     # Create database tables
     with app.app_context():
