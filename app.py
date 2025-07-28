@@ -62,6 +62,7 @@ def create_app():
     from routes.actors import actors_bp
     from routes.clockchain_api import clockchain_api_bp
     from routes.oracles import oracles_bp
+    from routes.generate_realistic_data import generate_data_bp
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -76,6 +77,7 @@ def create_app():
     app.register_blueprint(actors_bp)
     app.register_blueprint(clockchain_api_bp)
     app.register_blueprint(oracles_bp)
+    app.register_blueprint(generate_data_bp)
     
     # Initialize rate limiter
     init_limiter(app)

@@ -222,12 +222,23 @@ def market_detail(market_id):
         actor = Actor.query.get(market.actor_id) if market.actor_id else None
         submissions = Submission.query.filter_by(market_id=market.id).all()
         
-        # Get all bets for this market
+        # Get all bets for this market with transaction status
         all_bets = []
         total_volume = 0
         for submission in submissions:
             bets = Bet.query.filter_by(submission_id=submission.id).all()
             for bet in bets:
+                # Get transaction status for this bet
+                transaction = Transaction.query.filter_by(
+                    transaction_hash=bet.transaction_hash
+                ).first()
+                
+                # Use transaction status if available, otherwise use bet status
+                if transaction:
+                    bet.display_status = transaction.status
+                else:
+                    bet.display_status = bet.status or 'pending'
+                
                 total_volume += bet.amount
                 all_bets.append({
                     'submission': submission,

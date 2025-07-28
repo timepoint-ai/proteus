@@ -106,10 +106,18 @@
                                             <strong>{{ submission_volume }} {{ submission.currency }}</strong>
                                         </td>
                                         <td>
-                                            {% if submission.is_winner %}
-                                                <span class="badge bg-success">Winner</span>
+                                            {% if market.status == 'resolved' %}
+                                                {% if submission.is_winner %}
+                                                    <span class="badge bg-success">Winner</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Lost</span>
+                                                {% endif %}
+                                            {% elif market.status == 'validating' %}
+                                                <span class="badge bg-info">Validating</span>
+                                            {% elif market.status == 'expired' %}
+                                                <span class="badge bg-warning">Awaiting Oracle</span>
                                             {% else %}
-                                                <span class="badge bg-secondary">Pending</span>
+                                                <span class="badge bg-secondary">Active</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -172,8 +180,8 @@
                                             <strong>{{ bet_data.bet.amount }} {{ bet_data.bet.currency }}</strong>
                                         </td>
                                         <td>
-                                            <span class="badge bg-{{ 'success' if bet_data.bet.status == 'confirmed' else 'warning' if bet_data.bet.status == 'pending' else 'danger' }}">
-                                                {{ bet_data.bet.status.title() }}
+                                            <span class="badge bg-{{ 'success' if bet_data.bet.display_status == 'confirmed' else 'warning' if bet_data.bet.display_status == 'pending' else 'danger' }}">
+                                                {{ bet_data.bet.display_status.title() }}
                                             </span>
                                         </td>
                                         <td>
