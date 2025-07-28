@@ -119,6 +119,19 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Actors Pages and Pagination Implementation (July 28, 2025)
+- **Created Actors Section**: Added new `/actors` routes to display registered actors
+  - List view at `/actors` showing all actors with their status and market statistics
+  - Individual actor detail pages at `/actors/<actor_id>` with comprehensive market history
+  - Shows active markets, past markets, and total betting volume per actor
+- **Implemented Full Pagination System**: Added "Load More" pagination across all Clockchain views
+  - Created separate API blueprint (clockchain_api.py) for AJAX pagination endpoints
+  - Paginated endpoints for all markets, resolved markets, and active markets
+  - 10 entries loaded per request with "Load More" button functionality
+  - Removed old time range controls in favor of streamlined pagination
+- **Navigation Updates**: Added "Actors" link to main navigation between Markets and Oracles
+- **Template Updates**: Enhanced timeline and submission templates to support new pagination structure
+
 ### Marketing Landing Page and Site Restructure (July 23, 2025)
 - **Created New Marketing Landing Page**: Professional blockchain-style landing page at root URL ('/')
   - Demo banner indicating it's not a live site

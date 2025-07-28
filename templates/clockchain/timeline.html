@@ -10,11 +10,8 @@
                 <h1 class="h3">Clockchain Timeline</h1>
                 <div class="d-flex gap-2">
                     <div class="text-muted">
-                        <i class="fas fa-chart-line"></i> Active Bets: {{ active_bet_count }} | Total Volume: {{ total_bet_volume }} ETH
+                        <i class="fas fa-chart-line"></i> Active: {{ active_bet_count }} | Volume: {{ total_bet_volume }} ETH
                     </div>
-                    <button class="btn btn-primary" onclick="refreshTimeline()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
                     <a href="/" class="btn btn-secondary">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
@@ -23,45 +20,42 @@
         </div>
     </div>
 
-    <!-- Time Range Controls -->
+    <!-- Navigation Buttons -->
     <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Time Range</h5>
-                    <div class="mb-3">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(24, 24)">1 Day</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(168, 168)">1 Week</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(720, 720)">1 Month</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(1440, 1440)">2 Months</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(8760, 8760)">1 Year</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setTimeRange(43800, 43800)">5 Years</button>
-                        </div>
-                    </div>
-                    <form id="timeRangeForm" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="hoursBefore" class="form-label">Hours Before Now</label>
-                            <input type="number" class="form-control" id="hoursBefore" name="hours_before" value="{{ hours_before }}" min="1" max="10000000">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="hoursAfter" class="form-label">Hours After Now</label>
-                            <input type="number" class="form-control" id="hoursAfter" name="hours_after" value="{{ hours_after }}" min="1" max="10000000">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary d-block w-100">Update Range</button>
-                        </div>
-                    </form>
-                </div>
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                <a href="/clockchain" class="btn btn-{{ 'primary' if view_type == 'all' else 'outline-primary' }}">
+                    <i class="fas fa-clock"></i> All Predictions
+                </a>
+                <a href="/clockchain/active" class="btn btn-{{ 'primary' if view_type == 'active' else 'outline-primary' }}">
+                    <i class="fas fa-hourglass-half"></i> Active Predictions
+                </a>
+                <a href="/clockchain/resolved" class="btn btn-{{ 'primary' if view_type == 'resolved' else 'outline-primary' }}">
+                    <i class="fas fa-check-circle"></i> Resolved Submissions
+                </a>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Current Pacific Time</h5>
-                    <h3 class="text-primary" id="currentTime">{{ time_status.current_time or 'Loading...' }}</h3>
-                    <small class="text-muted">Milliseconds: <span id="currentMs">{{ current_time_ms }}</span></small>
+    </div>
+
+    <!-- Current Time Display -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Current Pacific Time:</strong> <span class="text-primary" id="currentTime">{{ time_status.current_time or 'Loading...' }}</span>
+                        </div>
+                        <div class="text-muted">
+                            {% if view_type == 'all' %}
+                                Showing upcoming predictions first, then recent resolved ones
+                            {% elif view_type == 'active' %}
+                                Showing only active predictions
+                            {% elif view_type == 'resolved' %}
+                                Showing resolved predictions by resolution time
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -179,7 +173,7 @@
                                                         {% endif %}
                                                     {% endif %}
                                                 </div>
-                                                <a href="/clockchain/submission/{{ segment.id }}" class="btn btn-sm btn-outline-primary">
+                                                <a href="/clockchain/market/{{ segment.id }}" class="btn btn-sm btn-outline-primary">
                                                     View Details <i class="fas fa-arrow-right"></i>
                                                 </a>
                                             </div>
@@ -232,13 +226,11 @@
                         </div>
                         {% endif %}
                         
-                        {% if has_more_records %}
+                        {% if has_more_pages %}
                         <div class="text-center py-3">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i> 
-                                Showing only the first {{ displayed_count }} submissions out of {{ total_count }} total.
-                                Consider narrowing your time range for better performance.
-                            </div>
+                            <button id="loadMoreBtn" class="btn btn-primary btn-lg" onclick="loadMore()">
+                                <i class="fas fa-plus-circle"></i> Load More
+                            </button>
                         </div>
                         {% endif %}
                     </div>
@@ -322,22 +314,56 @@ function refreshTimeline() {
     location.reload();
 }
 
-// Handle time range form
-document.getElementById('timeRangeForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const params = new URLSearchParams(formData);
-    window.location.href = `/clockchain?${params.toString()}`;
-});
+// Current page for pagination
+let currentPage = {{ current_page or 1 }};
+const viewType = '{{ view_type }}';
 
-// No longer need positioning function since we're using natural flow
-// Timeline segments are now positioned naturally in the document flow
-
-// Set time range helper
-function setTimeRange(hoursBefore, hoursAfter) {
-    document.getElementById('hoursBefore').value = hoursBefore;
-    document.getElementById('hoursAfter').value = hoursAfter;
-    document.getElementById('timeRangeForm').submit();
+// Load more submissions
+function loadMore() {
+    currentPage++;
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    
+    let url = '';
+    if (viewType === 'all') {
+        url = `/api/clockchain/markets?page=${currentPage}`;
+    } else if (viewType === 'active') {
+        url = `/api/clockchain/active?page=${currentPage}`;
+    } else if (viewType === 'resolved') {
+        url = `/api/clockchain/resolved?page=${currentPage}`;
+    }
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.segments && data.segments.length > 0) {
+                // Add new segments to the timeline
+                const timelineContainer = document.querySelector('.timeline-container');
+                const existingLoadMore = document.getElementById('loadMoreBtn').parentElement.parentElement;
+                
+                data.segments.forEach(segment => {
+                    const segmentHtml = createSegmentHtml(segment);
+                    const div = document.createElement('div');
+                    div.innerHTML = segmentHtml;
+                    timelineContainer.insertBefore(div.firstChild, existingLoadMore);
+                });
+                
+                if (data.has_more) {
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Load More';
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading more:', error);
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Load More';
+        });
 }
 
 // Format large hour counts
@@ -368,19 +394,82 @@ function formatHours(hours) {
     return `${hours} hour${hours > 1 ? 's' : ''}`;
 }
 
+// Create HTML for a segment
+function createSegmentHtml(segment) {
+    const statusBadgeClass = segment.status === 'active' ? 'bg-primary' : 
+                            segment.status === 'resolved' ? 'bg-success' : 'bg-secondary';
+    
+    let resolutionHtml = '';
+    if (segment.status === 'resolved' && segment.resolution) {
+        resolutionHtml = `
+            <div class="mt-3 p-3 bg-light rounded">
+                <small class="text-muted d-block">RESOLVED: ${segment.resolution.actual_text}</small>
+                ${segment.resolution.levenshtein_distance !== null ? 
+                    `<span class="badge bg-info mt-1">Levenshtein Distance: ${segment.resolution.levenshtein_distance}</span>` : ''}
+            </div>
+        `;
+    }
+    
+    let oracleHtml = '';
+    if (segment.status === 'active') {
+        if (segment.oracle_allowed) {
+            oracleHtml = '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Oracle Submission Open</span>';
+        } else if (segment.time_until_oracle) {
+            const hours = Math.floor(segment.time_until_oracle / 3600);
+            const minutes = Math.floor((segment.time_until_oracle % 3600) / 60);
+            oracleHtml = `<span class="badge bg-info"><i class="fas fa-hourglass-half"></i> Oracle opens in ${hours}h ${minutes}m</span>`;
+        }
+    }
+    
+    return `
+        <div class="row timeline-segment mb-4">
+            <div class="col-md-2 text-center">
+                <div class="timeline-line d-flex flex-column align-items-center">
+                    <div class="timeline-marker bg-primary rounded-circle" style="width: 20px; height: 20px; margin: 40px 0;"></div>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-user"></i> ${segment.actor.name}
+                                    <span class="badge ${statusBadgeClass} ms-2">${segment.status.toUpperCase()}</span>
+                                </h5>
+                                <small class="text-muted">
+                                    ${new Date(segment.start_time).toLocaleString()} - ${new Date(segment.end_time).toLocaleString()}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-0">${segment.total_volume} ${segment.currency}</h6>
+                                <small class="text-muted">${segment.submission_count} submissions</small>
+                            </div>
+                        </div>
+                        
+                        <div class="prediction-text mb-3">
+                            <em>"${segment.predicted_text}"</em>
+                        </div>
+                        
+                        ${resolutionHtml}
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>${oracleHtml}</div>
+                            <a href="/clockchain/market/${segment.id}" class="btn btn-sm btn-outline-primary">
+                                View Details <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Update time every second
     setInterval(updateCurrentTime, 1000);
-    
-    // Display formatted time ranges
-    const hoursBefore = {{ hours_before }};
-    const hoursAfter = {{ hours_after }};
-    
-    // Add a helper text showing the actual time range
-    const rangeInfo = document.createElement('small');
-    rangeInfo.className = 'text-muted d-block mt-2';
-    rangeInfo.innerHTML = `Showing ${formatHours(hoursBefore)} before and ${formatHours(hoursAfter)} after current time`;
     document.querySelector('.card-title').parentElement.appendChild(rangeInfo);
 });
 

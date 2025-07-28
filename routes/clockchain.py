@@ -13,35 +13,43 @@ time_sync_service = TimeSyncService()
 
 @clockchain_bp.route('/clockchain')
 def clockchain_view():
-    """Display the Clockchain timeline view"""
+    """Display the Clockchain timeline view with upcoming events first"""
     try:
         # Get current Pacific time
         time_status = time_sync_service.get_time_health_status()
         
-        # Get time range parameters (default 1440 hours = 60 days)
-        hours_before = request.args.get('hours_before', 1440, type=int)
-        hours_after = request.args.get('hours_after', 1440, type=int)
-        
-        # Limit to reasonable maximum to prevent memory issues
-        max_hours = 10000000
-        hours_before = min(hours_before, max_hours)
-        hours_after = min(hours_after, max_hours)
+        # Get pagination parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = 10  # Show 10 items per page
         
         # Calculate time range
         current_time = datetime.utcnow()
-        start_time = current_time - timedelta(hours=hours_before)
-        end_time = current_time + timedelta(hours=hours_after)
         
-        # Get all active and recent bets in the time range (limit to prevent overload)
-        max_records = 200  # Limit number of records to load
+        # Get upcoming markets first (markets that haven't ended yet)
+        upcoming_query = PredictionMarket.query.filter(
+            PredictionMarket.end_time > current_time
+        ).order_by(PredictionMarket.start_time)
         
-        # Get all markets (simplified filtering for now)
-        total_count = PredictionMarket.query.count()
+        # Get past markets
+        past_query = PredictionMarket.query.filter(
+            PredictionMarket.end_time <= current_time
+        ).order_by(desc(PredictionMarket.end_time))
         
-        # Get all markets ordered by start time
-        markets_in_range = PredictionMarket.query.order_by(PredictionMarket.start_time).limit(max_records).all()
+        # Combine queries - upcoming first, then past
+        if page == 1:
+            # First page shows all upcoming + some past
+            upcoming_markets = upcoming_query.all()
+            remaining_slots = max(0, per_page - len(upcoming_markets))
+            past_markets = past_query.limit(remaining_slots).all()
+            markets_in_range = upcoming_markets + past_markets
+            total_count = upcoming_query.count() + past_query.count()
+        else:
+            # Other pages show only past markets
+            offset = (page - 1) * per_page - upcoming_query.count()
+            markets_in_range = past_query.offset(max(0, offset)).limit(per_page).all()
+            total_count = upcoming_query.count() + past_query.count()
         
-        has_more_records = total_count > max_records
+        has_more_pages = total_count > page * per_page
         
         # Group markets by actor and time period
         timeline_segments = []
@@ -116,10 +124,13 @@ def clockchain_view():
             
             # Add resolution info if available
             if market.status == 'resolved':
+                # Get winning submission to get Levenshtein distance
+                winning_submission = Submission.query.get(market.winning_submission_id) if market.winning_submission_id else None
                 segment['resolution'] = {
                     'actual_text': market.resolution_text,
                     'resolution_time': market.resolution_time.isoformat() if market.resolution_time else None,
-                    'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None
+                    'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None,
+                    'levenshtein_distance': winning_submission.levenshtein_distance if winning_submission else None
                 }
                 
             timeline_segments.append(segment)
@@ -127,9 +138,7 @@ def clockchain_view():
         # Sort segments by start time
         timeline_segments.sort(key=lambda x: x['start_ms'])
         
-        # Calculate timeline boundaries
-        min_time_ms = int(start_time.timestamp() * 1000)
-        max_time_ms = int(end_time.timestamp() * 1000)
+        # Calculate timeline boundaries for display
         current_time_ms = int(current_time.timestamp() * 1000)
         
         # Get aggregate statistics
@@ -139,17 +148,14 @@ def clockchain_view():
         return render_template('clockchain/timeline.html',
                              time_status=time_status,
                              timeline_segments=timeline_segments,
-                             hours_before=hours_before,
-                             hours_after=hours_after,
+                             current_page=page,
+                             has_more_pages=has_more_pages,
                              current_time_ms=current_time_ms,
-                             min_time_ms=min_time_ms,
-                             max_time_ms=max_time_ms,
                              active_bet_count=active_market_count,
                              total_bet_volume=str(total_bet_volume),
                              total_count=total_count,
                              displayed_count=len(markets_in_range),
-                             has_more_records=has_more_records,
-                             now_marker_shown=False)
+                             view_type='all')
         
     except Exception as e:
         logger.error(f"Error loading clockchain view: {e}")
@@ -244,23 +250,288 @@ def market_detail(market_id):
 
 @clockchain_bp.route('/clockchain/submission/<submission_id>')
 def submission_detail(submission_id):
-    """Display detailed view of a submission (redirects to market view)"""
+    """Display detailed view of a submission"""
     try:
         submission = Submission.query.get(submission_id)
         if not submission:
             flash('Submission not found', 'error')
             return redirect(url_for('clockchain.clockchain_view'))
             
-        # Redirect to market detail view
-        return redirect(url_for('clockchain.market_detail', market_id=submission.market_id))
+        market = PredictionMarket.query.get(submission.market_id)
+        if not market:
+            flash('Market not found', 'error')
+            return redirect(url_for('clockchain.clockchain_view'))
+            
+        actor = Actor.query.get(market.actor_id) if market.actor_id else None
+        
+        # Get all bets for this submission
+        bets = Bet.query.filter_by(submission_id=submission.id).all()
+        total_volume = sum(bet.amount for bet in bets)
+        
+        # Get competing submissions
+        competing_submissions = Submission.query.filter(
+            Submission.market_id == market.id,
+            Submission.id != submission.id
+        ).all()
+        
+        # Get transactions for this submission
+        transactions = Transaction.query.filter_by(
+            reference_id=str(submission.id),
+            reference_type='submission'
+        ).all()
+        
+        # Get oracle submissions for this market
+        oracle_submissions = OracleSubmission.query.filter_by(
+            market_id=market.id
+        ).order_by(OracleSubmission.created_at.desc()).all()
+        
+        submission_data = {
+            'id': str(submission.id),
+            'creator_wallet': submission.creator_wallet,
+            'actor': {
+                'id': str(actor.id) if actor else None,
+                'name': actor.name if actor else 'Unknown',
+                'is_unknown': actor.is_unknown if actor else True
+            },
+            'predicted_text': submission.predicted_text,
+            'submission_type': submission.submission_type,
+            'market': {
+                'id': str(market.id),
+                'start_time': market.start_time,
+                'end_time': market.end_time,
+                'status': market.status,
+                'resolution_text': market.resolution_text,
+                'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None
+            },
+            'initial_stake_amount': str(submission.initial_stake_amount),
+            'currency': submission.currency,
+            'transaction_hash': submission.transaction_hash,
+            'is_winner': submission.is_winner,
+            'levenshtein_distance': submission.levenshtein_distance,
+            'created_at': submission.created_at,
+            'bets': [{
+                'id': str(bet.id),
+                'bettor_wallet': bet.bettor_wallet,
+                'amount': str(bet.amount),
+                'currency': bet.currency,
+                'status': bet.status,
+                'created_at': bet.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            } for bet in bets],
+            'total_volume': str(total_volume),
+            'bet_count': len(bets),
+            'competing_submissions': [{
+                'id': str(comp.id),
+                'predicted_text': comp.predicted_text or '[No prediction]',
+                'creator_wallet': comp.creator_wallet,
+                'initial_stake': str(comp.initial_stake_amount),
+                'currency': comp.currency,
+                'is_winner': comp.is_winner,
+                'levenshtein_distance': comp.levenshtein_distance
+            } for comp in competing_submissions],
+            'related_transactions': [{
+                'id': str(tx.id),
+                'hash': tx.transaction_hash,
+                'currency': tx.currency,
+                'amount': str(tx.amount),
+                'status': tx.status,
+                'created_at': tx.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            } for tx in transactions],
+            'oracle_submissions': [{
+                'id': str(os.id),
+                'oracle_wallet': os.oracle_wallet,
+                'submitted_text': os.submitted_text,
+                'votes_for': os.votes_for,
+                'votes_against': os.votes_against,
+                'is_consensus': os.is_consensus,
+                'status': os.status,
+                'created_at': os.created_at.strftime('%Y-%m-%d %H:%M:%S') if os.created_at else ''
+            } for os in oracle_submissions]
+        }
+        
+        # Add resolution info if available
+        if market.status == 'resolved':
+            submission_data['resolution'] = {
+                'text': market.resolution_text,
+                'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None,
+                'resolution_time': market.resolution_time
+            }
+            
+        return render_template('clockchain/submission_detail.html', submission=submission_data)
         
     except Exception as e:
         logger.error(f"Error loading submission detail: {e}")
-        flash('Submission not found', 'error')
+        flash(f'Error loading submission details: {str(e)}', 'error')
         return redirect(url_for('clockchain.clockchain_view'))
+
+
+@clockchain_bp.route('/clockchain/resolved')
+def resolved_view():
+    """Display resolved prediction markets"""
+    try:
+        time_status = time_sync_service.get_time_health_status()
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
         
-        # Calculate totals
-        total_volume = sum(stake.amount for stake in stakes)
+        # Get resolved markets
+        query = PredictionMarket.query.filter_by(status='resolved').order_by(desc(PredictionMarket.resolution_time))
+        
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        markets_in_range = paginated.items
+        total_count = paginated.total
+        has_more_pages = paginated.has_next
+        
+        # Build timeline segments (reuse the same logic)
+        timeline_segments = []
+        for market in markets_in_range:
+            actor = Actor.query.get(market.actor_id) if market.actor_id else None
+            submissions = Submission.query.filter_by(market_id=market.id).all()
+            
+            # Calculate total volume
+            total_volume = 0
+            for submission in submissions:
+                bets = Bet.query.filter_by(submission_id=submission.id).all()
+                total_volume += sum(bet.amount for bet in bets)
+            
+            primary_submission = next((s for s in submissions if s.submission_type == 'original'), submissions[0] if submissions else None)
+            winning_submission = Submission.query.get(market.winning_submission_id) if market.winning_submission_id else None
+            
+            segment = {
+                'id': str(market.id),
+                'actor': {
+                    'id': str(actor.id) if actor else None,
+                    'name': actor.name if actor else 'Unknown',
+                    'is_unknown': actor.is_unknown if actor else True
+                },
+                'start_time': market.start_time,
+                'end_time': market.end_time,
+                'start_ms': int(market.start_time.timestamp() * 1000) if market.start_time else 0,
+                'end_ms': int(market.end_time.timestamp() * 1000) if market.end_time else 0,
+                'status': market.status,
+                'submission_count': len(submissions),
+                'total_volume': str(total_volume),
+                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
+                'resolution': {
+                    'actual_text': market.resolution_text,
+                    'resolution_time': market.resolution_time.isoformat() if market.resolution_time else None,
+                    'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None,
+                    'levenshtein_distance': winning_submission.levenshtein_distance if winning_submission else None
+                }
+            }
+            timeline_segments.append(segment)
+        
+        active_market_count = PredictionMarket.query.filter_by(status='active').count()
+        total_bet_volume = db.session.query(db.func.sum(Bet.amount)).scalar() or 0
+        
+        return render_template('clockchain/timeline.html',
+                             time_status=time_status,
+                             timeline_segments=timeline_segments,
+                             current_page=page,
+                             has_more_pages=has_more_pages,
+                             current_time_ms=int(datetime.utcnow().timestamp() * 1000),
+                             active_bet_count=active_market_count,
+                             total_bet_volume=str(total_bet_volume),
+                             total_count=total_count,
+                             displayed_count=len(markets_in_range),
+                             view_type='resolved')
+    except Exception as e:
+        logger.error(f"Error loading resolved view: {e}")
+        return render_template('clockchain/timeline.html',
+                             time_status={},
+                             timeline_segments=[],
+                             current_page=1,
+                             has_more_pages=False,
+                             current_time_ms=0,
+                             active_bet_count=0,
+                             total_bet_volume='0',
+                             total_count=0,
+                             displayed_count=0,
+                             view_type='resolved')
+
+
+@clockchain_bp.route('/clockchain/active')
+def active_view():
+    """Display active prediction markets"""
+    try:
+        time_status = time_sync_service.get_time_health_status()
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+        
+        # Get active markets
+        query = PredictionMarket.query.filter_by(status='active').order_by(PredictionMarket.start_time)
+        
+        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+        markets_in_range = paginated.items
+        total_count = paginated.total
+        has_more_pages = paginated.has_next
+        
+        # Build timeline segments
+        timeline_segments = []
+        current_time = datetime.utcnow()
+        
+        for market in markets_in_range:
+            actor = Actor.query.get(market.actor_id) if market.actor_id else None
+            submissions = Submission.query.filter_by(market_id=market.id).all()
+            
+            # Calculate total volume
+            total_volume = 0
+            for submission in submissions:
+                bets = Bet.query.filter_by(submission_id=submission.id).all()
+                total_volume += sum(bet.amount for bet in bets)
+            
+            oracle_allowed = current_time >= market.end_time if market.end_time else False
+            time_until_oracle = max(0, (market.end_time - current_time).total_seconds()) if market.end_time and not oracle_allowed else 0
+            
+            primary_submission = next((s for s in submissions if s.submission_type == 'original'), submissions[0] if submissions else None)
+            
+            segment = {
+                'id': str(market.id),
+                'actor': {
+                    'id': str(actor.id) if actor else None,
+                    'name': actor.name if actor else 'Unknown',
+                    'is_unknown': actor.is_unknown if actor else True
+                },
+                'start_time': market.start_time,
+                'end_time': market.end_time,
+                'start_ms': int(market.start_time.timestamp() * 1000) if market.start_time else 0,
+                'end_ms': int(market.end_time.timestamp() * 1000) if market.end_time else 0,
+                'status': market.status,
+                'submission_count': len(submissions),
+                'total_volume': str(total_volume),
+                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
+                'oracle_allowed': oracle_allowed,
+                'time_until_oracle': time_until_oracle
+            }
+            timeline_segments.append(segment)
+        
+        active_market_count = total_count
+        total_bet_volume = db.session.query(db.func.sum(Bet.amount)).scalar() or 0
+        
+        return render_template('clockchain/timeline.html',
+                             time_status=time_status,
+                             timeline_segments=timeline_segments,
+                             current_page=page,
+                             has_more_pages=has_more_pages,
+                             current_time_ms=int(datetime.utcnow().timestamp() * 1000),
+                             active_bet_count=active_market_count,
+                             total_bet_volume=str(total_bet_volume),
+                             total_count=total_count,
+                             displayed_count=len(markets_in_range),
+                             view_type='active')
+    except Exception as e:
+        logger.error(f"Error loading active view: {e}")
+        return render_template('clockchain/timeline.html',
+                             time_status={},
+                             timeline_segments=[],
+                             current_page=1,
+                             has_more_pages=False,
+                             current_time_ms=0,
+                             active_bet_count=0,
+                             total_bet_volume='0',
+                             total_count=0,
+                             displayed_count=0,
+                             view_type='active')
         
         submission_data = {
             'id': str(bet.id),

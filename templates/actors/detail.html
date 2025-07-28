@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ actor.name }} - Clockchain{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3">
+                        <i class="fas fa-user"></i> {{ actor.name }}
+                        {% if actor.is_verified %}
+                        <span class="badge bg-success" title="Verified Actor">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                        {% endif %}
+                    </h1>
+                    {% if actor.description %}
+                    <p class="text-muted mb-0">{{ actor.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/actors" class="btn btn-secondary">
+                        <i class="fas fa-users"></i> All Actors
+                    </a>
+                    <a href="/clockchain" class="btn btn-secondary">
+                        <i class="fas fa-clock"></i> Timeline
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Markets</h5>
+                    <h2 class="mb-0">{{ total_markets }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Volume</h5>
+                    <h2 class="mb-0">{{ total_volume }} ETH</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Predictions</h5>
+                    <h2 class="mb-0">{{ total_predictions }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Markets -->
+    {% if active_markets %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3">Active Markets</h4>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time Window</th>
+                                    <th>Predicted Text</th>
+                                    <th>Submissions</th>
+                                    <th>Volume</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for market_data in active_markets %}
+                                <tr>
+                                    <td>
+                                        <small>{{ market_data.market.start_time.strftime('%Y-%m-%d %H:%M') }} -<br>
+                                        {{ market_data.market.end_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </td>
+                                    <td>
+                                        {% if market_data.primary_submission %}
+                                        <em>"{{ market_data.primary_submission.predicted_text[:50] }}{% if market_data.primary_submission.predicted_text|length > 50 %}...{% endif %}"</em>
+                                        {% else %}
+                                        <span class="text-muted">[No predictions yet]</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ market_data.submissions|length }}</td>
+                                    <td>{{ market_data.volume }} ETH</td>
+                                    <td>
+                                        <a href="/clockchain/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Resolved Markets -->
+    {% if resolved_markets %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3">Recent Resolved Markets</h4>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Resolution Time</th>
+                                    <th>Predicted Text</th>
+                                    <th>Actual Text</th>
+                                    <th>Winner</th>
+                                    <th>Volume</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for market_data in resolved_markets %}
+                                <tr>
+                                    <td>
+                                        <small>{{ market_data.market.resolution_time.strftime('%Y-%m-%d %H:%M') if market_data.market.resolution_time else 'Unknown' }}</small>
+                                    </td>
+                                    <td>
+                                        {% if market_data.primary_submission %}
+                                        <em>"{{ market_data.primary_submission.predicted_text[:30] }}{% if market_data.primary_submission.predicted_text|length > 30 %}...{% endif %}"</em>
+                                        {% else %}
+                                        <span class="text-muted">[No prediction]</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if market_data.market.resolution_text %}
+                                        <em>"{{ market_data.market.resolution_text[:30] }}{% if market_data.market.resolution_text|length > 30 %}...{% endif %}"</em>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if market_data.winning_submission %}
+                                        <code>{{ market_data.winning_submission.creator_wallet[:10] }}...</code>
+                                        {% if market_data.winning_submission.levenshtein_distance is not none %}
+                                        <br><span class="badge bg-info">Distance: {{ market_data.winning_submission.levenshtein_distance }}</span>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ market_data.volume }} ETH</td>
+                                    <td>
+                                        <a href="/clockchain/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not active_markets and not resolved_markets %}
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No markets found for this actor</h5>
+                <p class="text-muted">Markets will appear here once predictions are made about {{ actor.name }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.table td {
+    vertical-align: middle;
+}
+</style>
+{% endblock %}

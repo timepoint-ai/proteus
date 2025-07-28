@@ -59,6 +59,8 @@ def create_app():
     from routes.clockchain import clockchain_bp
     from routes.ai_agent_api import ai_agent_api_bp, init_limiter
     from routes.marketing import marketing_bp
+    from routes.actors import actors_bp
+    from routes.clockchain_api import clockchain_api_bp
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -70,6 +72,8 @@ def create_app():
     app.register_blueprint(test_transactions_bp, url_prefix='/test_transactions')
     app.register_blueprint(clockchain_bp)
     app.register_blueprint(ai_agent_api_bp, url_prefix='/ai_agent')
+    app.register_blueprint(actors_bp)
+    app.register_blueprint(clockchain_api_bp)
     
     # Initialize rate limiter
     init_limiter(app)
