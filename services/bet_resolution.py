@@ -140,6 +140,7 @@ class MarketResolutionService:
             )
             
             submission.levenshtein_distance = distance
+            db.session.add(submission)  # Ensure the change is tracked
             
             if distance < lowest_distance:
                 lowest_distance = distance
@@ -147,6 +148,7 @@ class MarketResolutionService:
         
         if best_submission:
             best_submission.is_winner = True
+            db.session.add(best_submission)  # Ensure the change is tracked
             
         return best_submission
     

@@ -46,7 +46,7 @@ def actors_list():
         return render_template('actors/list.html', actor_stats=[])
 
 
-@actors_bp.route('/actors/<int:actor_id>')
+@actors_bp.route('/actors/<actor_id>')
 def actor_detail(actor_id):
     """Display detailed page for a specific actor"""
     try:

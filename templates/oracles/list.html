@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Oracles - Clockchain{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Active Oracles</h1>
+                <div class="text-muted">
+                    <i class="fas fa-eye me-1"></i>
+                    {{ oracle_data|length }} Active Oracles
+                </div>
+            </div>
+
+            {% if oracle_data %}
+                <div class="row">
+                    {% for oracle in oracle_data %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card bg-dark border-secondary h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-truncate">
+                                    <i class="fas fa-eye me-2 text-primary"></i>
+                                    Oracle {{ oracle.wallet[:8] }}...{{ oracle.wallet[-6:] }}
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Total Submissions:</span>
+                                        <span class="badge bg-primary">{{ oracle.total_submissions }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Consensus Count:</span>
+                                        <span class="badge bg-success">{{ oracle.consensus_count }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Accuracy Rate:</span>
+                                        <span class="badge {% if oracle.accuracy_rate > 75 %}bg-success{% elif oracle.accuracy_rate > 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ "%.1f"|format(oracle.accuracy_rate) }}%
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Last Active:</span>
+                                        <span class="text-white-50">
+                                            {% if oracle.last_submission %}
+                                                {{ oracle.last_submission.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {% if oracle.recent_submissions %}
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">Recent Submissions:</h6>
+                                    <div class="small">
+                                        {% for submission in oracle.recent_submissions[:3] %}
+                                        <div class="mb-1 text-truncate">
+                                            <span class="badge {% if submission.is_consensus %}bg-success{% else %}bg-secondary{% endif %} me-1">
+                                                {% if submission.is_consensus %}✓{% else %}○{% endif %}
+                                            </span>
+                                            <span class="text-white-50">Market #{{ submission.market_id|string|truncate(8, True, '') if submission.market_id else 'N/A' }}</span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <a href="{{ url_for('oracles.oracle_detail', oracle_wallet=oracle.wallet) }}" class="btn btn-outline-primary btn-sm w-100">
+                                    View Oracle Details
+                                    <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No oracle submissions have been recorded yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
