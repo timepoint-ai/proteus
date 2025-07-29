@@ -1,0 +1,19 @@
+{
+  "name": "clockchain-contracts",
+  "version": "1.0.0",
+  "description": "Clockchain prediction market smart contracts for BASE",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network baseSepolia",
+    "deploy:mainnet": "npx hardhat run scripts/deploy-mainnet.js --network base",
+    "verify": "npx hardhat run scripts/verify.js --network baseSepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.19.0",
+    "ethers": "^6.0.0",
+    "dotenv": "^16.0.0"
+  }
+}
