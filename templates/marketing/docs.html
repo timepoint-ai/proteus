@@ -117,6 +117,7 @@
                 <a href="#api">API Documentation</a>
                 <a href="#status">Status Workflow</a>
                 <a href="#ai">AI Transparency</a>
+                <a href="#data-integrity">Data Integrity</a>
                 <a href="#consensus">Consensus Mechanism</a>
                 <a href="#deployment">Deployment</a>
             </nav>
@@ -343,6 +344,52 @@ Response:
                         <li>Performance metrics across verification modules</li>
                         <li>Automatic agent classification by behavior</li>
                         <li>Transparency dashboard with real-time stats</li>
+                    </ul>
+                </section>
+                
+                <!-- Data Integrity Section -->
+                <section id="data-integrity" class="docs-section">
+                    <h2>🔒 Data Integrity</h2>
+                    
+                    <h3>Real-time Calculations</h3>
+                    <p>All status indicators, transaction states, and market resolutions are calculated in real-time from database queries. No hardcoded values are used throughout the platform.</p>
+                    
+                    <h3>Dynamic Status Tracking</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>📈 Market Status</h5>
+                                <p>Active, expired, validating, or resolved states calculated from actual timestamps and oracle submissions</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>💰 Transaction Status</h5>
+                                <p>Confirmed or pending states based on actual blockchain confirmations</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>🏆 Winner Determination</h5>
+                                <p>Winners calculated from real Levenshtein distance scores, not predetermined</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <h5>📊 Market Statistics</h5>
+                                <p>Betting volumes and submission counts aggregated from actual transaction records</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Test Data Generator</h3>
+                    <p>Generate realistic test data at <code>/generate/realistic</code> with:</p>
+                    <ul>
+                        <li>Markets in various states: active, expired, validating, and resolved</li>
+                        <li>Proper foreign key relationships and status workflows</li>
+                        <li>Realistic blockchain transactions with confirmed/pending statuses</li>
+                        <li>Complete market lifecycles with real Levenshtein distance calculations</li>
+                        <li>Authentic oracle submissions and consensus validation flows</li>
                     </ul>
                 </section>
                 

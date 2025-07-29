@@ -112,14 +112,18 @@ NodeOperator ──┬── NodeVote (self-referential)
                └── ActorVote
                └── SyntheticTimeEntry
 
-Actor ──┬── Bet
+Actor ──┬── PredictionMarket
         └── ActorVote
 
-Bet ──┬── Stake
-      ├── OracleSubmission ── OracleVote
-      └── Transaction
+PredictionMarket ──┬── Submission ──┬── Bet
+                   │                └── VerificationModule
+                   ├── OracleSubmission ── OracleVote
+                   └── Transaction
 
 NetworkMetrics (standalone)
+EmailCapture (standalone)
+AIProfile ──┬── AITransaction
+            └── AIVerificationResult
 ```
 
 Key relationships:
@@ -473,16 +477,22 @@ Features:
 - Can be marked as "unknown"
 - Links to social proof
 
-#### Bet
-- Primary prediction entity
-- Time-bounded prediction window
+#### PredictionMarket
+- Time-bounded container for all predictions about an actor
+- Manages multiple competing submissions
+- Tracks oracle wallets and consensus status
 - Immutable once created
-- Links to resolution data
 
-#### Stake
-- User positions on bets
-- For/against binary choice
-- Tracks payout status
+#### Submission
+- Individual predictions within a market
+- Types: original, competitor, or null
+- Tracks initial stake and creator wallet
+- Links to text analysis results
+
+#### Bet
+- Individual wagers on specific submissions
+- Tracks bettor wallet and amount
+- Status tracking (pending, confirmed, won, lost)
 - Links to blockchain transactions
 
 ### Supporting Entities
@@ -689,6 +699,82 @@ def verify_signature(message, signature, public_key):
 - Certificate pinning for nodes
 - IP allowlisting available
 - DDoS protection strategies
+
+## Data Integrity & Real-time Calculations
+
+### Core Principle: No Hardcoded Values
+
+All status indicators, transaction states, and market resolutions are calculated in real-time from database queries:
+
+#### Dynamic Status Calculation
+```python
+# Market status determined by actual state
+if market.resolved_at:
+    status = 'resolved'
+elif datetime.utcnow() > market.end_time:
+    status = 'expired' if not oracle_submissions else 'validating'
+else:
+    status = 'active'
+```
+
+#### Real Transaction Tracking
+```python
+# Transaction status from blockchain confirmation
+def get_transaction_status(tx_hash):
+    tx = Transaction.query.filter_by(transaction_hash=tx_hash).first()
+    if tx.block_number:
+        return 'confirmed'
+    return 'pending'
+```
+
+#### Winner Determination
+```python
+# Winners calculated from Levenshtein distances
+def determine_winner(market):
+    oracle_text = market.oracle_submissions[0].submitted_text
+    distances = []
+    for submission in market.submissions:
+        if submission.predicted_text:
+            distance = calculate_levenshtein_distance(
+                submission.predicted_text, 
+                oracle_text
+            )
+            distances.append((submission, distance))
+    
+    # Winner has lowest distance
+    winner = min(distances, key=lambda x: x[1])[0]
+    return winner
+```
+
+### Realistic Test Data Generator
+
+#### Purpose
+Generate comprehensive test data with proper status workflows and relationships:
+
+#### Implementation (`routes/generate_realistic_data.py`)
+```python
+@generate_data_bp.route('/realistic')
+def generate_realistic():
+    # Creates markets in various states
+    # - Active: accepting bets
+    # - Expired: awaiting oracle
+    # - Validating: oracle submitted, pending consensus
+    # - Resolved: winners calculated, payouts distributed
+    
+    # Generates realistic transactions
+    # - Confirmed: with block numbers
+    # - Pending: without block confirmation
+    
+    # Simulates complete workflows
+    # - Market creation → Submissions → Bets → Oracle → Resolution
+```
+
+#### Key Features
+- Proper foreign key relationships
+- Realistic Levenshtein distance calculations
+- Authentic transaction statuses
+- Complete market lifecycle simulation
+- Real consensus voting patterns
 
 ## Performance Optimization
 

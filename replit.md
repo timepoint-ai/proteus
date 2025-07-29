@@ -119,6 +119,22 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Data Integrity & Documentation Updates (July 29, 2025)
+- **Fixed Oracle Service**: Resolved UUID handling errors and created new /oracles pages outside admin
+- **Enhanced Status Logic**: All status elements now display real database-calculated values, not hardcoded placeholders
+  - Transaction statuses pulled from actual blockchain confirmations
+  - Submission winners/losers determined by real Levenshtein distance calculations
+  - Market statuses (active/expired/validating/resolved) computed from timestamps and oracle data
+- **Created Realistic Test Data Generator**: Added `/generate/realistic` route
+  - Generates actors, markets, and transactions with proper status workflows
+  - Creates markets in various states with complete lifecycles
+  - Simulates real Levenshtein distance calculations and oracle consensus
+  - Proper foreign key relationships and realistic blockchain transactions
+- **Updated Documentation**: Comprehensive updates to README.md, ENGINEERING.md, and /docs page
+  - Added Data Integrity sections emphasizing real-time calculations
+  - Updated schema documentation to reflect PredictionMarket → Submission → Bet structure
+  - Documented realistic test data generator functionality
+
 ### Actors Pages and Pagination Implementation (July 28, 2025)
 - **Created Actors Section**: Added new `/actors` routes to display registered actors
   - List view at `/actors` showing all actors with their status and market statistics

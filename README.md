@@ -204,12 +204,23 @@ celery -A app.celery beat --loglevel=info
 
 Access the admin dashboard at `http://localhost:5000/admin` to:
 
-- Monitor network health and node status
-- View active predictions and betting markets
-- Track transaction history and platform fees
-- Manage actors and approve new submissions
+- Monitor network health and node status with real-time database calculations
+- View active predictions and betting markets with authentic transaction statuses
+- Track transaction history and platform fees from actual blockchain data
+- Manage actors and approve new submissions with live consensus voting
 - Configure node settings and consensus parameters
 - Access AI transparency dashboard with verification statistics
+
+### Generate Realistic Test Data
+
+Create comprehensive test data at `http://localhost:5000/generate/realistic` to:
+
+- Generate actors, markets, and transactions with proper status workflows
+- Create markets in various states: active, expired, validating, and resolved
+- Simulate complete market lifecycles with real Levenshtein distance calculations
+- Generate realistic blockchain transactions with confirmed/pending statuses
+- Test oracle submissions and consensus validation flows
+- All generated data follows proper foreign key relationships and status transitions
 
 ### Test Transaction Generator
 
@@ -236,10 +247,30 @@ Access the programmatic interface at `http://localhost:5000/ai_agent/docs` to:
 
 The main interface at `http://localhost:5000/clockchain` provides:
 
-- Visual timeline of all predictions and their time windows
-- Real-time updates on betting volumes and competing submissions
-- Detailed views of individual predictions with stake history
-- Historical analysis of resolved predictions and accuracy metrics
+- Visual timeline of all predictions with real-time database-calculated statuses
+- Live betting volumes and competing submission counts from actual transactions
+- Detailed market views showing winner/lost/pending statuses based on resolution state
+- Individual submission pages with complete transaction histories
+- Historical analysis of resolved predictions with actual Levenshtein distance scores
+
+### Oracle Management
+
+Access oracle functionality at `http://localhost:5000/oracles` to:
+
+- View all oracle submissions with consensus voting status
+- Track oracle validation results and text similarity calculations
+- Monitor distributed time consensus across the network
+- Analyze oracle performance metrics and accuracy rates
+
+## Data Integrity & Real-time Calculations
+
+**Clockchain** prioritizes authentic data throughout the platform:
+
+- **No Hardcoded Values**: All status indicators, transaction states, and market resolutions are calculated in real-time from database queries
+- **Dynamic Status Calculation**: Winner/Lost/Pending statuses computed based on actual market resolution states and Levenshtein distance scores
+- **Live Transaction Tracking**: Every transaction status reflects actual blockchain confirmation states
+- **Real Oracle Consensus**: Oracle voting and consensus results pulled directly from distributed node submissions
+- **Authentic Market Statistics**: Betting volumes, submission counts, and participation metrics aggregated from actual transaction records
 
 ## AI Agent API Documentation
 
