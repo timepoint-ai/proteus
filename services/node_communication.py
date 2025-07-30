@@ -330,6 +330,38 @@ class NodeCommunicationService:
         except Exception as e:
             logger.error(f"Error broadcasting message: {e}")
             
+    def sign_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Sign a message with node's private key"""
+        try:
+            message_str = json.dumps(message, sort_keys=True)
+            signature = self.crypto_utils.sign_message(message_str)
+            message['signature'] = signature
+            return message
+        except Exception as e:
+            logger.error(f"Error signing message: {e}")
+            return message
+            
+    def verify_message(self, message: Dict[str, Any]) -> bool:
+        """Verify a message signature"""
+        try:
+            if 'signature' not in message:
+                return False
+                
+            # Extract signature and remove it from message for verification
+            signature = message.pop('signature')
+            message_str = json.dumps(message, sort_keys=True)
+            
+            # Verify the signature
+            is_valid = self.crypto_utils.verify_message(message_str, signature)
+            
+            # Restore signature to message
+            message['signature'] = signature
+            
+            return is_valid
+        except Exception as e:
+            logger.error(f"Error verifying message: {e}")
+            return False
+            
     def _broadcast_http(self, message: Dict[str, Any]):
         """Broadcast message via HTTP as fallback"""
         try:

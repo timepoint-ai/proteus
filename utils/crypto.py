@@ -103,6 +103,23 @@ class CryptoUtils:
             logger.error(f"Error verifying signature: {e}")
             return False
     
+    def verify_message(self, message: str, signature: str) -> bool:
+        """Verify a message signature using our own public key"""
+        try:
+            # For demo purposes, use HMAC verification with our private key
+            # This simulates verifying a message we signed ourselves
+            expected_signature = hmac.new(
+                self.private_key_data.encode('utf-8'),
+                message.encode('utf-8'),
+                hashlib.sha256
+            ).hexdigest()
+            
+            return hmac.compare_digest(signature, expected_signature)
+            
+        except Exception as e:
+            logger.error(f"Error verifying message: {e}")
+            return False
+    
     def hash_data(self, data: str) -> str:
         """Hash data using SHA-256"""
         try:

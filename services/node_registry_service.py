@@ -22,7 +22,7 @@ class NodeRegistryService:
     
     def __init__(self):
         self.blockchain_service = BaseBlockchainService()
-        self.web3 = self.blockchain_service.web3
+        self.web3 = self.blockchain_service.w3  # Fixed: was web3, should be w3
         self.node_registry_address = Config.NODE_REGISTRY_ADDRESS if hasattr(Config, 'NODE_REGISTRY_ADDRESS') else None
         self.contract = None
         
