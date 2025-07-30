@@ -98,6 +98,12 @@
                                     Test Transactions
                                 </a>
                             </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('oracle_manual.expired_markets') }}">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Manual Oracle Submit
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ url_for('admin.trigger_reconciliation') }}" method="post" class="d-inline">

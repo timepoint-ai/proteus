@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% block title %}Manual X.com Oracle Submission{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Manual X.com Oracle Submission</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Submit Oracle Data for Market</h3>
+                    <p class="mb-0">Actor: <strong>{{ market.actor.name }}</strong> (@{{ market.twitter_handle }})</p>
+                    <p class="mb-0">Time Window: {{ market.start_time.strftime('%Y-%m-%d %H:%M') }} - {{ market.end_time.strftime('%Y-%m-%d %H:%M') }} UTC</p>
+                </div>
+                <div class="card-body">
+                    <!-- API Status Alert -->
+                    {% if api_status.api_configured %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> X.com API is configured and available
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> X.com API is not configured. Manual submission only.
+                    </div>
+                    {% endif %}
+                    
+                    <form id="oracleSubmissionForm">
+                        <input type="hidden" id="market_id" value="{{ market.id }}">
+                        
+                        <div class="form-group mb-3">
+                            <label for="oracle_wallet">Oracle Wallet Address</label>
+                            <input type="text" class="form-control" id="oracle_wallet" required 
+                                   placeholder="0x..." pattern="^0x[a-fA-F0-9]{40}$">
+                            <small class="form-text text-muted">Your authorized oracle wallet address</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="tweet_url">X.com Post URL</label>
+                            <input type="url" class="form-control" id="tweet_url" required 
+                                   placeholder="https://x.com/username/status/1234567890"
+                                   pattern="https?://(x\.com|twitter\.com)/.*">
+                            <small class="form-text text-muted">Full URL of the X.com post</small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="submission_method">Submission Method</label>
+                            <select class="form-control" id="submission_method">
+                                {% if api_status.api_configured %}
+                                <option value="api">Automatic (API)</option>
+                                {% endif %}
+                                <option value="manual" {% if not api_status.api_configured %}selected{% endif %}>Manual Entry</option>
+                            </select>
+                        </div>
+                        
+                        <div id="manualFields" style="display: {% if api_status.api_configured %}none{% else %}block{% endif %};">
+                            <div class="form-group mb-3">
+                                <label for="tweet_text">Tweet Text</label>
+                                <textarea class="form-control" id="tweet_text" rows="4" 
+                                          placeholder="Paste the exact text from the X.com post"></textarea>
+                                <small class="form-text text-muted">Copy and paste the exact text as it appears on X.com</small>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="tweet_timestamp">Tweet Timestamp</label>
+                                <input type="text" class="form-control" id="tweet_timestamp" 
+                                       placeholder="2024-01-01 12:30:00">
+                                <small class="form-text text-muted">Format: YYYY-MM-DD HH:MM:SS (UTC)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <button type="button" class="btn btn-primary" id="previewBtn">
+                                <i class="fas fa-eye"></i> Preview Submission
+                            </button>
+                            <button type="button" class="btn btn-success" id="submitBtn" disabled>
+                                <i class="fas fa-check"></i> Submit Oracle Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Submissions in this Market</h4>
+                </div>
+                <div class="card-body">
+                    {% for submission in market.submissions %}
+                    <div class="mb-3 p-2 border rounded">
+                        <strong>{{ loop.index }}. 
+                            {% if submission.is_null_submission %}
+                                [NULL SUBMISSION]
+                            {% else %}
+                                {{ submission.predicted_text[:50] }}{% if submission.predicted_text|length > 50 %}...{% endif %}
+                            {% endif %}
+                        </strong>
+                        <br>
+                        <small class="text-muted">
+                            Type: {{ submission.submission_type }}<br>
+                            Bets: {{ submission.bets|length }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Oracle Submission Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirmSubmitBtn">
+                        <i class="fas fa-check"></i> Confirm Submission
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Toggle manual fields based on submission method
+    $('#submission_method').change(function() {
+        if ($(this).val() === 'manual') {
+            $('#manualFields').show();
+        } else {
+            $('#manualFields').hide();
+        }
+    });
+    
+    // Preview submission
+    $('#previewBtn').click(async function() {
+        const marketId = $('#market_id').val();
+        const tweetUrl = $('#tweet_url').val();
+        const method = $('#submission_method').val();
+        
+        if (!tweetUrl) {
+            alert('Please enter an X.com URL');
+            return;
+        }
+        
+        const data = {
+            market_id: marketId,
+            tweet_url: tweetUrl,
+            method: method
+        };
+        
+        if (method === 'manual') {
+            data.tweet_text = $('#tweet_text').val();
+            data.tweet_timestamp = $('#tweet_timestamp').val();
+            
+            if (!data.tweet_text) {
+                alert('Please enter the tweet text');
+                return;
+            }
+        }
+        
+        try {
+            const response = await $.post('/oracle/manual/preview', JSON.stringify(data), null, 'json');
+            
+            // Build preview HTML
+            let previewHtml = `
+                <div class="mb-3">
+                    <strong>Method:</strong> ${response.method === 'api' ? 'API Verified' : 'Manual Entry'}
+                </div>
+                <div class="mb-3">
+                    <strong>Tweet Text:</strong>
+                    <div class="border p-2 bg-light">${response.text || 'N/A'}</div>
+                </div>
+            `;
+            
+            if (response.screenshot) {
+                previewHtml += `
+                    <div class="mb-3">
+                        <strong>Screenshot:</strong><br>
+                        <img src="${response.screenshot}" class="img-fluid" alt="Tweet Screenshot">
+                    </div>
+                `;
+            }
+            
+            if (response.distances && response.distances.length > 0) {
+                previewHtml += `
+                    <div class="mb-3">
+                        <strong>Levenshtein Distance Analysis:</strong>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Submission</th>
+                                    <th>Distance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                response.distances.forEach(d => {
+                    const text = d.is_null ? '[NULL]' : d.predicted_text.substring(0, 50) + '...';
+                    previewHtml += `
+                        <tr class="${d.distance === Math.min(...response.distances.map(x => x.distance)) ? 'table-success' : ''}">
+                            <td>${text}</td>
+                            <td>${d.distance}</td>
+                        </tr>
+                    `;
+                });
+                
+                previewHtml += '</tbody></table></div>';
+            }
+            
+            $('#previewContent').html(previewHtml);
+            $('#previewModal').modal('show');
+            $('#submitBtn').prop('disabled', false);
+            
+            // Store preview data for submission
+            window.previewData = response;
+            
+        } catch (error) {
+            alert('Error previewing submission: ' + (error.responseJSON?.error || error.message));
+        }
+    });
+    
+    // Confirm submission
+    $('#confirmSubmitBtn, #submitBtn').click(async function() {
+        const oracleWallet = $('#oracle_wallet').val();
+        
+        if (!oracleWallet) {
+            alert('Please enter your oracle wallet address');
+            return;
+        }
+        
+        // In production, this would sign the data with the oracle's private key
+        const signature = 'manual_submission_signature_placeholder';
+        
+        const submissionData = {
+            market_id: $('#market_id').val(),
+            oracle_wallet: oracleWallet,
+            tweet_url: $('#tweet_url').val(),
+            tweet_text: window.previewData?.text || $('#tweet_text').val(),
+            screenshot: window.previewData?.screenshot || '',
+            signature: signature
+        };
+        
+        try {
+            const response = await $.post('/oracle/manual/submit', JSON.stringify(submissionData), null, 'json');
+            
+            if (response.success) {
+                alert('Oracle submission successful!');
+                window.location.href = '/oracle/markets/expired';
+            } else {
+                alert('Submission failed: ' + (response.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error submitting oracle data: ' + (error.responseJSON?.error || error.message));
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Expired Markets - Oracle Submission{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Expired Markets Awaiting Oracle Submission</h1>
+    
+    <!-- API Status Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">X.com API Status</h5>
+            {% if api_status.api_configured %}
+                <p class="text-success">
+                    <i class="fas fa-check-circle"></i> API is configured and available
+                    {% if api_status.rate_limits %}
+                        - Rate Limits: {{ api_status.rate_limits }}
+                    {% endif %}
+                </p>
+            {% else %}
+                <p class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i> API is not configured - Manual submission only
+                </p>
+                <small class="text-muted">Contact administrator to configure X.com API credentials</small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Markets Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Markets Ready for Oracle Submission</h3>
+        </div>
+        <div class="card-body">
+            {% if market_data %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Actor</th>
+                            <th>X.com Handle</th>
+                            <th>Time Window</th>
+                            <th>Submissions</th>
+                            <th>Oracle Count</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in market_data %}
+                        <tr>
+                            <td>{{ item.market.actor.name }}</td>
+                            <td>
+                                <a href="https://x.com/{{ item.market.twitter_handle }}" target="_blank">
+                                    @{{ item.market.twitter_handle }}
+                                </a>
+                            </td>
+                            <td>
+                                <small>
+                                    {{ item.market.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                                    to {{ item.market.end_time.strftime('%Y-%m-%d %H:%M') }}
+                                </small>
+                            </td>
+                            <td>{{ item.market.submissions|length }}</td>
+                            <td>
+                                <span class="badge {% if item.oracle_count >= 3 %}bg-success{% elif item.oracle_count > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ item.oracle_count }}/3
+                                </span>
+                            </td>
+                            <td>
+                                {% if item.needs_oracles %}
+                                    <span class="badge bg-warning">Needs Oracles</span>
+                                {% else %}
+                                    <span class="badge bg-info">Validating</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('oracle_manual.manual_submission_form', market_id=item.market.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-upload"></i> Submit Oracle
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No expired markets awaiting oracle submission.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Instructions -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Oracle Submission Instructions</h4>
+        </div>
+        <div class="card-body">
+            <ol>
+                <li>Markets become available for oracle submission after their end time passes</li>
+                <li>You must be an authorized oracle for the market (check oracle wallets)</li>
+                <li>Submit the actual X.com post that was made during the time window</li>
+                <li>You can either:
+                    <ul>
+                        <li>Use automatic API verification (if configured)</li>
+                        <li>Manually paste the X.com link and tweet content</li>
+                    </ul>
+                </li>
+                <li>The system will calculate Levenshtein distances to determine the winner</li>
+                <li>At least 3 oracle submissions are required for consensus</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

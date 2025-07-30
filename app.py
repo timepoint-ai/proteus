@@ -64,6 +64,7 @@ def create_app():
     from routes.oracles import oracles_bp
     from routes.generate_realistic_data import generate_data_bp
     from routes.base_api import base_api_bp
+    from routes.oracle_manual import oracle_manual_bp
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
@@ -79,6 +80,7 @@ def create_app():
     app.register_blueprint(actors_bp)
     app.register_blueprint(clockchain_api_bp)
     app.register_blueprint(oracles_bp)
+    app.register_blueprint(oracle_manual_bp)
     app.register_blueprint(generate_data_bp)
     
     # Test Manager Routes (Protected)
