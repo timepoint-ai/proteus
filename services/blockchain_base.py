@@ -74,6 +74,23 @@ class BaseBlockchainService:
                         logger.info(f"Loaded {contract_name} at {address}")
         except Exception as e:
             logger.error(f"Error loading contracts: {e}")
+    
+    def get_contract(self, contract_name: str, address: str = None):
+        """Get a contract instance by name or address"""
+        try:
+            if address:
+                # Create contract instance with provided address
+                if contract_name in self.abis:
+                    return self.w3.eth.contract(
+                        address=Web3.to_checksum_address(address),
+                        abi=self.abis[contract_name]
+                    )
+            else:
+                # Return already loaded contract
+                return self.contracts.get(contract_name)
+        except Exception as e:
+            logger.error(f"Error getting contract {contract_name}: {e}")
+            return None
             
     def validate_transaction(self, tx_hash: str) -> Optional[Dict[str, Any]]:
         """Validate a BASE transaction"""

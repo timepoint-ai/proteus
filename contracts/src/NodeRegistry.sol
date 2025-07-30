@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title NodeRegistry
@@ -65,6 +65,10 @@ contract NodeRegistry is Ownable, ReentrancyGuard {
     modifier nodeExists(address _operator) {
         require(isNode[_operator], "Node does not exist");
         _;
+    }
+    
+    constructor() Ownable(msg.sender) {
+        // Initialize
     }
     
     /**

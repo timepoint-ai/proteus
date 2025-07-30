@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /**
  * @title PredictionMarket
  * @dev Core prediction market contract for Clockchain on BASE
  */
 contract PredictionMarket is ReentrancyGuard, Ownable {
-    using SafeMath for uint256;
 
     struct Market {
         string question;
@@ -79,7 +77,7 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         _;
     }
 
-    constructor() {
+    constructor() Ownable(msg.sender) {
         marketCount = 0;
         submissionCount = 0;
         betCount = 0;
@@ -130,8 +128,8 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         require(bytes(_predictedText).length > 0, "Predicted text cannot be empty");
 
         uint256 submissionId = submissionCount++;
-        uint256 fee = msg.value.mul(PLATFORM_FEE).div(100);
-        uint256 stake = msg.value.sub(fee);
+        uint256 fee = (msg.value * PLATFORM_FEE) / 100;
+        uint256 stake = msg.value - fee;
 
         submissions[submissionId] = Submission({
             marketId: _marketId,
@@ -145,8 +143,8 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
             screenshotBase64Hash: keccak256(bytes(_screenshotIpfsHash))
         });
 
-        markets[_marketId].totalVolume = markets[_marketId].totalVolume.add(msg.value);
-        markets[_marketId].platformFeeCollected = markets[_marketId].platformFeeCollected.add(fee);
+        markets[_marketId].totalVolume = markets[_marketId].totalVolume + msg.value;
+        markets[_marketId].platformFeeCollected = markets[_marketId].platformFeeCollected + fee;
 
         marketSubmissions[_marketId].push(submissionId);
         userSubmissions[msg.sender].push(submissionId);
@@ -169,8 +167,8 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
         require(block.timestamp < market.endTime, "Market has ended");
 
         uint256 betId = betCount++;
-        uint256 fee = msg.value.mul(PLATFORM_FEE).div(100);
-        uint256 betAmount = msg.value.sub(fee);
+        uint256 fee = (msg.value * PLATFORM_FEE) / 100;
+        uint256 betAmount = msg.value - fee;
 
         bets[betId] = Bet({
             bettor: msg.sender,
@@ -179,9 +177,9 @@ contract PredictionMarket is ReentrancyGuard, Ownable {
             timestamp: block.timestamp
         });
 
-        submission.totalBets = submission.totalBets.add(betAmount);
-        market.totalVolume = market.totalVolume.add(msg.value);
-        market.platformFeeCollected = market.platformFeeCollected.add(fee);
+        submission.totalBets = submission.totalBets + betAmount;
+        market.totalVolume = market.totalVolume + msg.value;
+        market.platformFeeCollected = market.platformFeeCollected + fee;
 
         userBets[msg.sender].push(betId);
 

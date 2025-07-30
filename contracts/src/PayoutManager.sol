@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./PredictionMarket.sol";
 import "./ClockchainOracle.sol";
@@ -53,7 +53,7 @@ contract PayoutManager is ReentrancyGuard, Ownable {
         _;
     }
     
-    constructor(address _predictionMarket, address _oracle) {
+    constructor(address payable _predictionMarket, address _oracle) Ownable(msg.sender) {
         predictionMarket = PredictionMarket(_predictionMarket);
         oracle = ClockchainOracle(_oracle);
     }

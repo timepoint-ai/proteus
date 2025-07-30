@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./PredictionMarket.sol";
 
 /**
@@ -61,10 +61,10 @@ contract ClockchainOracle is AccessControl, ReentrancyGuard {
         _;
     }
     
-    constructor(address _predictionMarket) {
+    constructor(address payable _predictionMarket) {
         predictionMarket = PredictionMarket(_predictionMarket);
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, msg.sender);
     }
     
     /**
