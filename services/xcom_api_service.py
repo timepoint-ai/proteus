@@ -35,14 +35,14 @@ class XComAPIService:
                         consumer_secret=self.api_secret,
                         access_token=self.access_token,
                         access_token_secret=self.access_token_secret,
-                        wait_on_rate_limit=True
+                        wait_on_rate_limit=False  # Don't wait for rate limit
                     )
                 elif self.api_key and self.api_secret:
                     # Use OAuth1 with just API key/secret
                     auth = tweepy.OAuthHandler(self.api_key, self.api_secret)
                     if self.access_token and self.access_token_secret:
                         auth.set_access_token(self.access_token, self.access_token_secret)
-                    self.client = tweepy.Client(auth=auth, wait_on_rate_limit=True)
+                    self.client = tweepy.Client(auth=auth, wait_on_rate_limit=False)
                 logger.info("X.com API client initialized successfully")
             except Exception as e:
                 logger.error(f"Failed to initialize X.com API client: {e}")

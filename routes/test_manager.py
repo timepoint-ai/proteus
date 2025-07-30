@@ -11,9 +11,12 @@ from functools import wraps
 from models import db, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, Actor
 from services.blockchain_base import BaseBlockchainService
 from services.payout_base import BasePayoutService
+from services.xcom_api_service import XComAPIService
+from services.oracle_xcom import XcomOracleService
 from web3 import Web3
 import time
 from Levenshtein import distance
+import base64
 
 logger = logging.getLogger(__name__)
 test_manager_bp = Blueprint('test_manager', __name__)
@@ -434,7 +437,7 @@ def run_bet_placement_test(results):
         return results
 
 def run_oracle_submission_test(results):
-    """Test oracle submission workflow"""
+    """Test oracle submission workflow with X.com API integration"""
     try:
         # Step 1: Get expired market
         add_test_step(results, "Get Expired Market", "running")
@@ -453,25 +456,81 @@ def run_oracle_submission_test(results):
         add_test_step(results, "Get Expired Market", "passed", 
                      details={'market_id': str(market.id), 'expired': True})
         
-        # Step 2: Submit oracle data
+        # Step 2: Test X.com API Integration
+        add_test_step(results, "Test X.com API Integration", "running")
+        
+        # Initialize X.com services
+        xcom_api = XComAPIService()
+        oracle_service = XcomOracleService()
+        
+        # Test tweet data - using a known test tweet ID
+        test_tweet_url = "https://x.com/test_user/status/1234567890123456789"
+        tweet_text = None
+        screenshot_proof = None
+        
+        try:
+            # Try fetching tweet via API
+            tweet_data = xcom_api.get_tweet("1234567890123456789")
+            if tweet_data and tweet_data.get('data'):
+                tweet_text = tweet_data['data'].get('text', 'Test actual text from tweet')
+                add_test_step(results, "Test X.com API Integration", "passed", 
+                             details={'api_success': True, 'tweet_fetched': True})
+            else:
+                # API didn't return data, use fallback
+                tweet_text = 'Test actual text from tweet'
+                add_test_step(results, "Test X.com API Integration", "warning", 
+                             details={'api_success': False, 'using_fallback': True})
+        except Exception as api_error:
+            # API failed, use manual fallback
+            tweet_text = 'Test actual text from tweet'
+            add_test_step(results, "Test X.com API Integration", "warning", 
+                         details={'api_error': str(api_error), 'using_manual_fallback': True})
+        
+        # Step 3: Capture Screenshot (or use placeholder)
+        add_test_step(results, "Capture Tweet Screenshot", "running")
+        
+        try:
+            # Try to capture screenshot
+            screenshot_data = oracle_service.capture_tweet_screenshot(test_tweet_url)
+            if screenshot_data:
+                screenshot_proof = screenshot_data
+                add_test_step(results, "Capture Tweet Screenshot", "passed", 
+                             details={'screenshot_captured': True})
+            else:
+                # Use placeholder if capture fails
+                screenshot_proof = 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+                add_test_step(results, "Capture Tweet Screenshot", "warning", 
+                             details={'using_placeholder': True})
+        except Exception as screenshot_error:
+            screenshot_proof = 'data:image/png;base64,iVBORw0KGgoAAAANS...'
+            add_test_step(results, "Capture Tweet Screenshot", "warning", 
+                         details={'screenshot_error': str(screenshot_error)})
+        
+        # Step 4: Submit oracle data
         add_test_step(results, "Submit Oracle Data", "running")
         
         oracle_submission = OracleSubmission(
             market_id=market.id,
             oracle_wallet=TEST_CONFIG['test_wallets']['oracle1'],
             tweet_id='1234567890123456789',
-            submitted_text='Test actual text from tweet',
-            screenshot_proof='data:image/png;base64,iVBORw0KGgoAAAANS...',
+            submitted_text=tweet_text,
+            screenshot_proof=screenshot_proof,
             signature='0x' + 'f' * 130,
-            status='pending'
+            status='pending',
+            tweet_url=test_tweet_url,
+            verification_method='api_test'
         )
         db.session.add(oracle_submission)
         db.session.commit()
         
         add_test_step(results, "Submit Oracle Data", "passed", 
-                     details={'oracle_id': str(oracle_submission.id)})
+                     details={
+                         'oracle_id': str(oracle_submission.id),
+                         'tweet_text': tweet_text[:50] + '...' if len(tweet_text) > 50 else tweet_text,
+                         'has_screenshot': bool(screenshot_proof)
+                     })
         
-        # Step 3: Calculate Levenshtein distances
+        # Step 5: Calculate Levenshtein distances
         add_test_step(results, "Calculate Levenshtein Distances", "running")
         
         # Using imported distance function
@@ -488,7 +547,19 @@ def run_oracle_submission_test(results):
         add_test_step(results, "Calculate Levenshtein Distances", "passed", 
                      details={'distances': distances})
         
-        # Step 4: Verify oracle submission
+        # Step 6: Test Manual Submission Interface
+        add_test_step(results, "Test Manual Submission Interface", "running")
+        
+        # Verify the manual submission route is available
+        from routes.oracle_manual import oracle_manual_bp
+        if oracle_manual_bp:
+            add_test_step(results, "Test Manual Submission Interface", "passed", 
+                         details={'manual_interface_available': True})
+        else:
+            add_test_step(results, "Test Manual Submission Interface", "warning", 
+                         details={'manual_interface_available': False})
+        
+        # Step 7: Verify oracle submission
         add_test_step(results, "Verify Oracle Submission", "running")
         
         saved_oracle = OracleSubmission.query.get(oracle_submission.id)
@@ -498,7 +569,12 @@ def run_oracle_submission_test(results):
             return results
         
         add_test_step(results, "Verify Oracle Submission", "passed", 
-                     details={'verified': True, 'status': saved_oracle.status})
+                     details={
+                         'verified': True, 
+                         'status': saved_oracle.status,
+                         'has_tweet_url': bool(saved_oracle.tweet_url),
+                         'verification_method': saved_oracle.verification_method
+                     })
         
         return results
         

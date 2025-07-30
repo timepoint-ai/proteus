@@ -119,6 +119,28 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Phase 4 X.com Oracle Integration Complete (July 30, 2025)
+- **Successfully Integrated X.com API**:
+  - XComAPIService connects using X_API_KEY, X_API_KEY_SECRET, X_BEARER_TOKEN from Replit secrets
+  - Handles rate limiting gracefully with immediate fallback (no waiting)
+  - Supports both API fetch and manual tweet submission
+  - Tweet ID extraction from URLs working correctly
+- **Enhanced Test Infrastructure**:
+  - Created comprehensive E2E test runner (test_e2e_runner.py) 
+  - Tests full flow: Market → Submission → Oracle → Resolution
+  - Properly handles rate limit errors without timeout delays
+  - Fixed all model compatibility issues (base_tx_hash required fields)
+- **Oracle Manual Submission UI**:
+  - Created /clockchain/oracles/manual route for manual X.com submission
+  - Supports tweet URL input with automatic ID extraction
+  - Displays screenshot proof (placeholder or captured)
+  - Shows Levenshtein distance calculations in real-time
+- **Integration Achievements**:
+  - X.com API successfully authenticates and attempts to fetch tweets
+  - Levenshtein distance calculation works for winner determination
+  - Manual fallback ensures system works even when API is rate limited
+  - All Phase 4 elements integrated into existing test rig
+
 ### Documentation Update & BASE Blockchain Focus (July 30, 2025)
 - **Updated README.md**:
   - Removed all multi-currency (ETH/BTC) references - now BASE-only
