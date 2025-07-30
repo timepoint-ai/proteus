@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Manager Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-step {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #6c757d;
+            background: rgba(255,255,255,0.05);
+        }
+        .test-step.passed { border-color: #28a745; }
+        .test-step.failed { border-color: #dc3545; }
+        .test-step.running { border-color: #ffc107; }
+        
+        .test-output {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .network-info {
+            background: linear-gradient(135deg, #0052FF, #1a73e8);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .wallet-info {
+            background: rgba(0, 82, 255, 0.1);
+            border: 1px solid #0052FF;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Header -->
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                    <h2><i class="fas fa-flask"></i> BASE Sepolia Test Manager</h2>
+                    <div>
+                        <a href="/test-manager/logout" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <!-- Test Controls -->
+            <div class="col-md-4">
+                <div class="network-info">
+                    <h5><i class="fab fa-ethereum"></i> BASE Sepolia Network</h5>
+                    <p class="mb-2"><strong>Chain ID:</strong> {{ config.chain_id }}</p>
+                    <p class="mb-2"><strong>RPC:</strong> {{ config.rpc_url }}</p>
+                    <p class="mb-0"><strong>Explorer:</strong> <a href="{{ config.explorer_url }}" target="_blank" class="text-light">BaseScan</a></p>
+                </div>
+                
+                <div class="card bg-secondary">
+                    <div class="card-header">
+                        <h5><i class="fas fa-play-circle"></i> Test Workflows</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="runTest('market_creation')">
+                                <i class="fas fa-plus-circle"></i> Market Creation Test
+                            </button>
+                            <button class="btn btn-success" onclick="runTest('submission_creation')">
+                                <i class="fas fa-edit"></i> Submission Creation Test
+                            </button>
+                            <button class="btn btn-info" onclick="runTest('betting')">
+                                <i class="fas fa-coins"></i> Betting Test
+                            </button>
+                            <button class="btn btn-warning" onclick="runTest('oracle_submission')">
+                                <i class="fas fa-eye"></i> Oracle Submission Test
+                            </button>
+                            <button class="btn btn-purple" onclick="runTest('market_resolution')">
+                                <i class="fas fa-trophy"></i> Market Resolution Test
+                            </button>
+                            <hr>
+                            <button class="btn btn-danger" onclick="runTest('full_e2e')">
+                                <i class="fas fa-rocket"></i> Full E2E Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-secondary mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tools"></i> Test Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-warning" onclick="cleanTestData()">
+                                <i class="fas fa-broom"></i> Clean Test Data
+                            </button>
+                            <button class="btn btn-outline-info" onclick="checkNetworkStatus()">
+                                <i class="fas fa-network-wired"></i> Check Network Status
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="viewTestWallets()">
+                                <i class="fas fa-wallet"></i> View Test Wallets
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Output -->
+            <div class="col-md-8">
+                <div class="card bg-secondary h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-terminal"></i> Test Output</h5>
+                        <button class="btn btn-outline-light btn-sm" onclick="clearOutput()">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="test-output" class="test-output">
+                            <div class="text-muted">
+                                <i class="fas fa-info-circle"></i> Welcome to the BASE Sepolia Test Manager
+                                <br>Select a test from the left panel to begin testing...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Wallets Modal -->
+        <div class="modal fade" id="walletsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-wallet"></i> Test Wallets Configuration</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            {% for wallet_name, address in config.test_wallets.items() %}
+                            <div class="col-md-6">
+                                <div class="wallet-info">
+                                    <h6>{{ wallet_name.title() }} Wallet</h6>
+                                    <code class="text-info">{{ address }}</code>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <a href="{{ config.explorer_url }}/address/{{ address }}" target="_blank" class="text-decoration-none">
+                                                <i class="fas fa-external-link-alt"></i> View on BaseScan
+                                            </a>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> These are test wallet addresses for BASE Sepolia testnet. 
+                            You can fund them with test ETH from the BASE Sepolia faucet.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentTest = null;
+        
+        function addOutput(message, type = 'info') {
+            const output = document.getElementById('test-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? 'fa-exclamation-triangle' : 
+                        type === 'success' ? 'fa-check-circle' : 
+                        type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-2 text-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'}`;
+            messageDiv.innerHTML = `<small>[${timestamp}]</small> <i class="fas ${icon}"></i> ${message}`;
+            
+            output.appendChild(messageDiv);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearOutput() {
+            document.getElementById('test-output').innerHTML = '<div class="text-muted"><i class="fas fa-info-circle"></i> Output cleared...</div>';
+        }
+        
+        function runTest(testType) {
+            if (currentTest) {
+                addOutput('A test is already running. Please wait...', 'warning');
+                return;
+            }
+            
+            currentTest = testType;
+            addOutput(`Starting ${testType.replace('_', ' ')} test...`, 'info');
+            
+            fetch(`/test-manager/run-test/${testType}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addOutput(`Test completed successfully!`, 'success');
+                    displayTestResults(data.results);
+                } else {
+                    addOutput(`Test failed: ${data.error}`, 'error');
+                }
+                currentTest = null;
+            })
+            .catch(error => {
+                addOutput(`Test error: ${error.message}`, 'error');
+                currentTest = null;
+            });
+        }
+        
+        function displayTestResults(results) {
+            results.forEach(step => {
+                const status = step.status === 'passed' ? 'success' : 
+                              step.status === 'failed' ? 'error' : 'warning';
+                let message = `${step.name}: ${step.status}`;
+                
+                if (step.details) {
+                    message += ` - ${JSON.stringify(step.details)}`;
+                }
+                if (step.error) {
+                    message += ` - Error: ${step.error}`;
+                }
+                
+                addOutput(message, status);
+            });
+        }
+        
+        function cleanTestData() {
+            if (confirm('Are you sure you want to clean all test data? This action cannot be undone.')) {
+                addOutput('Cleaning test data...', 'warning');
+                
+                fetch('/test-manager/clean-data', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addOutput('Test data cleaned successfully!', 'success');
+                    } else {
+                        addOutput(`Failed to clean test data: ${data.error}`, 'error');
+                    }
+                });
+            }
+        }
+        
+        function checkNetworkStatus() {
+            addOutput('Checking BASE Sepolia network status...', 'info');
+            
+            fetch('/test-manager/network-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addOutput(`Network Status: Connected to BASE Sepolia`, 'success');
+                    addOutput(`Current Block: ${data.status.current_block}`, 'info');
+                    addOutput(`Gas Price: ${data.status.gas_price} gwei`, 'info');
+                } else {
+                    addOutput(`Network check failed: ${data.error}`, 'error');
+                }
+            });
+        }
+        
+        function viewTestWallets() {
+            const modal = new bootstrap.Modal(document.getElementById('walletsModal'));
+            modal.show();
+        }
+        
+        // Auto-refresh network status every 30 seconds
+        setInterval(checkNetworkStatus, 30000);
+    </script>
+</body>
+</html>

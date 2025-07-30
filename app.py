@@ -81,6 +81,10 @@ def create_app():
     app.register_blueprint(oracles_bp)
     app.register_blueprint(generate_data_bp)
     
+    # Test Manager Routes (Protected)
+    from routes.test_manager import test_manager_bp
+    app.register_blueprint(test_manager_bp)
+    
     # Initialize rate limiter
     init_limiter(app)
     
