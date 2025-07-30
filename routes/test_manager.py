@@ -241,7 +241,7 @@ def run_market_creation_test(results):
             db.session.commit()
         
         add_test_step(results, "Create Test Actor", "passed", 
-                     details={'actor_id': actor.id, 'name': actor.name})
+                     details={'actor_id': str(actor.id), 'name': actor.name})
         
         # Step 2: Initialize blockchain service
         add_test_step(results, "Initialize Blockchain Service", "running")
@@ -279,7 +279,7 @@ def run_market_creation_test(results):
         db.session.commit()
         
         add_test_step(results, "Create Prediction Market", "passed", 
-                     details={'market_id': market.id, 'twitter_handle': market.twitter_handle})
+                     details={'market_id': str(market.id), 'twitter_handle': market.twitter_handle})
         
         # Step 4: Verify market creation
         add_test_step(results, "Verify Market Creation", "running")
@@ -312,7 +312,7 @@ def run_submission_creation_test(results):
             return results
         
         add_test_step(results, "Get Active Market", "passed", 
-                     details={'market_id': market.id})
+                     details={'market_id': str(market.id)})
         
         # Step 2: Create original submission
         add_test_step(results, "Create Original Submission", "running")
@@ -329,7 +329,7 @@ def run_submission_creation_test(results):
         db.session.commit()
         
         add_test_step(results, "Create Original Submission", "passed", 
-                     details={'submission_id': original.id, 'type': 'original'})
+                     details={'submission_id': str(original.id), 'type': 'original'})
         
         # Step 3: Create competitor submission
         add_test_step(results, "Create Competitor Submission", "running")
@@ -346,7 +346,7 @@ def run_submission_creation_test(results):
         db.session.commit()
         
         add_test_step(results, "Create Competitor Submission", "passed", 
-                     details={'submission_id': competitor.id, 'type': 'competitor'})
+                     details={'submission_id': str(competitor.id), 'type': 'competitor'})
         
         # Step 4: Create null submission
         add_test_step(results, "Create Null Submission", "running")
@@ -363,7 +363,7 @@ def run_submission_creation_test(results):
         db.session.commit()
         
         add_test_step(results, "Create Null Submission", "passed", 
-                     details={'submission_id': null_sub.id, 'type': 'null'})
+                     details={'submission_id': str(null_sub.id), 'type': 'null'})
         
         return results
         
@@ -384,7 +384,7 @@ def run_bet_placement_test(results):
             return results
         
         add_test_step(results, "Get Test Submission", "passed", 
-                     details={'submission_id': submission.id})
+                     details={'submission_id': str(submission.id)})
         
         # Step 2: Calculate fees
         add_test_step(results, "Calculate Bet Fees", "running")
@@ -413,7 +413,7 @@ def run_bet_placement_test(results):
         db.session.commit()
         
         add_test_step(results, "Place Test Bet", "passed", 
-                     details={'bet_id': bet.id, 'amount': bet.amount})
+                     details={'bet_id': str(bet.id), 'amount': str(bet.amount)})
         
         # Step 4: Verify bet
         add_test_step(results, "Verify Bet Placement", "running")
@@ -451,7 +451,7 @@ def run_oracle_submission_test(results):
         db.session.commit()
         
         add_test_step(results, "Get Expired Market", "passed", 
-                     details={'market_id': market.id, 'expired': True})
+                     details={'market_id': str(market.id), 'expired': True})
         
         # Step 2: Submit oracle data
         add_test_step(results, "Submit Oracle Data", "running")
@@ -469,7 +469,7 @@ def run_oracle_submission_test(results):
         db.session.commit()
         
         add_test_step(results, "Submit Oracle Data", "passed", 
-                     details={'oracle_id': oracle_submission.id})
+                     details={'oracle_id': str(oracle_submission.id)})
         
         # Step 3: Calculate Levenshtein distances
         add_test_step(results, "Calculate Levenshtein Distances", "running")
@@ -484,7 +484,7 @@ def run_oracle_submission_test(results):
         
         db.session.commit()
         
-        distances = {s.id: s.levenshtein_distance for s in submissions if s.levenshtein_distance is not None}
+        distances = {str(s.id): s.levenshtein_distance for s in submissions if s.levenshtein_distance is not None}
         add_test_step(results, "Calculate Levenshtein Distances", "passed", 
                      details={'distances': distances})
         
@@ -676,9 +676,9 @@ def clean_data():
     """Clean test data endpoint"""
     try:
         clean_test_data()
-        return jsonify({'status': 'success', 'message': 'Test data cleaned'})
+        return jsonify({'success': True, 'message': 'Test data cleaned'})
     except Exception as e:
-        return jsonify({'status': 'error', 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @test_manager_bp.route('/test-manager/logout')
 def test_logout():
