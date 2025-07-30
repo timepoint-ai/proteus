@@ -10,8 +10,13 @@ logger = logging.getLogger(__name__)
 
 class BlockchainService:
     def __init__(self):
-        self.eth_web3 = Web3(Web3.HTTPProvider(Config.ETH_RPC_URL))
-        self.btc_api_url = Config.BTC_RPC_URL
+        # Use BASE configuration
+        if Config.NETWORK == 'mainnet':
+            rpc_url = Config.BASE_RPC_URL
+        else:
+            rpc_url = Config.BASE_SEPOLIA_RPC_URL
+        self.eth_web3 = Web3(Web3.HTTPProvider(rpc_url))
+        self.btc_api_url = None  # BTC support removed
         
     def validate_eth_transaction(self, tx_hash: str) -> Optional[Dict[str, Any]]:
         """Validate an Ethereum transaction"""

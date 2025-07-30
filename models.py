@@ -47,6 +47,18 @@ class PredictionMarket(db.Model):
     resolution_text = db.Column(db.Text)
     winning_submission_id = db.Column(UUID(as_uuid=True))  # Set after resolution
     resolution_time = db.Column(db.DateTime)
+    
+    # X.com integration fields
+    twitter_handle = db.Column(db.String(256))  # X.com handle of the actor
+    target_tweet_id = db.Column(db.String(128))  # Specific tweet ID if targeting
+    xcom_only = db.Column(db.Boolean, default=True)  # Require X.com posts only
+    
+    # BASE blockchain fields
+    contract_address = db.Column(db.String(128))  # Deployed contract address on BASE
+    market_creation_tx = db.Column(db.String(128))  # Transaction hash for market creation
+    total_volume = db.Column(db.Numeric(20, 8), default=0)  # Total BASE volume
+    platform_fee_collected = db.Column(db.Numeric(20, 8), default=0)  # Platform fees in BASE
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -62,10 +74,15 @@ class Submission(db.Model):
     predicted_text = db.Column(db.Text)  # Nullable for null submissions
     submission_type = db.Column(db.String(20), nullable=False)  # original, competitor, null
     initial_stake_amount = db.Column(db.Numeric(20, 8), nullable=False)
-    currency = db.Column(db.String(10), nullable=False)  # ETH, BTC, TAO
-    transaction_hash = db.Column(db.String(128), nullable=False)
+    base_tx_hash = db.Column(db.String(128), nullable=False)  # BASE transaction hash
     levenshtein_distance = db.Column(db.Integer)
     is_winner = db.Column(db.Boolean, default=False)
+    
+    # X.com integration fields
+    tweet_id = db.Column(db.String(128))  # Predicted tweet ID
+    screenshot_ipfs = db.Column(db.String(256))  # IPFS hash of screenshot
+    screenshot_base64 = db.Column(db.Text)  # Base64 encoded screenshot
+    screenshot_hash = db.Column(db.String(128))  # SHA256 hash of screenshot
     
     # AI Agent and Transparency Fields
     is_ai_agent = db.Column(db.Boolean, default=False)
@@ -86,11 +103,10 @@ class Bet(db.Model):
     submission_id = db.Column(UUID(as_uuid=True), db.ForeignKey('submissions.id'), nullable=False)
     bettor_wallet = db.Column(db.String(128), nullable=False)
     amount = db.Column(db.Numeric(20, 8), nullable=False)
-    currency = db.Column(db.String(10), nullable=False)  # ETH, BTC
-    transaction_hash = db.Column(db.String(128), nullable=False)
+    base_tx_hash = db.Column(db.String(128), nullable=False)  # BASE transaction hash
     status = db.Column(db.String(20), default='pending')  # pending, confirmed, won, lost, refunded
     payout_amount = db.Column(db.Numeric(20, 8))
-    payout_transaction_hash = db.Column(db.String(128))
+    payout_tx_hash = db.Column(db.String(128))  # BASE payout transaction
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Renamed from Stake - no longer needed
@@ -108,6 +124,15 @@ class OracleSubmission(db.Model):
     votes_against = db.Column(db.Integer, default=0)
     status = db.Column(db.String(20), default='pending')  # pending, consensus, rejected
     is_consensus = db.Column(db.Boolean, default=False)
+    
+    # X.com verification fields
+    tweet_id = db.Column(db.String(128))  # Actual tweet ID from X.com
+    tweet_verification = db.Column(db.Text)  # JSON with verification details
+    screenshot_proof = db.Column(db.Text)  # Base64 encoded screenshot
+    screenshot_ipfs = db.Column(db.String(256))  # IPFS hash of screenshot
+    screenshot_hash = db.Column(db.String(128))  # SHA256 hash for verification
+    tweet_timestamp = db.Column(db.DateTime)  # When tweet was posted
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -151,7 +176,6 @@ class Transaction(db.Model):
     from_address = db.Column(db.String(128), nullable=False)
     to_address = db.Column(db.String(128), nullable=False)
     amount = db.Column(db.Numeric(20, 8), nullable=False)
-    currency = db.Column(db.String(10), nullable=False)
     transaction_type = db.Column(db.String(20), nullable=False)  # stake, payout, fee, refund
     related_market_id = db.Column(UUID(as_uuid=True), db.ForeignKey('prediction_markets.id'))
     related_submission_id = db.Column(UUID(as_uuid=True), db.ForeignKey('submissions.id'))
@@ -159,6 +183,14 @@ class Transaction(db.Model):
     platform_fee = db.Column(db.Numeric(20, 8), default=0)
     status = db.Column(db.String(20), default='pending')  # pending, confirmed, failed
     block_number = db.Column(db.BigInteger)
+    
+    # BASE-specific fields
+    gas_used = db.Column(db.BigInteger)
+    gas_price = db.Column(db.Numeric(20, 8))
+    nonce = db.Column(db.Integer)
+    contract_address = db.Column(db.String(128))  # Contract interacted with
+    method_signature = db.Column(db.String(256))  # Method called
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class SyntheticTimeEntry(db.Model):
@@ -182,11 +214,13 @@ class NetworkMetrics(db.Model):
     total_markets = db.Column(db.Integer, default=0)
     total_submissions = db.Column(db.Integer, default=0)
     total_bets = db.Column(db.Integer, default=0)
-    total_volume_eth = db.Column(db.Numeric(20, 8), default=0)
-    total_volume_btc = db.Column(db.Numeric(20, 8), default=0)
-    platform_fees_eth = db.Column(db.Numeric(20, 8), default=0)
-    platform_fees_btc = db.Column(db.Numeric(20, 8), default=0)
+    total_volume_base = db.Column(db.Numeric(20, 8), default=0)  # BASE volume only
+    platform_fees_base = db.Column(db.Numeric(20, 8), default=0)  # BASE fees only
     consensus_accuracy = db.Column(db.Float, default=0.0)
+    
+    # X.com metrics
+    total_tweets_verified = db.Column(db.Integer, default=0)
+    average_levenshtein_distance = db.Column(db.Float, default=0.0)
 
 # AI Agent Transparency Models
 

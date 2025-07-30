@@ -3,10 +3,11 @@ import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
 import json
-from services.blockchain import BlockchainService
+from services.blockchain_base import BaseBlockchainService
 from services.consensus import ConsensusService
 from services.ledger import LedgerService
-from services.oracle import OracleService
+from services.oracle_xcom import XcomOracleService
+from services.payout_base import BasePayoutService
 from services.time_sync import TimeSyncService
 from services.text_analysis import TextAnalysisService
 from services.node_communication import NodeCommunicationService
@@ -14,21 +15,28 @@ from models import PredictionMarket, Submission, Bet, Actor, NodeOperator, Trans
 from app import db
 from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils
+import os
 
 logger = logging.getLogger(__name__)
 
 api_bp = Blueprint('api', __name__)
 
 # Initialize services
-blockchain_service = BlockchainService()
+blockchain_service = BaseBlockchainService()
 consensus_service = ConsensusService()
 ledger_service = LedgerService()
-oracle_service = OracleService()
+oracle_service = XcomOracleService()
+payout_service = BasePayoutService()
 time_sync_service = TimeSyncService()
 text_analysis_service = TextAnalysisService()
 node_comm_service = NodeCommunicationService()
 validation_utils = ValidationUtils()
 crypto_utils = CryptoUtils()
+
+# Load contract deployment if available
+deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'testnet' else 'deployment-mainnet.json'
+if os.path.exists(deployment_file):
+    blockchain_service.load_contracts(deployment_file)
 
 @api_bp.route('/health', methods=['GET'])
 def health_check():

@@ -22,16 +22,27 @@ class Config:
     NODE_PRIVATE_KEY = os.environ.get('NODE_PRIVATE_KEY') or 'dev-private-key'
     NODE_PUBLIC_KEY = os.environ.get('NODE_PUBLIC_KEY') or 'dev-public-key'
     
-    # Blockchain configuration
-    ETH_RPC_URL = os.environ.get('ETH_RPC_URL') or 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID'
-    BTC_RPC_URL = os.environ.get('BTC_RPC_URL') or 'https://blockstream.info/api'
+    # BASE Blockchain configuration
+    BASE_RPC_URL = os.environ.get('BASE_RPC_URL') or 'https://mainnet.base.org'
+    BASE_SEPOLIA_RPC_URL = os.environ.get('BASE_SEPOLIA_RPC_URL') or 'https://sepolia.base.org'
+    NETWORK = os.environ.get('NETWORK') or 'testnet'  # 'testnet' or 'mainnet'
+    
+    # Chain IDs
+    BASE_MAINNET_CHAIN_ID = 8453
+    BASE_SEPOLIA_CHAIN_ID = 84532
     
     # Network configuration
     KNOWN_NODES = os.environ.get('KNOWN_NODES', '').split(',') if os.environ.get('KNOWN_NODES') else []
     CONSENSUS_THRESHOLD = float(os.environ.get('CONSENSUS_THRESHOLD', '0.51'))  # 51% majority
     
     # Platform configuration
-    PLATFORM_FEE_RATE = float(os.environ.get('PLATFORM_FEE_RATE', '0.01'))  # 1%
+    PLATFORM_FEE = float(os.environ.get('PLATFORM_FEE', '7'))  # 7% platform fee
+    
+    # X.com Oracle configuration
+    XCOM_API_URL = os.environ.get('XCOM_API_URL') or 'https://api.x.com/v2'
+    XCOM_BEARER_TOKEN = os.environ.get('XCOM_BEARER_TOKEN')
+    SCREENSHOT_SERVICE_URL = os.environ.get('SCREENSHOT_SERVICE_URL') or 'http://localhost:3000'
+    IPFS_GATEWAY_URL = os.environ.get('IPFS_GATEWAY_URL') or 'https://ipfs.io/ipfs/'
     
     # Time configuration
     PACIFIC_TIMEZONE = 'America/Los_Angeles'

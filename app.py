@@ -63,9 +63,11 @@ def create_app():
     from routes.clockchain_api import clockchain_api_bp
     from routes.oracles import oracles_bp
     from routes.generate_realistic_data import generate_data_bp
+    from routes.base_api import base_api_bp
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(base_api_bp, url_prefix='/api/base')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(test_data_bp, url_prefix='/test_data')
     app.register_blueprint(test_data_v2_bp, url_prefix='/test_data_v2')
