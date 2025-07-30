@@ -119,6 +119,23 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Test Manager E2E Fixed (July 30, 2025)
+- **Fixed BaseBlockchainService Missing Attribute**:
+  - Added `is_testnet` property based on network configuration
+  - BASE Sepolia (chain ID 84532): is_testnet = True
+  - BASE Mainnet (chain ID 8453): is_testnet = False
+- **Resolved Database Schema Issues**:
+  - Fixed missing `base_tx_hash` column in bets table
+  - Recreated all tables with proper schema alignment
+- **E2E Test Suite Validation**:
+  - All backend E2E tests now passing successfully
+  - Test flow: Wallet → Market → Submission → Betting → Oracle → Resolution
+  - Proper cleanup of test data after completion
+- **Test Manager Dashboard**:
+  - Fixed route mismatches between frontend and backend
+  - Updated JavaScript endpoints to match server routes
+  - Full E2E test function properly implemented
+
 ### Phase 3 Frontend Wallet Integration Complete (July 30, 2025)
 - **Implemented Comprehensive Wallet Integration**:
   - Created wallet.js for MetaMask/Coinbase Wallet connection management
