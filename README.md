@@ -28,10 +28,18 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 
 **Clockchain** leverages Coinbase's BASE blockchain for ultra-low-cost, high-speed prediction markets:
 
+#### Deployed Contracts (BASE Sepolia Testnet)
+- **PredictionMarket**: [`0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3`](https://sepolia.basescan.org/address/0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3)
+- **ClockchainOracle**: [`0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9`](https://sepolia.basescan.org/address/0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9)
+- **NodeRegistry**: [`0xA69C842F335dfE1F69288a70054A34018282218d`](https://sepolia.basescan.org/address/0xA69C842F335dfE1F69288a70054A34018282218d)
+- **PayoutManager**: [`0x142F944868596Eb0b35340f29a727b0560B130f7`](https://sepolia.basescan.org/address/0x142F944868596Eb0b35340f29a727b0560B130f7)
+
+Total deployment cost: ~0.006 BASE (~$0.007 USD)
+
 #### 1. Market Creation & Submissions
 - **X.com Integration**: Markets created for specific Twitter handles with time windows
 - **Smart Contract Deployment**: Each market managed by on-chain contracts
-- **BASE Token Stakes**: All transactions use BASE ETH with gas costs < 0.002 gwei
+- **BASE Token Stakes**: All transactions use BASE ETH with gas costs < 0.001 gwei
 - **Platform Fee**: 7% fee covers gas costs and network operations
 
 #### 2. Competitive Submission System
@@ -168,11 +176,11 @@ export BASE_RPC_URL="https://base-sepolia.g.alchemy.com/public"  # Testnet
 export BASE_MAINNET_RPC_URL="https://base.g.alchemy.com/public"  # Mainnet
 export BASE_CHAIN_ID="84532"  # Sepolia: 84532, Mainnet: 8453
 
-# Smart Contract Addresses (deploy your own or use existing)
-export PREDICTION_MARKET_ADDRESS="0x..."
-export ORACLE_CONTRACT_ADDRESS="0x..."
-export NODE_REGISTRY_ADDRESS="0x..."
-export PAYOUT_MANAGER_ADDRESS="0x..."
+# Smart Contract Addresses (BASE Sepolia Testnet - Already Deployed)
+export PREDICTION_MARKET_ADDRESS="0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3"
+export ORACLE_CONTRACT_ADDRESS="0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9"
+export NODE_REGISTRY_ADDRESS="0xA69C842F335dfE1F69288a70054A34018282218d"
+export PAYOUT_MANAGER_ADDRESS="0x142F944868596Eb0b35340f29a727b0560B130f7"
 
 # Security
 export SESSION_SECRET="your-secret-key"

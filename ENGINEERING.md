@@ -327,7 +327,15 @@ def clean_test_data():
 # BASE Sepolia network configuration
 BASE_RPC_URL = "https://base-sepolia.g.alchemy.com/public"
 BASE_CHAIN_ID = 84532  # Sepolia testnet
-GAS_PRICE_THRESHOLD = 0.002  # Maximum acceptable gas price in gwei
+GAS_PRICE_THRESHOLD = 0.001  # Actual gas prices < 0.001 gwei
+
+# Deployed Contract Addresses (Live on BASE Sepolia)
+CONTRACTS = {
+    'PredictionMarket': '0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3',
+    'ClockchainOracle': '0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9',
+    'NodeRegistry': '0xA69C842F335dfE1F69288a70054A34018282218d',
+    'PayoutManager': '0x142F944868596Eb0b35340f29a727b0560B130f7'
+}
 
 # Test wallet configuration
 TEST_WALLETS = {
