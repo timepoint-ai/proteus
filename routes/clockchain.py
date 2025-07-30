@@ -210,6 +210,11 @@ def get_clockchain_events():
         logger.error(f"Error getting clockchain events: {e}")
         return jsonify({'error': 'Failed to get events'}), 500
 
+@clockchain_bp.route('/clockchain/markets/create')
+def create_market():
+    """Display market creation form"""
+    return render_template('markets/create.html')
+
 @clockchain_bp.route('/clockchain/market/<market_id>')
 def market_detail(market_id):
     """Display detailed view of a prediction market"""

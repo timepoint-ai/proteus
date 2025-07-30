@@ -12,6 +12,9 @@
                     <div class="text-muted">
                         <i class="fas fa-chart-line"></i> Active: {{ active_bet_count }} | Volume: {{ total_bet_volume }} ETH
                     </div>
+                    <a href="{{ url_for('clockchain.create_market') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Market
+                    </a>
                     <a href="/" class="btn btn-secondary">
                         <i class="fas fa-home"></i> Dashboard
                     </a>

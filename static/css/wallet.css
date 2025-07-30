@@ -1,0 +1,191 @@
+/**
+ * Wallet Integration Styles for BASE Blockchain
+ */
+
+/* Wallet Connection Button */
+#wallet-connect-btn {
+    background: linear-gradient(135deg, #0052FF 0%, #003FCC 100%);
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+#wallet-connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 82, 255, 0.3);
+}
+
+/* Wallet Status Display */
+#wallet-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#wallet-status .fa-circle {
+    font-size: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Market Creation Form */
+#market-create-form .card {
+    border: 1px solid rgba(0, 82, 255, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#market-create-form .form-control,
+#market-create-form .form-select {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+#market-create-form .form-control:focus,
+#market-create-form .form-select:focus {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: #0052FF;
+    box-shadow: 0 0 0 0.25rem rgba(0, 82, 255, 0.25);
+}
+
+/* Oracle Wallet List */
+#oracle-wallets-list .badge {
+    background: rgba(0, 82, 255, 0.2);
+    border: 1px solid rgba(0, 82, 255, 0.4);
+}
+
+/* BASE Chain Badge */
+.chain-badge {
+    background: linear-gradient(135deg, #0052FF 0%, #003FCC 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chain-badge .chain-icon {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+}
+
+/* Transaction Notifications */
+.transaction-notification {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(0, 82, 255, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.transaction-notification a {
+    color: #0052FF;
+    text-decoration: none;
+}
+
+.transaction-notification a:hover {
+    text-decoration: underline;
+}
+
+/* Loading Overlay */
+#blockchain-loader {
+    backdrop-filter: blur(5px);
+}
+
+#blockchain-loader .bg-dark {
+    background: rgba(0, 0, 0, 0.95) !important;
+    border: 1px solid rgba(0, 82, 255, 0.4);
+}
+
+/* Bet Modal */
+.bet-modal .modal-content {
+    border: 1px solid rgba(0, 82, 255, 0.2);
+}
+
+.bet-modal .alert-info {
+    background: rgba(0, 82, 255, 0.1);
+    border-color: rgba(0, 82, 255, 0.3);
+}
+
+/* Market Cards on Timeline */
+.market-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.market-card:hover {
+    border-color: rgba(0, 82, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 82, 255, 0.2);
+}
+
+/* Submission Items */
+.submission-item {
+    transition: all 0.3s ease;
+}
+
+.submission-item:hover {
+    background: rgba(0, 82, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    margin: -12px;
+}
+
+/* BASE Platform Colors */
+.text-base-primary {
+    color: #0052FF !important;
+}
+
+.bg-base-primary {
+    background-color: #0052FF !important;
+}
+
+.border-base-primary {
+    border-color: #0052FF !important;
+}
+
+/* Gas Price Display */
+.gas-price-display {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #00D9FF;
+    background: rgba(0, 217, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Network Status Indicator */
+.network-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(0, 82, 255, 0.4);
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.network-status.connected {
+    border-color: #00D9FF;
+}
+
+.network-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00D9FF;
+    animation: pulse 2s infinite;
+}

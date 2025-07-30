@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Create Market - Clockchain{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('clockchain.clockchain_view') }}">Clockchain</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.markets_view') }}">Markets</a></li>
+            <li class="breadcrumb-item active">Create Market</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="h3 mb-4">
+                <i class="fas fa-plus-circle text-primary"></i>
+                Create Prediction Market on BASE
+            </h1>
+            
+            <!-- Wallet connection warning -->
+            <div id="wallet-warning" class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Please connect your wallet to create a market
+            </div>
+            
+            <!-- Market creation form will be injected here -->
+            <div id="market-create-form"></div>
+            
+            <!-- Information section -->
+            <div class="card bg-dark text-white mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">How it works</h5>
+                    <ol>
+                        <li>Connect your BASE wallet (MetaMask or Coinbase Wallet)</li>
+                        <li>Fill in the market details and predicted text</li>
+                        <li>Add oracle wallets that will verify the outcome</li>
+                        <li>Submit your initial stake (plus 7% platform fee)</li>
+                        <li>Sign the transaction to create the market on-chain</li>
+                    </ol>
+                    <p class="mb-0 text-muted">
+                        <small>Markets track X.com posts and use Levenshtein distance to determine winners</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update wallet warning based on connection status
+document.addEventListener('DOMContentLoaded', () => {
+    // Check wallet status periodically
+    setInterval(() => {
+        const warning = document.getElementById('wallet-warning');
+        if (warning && clockchainWallet && clockchainWallet.isConnected) {
+            warning.style.display = 'none';
+        }
+    }, 1000);
+});
+</script>
+{% endblock %}

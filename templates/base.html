@@ -16,6 +16,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
     
     {% block head %}{% endblock %}
 </head>
@@ -179,6 +180,13 @@
     
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    
+    <!-- Web3 and Blockchain Integration -->
+    <script src="{{ url_for('static', filename='js/wallet.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/base-blockchain.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/market-create.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/oracle-submit.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/network-status.js') }}"></script>
     
     {% block scripts %}{% endblock %}
 </body>
