@@ -38,6 +38,12 @@ class Config:
     # Platform configuration
     PLATFORM_FEE = float(os.environ.get('PLATFORM_FEE', '7'))  # 7% platform fee
     
+    # Node operator configuration
+    NODE_OPERATOR_KEY = os.environ.get('NODE_OPERATOR_KEY')
+    NODE_STAKE_AMOUNT = 100  # BASE tokens required for node staking
+    P2P_PORT = int(os.environ.get('P2P_PORT', '8545'))
+    NODE_ENDPOINT = os.environ.get('NODE_ENDPOINT', f'ws://0.0.0.0:{P2P_PORT}')
+    
     # X.com Oracle configuration
     XCOM_API_URL = os.environ.get('XCOM_API_URL') or 'https://api.x.com/v2'
     XCOM_BEARER_TOKEN = os.environ.get('XCOM_BEARER_TOKEN')
