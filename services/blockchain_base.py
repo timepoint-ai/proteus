@@ -19,9 +19,11 @@ class BaseBlockchainService:
         if network == 'mainnet':
             self.rpc_url = os.environ.get('BASE_RPC_URL', 'https://mainnet.base.org')
             self.chain_id = 8453
+            self.is_testnet = False
         else:
             self.rpc_url = os.environ.get('BASE_SEPOLIA_RPC_URL', 'https://sepolia.base.org')
             self.chain_id = 84532
+            self.is_testnet = True
             
         self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
         
