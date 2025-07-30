@@ -21,21 +21,21 @@
 
 ## Architecture Overview
 
-Clockchain is built as a distributed, microservices-oriented application with the following layers:
+Clockchain is built as a BASE blockchain-native application with the following layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Frontend Layer                          │
-│ (Jinja2 Templates, Bootstrap, Chart.js, WebSockets,        │
-│  Test Transaction UI, AI Transparency Dashboard)           │
+│ (Jinja2 Templates, Bootstrap, Web3.js Integration,         │
+│  Wallet Connection UI, E2E Test Manager Dashboard)         │
 ├─────────────────────────────────────────────────────────────┤
 │                    Application Layer                         │
-│ (Flask Routes, AI Agent API, Test Transaction Manager,     │
+│ (Flask Routes, BASE API, Test Manager,                     │
 │  Admin Dashboard, WebSocket Handlers)                      │
 ├─────────────────────────────────────────────────────────────┤
 │                     Service Layer                            │
-│ (Business Logic, AI Transparency Service, Test Generator,  │
-│  Consensus, Oracle, Text Analysis, Verification Modules)   │
+│ (Business Logic, X.com Oracle Service, BASE Blockchain,    │
+│  Consensus, Text Analysis, Payout Management)              │
 ├─────────────────────────────────────────────────────────────┤
 │                  Infrastructure Layer                        │
 │ (Celery Tasks, Redis Cache, WebSocket Connections,         │
@@ -43,11 +43,11 @@ Clockchain is built as a distributed, microservices-oriented application with th
 ├─────────────────────────────────────────────────────────────┤
 │                     Data Layer                               │
 │ (PostgreSQL, SQLAlchemy ORM, Redis Store,                  │
-│  AI Profiles, Verification Results, Test Sessions)         │
+│  Market Data, Oracle Submissions, Test Sessions)           │
 ├─────────────────────────────────────────────────────────────┤
-│                   Blockchain Layer                           │
-│ (Ethereum Web3, Bitcoin API, Test Wallets,                 │
-│  Transaction Validation, Mock Transaction System)          │
+│                   BASE Blockchain Layer                      │
+│ (BASE Sepolia/Mainnet, Smart Contracts, Web3 Provider,     │
+│  MetaMask/Coinbase Wallet, Basescan Integration)          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -134,227 +134,233 @@ Key relationships:
 
 ### Service Layer Architecture
 
-## AI Transparency & Bittensor Integration
+## BASE Blockchain Integration
 
 ### Overview
 
-Clockchain integrates advanced AI transparency features to provide comprehensive verification and analysis of AI agent submissions. This system includes Bittensor TAO tracking, multi-layered verification modules, and real-time transparency dashboards.
+Clockchain is built exclusively on Coinbase's BASE blockchain, leveraging its low-cost Layer 2 infrastructure for prediction markets. The system uses smart contracts for market management, oracle validation, and decentralized consensus.
 
 ### Architecture Components
 
-#### AI Transparency Service (`services/ai_transparency.py`)
+#### BASE Blockchain Service (`services/blockchain_base.py`)
 
-Core service managing AI agent verification and transparency scoring:
+Core service managing all BASE blockchain interactions:
 
 ```python
-class AITransparencyService:
-    def create_ai_profile(self, agent_id, initial_tao_stake):
-        """Create new AI agent profile with Bittensor integration"""
+class BaseBlockchainService:
+    def __init__(self):
+        """Initialize Web3 connection to BASE network"""
+        self.w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
+        self.chain_id = 84532  # Sepolia testnet
+        self.is_testnet = True  # Determines testnet vs mainnet
     
-    def run_verification_modules(self, submission_id):
-        """Execute all verification modules on a submission"""
+    def create_market(self, twitter_handle, start_time, end_time):
+        """Deploy new prediction market on BASE"""
         
-    def update_transparency_score(self, agent_id):
-        """Recalculate overall transparency score"""
+    def submit_oracle_data(self, market_id, tweet_data):
+        """Submit X.com verification with screenshot proof"""
         
-    def get_verification_stats(self):
-        """Return real-time verification statistics"""
+    def calculate_payouts(self, market_id):
+        """Calculate winner based on Levenshtein distance"""
 ```
 
-#### Verification Modules
+#### Smart Contract Architecture
 
-**1. Relevance Verification Module**
-- Assesses prediction relevance to target actors and contexts
-- Uses contextual analysis to determine appropriateness
-- Scores submissions on 0-100 scale for relevance
+**1. PredictionMarket.sol**
+- Core market functionality for X.com predictions
+- Time window management and expiration logic
+- Submission tracking (original, competitor, null)
+- Integration with oracle and payout contracts
 
-**2. NLP Analysis Module**
-- Advanced natural language processing for text quality
-- Grammar, syntax, and coherence assessment
-- Language model bias detection
+**2. ClockchainOracle.sol**
+- X.com data submission with base64 screenshots
+- Levenshtein distance calculation on-chain
+- Multi-oracle consensus mechanism
+- 66% threshold for validation
 
-**3. Sentiment Analysis Module**
-- Emotional tone and sentiment classification
-- Bias detection in AI-generated content
-- Comparative analysis against human submissions
+**3. NodeRegistry.sol**
+- Decentralized node management
+- 100 BASE staking requirement
+- No KYC/DBS requirements
+- Reputation tracking
 
-**4. Bias Detection Module**
-- Systematic identification of AI model limitations
-- Training data bias assessment
-- Fairness and neutrality scoring
+**4. PayoutManager.sol**
+- Automated reward distribution
+- Platform fee (7%) collection
+- Gas-optimized batch payments
+- Winner determination logic
+
+### X.com Oracle Integration (`services/oracle_xcom.py`)
+
+```python
+class XComOracleService:
+    def capture_tweet(self, tweet_id):
+        """Capture tweet screenshot and metadata"""
+        
+    def verify_tweet_authenticity(self, handle, text, timestamp):
+        """Verify tweet exists on X.com"""
+        
+    def calculate_levenshtein_distance(self, predicted, actual):
+        """Calculate text similarity preserving X.com formatting"""
+```
 
 ### Data Models
 
-#### AI Profile Management
+#### BASE-Specific Fields
 ```python
-class AIProfile(db.Model):
-    agent_id = db.Column(db.String(255), primary_key=True)
-    tao_wallet_address = db.Column(db.String(100))
-    total_tao_staked = db.Column(db.Numeric(20, 8))
-    performance_score = db.Column(db.Float)
-    transparency_score = db.Column(db.Float)
-    submission_count = db.Column(db.Integer)
-    verification_results = db.relationship('VerificationResult')
+class PredictionMarket(db.Model):
+    twitter_handle = db.Column(db.String(100))  # X.com handle
+    contract_address = db.Column(db.String(42))  # BASE contract
+    total_volume = db.Column(db.Numeric(20, 8))  # In BASE ETH
+    
+class OracleSubmission(db.Model):
+    tweet_id = db.Column(db.String(100))
+    screenshot_base64 = db.Column(db.Text)  # On-chain storage
+    base_tx_hash = db.Column(db.String(66))  # BASE transaction
+    
+class Transaction(db.Model):
+    base_tx_hash = db.Column(db.String(66), primary_key=True)
+    gas_used = db.Column(db.BigInteger)
+    gas_price = db.Column(db.BigInteger)  # In wei
 ```
 
-#### Verification Results
-```python
-class VerificationResult(db.Model):
-    id = db.Column(db.String(36), primary_key=True)
-    ai_profile_id = db.Column(db.String(255))
-    module_name = db.Column(db.String(100))
-    score = db.Column(db.Float)
-    confidence = db.Column(db.Float)
-    details = db.Column(db.JSON)
-```
+### Frontend Wallet Integration
 
-### Transparency Dashboard
+JavaScript integration at `/static/js/base-blockchain.js`:
 
-Real-time dashboard at `/admin/ai_transparency` provides:
+- **MetaMask/Coinbase Wallet**: Automatic connection and network switching
+- **BASE Network Management**: Switch between Sepolia (84532) and Mainnet (8453)
+- **Transaction Signing**: In-wallet confirmation for all operations
+- **Gas Estimation**: Real-time gas price monitoring
+- **Basescan Integration**: Direct links to transaction explorers
 
-- **Live Statistics**: Active AI agents, verification counts, average scores
-- **Performance Metrics**: Success rates, transparency scores, Bittensor integration
-- **Verification Results**: Detailed breakdown by module and scoring
-- **Agent Profiles**: Individual AI agent performance and history
-- **Audit Trails**: Complete verification history with timestamps
-
-## Test Transaction Generator
+## BASE Sepolia Test Manager
 
 ### Overview
 
-Comprehensive end-to-end testing system for validating the complete Clockchain blockchain workflow. Implements a "mock-first" strategy to prevent real transaction failures while providing complete lifecycle testing.
+Comprehensive E2E testing dashboard specifically designed for BASE Sepolia testnet integration. Provides authenticated access to run individual test cases or complete workflow validation.
 
 ### Architecture Components
 
-#### Test Transaction Manager (`routes/test_transactions.py`)
+#### Test Manager Routes (`routes/test_manager.py`)
 
-Core management system for test sessions:
-
-```python
-class TestTransactionManager:
-    def create_test_session(self, scenario_id, mock_mode=True):
-        """Initialize new test session with scenario"""
-        
-    def update_session_state(self, session_id, new_state, data=None):
-        """Update session state and data"""
-        
-    def mock_transaction(self, tx_type, tx_data):
-        """Create mock blockchain transaction"""
-```
-
-### Test Scenarios
-
-#### Pre-built Realistic Scenarios
-
-**1. Elon Musk Twitter Scenario**
-- 10-minute prediction window
-- Target text: "abc 123 xyz"
-- 3 oracle validators
-- Multiple competitor predictions with varying stakes
-
-**2. Donald Trump Truth Social Scenario**
-- 10-minute prediction window
-- Economy-related post predictions
-- Realistic bet amounts and competitor strategies
-
-**3. Taylor Swift Album Announcement**
-- 15-minute prediction window
-- New album release predictions
-- Extended timeframe for realistic social media patterns
-
-### Testing Workflow
-
-#### Complete Lifecycle Testing
-
-1. **Market Creation Phase**
-   ```python
-   # Create prediction market with oracle configuration
-   market = create_test_market(scenario, oracle_wallets)
-   ```
-
-2. **Submission Generation Phase**
-   ```python
-   # Generate original and competitor submissions
-   submissions = create_test_submissions(market, scenario)
-   ```
-
-3. **Bet Placement Phase**
-   ```python
-   # Distribute bets across submissions
-   bets = create_test_bets(submissions, scenario)
-   ```
-
-4. **Time Management Phase**
-   ```python
-   # Support for fast-forwarding in test mode
-   if test_mode:
-       fast_forward_market_expiration(market)
-   ```
-
-5. **Oracle Consensus Phase**
-   ```python
-   # Simulate oracle submissions with consensus
-   oracle_results = submit_test_oracle_consensus(market, winning_text)
-   ```
-
-6. **Market Resolution Phase**
-   ```python
-   # Calculate winners using Levenshtein distance
-   winner = resolve_market_with_text_analysis(market, oracle_results)
-   ```
-
-7. **Reward Distribution Phase**
-   ```python
-   # Process payouts and update balances
-   payouts = distribute_rewards(market, winner)
-   ```
-
-8. **Ledger Reconciliation Phase**
-   ```python
-   # Final reconciliation of all transactions
-   reconcile_test_session_ledger(session_id)
-   ```
-
-### Mock Transaction System
-
-#### Safe Testing Strategy
+Authenticated dashboard for E2E testing:
 
 ```python
-def mock_transaction(self, tx_type, tx_data):
-    """Generate realistic mock transactions without blockchain interaction"""
-    return {
-        'hash': generate_mock_tx_hash(),
-        'type': tx_type,
-        'data': tx_data,
-        'status': 'mocked',
-        'gas_used': estimate_gas_usage(tx_type),
-        'timestamp': datetime.utcnow().isoformat()
-    }
+@test_manager_bp.route('/test-manager/run/<test_name>', methods=['POST'])
+def run_test(test_name):
+    """Execute individual test case on BASE Sepolia"""
+    # Test cases: wallet, market, submission, betting, oracle, resolution
+    
+@test_manager_bp.route('/test-manager/e2e', methods=['POST'])
+def run_e2e_test():
+    """Execute complete E2E workflow on BASE Sepolia"""
+    # Full workflow from wallet connection to market resolution
 ```
 
-#### Real Blockchain Integration
+### E2E Test Cases
 
-For actual blockchain testing, configure test wallets via Replit Secrets:
+#### Individual Test Components
 
-```bash
-TEST_WALLET_ADDRESS="0x..."       # Main test wallet
-TEST_WALLET_PRIVATE_KEY="0x..."   # Private key (test only)
-TEST_ORACLE_WALLETS='["0x..."]'   # Oracle wallet addresses
-TEST_NETWORK_RPC="https://..."    # Test network RPC
-TEST_CHAIN_ID="11155111"          # Sepolia testnet
+**1. Wallet Connection Test**
+- Verify BASE Sepolia RPC connectivity
+- Check gas prices and block numbers
+- Validate test wallet configurations
+
+**2. Market Creation Test**
+- Deploy prediction market for test actor
+- Set time windows and oracle wallets
+- Confirm transaction on BASE blockchain
+
+**3. Submission & Betting Tests**
+- Create original, competitor, null submissions
+- Place bets with fee calculations
+- Track BASE transaction confirmations
+
+**4. Oracle & Resolution Tests**
+- Submit X.com oracle data with screenshots
+- Calculate Levenshtein distances
+- Determine winners and process payouts
+
+### E2E Testing Workflow
+
+#### Test Manager Dashboard Features
+
+1. **Authentication**
+   - Passcode-protected access via TEST_MANAGER_PASSCODE
+   - Session management for test security
+
+2. **Network Monitoring**
+   - Real-time BASE Sepolia status
+   - Gas price tracking (typically < 0.002 gwei)
+   - Block number and chain ID verification
+
+3. **Test Execution**
+   - Individual test case buttons
+   - Full E2E test with single click
+   - Real-time test progress tracking
+   - Clean test data functionality
+
+4. **Test Results**
+   - Pass/fail status for each component
+   - Detailed error messages and logs
+   - Transaction hashes for verification
+   - Test data cleanup confirmation
+
+### Test Data Management
+
+```python
+@test_manager_bp.route('/test-manager/clean', methods=['POST'])
+def clean_test_data():
+    """Remove all test data from database"""
+    # Delete test actors, markets, submissions, bets
+    # Reset test wallet states
+    # Clear oracle submissions
+    # Return success confirmation
 ```
 
-### Session Management
+### BASE Sepolia Configuration
 
-#### Real-time Progress Tracking
+#### Test Environment Setup
 
-Dashboard at `/test_transactions` provides:
+```python
+# BASE Sepolia network configuration
+BASE_RPC_URL = "https://base-sepolia.g.alchemy.com/public"
+BASE_CHAIN_ID = 84532  # Sepolia testnet
+GAS_PRICE_THRESHOLD = 0.002  # Maximum acceptable gas price in gwei
 
-- **Session Overview**: Active test sessions with progress indicators
-- **Transaction Logs**: Real-time transaction history and status
-- **Error Tracking**: Comprehensive error logging and debugging
-- **Wallet Configuration**: Guide for setting up test wallets
-- **Scenario Management**: Selection and customization of test scenarios
+# Test wallet configuration
+TEST_WALLETS = {
+    'market_creator': '0x...',
+    'bettor': '0x...',
+    'oracle': '0x...'
+}
+```
+
+#### Integration with BASE Smart Contracts
+
+```python
+def test_base_integration():
+    """Verify BASE blockchain connectivity and contracts"""
+    # Check network connection
+    # Verify contract deployments
+    # Test gas estimation
+    # Validate wallet balances
+```
+
+### Frontend JavaScript Testing
+
+The test manager integrates with frontend wallet functionality:
+
+```javascript
+// static/js/test-manager.js
+async function runE2ETest() {
+    // Connect to BASE Sepolia
+    // Execute test workflow
+    // Display results in real-time
+    // Clean up test data
+}
+```
 
 #### ConsensusService (`services/consensus.py`)
 
@@ -419,23 +425,30 @@ Algorithm details:
 - Whitespace normalization
 - Configurable similarity threshold
 
-#### BlockchainService (`services/blockchain.py`)
+#### BASE Payout Service (`services/payout_base.py`)
 
-Validates on-chain transactions:
+Manages reward distribution on BASE blockchain:
 
 ```python
-class BlockchainService:
-    def validate_transaction(tx_hash, chain):
-        # Connect to blockchain
-        # Verify transaction exists
-        # Check confirmations
-        # Validate amount and addresses
+class BasePayoutService:
+    def calculate_payouts(market_id):
+        # Get market resolution data
+        # Calculate winner based on Levenshtein
+        # Determine payout amounts
+        # Deduct platform fee (7%)
+        
+    def distribute_rewards(market_id, payouts):
+        # Connect to PayoutManager contract
+        # Execute batch payout transaction
+        # Track gas usage and confirmation
+        # Update payout records
 ```
 
-Supported chains:
-- Ethereum (via Web3.py)
-- Bitcoin (via REST API)
-- Configurable confirmation requirements
+Features:
+- Gas-optimized batch transactions
+- Platform fee collection
+- Automatic winner determination
+- BASE blockchain confirmation tracking
 
 #### TimeConsensusService (`services/time_consensus.py`)
 
@@ -600,42 +613,42 @@ When multiple predictions exist:
 3. Verify meets minimum threshold
 4. Distribute stakes proportionally
 
-## Blockchain Integration
+## BASE Blockchain Operations
 
-### Ethereum Integration
+### Transaction Management
 
-Uses Web3.py for:
-- Transaction validation
-- Block confirmation waiting
-- Gas price estimation
-- Smart contract interaction (future)
+All blockchain operations exclusively use BASE (Coinbase L2):
 
 ```python
-def validate_eth_transaction(tx_hash):
-    w3 = Web3(Web3.HTTPProvider(ETH_RPC_URL))
+def validate_base_transaction(tx_hash):
+    """Validate transaction on BASE blockchain"""
+    w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
     tx = w3.eth.get_transaction(tx_hash)
     receipt = w3.eth.get_transaction_receipt(tx_hash)
     
-    # Verify transaction details
-    # Check confirmations
-    # Validate addresses
-    return validation_result
+    # Verify BASE chain ID (84532 or 8453)
+    # Check transaction confirmations
+    # Validate gas usage < 0.002 gwei
+    # Return validation result
 ```
 
-### Bitcoin Integration
+### Smart Contract Interaction
 
-REST API approach:
-- Query blockchain explorers
-- Verify transaction existence
-- Check confirmation count
-- Parse transaction details
+```python
+def interact_with_base_contracts():
+    """Execute smart contract functions on BASE"""
+    # Load contract ABI
+    # Connect to BASE network
+    # Execute contract methods
+    # Monitor gas usage
+```
 
-### Multi-Chain Considerations
+### Network Features
 
-- Abstracted transaction interface
-- Chain-specific validators
-- Configurable confirmation requirements
-- Fallback providers for reliability
+- **L2 Efficiency**: Sub-cent transaction costs
+- **Fast Finality**: ~2 second block times
+- **EVM Compatible**: Standard Web3 tooling
+- **Basescan Explorer**: Full transaction transparency
 
 ## Time Management
 

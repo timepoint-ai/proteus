@@ -119,6 +119,25 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Documentation Update & BASE Blockchain Focus (July 30, 2025)
+- **Updated README.md**:
+  - Removed all multi-currency (ETH/BTC) references - now BASE-only
+  - Added comprehensive BASE Sepolia testnet documentation
+  - Updated API documentation to reflect BASE blockchain endpoints
+  - Clarified X.com as sole oracle source with screenshot proofs
+  - Added wallet integration guide for MetaMask/Coinbase Wallet
+- **Updated ENGINEERING.md**:
+  - Replaced multi-chain architecture with BASE-exclusive design
+  - Added detailed BASE blockchain service documentation
+  - Documented smart contract architecture (PredictionMarket, Oracle, etc.)
+  - Removed outdated AI Transparency/Bittensor TAO sections
+  - Updated test manager section for BASE Sepolia E2E testing
+- **Platform Architecture**:
+  - Exclusively uses BASE blockchain (Sepolia: 84532, Mainnet: 8453)
+  - Gas costs < 0.002 gwei on BASE L2
+  - 7% platform fee for network operations
+  - Complete wallet integration with auto-network switching
+
 ### Test Manager E2E Fixed (July 30, 2025)
 - **Fixed BaseBlockchainService Missing Attribute**:
   - Added `is_testnet` property based on network configuration
