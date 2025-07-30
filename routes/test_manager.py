@@ -13,6 +13,7 @@ from services.blockchain_base import BaseBlockchainService
 from services.payout_base import BasePayoutService
 from web3 import Web3
 import time
+from Levenshtein import distance
 
 logger = logging.getLogger(__name__)
 test_manager_bp = Blueprint('test_manager', __name__)
@@ -73,12 +74,12 @@ def test_dashboard():
     return render_template('test_manager/dashboard.html', 
                          test_config=TEST_CONFIG)
 
-@test_manager_bp.route('/test-manager/api/run-test', methods=['POST'])
+@test_manager_bp.route('/test-manager/run-test/<test_type>', methods=['POST'])
 @require_test_auth
-def run_test():
+def run_test(test_type):
     """Run a specific test case"""
     try:
-        test_case = request.json.get('test_case')
+        test_case = test_type
         
         # Initialize test results
         results = {
@@ -96,14 +97,14 @@ def run_test():
             results = run_market_creation_test(results)
         elif test_case == 'submission_creation':
             results = run_submission_creation_test(results)
-        elif test_case == 'bet_placement':
+        elif test_case == 'betting':
             results = run_bet_placement_test(results)
         elif test_case == 'oracle_submission':
             results = run_oracle_submission_test(results)
         elif test_case == 'market_resolution':
             results = run_market_resolution_test(results)
-        elif test_case == 'full_workflow':
-            results = run_full_workflow_test(results)
+        elif test_case == 'full_e2e':
+            results = run_full_e2e_test(results)
         else:
             results['status'] = 'failed'
             results['errors'].append(f'Unknown test case: {test_case}')
@@ -115,7 +116,7 @@ def run_test():
         else:
             results['status'] = 'failed'
             
-        return jsonify(results)
+        return jsonify({'success': True, 'results': results['steps']})
         
     except Exception as e:
         logger.error(f"Test execution error: {e}")
@@ -125,6 +126,27 @@ def run_test():
             'error': str(e),
             'traceback': traceback.format_exc()
         }), 500
+
+@test_manager_bp.route('/test-manager/network-status')
+@require_test_auth
+def network_status():
+    """Check network status"""
+    try:
+        w3 = Web3(Web3.HTTPProvider(TEST_CONFIG['rpc_url']))
+        if not w3.is_connected():
+            return jsonify({'success': False, 'error': 'Not connected to BASE Sepolia'})
+        
+        status = {
+            'connected': True,
+            'chain_id': w3.eth.chain_id,
+            'current_block': w3.eth.block_number,
+            'gas_price': w3.eth.gas_price / 10**9  # Convert to gwei
+        }
+        
+        return jsonify({'success': True, 'status': status})
+    except Exception as e:
+        logger.error(f"Network status error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def add_test_step(results, step_name, status, details=None, error=None):
     """Add a step to test results"""
@@ -663,3 +685,77 @@ def test_logout():
     """Logout from test manager"""
     session.pop('test_authenticated', None)
     return redirect(url_for('test_manager.test_login'))
+
+def run_full_e2e_test(results):
+    """Run full end-to-end test workflow"""
+    try:
+        # Run all tests in sequence
+        add_test_step(results, "Full E2E Test", "running")
+        
+        # 1. Wallet Connection
+        add_test_step(results, "Wallet Connection Test", "running")
+        wallet_results = run_wallet_connection_test({'steps': [], 'errors': []})
+        if wallet_results['errors']:
+            add_test_step(results, "Wallet Connection Test", "failed", 
+                         error=wallet_results['errors'][0])
+            return results
+        add_test_step(results, "Wallet Connection Test", "passed")
+        
+        # 2. Market Creation
+        add_test_step(results, "Market Creation Test", "running")
+        market_results = run_market_creation_test({'steps': [], 'errors': []})
+        if market_results['errors']:
+            add_test_step(results, "Market Creation Test", "failed", 
+                         error=market_results['errors'][0])
+            return results
+        add_test_step(results, "Market Creation Test", "passed")
+        
+        # 3. Submission Creation
+        add_test_step(results, "Submission Creation Test", "running")
+        submission_results = run_submission_creation_test({'steps': [], 'errors': []})
+        if submission_results['errors']:
+            add_test_step(results, "Submission Creation Test", "failed", 
+                         error=submission_results['errors'][0])
+            return results
+        add_test_step(results, "Submission Creation Test", "passed")
+        
+        # 4. Betting
+        add_test_step(results, "Betting Test", "running")
+        bet_results = run_bet_placement_test({'steps': [], 'errors': []})
+        if bet_results['errors']:
+            add_test_step(results, "Betting Test", "failed", 
+                         error=bet_results['errors'][0])
+            return results
+        add_test_step(results, "Betting Test", "passed")
+        
+        # 5. Oracle Submission
+        add_test_step(results, "Oracle Submission Test", "running")
+        oracle_results = run_oracle_submission_test({'steps': [], 'errors': []})
+        if oracle_results['errors']:
+            add_test_step(results, "Oracle Submission Test", "failed", 
+                         error=oracle_results['errors'][0])
+            return results
+        add_test_step(results, "Oracle Submission Test", "passed")
+        
+        # 6. Market Resolution
+        add_test_step(results, "Market Resolution Test", "running")
+        resolution_results = run_market_resolution_test({'steps': [], 'errors': []})
+        if resolution_results['errors']:
+            add_test_step(results, "Market Resolution Test", "failed", 
+                         error=resolution_results['errors'][0])
+            return results
+        add_test_step(results, "Market Resolution Test", "passed")
+        
+        # 7. Clean up test data
+        add_test_step(results, "Clean Test Data", "running")
+        clean_test_data()
+        add_test_step(results, "Clean Test Data", "passed")
+        
+        add_test_step(results, "Full E2E Test", "passed", 
+                     details={'all_tests': 'completed successfully'})
+        
+        return results
+        
+    except Exception as e:
+        add_test_step(results, "Full E2E Test", "failed", error=str(e))
+        return results

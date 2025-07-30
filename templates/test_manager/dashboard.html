@@ -64,9 +64,9 @@
             <div class="col-md-4">
                 <div class="network-info">
                     <h5><i class="fab fa-ethereum"></i> BASE Sepolia Network</h5>
-                    <p class="mb-2"><strong>Chain ID:</strong> {{ config.chain_id }}</p>
-                    <p class="mb-2"><strong>RPC:</strong> {{ config.rpc_url }}</p>
-                    <p class="mb-0"><strong>Explorer:</strong> <a href="{{ config.explorer_url }}" target="_blank" class="text-light">BaseScan</a></p>
+                    <p class="mb-2"><strong>Chain ID:</strong> {{ test_config.chain_id }}</p>
+                    <p class="mb-2"><strong>RPC:</strong> {{ test_config.rpc_url }}</p>
+                    <p class="mb-0"><strong>Explorer:</strong> <a href="{{ test_config.explorer_url }}" target="_blank" class="text-light">BaseScan</a></p>
                 </div>
                 
                 <div class="card bg-secondary">
@@ -149,14 +149,14 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            {% for wallet_name, address in config.test_wallets.items() %}
+                            {% for wallet_name, address in test_config.test_wallets.items() %}
                             <div class="col-md-6">
                                 <div class="wallet-info">
                                     <h6>{{ wallet_name.title() }} Wallet</h6>
                                     <code class="text-info">{{ address }}</code>
                                     <div class="mt-2">
                                         <small class="text-muted">
-                                            <a href="{{ config.explorer_url }}/address/{{ address }}" target="_blank" class="text-decoration-none">
+                                            <a href="{{ test_config.explorer_url }}/address/{{ address }}" target="_blank" class="text-decoration-none">
                                                 <i class="fas fa-external-link-alt"></i> View on BaseScan
                                             </a>
                                         </small>
@@ -251,7 +251,7 @@
             if (confirm('Are you sure you want to clean all test data? This action cannot be undone.')) {
                 addOutput('Cleaning test data...', 'warning');
                 
-                fetch('/test-manager/clean-data', {
+                fetch('/test-manager/api/clean-data', {
                     method: 'POST'
                 })
                 .then(response => response.json())
