@@ -802,6 +802,37 @@ def run_oracle_submission_test(results):
                          'has_screenshot': bool(saved_oracle.screenshot_proof)
                      })
         
+        # Step 8: Calculate Levenshtein distances for all submissions
+        add_test_step(results, "Calculate Submission Distances", "running")
+        
+        submissions = Submission.query.filter_by(market_id=market.id).all()
+        oracle_text = saved_oracle.submitted_text
+        distance_details = []
+        
+        for submission in submissions:
+            if submission.predicted_text:
+                # Calculate distance between predicted text and actual oracle text
+                dist = distance(submission.predicted_text, oracle_text)
+                submission.levenshtein_distance = dist
+                distance_details.append({
+                    'submission_id': str(submission.id),
+                    'predicted': submission.predicted_text[:30] + '...' if len(submission.predicted_text) > 30 else submission.predicted_text,
+                    'distance': dist
+                })
+            else:
+                # Null submission
+                submission.levenshtein_distance = None
+                distance_details.append({
+                    'submission_id': str(submission.id),
+                    'predicted': '[NULL]',
+                    'distance': None
+                })
+        
+        db.session.commit()
+        
+        add_test_step(results, "Calculate Submission Distances", "passed", 
+                     details={'distances': distance_details})
+        
         return results
         
     except Exception as e:
