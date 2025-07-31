@@ -103,7 +103,7 @@ def create_app():
         # Start production monitoring service
         try:
             from services.monitoring import monitoring_service
-            monitoring_service.start_monitoring()
+            monitoring_service.start_monitoring(app)
             logger.info("Production monitoring service started")
         except Exception as e:
             logger.error(f"Failed to start monitoring service: {e}")

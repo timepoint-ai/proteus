@@ -460,8 +460,15 @@ class HealthCheckService:
         try:
             # Get connection status
             connection_status = self.node_comm_service.get_connection_status()
-            connected_nodes = len([n for n in connection_status.values() if n.get('connected')])
+            connected_nodes = 0
             total_known_nodes = len(connection_status)
+            
+            # Check each node's connection status
+            for node_id, status in connection_status.items():
+                if isinstance(status, dict) and status.get('connected'):
+                    connected_nodes += 1
+                elif isinstance(status, str) and status == 'connected':
+                    connected_nodes += 1
             
             if connected_nodes == 0 and total_known_nodes > 0:
                 return {

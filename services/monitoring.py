@@ -44,12 +44,16 @@ class MonitoringService:
             'screenshot_storage': {'used_mb': 0, 'total_screenshots': 0, 'alert_sent': False},
             'contract_events': {'last_check': None, 'events_processed': 0}
         }
+        self.app = None
         
-    def start_monitoring(self):
+    def start_monitoring(self, app=None):
         """Start the monitoring service"""
         if self.monitoring_active:
             logger.warning("Monitoring service already active")
             return
+        
+        if app:
+            self.app = app
             
         self.monitoring_active = True
         self.monitoring_thread = threading.Thread(target=self._monitor_loop, daemon=True)
@@ -67,15 +71,17 @@ class MonitoringService:
         """Main monitoring loop"""
         while self.monitoring_active:
             try:
-                # Run all monitoring checks
+                # Run monitoring checks that don't need app context
                 self._monitor_gas_prices()
-                self._monitor_oracle_consensus()
                 self._monitor_xcom_api_limits()
-                self._monitor_screenshot_storage()
                 self._monitor_contract_events()
                 
-                # Save metrics to database
-                self._save_metrics()
+                # Run monitoring checks that need app context
+                if self.app:
+                    with self.app.app_context():
+                        self._monitor_oracle_consensus()
+                        self._monitor_screenshot_storage()
+                        self._save_metrics()
                 
                 # Sleep for monitoring interval
                 time.sleep(30)  # Check every 30 seconds
@@ -207,9 +213,9 @@ class MonitoringService:
             screenshot_count = 0
             
             for submission in all_submissions:
-                if submission.screenshot_base64:
+                if submission.screenshot_proof:
                     # Calculate size of base64 string
-                    total_size += len(submission.screenshot_base64)
+                    total_size += len(submission.screenshot_proof)
                     screenshot_count += 1
             
             # Convert to MB (base64 is ~1.33x larger than binary)
