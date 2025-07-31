@@ -104,14 +104,18 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-outline-warning" onclick="cleanTestData()">
-                                <i class="fas fa-broom"></i> Clean Test Data
-                            </button>
-                            <button class="btn btn-outline-info" onclick="checkNetworkStatus()">
-                                <i class="fas fa-network-wired"></i> Check Network Status
+                            <button class="btn btn-primary" onclick="runTest('wallet_setup')">
+                                <i class="fas fa-key"></i> Setup Test Wallets
                             </button>
                             <button class="btn btn-outline-secondary" onclick="viewTestWallets()">
                                 <i class="fas fa-wallet"></i> View Test Wallets
+                            </button>
+                            <hr>
+                            <button class="btn btn-outline-info" onclick="checkNetworkStatus()">
+                                <i class="fas fa-network-wired"></i> Check Network Status
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="cleanTestData()">
+                                <i class="fas fa-broom"></i> Clean Test Data
                             </button>
                         </div>
                     </div>

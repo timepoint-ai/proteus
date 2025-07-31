@@ -14,26 +14,46 @@ from services.payout_base import BasePayoutService
 from services.xcom_api_service import XComAPIService
 from services.oracle_xcom import XcomOracleService
 from web3 import Web3
+from eth_account import Account
 import time
 from Levenshtein import distance
 import base64
+import secrets
 
 logger = logging.getLogger(__name__)
 test_manager_bp = Blueprint('test_manager', __name__)
 
+# Helper function to get configured test wallets
+def get_configured_test_wallets():
+    """Get test wallets from environment or use defaults"""
+    # Check if wallets are configured in environment
+    if os.environ.get('TEST_WALLET_ADDRESS'):
+        oracle_wallets = json.loads(os.environ.get('TEST_ORACLE_WALLETS', '[]'))
+        return {
+            'creator': os.environ.get('TEST_WALLET_ADDRESS'),
+            'bettor1': oracle_wallets[0] if len(oracle_wallets) > 0 else '0x2345678901234567890123456789012345678901',
+            'bettor2': oracle_wallets[1] if len(oracle_wallets) > 1 else '0x3456789012345678901234567890123456789012',
+            'oracle1': oracle_wallets[0] if len(oracle_wallets) > 0 else '0x4567890123456789012345678901234567890123',
+            'oracle2': oracle_wallets[1] if len(oracle_wallets) > 1 else '0x5678901234567890123456789012345678901234',
+            'oracle3': oracle_wallets[2] if len(oracle_wallets) > 2 else '0x6789012345678901234567890123456789012345'
+        }
+    else:
+        # Default test wallets
+        return {
+            'creator': '0x1234567890123456789012345678901234567890',
+            'bettor1': '0x2345678901234567890123456789012345678901',
+            'bettor2': '0x3456789012345678901234567890123456789012',
+            'oracle1': '0x4567890123456789012345678901234567890123',
+            'oracle2': '0x5678901234567890123456789012345678901234',
+            'oracle3': '0x6789012345678901234567890123456789012345'
+        }
+
 # Test configuration for BASE Sepolia
 TEST_CONFIG = {
-    'chain_id': 84532,
-    'rpc_url': 'https://base-sepolia.g.alchemy.com/public',
+    'chain_id': int(os.environ.get('TEST_CHAIN_ID', '84532')),
+    'rpc_url': os.environ.get('TEST_NETWORK_RPC', 'https://base-sepolia.g.alchemy.com/public'),
     'explorer_url': 'https://sepolia.basescan.org',
-    'test_wallets': {
-        'creator': '0x1234567890123456789012345678901234567890',
-        'bettor1': '0x2345678901234567890123456789012345678901',
-        'bettor2': '0x3456789012345678901234567890123456789012',
-        'oracle1': '0x4567890123456789012345678901234567890123',
-        'oracle2': '0x5678901234567890123456789012345678901234',
-        'oracle3': '0x6789012345678901234567890123456789012345'
-    },
+    'test_wallets': get_configured_test_wallets(),
     'test_amounts': {
         'initial_stake': '0.1',
         'bet_amount': '0.05',
@@ -94,7 +114,9 @@ def run_test(test_type):
         }
         
         # Run the appropriate test
-        if test_case == 'wallet_connection':
+        if test_case == 'wallet_setup':
+            results = run_wallet_setup_test(results)
+        elif test_case == 'wallet_connection':
             results = run_wallet_connection_test(results)
         elif test_case == 'market_creation':
             results = run_market_creation_test(results)
@@ -168,6 +190,201 @@ def add_test_step(results, step_name, status, details=None, error=None):
     logger.info(f"TEST STEP: {step_name} - {status}")
     if error:
         logger.error(f"TEST ERROR: {error}")
+
+def generate_test_wallets(oracle_count=3):
+    """Generate test wallets programmatically"""
+    # Generate main test wallet
+    main_account = Account.create()
+    
+    # Generate oracle wallets
+    oracle_wallets = []
+    oracle_private_keys = []
+    
+    for i in range(oracle_count):
+        oracle_account = Account.create()
+        oracle_wallets.append(oracle_account.address)
+        oracle_private_keys.append(oracle_account.key.hex())
+    
+    return {
+        'main_wallet': {
+            'address': main_account.address,
+            'private_key': main_account.key.hex()
+        },
+        'oracle_wallets': oracle_wallets,
+        'oracle_private_keys': oracle_private_keys
+    }
+
+def save_wallet_config_to_file(wallet_config, filename='.test_wallets.json'):
+    """Save wallet configuration to file"""
+    config = {
+        'main_wallet': wallet_config['main_wallet'],
+        'oracle_wallets': wallet_config['oracle_wallets'],
+        'oracle_private_keys': wallet_config['oracle_private_keys'],
+        'chain_id': TEST_CONFIG['chain_id'],
+        'rpc_url': TEST_CONFIG['rpc_url'],
+        'generated_at': datetime.utcnow().isoformat()
+    }
+    
+    with open(filename, 'w') as f:
+        json.dump(config, f, indent=2)
+    
+    return True
+
+def configure_environment_from_wallets(wallet_config):
+    """Configure environment variables from wallet config"""
+    os.environ['TEST_WALLET_ADDRESS'] = wallet_config['main_wallet']['address']
+    os.environ['TEST_WALLET_PRIVATE_KEY'] = wallet_config['main_wallet']['private_key']
+    os.environ['TEST_ORACLE_WALLETS'] = json.dumps(wallet_config['oracle_wallets'])
+    os.environ['TEST_NETWORK_RPC'] = TEST_CONFIG['rpc_url']
+    os.environ['TEST_CHAIN_ID'] = str(TEST_CONFIG['chain_id'])
+    
+    # Update TEST_CONFIG with new wallets
+    TEST_CONFIG['test_wallets'] = get_configured_test_wallets()
+    
+    return True
+
+def run_wallet_setup_test(results):
+    """Automated test wallet setup and configuration"""
+    try:
+        # Step 1: Check current configuration
+        add_test_step(results, "Check Current Configuration", "running")
+        
+        existing_config = {
+            'has_main_wallet': bool(os.environ.get('TEST_WALLET_ADDRESS')),
+            'has_private_key': bool(os.environ.get('TEST_WALLET_PRIVATE_KEY')),
+            'has_oracle_wallets': bool(os.environ.get('TEST_ORACLE_WALLETS')),
+            'oracle_count': len(json.loads(os.environ.get('TEST_ORACLE_WALLETS', '[]')))
+        }
+        
+        add_test_step(results, "Check Current Configuration", "passed", details=existing_config)
+        
+        # Step 2: Generate new wallets
+        add_test_step(results, "Generate Test Wallets", "running")
+        
+        wallet_config = generate_test_wallets(oracle_count=3)
+        
+        add_test_step(results, "Generate Test Wallets", "passed", details={
+            'main_wallet': wallet_config['main_wallet']['address'],
+            'oracle_count': len(wallet_config['oracle_wallets']),
+            'oracle_addresses': wallet_config['oracle_wallets']
+        })
+        
+        # Step 3: Configure environment
+        add_test_step(results, "Configure Environment Variables", "running")
+        
+        if configure_environment_from_wallets(wallet_config):
+            add_test_step(results, "Configure Environment Variables", "passed", details={
+                'TEST_WALLET_ADDRESS': 'Configured',
+                'TEST_WALLET_PRIVATE_KEY': 'Configured',
+                'TEST_ORACLE_WALLETS': f"Configured ({len(wallet_config['oracle_wallets'])} wallets)"
+            })
+        else:
+            add_test_step(results, "Configure Environment Variables", "failed", 
+                         error="Failed to configure environment")
+            return results
+        
+        # Step 4: Save configuration
+        add_test_step(results, "Save Wallet Configuration", "running")
+        
+        try:
+            save_wallet_config_to_file(wallet_config)
+            add_test_step(results, "Save Wallet Configuration", "passed", 
+                         details={'file': '.test_wallets.json'})
+        except Exception as e:
+            add_test_step(results, "Save Wallet Configuration", "warning", 
+                         details={'error': str(e), 'note': 'Configuration still active in memory'})
+        
+        # Step 5: Validate configuration
+        add_test_step(results, "Validate Configuration", "running")
+        
+        # Initialize Web3
+        w3 = Web3(Web3.HTTPProvider(TEST_CONFIG['rpc_url']))
+        
+        if not w3.is_connected():
+            add_test_step(results, "Validate Configuration", "failed", 
+                         error="Failed to connect to BASE Sepolia")
+            return results
+        
+        # Check all addresses are valid
+        validation_errors = []
+        
+        if not Web3.is_address(wallet_config['main_wallet']['address']):
+            validation_errors.append("Invalid main wallet address")
+        
+        for i, addr in enumerate(wallet_config['oracle_wallets']):
+            if not Web3.is_address(addr):
+                validation_errors.append(f"Invalid oracle wallet {i+1}")
+        
+        if validation_errors:
+            add_test_step(results, "Validate Configuration", "failed", 
+                         error=", ".join(validation_errors))
+            return results
+        
+        add_test_step(results, "Validate Configuration", "passed", details={
+            'all_addresses_valid': True,
+            'connected_to_base_sepolia': True
+        })
+        
+        # Step 6: Check balances (informational)
+        add_test_step(results, "Check Wallet Balances", "running")
+        
+        balances = {}
+        try:
+            # Check main wallet balance
+            balance_wei = w3.eth.get_balance(wallet_config['main_wallet']['address'])
+            balance_eth = w3.from_wei(balance_wei, 'ether')
+            balances['main'] = float(balance_eth)
+            
+            # Check oracle wallets
+            for i, addr in enumerate(wallet_config['oracle_wallets']):
+                balance_wei = w3.eth.get_balance(addr)
+                balance_eth = w3.from_wei(balance_wei, 'ether')
+                balances[f'oracle_{i+1}'] = float(balance_eth)
+            
+            add_test_step(results, "Check Wallet Balances", "passed", details=balances)
+        except Exception as e:
+            add_test_step(results, "Check Wallet Balances", "warning", 
+                         details={'error': str(e), 'note': 'Balances could not be checked'})
+        
+        # Step 7: Provide funding instructions
+        add_test_step(results, "Funding Instructions", "info", details={
+            'faucets': [
+                {
+                    'name': 'QuickNode BASE Sepolia Faucet',
+                    'url': 'https://faucet.quicknode.com/base/sepolia',
+                    'amount': '0.05 BASE ETH'
+                },
+                {
+                    'name': 'Coinbase BASE Sepolia Faucet',
+                    'url': 'https://faucet.coinbase.com/base-sepolia',
+                    'amount': '0.1 BASE ETH daily'
+                }
+            ],
+            'required_amounts': {
+                'main_wallet': '0.1 BASE ETH',
+                'oracle_wallets': '0.01 BASE ETH each'
+            }
+        })
+        
+        # Summary
+        results['summary'] = {
+            'wallets_generated': True,
+            'environment_configured': True,
+            'main_wallet': wallet_config['main_wallet']['address'],
+            'oracle_wallets': wallet_config['oracle_wallets'],
+            'next_steps': [
+                'Fund the wallets using the faucets provided',
+                'Run the Wallet Connection test to verify setup',
+                'Proceed with E2E testing'
+            ]
+        }
+        
+        return results
+        
+    except Exception as e:
+        add_test_step(results, "Wallet Setup Test", "failed", error=str(e))
+        logger.error(f"Wallet setup error: {e}")
+        return results
 
 def run_wallet_connection_test(results):
     """Test wallet connection to BASE Sepolia"""

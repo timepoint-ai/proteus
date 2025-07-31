@@ -119,6 +119,24 @@ The system is designed to be highly distributed with fault tolerance, automatic 
 
 ## Recent Changes
 
+### Automated Test Wallet Setup Integration (July 31, 2025)
+- **Integrated Wallet Setup into Test Manager**:
+  - Added automated wallet generation using eth_account library
+  - Created "Setup Test Wallets" button in Test Management section
+  - Generates main wallet + 3 oracle wallets programmatically
+  - Automatically configures environment variables (TEST_WALLET_ADDRESS, TEST_WALLET_PRIVATE_KEY, TEST_ORACLE_WALLETS)
+  - Saves configuration to `.test_wallets.json` for persistence
+  - Validates all addresses and checks balances
+  - Provides faucet links for funding wallets
+- **Dynamic Test Configuration**:
+  - TEST_CONFIG now uses environment variables when available
+  - Falls back to default test wallets if not configured
+  - Supports runtime wallet updates without restart
+- **Improved Test Workflow**:
+  - No manual wallet configuration required
+  - Secure random wallet generation
+  - Full integration with existing E2E test suite
+
 ### Phase 5 Real Contract Deployment Complete (July 30, 2025)
 - **Successfully Deployed All Contracts to BASE Sepolia**:
   - PredictionMarket: 0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3

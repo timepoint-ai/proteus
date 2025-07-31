@@ -4,6 +4,22 @@
 
 This guide explains how to configure test wallets for the Clockchain E2E test manager on BASE Sepolia testnet. These wallets are essential for running automated tests of the prediction market functionality.
 
+## Automated Wallet Setup (Recommended)
+
+The Test Manager now includes automated wallet setup functionality:
+
+1. Go to the Test Manager Dashboard (`/test-manager`)
+2. In the "Test Management" section, click **"Setup Test Wallets"**
+3. The system will automatically:
+   - Generate a main test wallet and 3 oracle wallets
+   - Configure environment variables
+   - Save wallet configuration to `.test_wallets.json`
+   - Validate all addresses
+   - Check wallet balances
+   - Provide funding instructions
+
+This is the recommended approach as it ensures proper configuration and security.
+
 ## Required Wallet Configuration
 
 ### 1. TEST_WALLET_ADDRESS
