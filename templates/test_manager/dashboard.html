@@ -152,27 +152,8 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            {% for wallet_name, address in test_config.test_wallets.items() %}
-                            <div class="col-md-6">
-                                <div class="wallet-info">
-                                    <h6>{{ wallet_name.title() }} Wallet</h6>
-                                    <code class="text-info">{{ address }}</code>
-                                    <div class="mt-2">
-                                        <small class="text-muted">
-                                            <a href="{{ test_config.explorer_url }}/address/{{ address }}" target="_blank" class="text-decoration-none">
-                                                <i class="fas fa-external-link-alt"></i> View on BaseScan
-                                            </a>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="alert alert-info mt-3">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Note:</strong> These are test wallet addresses for BASE Sepolia testnet. 
-                            You can fund them with test ETH from the BASE Sepolia faucet.
+                        <div id="wallet-display-content">
+                            <!-- Dynamic wallet content will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -237,11 +218,26 @@
         function displayTestResults(results) {
             results.forEach(step => {
                 const status = step.status === 'passed' ? 'success' : 
-                              step.status === 'failed' ? 'error' : 'warning';
+                              step.status === 'failed' ? 'error' : 
+                              step.status === 'info' ? 'info' : 'warning';
                 let message = `${step.name}: ${step.status}`;
                 
-                if (step.details) {
-                    message += ` - ${JSON.stringify(step.details)}`;
+                // Special formatting for Replit Secrets Configuration
+                if (step.name === 'Replit Secrets Configuration' && step.details) {
+                    message = '<strong>Replit Secrets Configuration:</strong><br>';
+                    message += '<div class="ms-3">';
+                    message += '<code>TEST_WALLET_ADDRESS</code> = <code class="text-info">' + step.details.TEST_WALLET_ADDRESS + '</code><br>';
+                    message += '<code>TEST_WALLET_PRIVATE_KEY</code> = <code class="text-warning">Generated (check .test_wallets.json)</code><br>';
+                    message += '<code>TEST_ORACLE_WALLETS</code> = <code class="text-info">' + step.details.TEST_ORACLE_WALLETS + '</code><br>';
+                    message += '<small class="text-muted mt-2">Copy these values to your Replit Secrets</small>';
+                    message += '</div>';
+                } else if (step.details) {
+                    // Format other details normally
+                    if (typeof step.details === 'object') {
+                        message += '<br><small class="ms-3">' + JSON.stringify(step.details, null, 2).replace(/\n/g, '<br>') + '</small>';
+                    } else {
+                        message += ` - ${step.details}`;
+                    }
                 }
                 if (step.error) {
                     message += ` - Error: ${step.error}`;
@@ -286,6 +282,86 @@
         }
         
         function viewTestWallets() {
+            // Generate dynamic wallet display
+            const walletConfig = {{ test_config.test_wallets | tojson }};
+            const explorerUrl = '{{ test_config.explorer_url }}';
+            
+            let html = '<div class="alert alert-primary mb-3">';
+            html += '<i class="fas fa-info-circle"></i> <strong>Replit Secrets Configuration:</strong><br>';
+            html += 'Configure these values in your Replit Secrets to use the wallets below.';
+            html += '</div>';
+            
+            // Main wallet (creator)
+            html += '<div class="mb-4">';
+            html += '<h5 class="text-primary">Main Test Wallet</h5>';
+            html += '<div class="wallet-info">';
+            html += '<p class="mb-2"><strong>TEST_WALLET_ADDRESS:</strong></p>';
+            html += '<code class="text-info d-block mb-2">' + walletConfig.creator + '</code>';
+            html += '<small class="text-muted">Used for: Market creation, initial submissions</small>';
+            html += '<div class="mt-2">';
+            html += '<a href="' + explorerUrl + '/address/' + walletConfig.creator + '" target="_blank" class="text-decoration-none">';
+            html += '<i class="fas fa-external-link-alt"></i> View on BaseScan';
+            html += '</a>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            
+            // Oracle wallets
+            html += '<div class="mb-4">';
+            html += '<h5 class="text-warning">Oracle Wallets</h5>';
+            html += '<div class="wallet-info">';
+            html += '<p class="mb-2"><strong>TEST_ORACLE_WALLETS:</strong></p>';
+            html += '<code class="text-info d-block mb-2">';
+            html += '["' + walletConfig.oracle1 + '", "' + walletConfig.oracle2 + '", "' + walletConfig.oracle3 + '"]';
+            html += '</code>';
+            html += '<small class="text-muted">Used for: Oracle consensus submissions</small>';
+            html += '</div>';
+            
+            // Individual oracle wallet details
+            html += '<div class="row mt-3">';
+            ['oracle1', 'oracle2', 'oracle3'].forEach((oracleName, index) => {
+                html += '<div class="col-md-4">';
+                html += '<div class="wallet-info mb-2">';
+                html += '<h6>Oracle ' + (index + 1) + '</h6>';
+                html += '<code class="text-info small">' + walletConfig[oracleName] + '</code>';
+                html += '<div class="mt-1">';
+                html += '<a href="' + explorerUrl + '/address/' + walletConfig[oracleName] + '" target="_blank" class="text-decoration-none small">';
+                html += '<i class="fas fa-external-link-alt"></i> BaseScan';
+                html += '</a>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+            
+            // Additional wallets (bettor1, bettor2)
+            html += '<div class="mb-4">';
+            html += '<h5 class="text-info">Additional Test Wallets</h5>';
+            html += '<div class="row">';
+            ['bettor1', 'bettor2'].forEach((bettorName, index) => {
+                html += '<div class="col-md-6">';
+                html += '<div class="wallet-info">';
+                html += '<h6>Bettor ' + (index + 1) + ' (for testing bets)</h6>';
+                html += '<code class="text-info small">' + walletConfig[bettorName] + '</code>';
+                html += '<div class="mt-1">';
+                html += '<a href="' + explorerUrl + '/address/' + walletConfig[bettorName] + '" target="_blank" class="text-decoration-none small">';
+                html += '<i class="fas fa-external-link-alt"></i> View on BaseScan';
+                html += '</a>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+            
+            // Funding instructions
+            html += '<div class="alert alert-info mt-3">';
+            html += '<i class="fas fa-info-circle"></i> <strong>Funding Instructions:</strong><br>';
+            html += 'Fund these wallets with BASE Sepolia ETH from:<br>';
+            html += '<a href="https://faucet.quicknode.com/base/sepolia" target="_blank">QuickNode Faucet</a> or ';
+            html += '<a href="https://faucet.coinbase.com/base-sepolia" target="_blank">Coinbase Faucet</a>';
+            html += '</div>';
+            
+            document.getElementById('wallet-display-content').innerHTML = html;
             const modal = new bootstrap.Modal(document.getElementById('walletsModal'));
             modal.show();
         }

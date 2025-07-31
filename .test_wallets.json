@@ -1,0 +1,19 @@
+{
+  "main_wallet": {
+    "address": "0x5b5b27b17C22A5D8Ac1507072168e25d79c925ab",
+    "private_key": "ce491c92455e5c92b741a72ce605d7152dced5f66593e3430a987ac7f0a4c03e"
+  },
+  "oracle_wallets": [
+    "0x72A3F890e731F5B5b256b8B87d69BEAb16A4FFb8",
+    "0x308Fc5336844AB770f0649AC0f12F64afC00378A",
+    "0x3a6aFe6dD10b7AFb5876635D2762551037518236"
+  ],
+  "oracle_private_keys": [
+    "5dd41d89be89c56c7ba329cdb03adac634afcf4eb7bee17daefc89e632cd7172",
+    "c3c8b4fdc7b6d5eb63ff54d577c09b0b41eba65bb334ac1d6249dffbe0635fe5",
+    "845c2cd194f1ade75a59ed16b5298b3e36be77e74585f5391e33b189f699e897"
+  ],
+  "chain_id": 84532,
+  "rpc_url": "https://base-sepolia.g.alchemy.com/public",
+  "generated_at": "2025-07-31T14:37:42.602963"
+}

@@ -346,7 +346,15 @@ def run_wallet_setup_test(results):
             add_test_step(results, "Check Wallet Balances", "warning", 
                          details={'error': str(e), 'note': 'Balances could not be checked'})
         
-        # Step 7: Provide funding instructions
+        # Step 7: Provide Replit Secrets instructions
+        add_test_step(results, "Replit Secrets Configuration", "info", details={
+            'TEST_WALLET_ADDRESS': wallet_config['main_wallet']['address'],
+            'TEST_WALLET_PRIVATE_KEY': 'Generated (stored securely)',
+            'TEST_ORACLE_WALLETS': json.dumps(wallet_config['oracle_wallets']),
+            'note': 'Copy these values to your Replit Secrets'
+        })
+        
+        # Step 8: Provide funding instructions
         add_test_step(results, "Funding Instructions", "info", details={
             'faucets': [
                 {
