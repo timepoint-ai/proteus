@@ -178,6 +178,98 @@
     </div>
 </div>
 
+<!-- System Health Monitoring -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-heartbeat me-2"></i>
+                    System Health Monitoring
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <small class="text-muted">Gas Price</small>
+                        <div class="h6" id="gas-price">
+                            {% if monitoring_metrics and monitoring_metrics.gas_price %}
+                                {{ "%.6f" | format(monitoring_metrics.gas_price.current) }} gwei
+                            {% else %}
+                                <span class="text-muted">Loading...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Oracle Consensus</small>
+                        <div class="h6" id="oracle-consensus">
+                            {% if monitoring_metrics and monitoring_metrics.oracle_consensus %}
+                                {{ monitoring_metrics.oracle_consensus.failures }}/{{ monitoring_metrics.oracle_consensus.total }} failures
+                            {% else %}
+                                <span class="text-muted">Loading...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">X.com API</small>
+                        <div class="h6" id="xcom-api">
+                            {% if monitoring_metrics and monitoring_metrics.xcom_api %}
+                                {{ monitoring_metrics.xcom_api.rate_limit_remaining }} remaining
+                            {% else %}
+                                <span class="text-muted">Loading...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Screenshot Storage</small>
+                        <div class="h6" id="screenshot-storage">
+                            {% if monitoring_metrics and monitoring_metrics.screenshot_storage %}
+                                {{ "%.1f" | format(monitoring_metrics.screenshot_storage.used_mb) }} MB
+                            {% else %}
+                                <span class="text-muted">Loading...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Contract Events</small>
+                        <div class="h6" id="contract-events">
+                            {% if monitoring_metrics and monitoring_metrics.contract_events %}
+                                {{ monitoring_metrics.contract_events.events_processed }} processed
+                            {% else %}
+                                <span class="text-muted">Loading...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Last Check</small>
+                        <div class="h6" id="last-check">
+                            {% if monitoring_metrics and monitoring_metrics.contract_events.last_check %}
+                                {{ monitoring_metrics.contract_events.last_check }}
+                            {% else %}
+                                <span class="text-muted">Never</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if monitoring_metrics and monitoring_metrics.contract_events %}
+                    {% if monitoring_metrics.contract_events.gas_spikes > 0 %}
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            {{ monitoring_metrics.contract_events.gas_spikes }} gas spike alerts detected
+                        </div>
+                    {% endif %}
+                    {% if monitoring_metrics.contract_events.consensus_failures > 0 %}
+                        <div class="alert alert-danger mt-3 mb-0">
+                            <i class="fas fa-times-circle"></i> 
+                            {{ monitoring_metrics.contract_events.consensus_failures }} consensus failures detected
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Recent Activity -->
 <div class="row">
     <div class="col-md-6">

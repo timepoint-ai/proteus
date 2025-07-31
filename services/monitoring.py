@@ -42,9 +42,18 @@ class MonitoringService:
             'oracle_consensus': {'failures': 0, 'total': 0, 'alert_sent': False},
             'xcom_api': {'rate_limit_remaining': 100, 'reset_time': None, 'alert_sent': False},
             'screenshot_storage': {'used_mb': 0, 'total_screenshots': 0, 'alert_sent': False},
-            'contract_events': {'last_check': None, 'events_processed': 0}
+            'contract_events': {'last_check': None, 'events_processed': 0, 'gas_spikes': 0, 'consensus_failures': 0}
         }
         self.app = None
+        
+        # Initialize contract monitoring (single-node setup)
+        try:
+            from services.contract_monitoring import ContractMonitoringService
+            self.contract_monitor = ContractMonitoringService()
+            logger.info("Contract monitoring service initialized")
+        except Exception as e:
+            logger.error(f"Failed to initialize contract monitoring: {e}")
+            self.contract_monitor = None
         
     def start_monitoring(self, app=None):
         """Start the monitoring service"""
@@ -166,6 +175,43 @@ class MonitoringService:
                     
         except Exception as e:
             logger.error(f"Error monitoring oracle consensus: {e}")
+    
+    def _monitor_contract_events(self):
+        """Monitor on-chain contract events"""
+        try:
+            if not self.contract_monitor:
+                return
+                
+            # Run contract monitoring cycle
+            results = self.contract_monitor.run_monitoring_cycle()
+            
+            # Update metrics
+            if 'events' in results:
+                events_data = results['events']
+                self.metrics['contract_events']['events_processed'] = events_data.get('events_processed', 0)
+                self.metrics['contract_events']['gas_spikes'] = len(events_data.get('gas_spike_alerts', []))
+                self.metrics['contract_events']['consensus_failures'] = len(events_data.get('consensus_failures', []))
+                
+                # Process gas spike alerts
+                for alert in events_data.get('gas_spike_alerts', []):
+                    self._create_alert(
+                        'CONTRACT_GAS_SPIKE',
+                        f'Contract gas spike detected: {alert["gas_price_gwei"]} gwei',
+                        alert['severity']
+                    )
+                    
+                # Process consensus failures
+                for failure in events_data.get('consensus_failures', []):
+                    self._create_alert(
+                        'CONTRACT_CONSENSUS_FAILURE',
+                        f'Oracle consensus failure for market {failure["market_id"]}: {failure["consensus_percentage"]}%',
+                        'critical'
+                    )
+                    
+            self.metrics['contract_events']['last_check'] = datetime.utcnow().isoformat()
+            
+        except Exception as e:
+            logger.error(f"Error monitoring contract events: {e}")
     
     def _monitor_xcom_api_limits(self):
         """Monitor X.com API rate limits"""
@@ -404,6 +450,10 @@ class MonitoringService:
             'health_score': self._calculate_health_score(),
             'last_update': datetime.utcnow().isoformat()
         }
+    
+    def get_current_metrics(self) -> Dict[str, Any]:
+        """Get current monitoring metrics (alias for dashboard compatibility)"""
+        return self.metrics
     
     def acknowledge_alert(self, alert_type: str):
         """Acknowledge an alert"""

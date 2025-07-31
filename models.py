@@ -122,6 +122,7 @@ class OracleSubmission(db.Model):
     signature = db.Column(db.Text, nullable=False)
     votes_for = db.Column(db.Integer, default=0)
     votes_against = db.Column(db.Integer, default=0)
+    consensus_percentage = db.Column(db.Float, default=0.0)  # Percentage of votes in favor
     status = db.Column(db.String(20), default='pending')  # pending, consensus, rejected
     is_consensus = db.Column(db.Boolean, default=False)
     
@@ -344,4 +345,20 @@ class EmailCapture(db.Model):
     email = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     source = db.Column(db.String(100), default='landing_page')
+
+
+class ContractEvent(db.Model):
+    """Track on-chain contract events"""
+    __tablename__ = 'contract_events'
+    
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_type = db.Column(db.String(100), nullable=False)
+    contract_address = db.Column(db.String(42), nullable=False)
+    transaction_hash = db.Column(db.String(66))
+    block_number = db.Column(db.Integer)
+    event_data = db.Column(db.JSON)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<ContractEvent {self.event_type} at block {self.block_number}>'
 

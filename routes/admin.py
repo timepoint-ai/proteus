@@ -61,13 +61,23 @@ def dashboard():
         # Get ledger summary
         ledger_summary = ledger_service.get_ledger_summary()
         
+        # Get monitoring metrics
+        monitoring_metrics = None
+        try:
+            from services.monitoring import monitoring_service
+            if monitoring_service:
+                monitoring_metrics = monitoring_service.get_current_metrics()
+        except Exception as e:
+            logger.warning(f"Could not get monitoring metrics: {e}")
+        
         return render_template('dashboard.html',
                              stats=stats,
                              recent_bets=recent_bets,
                              recent_transactions=recent_transactions,
                              network_health=network_health,
                              time_status=time_status,
-                             ledger_summary=ledger_summary)
+                             ledger_summary=ledger_summary,
+                             monitoring_metrics=monitoring_metrics)
         
     except Exception as e:
         logger.error(f"Error loading dashboard: {e}")

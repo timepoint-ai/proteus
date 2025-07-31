@@ -949,15 +949,15 @@ services:
 
 ## Production Monitoring
 
-### Integrated Monitoring Dashboard
+### Phase 7 Complete: Single-Node Production Readiness
 
-The production monitoring system is fully integrated into the admin dashboard at `/dashboard` with comprehensive health tracking:
+The production monitoring system is fully integrated with a focus on single-node deployment optimization for Replit environments.
 
 #### MonitoringService (`services/monitoring.py`)
 
 ```python
 class MonitoringService:
-    """Production monitoring with automatic alerts"""
+    """Comprehensive monitoring service for production readiness"""
     
     def __init__(self):
         self.metrics = {
@@ -965,6 +965,95 @@ class MonitoringService:
             'oracle_consensus': {'failures': 0, 'total': 0, 'alert_sent': False},
             'xcom_api': {'rate_limit_remaining': 100, 'reset_time': None},
             'screenshot_storage': {'used_mb': 0, 'total_screenshots': 0},
+            'contract_events': {
+                'last_check': None, 
+                'events_processed': 0, 
+                'gas_spikes': 0, 
+                'consensus_failures': 0
+            }
+        }
+        # Single-node contract monitoring integration
+        self.contract_monitor = ContractMonitoringService()
+```
+
+#### Key Monitoring Features
+
+1. **Gas Price Monitoring**
+   - Real-time BASE gas price tracking
+   - Alert threshold: 0.002 gwei
+   - Automatic alerts for price spikes
+
+2. **Oracle Consensus Tracking**
+   - Monitors consensus percentage for each submission
+   - Alerts when consensus < 66%
+   - Tracks failure rates across all submissions
+
+3. **Contract Event Monitoring**
+   - Web3 event filters for all deployed contracts
+   - MarketCreated and OracleDataSubmitted event tracking
+   - Gas spike detection in contract transactions
+   - Consensus failure alerts
+
+4. **X.com API Monitoring**
+   - Rate limit tracking
+   - Automatic fallback handling
+   - Reset time monitoring
+
+5. **Screenshot Storage Metrics**
+   - Base64 storage usage in MB
+   - Total screenshot count tracking
+   - Storage capacity alerts
+
+#### Dashboard Integration
+
+The monitoring dashboard is integrated at `/dashboard` with real-time display:
+
+```html
+<!-- System Health Monitoring Section -->
+<div class="card">
+    <div class="card-header">
+        <h5>System Health Monitoring</h5>
+    </div>
+    <div class="card-body">
+        <!-- Real-time metrics display -->
+        <div>Gas Price: {{ monitoring_metrics.gas_price.current }} gwei</div>
+        <div>Oracle Consensus: {{ failures }}/{{ total }}</div>
+        <div>Contract Events: {{ events_processed }} processed</div>
+        <div>X.com API: {{ rate_limit_remaining }} remaining</div>
+        <div>Storage: {{ used_mb }} MB</div>
+    </div>
+</div>
+```
+
+#### Single-Node Architecture Benefits
+
+- **Simplified Deployment**: No multi-node coordination complexity
+- **Reduced Latency**: Direct database and contract access
+- **Cost Efficiency**: Single server resource usage
+- **Reliability**: No network partition concerns
+- **Future-Ready**: Architecture supports multi-node expansion
+
+### ContractMonitoringService (`services/contract_monitoring.py`)
+
+```python
+class ContractMonitoringService:
+    """Single-node contract event monitoring"""
+    
+    def run_monitoring_cycle(self):
+        # Direct Web3 event monitoring
+        events = self.fetch_recent_events()
+        
+        # Process events locally
+        for event in events:
+            self.process_event(event)
+            self.check_gas_spike(event)
+            self.check_consensus_failure(event)
+        
+        return {
+            'events_processed': len(events),
+            'gas_spike_alerts': self.gas_alerts,
+            'consensus_failures': self.consensus_alerts
+        } {'used_mb': 0, 'total_screenshots': 0},
             'contract_events': {'last_check': None, 'events_processed': 0}
         }
 ```
