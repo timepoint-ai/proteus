@@ -33,6 +33,7 @@ redis_client = redis.Redis(
 )
 
 def create_app():
+    logger = logging.getLogger(__name__)
     app = Flask(__name__)
     app.secret_key = os.environ.get("SESSION_SECRET")
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -98,6 +99,14 @@ def create_app():
         # Initialize node operator if not exists
         from services.consensus import ConsensusService
         ConsensusService.initialize_node()
+        
+        # Start production monitoring service
+        try:
+            from services.monitoring import monitoring_service
+            monitoring_service.start_monitoring()
+            logger.info("Production monitoring service started")
+        except Exception as e:
+            logger.error(f"Failed to start monitoring service: {e}")
     
     return app, celery
 

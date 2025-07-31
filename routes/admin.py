@@ -268,6 +268,29 @@ def oracles_view():
                              submissions=None,
                              stats={})
 
+@admin_bp.route('/monitoring')
+def monitoring_dashboard():
+    """Production monitoring dashboard"""
+    try:
+        from services.monitoring import monitoring_service
+        from services.health_check import health_check_service
+        
+        # Get monitoring status
+        monitoring_status = monitoring_service.get_monitoring_status()
+        
+        # Check if monitoring is active, if not start it
+        if not monitoring_status['active']:
+            monitoring_service.start_monitoring()
+            monitoring_status = monitoring_service.get_monitoring_status()
+        
+        return render_template('admin/monitoring.html',
+                             monitoring_status=monitoring_status)
+    except Exception as e:
+        logger.error(f"Error loading monitoring dashboard: {e}")
+        flash(f'Error loading monitoring dashboard: {str(e)}', 'error')
+        return render_template('admin/monitoring.html',
+                             monitoring_status=None)
+
 @admin_bp.route('/time-sync')
 def time_sync_view():
     """Time synchronization monitoring view"""
@@ -398,6 +421,46 @@ def api_time_status():
         return jsonify(status)
     except Exception as e:
         logger.error(f"Error getting time status: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/api/monitoring-status')
+def api_monitoring_status():
+    """Get production monitoring status"""
+    try:
+        from services.monitoring import monitoring_service
+        status = monitoring_service.get_monitoring_status()
+        return jsonify(status)
+    except Exception as e:
+        logger.error(f"Error getting monitoring status: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/api/health-check')
+def api_health_check():
+    """Run comprehensive health check"""
+    try:
+        from services.health_check import health_check_service
+        import asyncio
+        
+        # Run async health check in sync context
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(health_check_service.run_all_checks())
+        loop.close()
+        
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error running health check: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/api/monitoring/acknowledge/<alert_type>', methods=['POST'])
+def api_acknowledge_alert(alert_type):
+    """Acknowledge a monitoring alert"""
+    try:
+        from services.monitoring import monitoring_service
+        success = monitoring_service.acknowledge_alert(alert_type)
+        return jsonify({'success': success})
+    except Exception as e:
+        logger.error(f"Error acknowledging alert: {e}")
         return jsonify({'error': str(e)}), 500
 
 @admin_bp.route('/api/ledger-summary')

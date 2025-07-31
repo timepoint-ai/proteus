@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% block title %}Production Monitoring - Clockchain{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Production Monitoring Dashboard</h1>
+    
+    {% if not monitoring_status %}
+    <div class="alert alert-danger">
+        Unable to load monitoring status. Please check the server logs.
+    </div>
+    {% else %}
+    
+    <!-- Overall Status -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        System Status
+                        {% if monitoring_status.health_score >= 0.8 %}
+                        <span class="badge badge-success float-right">Healthy</span>
+                        {% elif monitoring_status.health_score >= 0.5 %}
+                        <span class="badge badge-warning float-right">Degraded</span>
+                        {% else %}
+                        <span class="badge badge-danger float-right">Critical</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Health Score</h6>
+                            <div class="progress">
+                                <div class="progress-bar {% if monitoring_status.health_score >= 0.8 %}bg-success{% elif monitoring_status.health_score >= 0.5 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ (monitoring_status.health_score * 100)|int }}%"
+                                     aria-valuenow="{{ (monitoring_status.health_score * 100)|int }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ (monitoring_status.health_score * 100)|int }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Monitoring Status</h6>
+                            <p class="mb-0">
+                                {% if monitoring_status.active %}
+                                <span class="text-success"><i class="fas fa-check-circle"></i> Active</span>
+                                {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Last Update</h6>
+                            <p class="mb-0" id="last-update">{{ monitoring_status.last_update }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Active Alerts</h6>
+                            <p class="mb-0">
+                                <span class="badge badge-danger">{{ monitoring_status.alerts|length }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Metrics Grid -->
+    <div class="row mb-4">
+        <!-- Gas Price -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">BASE Gas Price</h6>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-0">{{ monitoring_status.metrics.gas_price.current }} <small>gwei</small></h3>
+                    <small class="text-muted">Threshold: {{ monitoring_status.metrics.gas_price.threshold }} gwei</small>
+                    {% if monitoring_status.metrics.gas_price.current > monitoring_status.metrics.gas_price.threshold %}
+                    <span class="badge badge-warning">Above Threshold</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Oracle Consensus -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Oracle Consensus</h6>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-0">
+                        {{ monitoring_status.metrics.oracle_consensus.failures }}/{{ monitoring_status.metrics.oracle_consensus.total }}
+                    </h3>
+                    <small class="text-muted">Failures / Total</small>
+                    {% if monitoring_status.metrics.oracle_consensus.total > 0 and (monitoring_status.metrics.oracle_consensus.failures / monitoring_status.metrics.oracle_consensus.total) > 0.2 %}
+                    <span class="badge badge-danger">High Failure Rate</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- X.com API -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">X.com API Rate Limit</h6>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-0">{{ monitoring_status.metrics.xcom_api.rate_limit_remaining }}</h3>
+                    <small class="text-muted">Requests Remaining</small>
+                    {% if monitoring_status.metrics.xcom_api.rate_limit_remaining < 10 %}
+                    <span class="badge badge-warning">Low Rate Limit</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screenshot Storage -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Screenshot Storage</h6>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-0">{{ "%.1f"|format(monitoring_status.metrics.screenshot_storage.used_mb) }} <small>MB</small></h3>
+                    <small class="text-muted">{{ monitoring_status.metrics.screenshot_storage.total_screenshots }} screenshots</small>
+                    {% if monitoring_status.metrics.screenshot_storage.used_mb > 1024 %}
+                    <span class="badge badge-warning">High Usage</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contract Events -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contract Events</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Last Check:</strong> {{ monitoring_status.metrics.contract_events.last_check or 'Never' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Events Processed:</strong> {{ monitoring_status.metrics.contract_events.events_processed }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Alerts -->
+    {% if monitoring_status.alerts %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Severity</th>
+                                    <th>Type</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in monitoring_status.alerts %}
+                                <tr>
+                                    <td>
+                                        {% if alert.severity == 'critical' %}
+                                        <span class="badge badge-danger">Critical</span>
+                                        {% elif alert.severity == 'warning' %}
+                                        <span class="badge badge-warning">Warning</span>
+                                        {% else %}
+                                        <span class="badge badge-info">Info</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ alert.type }}</td>
+                                    <td>{{ alert.message }}</td>
+                                    <td>{{ alert.timestamp }}</td>
+                                    <td>
+                                        {% if not alert.acknowledged %}
+                                        <button class="btn btn-sm btn-primary acknowledge-alert" data-alert-type="{{ alert.type }}">
+                                            Acknowledge
+                                        </button>
+                                        {% else %}
+                                        <span class="text-muted">Acknowledged</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Health Check -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        Health Check Results
+                        <button class="btn btn-sm btn-primary float-right" id="run-health-check">
+                            <i class="fas fa-sync"></i> Run Health Check
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body" id="health-check-results">
+                    <p class="text-muted">Click "Run Health Check" to see detailed system health information.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        margin-bottom: 1rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+    
+    .badge {
+        font-size: 0.875rem;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .health-check-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+    }
+    
+    .health-check-item.healthy {
+        border-left: 4px solid #28a745;
+    }
+    
+    .health-check-item.warning {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .health-check-item.error {
+        border-left: 4px solid #dc3545;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh monitoring data every 30 seconds
+    setInterval(refreshMonitoring, 30000);
+    
+    // Run health check button
+    document.getElementById('run-health-check')?.addEventListener('click', runHealthCheck);
+    
+    // Acknowledge alert buttons
+    document.querySelectorAll('.acknowledge-alert').forEach(btn => {
+        btn.addEventListener('click', function() {
+            acknowledgeAlert(this.getAttribute('data-alert-type'));
+        });
+    });
+});
+
+function refreshMonitoring() {
+    fetch('/admin/api/monitoring-status')
+        .then(response => response.json())
+        .then(data => {
+            // Update the page with new data
+            // For now, just reload the page
+            location.reload();
+        })
+        .catch(error => console.error('Error refreshing monitoring:', error));
+}
+
+function runHealthCheck() {
+    const resultsDiv = document.getElementById('health-check-results');
+    resultsDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Running health check...</div>';
+    
+    fetch('/admin/api/health-check')
+        .then(response => response.json())
+        .then(data => {
+            displayHealthCheckResults(data);
+        })
+        .catch(error => {
+            resultsDiv.innerHTML = '<div class="alert alert-danger">Error running health check: ' + error + '</div>';
+        });
+}
+
+function displayHealthCheckResults(data) {
+    const resultsDiv = document.getElementById('health-check-results');
+    let html = '<div class="mb-3">';
+    
+    // Overall status
+    let statusClass = data.overall_status === 'healthy' ? 'success' : 
+                      data.overall_status === 'degraded' ? 'warning' : 'danger';
+    html += `<div class="alert alert-${statusClass}">
+        <strong>Overall Status:</strong> ${data.overall_status.toUpperCase()}
+        <small class="float-right">${data.timestamp}</small>
+    </div>`;
+    
+    // Summary
+    html += `<div class="row mb-3">
+        <div class="col-md-3"><strong>Total Checks:</strong> ${data.summary.total_checks}</div>
+        <div class="col-md-3"><strong>Passed:</strong> ${data.summary.passed}</div>
+        <div class="col-md-3"><strong>Failed:</strong> ${data.summary.failed}</div>
+        <div class="col-md-3"><strong>Critical:</strong> ${data.summary.critical}</div>
+    </div>`;
+    
+    // Individual checks
+    html += '<h6>Detailed Results:</h6>';
+    for (const [checkName, result] of Object.entries(data.checks)) {
+        let itemClass = result.status === 'healthy' ? 'healthy' : 
+                        result.status === 'warning' ? 'warning' : 'error';
+        
+        html += `<div class="health-check-item ${itemClass}">
+            <strong>${checkName.replace(/_/g, ' ').toUpperCase()}:</strong> ${result.status}
+            ${result.message ? '<br><small>' + result.message + '</small>' : ''}
+        </div>`;
+    }
+    
+    html += '</div>';
+    resultsDiv.innerHTML = html;
+}
+
+function acknowledgeAlert(alertType) {
+    fetch(`/admin/api/monitoring/acknowledge/${alertType}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to acknowledge alert');
+        }
+    })
+    .catch(error => {
+        console.error('Error acknowledging alert:', error);
+        alert('Error acknowledging alert');
+    });
+}
+</script>
+{% endblock %}
