@@ -7,17 +7,17 @@
 3. [Core Components](#core-components)
 4. [Data Models](#data-models)
 5. [Service Architecture](#service-architecture)
-6. [AI Transparency & Bittensor Integration](#ai-transparency--bittensor-integration)
-7. [Test Transaction Generator](#test-transaction-generator)
+6. [BASE Blockchain Integration](#base-blockchain-integration)
+7. [Test Manager & E2E Testing](#test-manager--e2e-testing)
 8. [Consensus Mechanism](#consensus-mechanism)
 9. [Text Analysis Algorithm](#text-analysis-algorithm)
-10. [Blockchain Integration](#blockchain-integration)
+10. [X.com Oracle System](#xcom-oracle-system)
 11. [Time Management](#time-management)
 12. [Security Architecture](#security-architecture)
 13. [Performance Optimization](#performance-optimization)
 14. [Testing Strategy](#testing-strategy)
 15. [Deployment Architecture](#deployment-architecture)
-16. [Monitoring and Observability](#monitoring-and-observability)
+16. [Production Monitoring](#production-monitoring)
 
 ## Architecture Overview
 
@@ -947,50 +947,108 @@ services:
 - Expand cache capacity
 - Upgrade node resources
 
-## Monitoring and Observability
+## Production Monitoring
 
-### Metrics Collection
+### Integrated Monitoring Dashboard
+
+The production monitoring system is fully integrated into the admin dashboard at `/dashboard` with comprehensive health tracking:
+
+#### MonitoringService (`services/monitoring.py`)
 
 ```python
-# Custom metrics
-network_health_gauge = Gauge('network_health', 'Network health score')
-bet_volume_counter = Counter('bet_volume_total', 'Total bet volume')
-consensus_duration_histogram = Histogram('consensus_duration_seconds', 'Consensus time')
+class MonitoringService:
+    """Production monitoring with automatic alerts"""
+    
+    def __init__(self):
+        self.metrics = {
+            'gas_price': {'current': 0, 'threshold': 0.002, 'alert_sent': False},
+            'oracle_consensus': {'failures': 0, 'total': 0, 'alert_sent': False},
+            'xcom_api': {'rate_limit_remaining': 100, 'reset_time': None},
+            'screenshot_storage': {'used_mb': 0, 'total_screenshots': 0},
+            'contract_events': {'last_check': None, 'events_processed': 0}
+        }
 ```
 
-### Logging Strategy
+#### Real-time Health Monitoring
+
+1. **Gas Price Tracking**
+   - Monitors BASE Sepolia/Mainnet gas prices
+   - Alert threshold: 0.002 gwei (50x normal)
+   - Updates every 30 seconds
+   - Historical tracking for trend analysis
+
+2. **Oracle Consensus Monitoring**
+   - Tracks consensus failures across all markets
+   - Alerts when agreement falls below 66%
+   - Monitors individual oracle performance
+   - Calculates network-wide consensus health
+
+3. **X.com API Status**
+   - Real-time rate limit tracking
+   - Automatic fallback detection
+   - API availability monitoring
+   - Reset time calculations
+
+4. **Screenshot Storage Metrics**
+   - Base64 storage usage tracking
+   - Per-submission size calculations
+   - Total storage utilization
+   - Growth rate monitoring
+
+5. **Contract Event Monitoring**
+   - Real-time blockchain event tracking
+   - Market creation events
+   - Oracle submission events
+   - Payout execution events
+
+#### Health Check API (`services/health_check.py`)
 
 ```python
-# Structured logging
-logger.info("Bet created", extra={
-    'bet_id': bet_id,
-    'actor_id': actor_id,
-    'amount': amount,
-    'user': user_wallet
-})
-```
-
-### Health Checks
-
-```python
-@app.route('/health')
-def health_check():
-    checks = {
-        'database': check_database(),
-        'redis': check_redis(),
-        'blockchain': check_blockchain_apis(),
-        'consensus': check_consensus_health()
+@app.route('/api/health/status')
+def get_health_status():
+    """Comprehensive health check endpoint"""
+    return {
+        'database': check_database_health(),
+        'redis': check_redis_health(),
+        'blockchain': check_blockchain_connection(),
+        'monitoring': monitoring_service.get_current_metrics()
     }
-    return jsonify(checks)
 ```
 
-### Alerting Rules
+### Alert System
 
-- Node offline > 5 minutes
-- Consensus failure rate > 10%
-- Database connection pool exhausted
-- Transaction validation failures
-- Abnormal betting patterns
+#### Automatic Alert Generation
+- Gas price exceeds threshold (50 gwei)
+- Oracle consensus failures detected
+- X.com API rate limits approached
+- Storage capacity warnings
+- Contract event anomalies
+
+#### Alert Display
+- Dashboard banner notifications
+- Color-coded health indicators
+- Historical alert tracking
+- One-click alert dismissal
+
+### Monitoring UI Features
+
+1. **Dashboard Integration**
+   - Real-time metrics display
+   - White text on dark background for visibility
+   - Auto-refresh every 30 seconds
+   - Responsive design for mobile
+
+2. **Visual Health Indicators**
+   - Green: All systems operational
+   - Yellow: Warning thresholds approached
+   - Red: Critical alerts active
+   - Historical trend graphs
+
+3. **Detailed Metrics View**
+   - Expandable metric cards
+   - Historical data visualization
+   - Export functionality for reports
+   - Custom threshold configuration
 
 ## Development Workflow
 

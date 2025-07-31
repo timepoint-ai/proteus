@@ -126,6 +126,23 @@ Total deployment cost: ~0.006 BASE (~$0.007 USD)
 - **Loading States**: Clear feedback during blockchain operations
 - **Error Handling**: Descriptive messages for failed transactions
 
+### Production Monitoring Dashboard
+
+**Clockchain** includes comprehensive production monitoring integrated into the admin dashboard:
+
+#### Health Monitoring Features
+- **Gas Price Tracking**: Real-time BASE gas prices with 50 gwei alert threshold
+- **Oracle Consensus Monitoring**: Detection of consensus failures (<66% agreement)
+- **X.com API Status**: Rate limit tracking and availability monitoring
+- **Screenshot Storage Metrics**: Usage tracking for base64 screenshot proofs
+- **Contract Event Monitoring**: Real-time tracking of on-chain events
+
+#### Alert System
+- **Automatic Alerts**: Triggers when thresholds exceeded
+- **Gas Price Alerts**: Warning when gas exceeds 0.002 gwei (50x normal)
+- **Consensus Failures**: Alert when oracle agreement falls below 66%
+- **API Rate Limits**: Warning when X.com API limits approached
+
 ### Important: Temporal Integrity
 
 **Critical timing constraints ensure market fairness:**
@@ -181,6 +198,18 @@ export PREDICTION_MARKET_ADDRESS="0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3"
 export ORACLE_CONTRACT_ADDRESS="0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9"
 export NODE_REGISTRY_ADDRESS="0xA69C842F335dfE1F69288a70054A34018282218d"
 export PAYOUT_MANAGER_ADDRESS="0x142F944868596Eb0b35340f29a727b0560B130f7"
+
+# X.com API Configuration (Required for Oracle)
+export X_API_KEY="your-x-api-key"
+export X_API_KEY_SECRET="your-x-api-key-secret"
+export X_BEARER_TOKEN="your-x-bearer-token"
+
+# Test Wallet Configuration (For Test Manager)
+export TEST_WALLET_ADDRESS="0x1234...abcd"  # Main test wallet address
+export TEST_WALLET_PRIVATE_KEY="0xabcd...1234"  # Private key (keep secure!)
+export TEST_ORACLE_WALLETS='["0xaaaa...","0xbbbb...","0xcccc..."]'  # JSON array
+export TEST_NETWORK_RPC="https://base-sepolia.g.alchemy.com/public"  # Optional
+export TEST_CHAIN_ID="84532"  # BASE Sepolia
 
 # Security
 export SESSION_SECRET="your-secret-key"
