@@ -228,7 +228,11 @@
                     message += '<div class="ms-3">';
                     message += '<code>TEST_WALLET_ADDRESS</code> = <code class="text-info">' + step.details.TEST_WALLET_ADDRESS + '</code><br>';
                     message += '<code>TEST_WALLET_PRIVATE_KEY</code> = <code class="text-warning">Generated (check .test_wallets.json)</code><br>';
-                    message += '<code>TEST_ORACLE_WALLETS</code> = <code class="text-info">' + step.details.TEST_ORACLE_WALLETS + '</code><br>';
+                    message += '<code>TEST_ORACLE_WALLET_1</code> = <code class="text-info">' + step.details.TEST_ORACLE_WALLET_1 + '</code><br>';
+                    message += '<code>TEST_ORACLE_WALLET_2</code> = <code class="text-info">' + step.details.TEST_ORACLE_WALLET_2 + '</code><br>';
+                    message += '<code>TEST_ORACLE_WALLET_3</code> = <code class="text-info">' + step.details.TEST_ORACLE_WALLET_3 + '</code><br>';
+                    message += '<code>BETTOR_1</code> = <code class="text-info">' + step.details.BETTOR_1 + '</code><br>';
+                    message += '<code>BETTOR_2</code> = <code class="text-info">' + step.details.BETTOR_2 + '</code><br>';
                     message += '<small class="text-muted mt-2">Copy these values to your Replit Secrets</small>';
                     message += '</div>';
                 } else if (step.details) {
@@ -310,11 +314,13 @@
             html += '<div class="mb-4">';
             html += '<h5 class="text-warning">Oracle Wallets</h5>';
             html += '<div class="wallet-info">';
-            html += '<p class="mb-2"><strong>TEST_ORACLE_WALLETS:</strong></p>';
-            html += '<code class="text-info d-block mb-2">';
-            html += '["' + walletConfig.oracle1 + '", "' + walletConfig.oracle2 + '", "' + walletConfig.oracle3 + '"]';
-            html += '</code>';
-            html += '<small class="text-muted">Used for: Oracle consensus submissions</small>';
+            html += '<p class="mb-2"><strong>Individual Oracle Wallet Secrets:</strong></p>';
+            html += '<div class="ms-3">';
+            html += '<code>TEST_ORACLE_WALLET_1</code> = <code class="text-info small">' + walletConfig.oracle1 + '</code><br>';
+            html += '<code>TEST_ORACLE_WALLET_2</code> = <code class="text-info small">' + walletConfig.oracle2 + '</code><br>';
+            html += '<code>TEST_ORACLE_WALLET_3</code> = <code class="text-info small">' + walletConfig.oracle3 + '</code><br>';
+            html += '</div>';
+            html += '<small class="text-muted mt-2 d-block">Used for: Oracle consensus submissions</small>';
             html += '</div>';
             
             // Individual oracle wallet details
@@ -336,22 +342,29 @@
             
             // Additional wallets (bettor1, bettor2)
             html += '<div class="mb-4">';
-            html += '<h5 class="text-info">Additional Test Wallets</h5>';
-            html += '<div class="row">';
+            html += '<h5 class="text-info">Betting Test Wallets</h5>';
+            html += '<div class="wallet-info">';
+            html += '<p class="mb-2"><strong>Individual Bettor Wallet Secrets:</strong></p>';
+            html += '<div class="ms-3">';
+            html += '<code>BETTOR_1</code> = <code class="text-info small">' + walletConfig.bettor1 + '</code><br>';
+            html += '<code>BETTOR_2</code> = <code class="text-info small">' + walletConfig.bettor2 + '</code><br>';
+            html += '</div>';
+            html += '<small class="text-muted mt-2 d-block">Used for: Testing bet placement functionality</small>';
+            html += '<div class="row mt-3">';
             ['bettor1', 'bettor2'].forEach((bettorName, index) => {
                 html += '<div class="col-md-6">';
-                html += '<div class="wallet-info">';
-                html += '<h6>Bettor ' + (index + 1) + ' (for testing bets)</h6>';
+                html += '<div class="wallet-info mb-2">';
+                html += '<h6>Bettor ' + (index + 1) + '</h6>';
                 html += '<code class="text-info small">' + walletConfig[bettorName] + '</code>';
                 html += '<div class="mt-1">';
                 html += '<a href="' + explorerUrl + '/address/' + walletConfig[bettorName] + '" target="_blank" class="text-decoration-none small">';
-                html += '<i class="fas fa-external-link-alt"></i> View on BaseScan';
+                html += '<i class="fas fa-external-link-alt"></i> BaseScan';
                 html += '</a>';
                 html += '</div>';
                 html += '</div>';
                 html += '</div>';
             });
-            html += '</div></div>';
+            html += '</div></div></div>';
             
             // Funding instructions
             html += '<div class="alert alert-info mt-3">';

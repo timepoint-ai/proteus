@@ -28,14 +28,13 @@ def get_configured_test_wallets():
     """Get test wallets from environment or use defaults"""
     # Check if wallets are configured in environment
     if os.environ.get('TEST_WALLET_ADDRESS'):
-        oracle_wallets = json.loads(os.environ.get('TEST_ORACLE_WALLETS', '[]'))
         return {
             'creator': os.environ.get('TEST_WALLET_ADDRESS'),
-            'bettor1': oracle_wallets[0] if len(oracle_wallets) > 0 else '0x2345678901234567890123456789012345678901',
-            'bettor2': oracle_wallets[1] if len(oracle_wallets) > 1 else '0x3456789012345678901234567890123456789012',
-            'oracle1': oracle_wallets[0] if len(oracle_wallets) > 0 else '0x4567890123456789012345678901234567890123',
-            'oracle2': oracle_wallets[1] if len(oracle_wallets) > 1 else '0x5678901234567890123456789012345678901234',
-            'oracle3': oracle_wallets[2] if len(oracle_wallets) > 2 else '0x6789012345678901234567890123456789012345'
+            'bettor1': os.environ.get('BETTOR_1', '0x2345678901234567890123456789012345678901'),
+            'bettor2': os.environ.get('BETTOR_2', '0x3456789012345678901234567890123456789012'),
+            'oracle1': os.environ.get('TEST_ORACLE_WALLET_1', '0x4567890123456789012345678901234567890123'),
+            'oracle2': os.environ.get('TEST_ORACLE_WALLET_2', '0x5678901234567890123456789012345678901234'),
+            'oracle3': os.environ.get('TEST_ORACLE_WALLET_3', '0x6789012345678901234567890123456789012345')
         }
     else:
         # Default test wallets
@@ -350,7 +349,11 @@ def run_wallet_setup_test(results):
         add_test_step(results, "Replit Secrets Configuration", "info", details={
             'TEST_WALLET_ADDRESS': wallet_config['main_wallet']['address'],
             'TEST_WALLET_PRIVATE_KEY': 'Generated (stored securely)',
-            'TEST_ORACLE_WALLETS': json.dumps(wallet_config['oracle_wallets']),
+            'TEST_ORACLE_WALLET_1': wallet_config['oracle_wallets'][0],
+            'TEST_ORACLE_WALLET_2': wallet_config['oracle_wallets'][1],
+            'TEST_ORACLE_WALLET_3': wallet_config['oracle_wallets'][2],
+            'BETTOR_1': wallet_config['bettor_wallets']['bettor1']['address'],
+            'BETTOR_2': wallet_config['bettor_wallets']['bettor2']['address'],
             'note': 'Copy these values to your Replit Secrets'
         })
         
@@ -741,9 +744,7 @@ def run_oracle_submission_test(results):
             submitted_text=tweet_text,
             screenshot_proof=screenshot_proof,
             signature='0x' + 'f' * 130,
-            status='pending',
-            tweet_url=test_tweet_url,
-            verification_method='api_test'
+            status='pending'
         )
         db.session.add(oracle_submission)
         db.session.commit()
@@ -797,8 +798,8 @@ def run_oracle_submission_test(results):
                      details={
                          'verified': True, 
                          'status': saved_oracle.status,
-                         'has_tweet_url': bool(saved_oracle.tweet_url),
-                         'verification_method': saved_oracle.verification_method
+                         'has_tweet_id': bool(saved_oracle.tweet_id),
+                         'has_screenshot': bool(saved_oracle.screenshot_proof)
                      })
         
         return results
