@@ -15,7 +15,7 @@ def actors_list():
     """Display list of all actors"""
     try:
         # Get all actors with their statistics
-        actors = Actor.query.order_by(Actor.name).all()
+        actors = Actor.query.order_by(Actor.x_username).all()
         
         actor_stats = []
         for actor in actors:

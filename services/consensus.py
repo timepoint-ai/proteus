@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from app import db, redis_client
-from models import NodeOperator, NodeVote, ActorVote, Actor, OracleSubmission, OracleVote
+from models import NodeOperator, NodeVote, Actor, OracleSubmission, OracleVote
 from utils.crypto import CryptoUtils
 from services.node_communication import NodeCommunicationService
 from config import Config
@@ -168,144 +168,7 @@ class ConsensusService:
             logger.error(f"Error checking node consensus: {e}")
             db.session.rollback()
             
-    def propose_actor(self, name: str, description: str, wallet_address: str = None, is_unknown: bool = False) -> bool:
-        """Propose a new actor for the directory"""
-        try:
-            # Check if actor already exists
-            existing = Actor.query.filter_by(name=name).first()
-            if existing:
-                logger.warning(f"Actor {name} already exists")
-                return False
-                
-            # Create pending actor
-            actor = Actor(
-                name=name,
-                description=description,
-                wallet_address=wallet_address,
-                is_unknown=is_unknown,
-                status='pending'
-            )
-            db.session.add(actor)
-            db.session.commit()
-            
-            # Broadcast proposal
-            proposal_data = {
-                'type': 'actor_proposal',
-                'actor_id': str(actor.id),
-                'name': name,
-                'description': description,
-                'wallet_address': wallet_address,
-                'is_unknown': is_unknown,
-                'proposer': Config.NODE_OPERATOR_ID,
-                'timestamp': datetime.utcnow().isoformat()
-            }
-            
-            self.node_comm.broadcast_message(proposal_data)
-            logger.info(f"Proposed new actor: {name}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error proposing actor: {e}")
-            db.session.rollback()
-            return False
-            
-    def vote_on_actor(self, actor_id: str, vote: str, signature: str) -> bool:
-        """Vote on a pending actor proposal"""
-        try:
-            # Validate vote
-            if vote not in ['approve', 'reject']:
-                logger.error(f"Invalid vote: {vote}")
-                return False
-                
-            # Get voter node
-            voter = NodeOperator.query.filter_by(
-                operator_id=Config.NODE_OPERATOR_ID
-            ).first()
-            
-            if not voter:
-                logger.error("Voter node not found")
-                return False
-                
-            # Get actor
-            actor = Actor.query.get(actor_id)
-            if not actor:
-                logger.error(f"Actor {actor_id} not found")
-                return False
-                
-            # Check if already voted
-            existing_vote = ActorVote.query.filter_by(
-                voter_id=voter.id,
-                actor_id=actor.id
-            ).first()
-            
-            if existing_vote:
-                logger.warning(f"Node {voter.operator_id} already voted on actor {actor_id}")
-                return False
-                
-            # Create vote record
-            vote_record = ActorVote(
-                actor_id=actor.id,
-                voter_id=voter.id,
-                vote=vote,
-                signature=signature
-            )
-            db.session.add(vote_record)
-            
-            # Update vote counts
-            if vote == 'approve':
-                actor.approval_votes += 1
-            else:
-                actor.rejection_votes += 1
-                
-            db.session.commit()
-            
-            # Check if consensus reached
-            self._check_actor_consensus(actor_id)
-            
-            logger.info(f"Vote recorded: {voter.operator_id} -> {vote} for actor {actor.name}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error voting on actor: {e}")
-            db.session.rollback()
-            return False
-            
-    def _check_actor_consensus(self, actor_id: str):
-        """Check if consensus has been reached for an actor proposal"""
-        try:
-            actor = Actor.query.get(actor_id)
-            if not actor:
-                return
-                
-            # Get total active nodes
-            total_active = NodeOperator.query.filter_by(status='active').count()
-            required_votes = int(total_active * Config.CONSENSUS_THRESHOLD)
-            
-            if actor.approval_votes >= required_votes:
-                actor.status = 'approved'
-                db.session.commit()
-                
-                # Broadcast approval
-                approval_data = {
-                    'type': 'actor_approved',
-                    'actor_id': actor_id,
-                    'name': actor.name,
-                    'approver': Config.NODE_OPERATOR_ID,
-                    'timestamp': datetime.utcnow().isoformat()
-                }
-                self.node_comm.broadcast_message(approval_data)
-                
-                logger.info(f"Actor {actor.name} approved by consensus")
-                
-            elif actor.rejection_votes >= required_votes:
-                actor.status = 'rejected'
-                db.session.commit()
-                
-                logger.info(f"Actor {actor.name} rejected by consensus")
-                
-        except Exception as e:
-            logger.error(f"Error checking actor consensus: {e}")
-            db.session.rollback()
+    # Actor-related consensus methods removed - actors are now public X accounts, no voting needed
             
     def resolve_oracle_consensus(self, bet_id: str) -> Optional[str]:
         """Resolve oracle consensus for a bet"""

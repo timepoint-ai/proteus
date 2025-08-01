@@ -123,7 +123,13 @@
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
                                                     <h5 class="card-title mb-1">
-                                                        <span class="text-primary">{{ segment.actor.name }}</span>
+                                                        <span class="text-primary">
+                                                            @{{ segment.actor.x_username }}
+                                                            {% if segment.actor.verified %}
+                                                                <i class="fas fa-check-circle text-info" title="Verified"></i>
+                                                            {% endif %}
+                                                        </span>
+                                                        <small class="text-muted">{{ segment.actor.display_name }}</small>
                                                         <span class="badge bg-{{ 'success' if segment.status == 'resolved' else 'primary' if segment.status == 'active' else 'secondary' }} ms-2">
                                                             {{ segment.status }}
                                                         </span>

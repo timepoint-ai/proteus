@@ -22,18 +22,19 @@ class Actor(db.Model):
     __tablename__ = 'actors'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = db.Column(db.String(256), nullable=False)
-    description = db.Column(db.Text)
-    wallet_address = db.Column(db.String(128))
-    is_unknown = db.Column(db.Boolean, default=False)
-    approval_votes = db.Column(db.Integer, default=0)
-    rejection_votes = db.Column(db.Integer, default=0)
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    x_username = db.Column(db.String(256), unique=True, nullable=False)  # X.com username without @
+    display_name = db.Column(db.String(256))  # Full display name from X profile
+    bio = db.Column(db.Text)  # Bio from X profile
+    profile_image_url = db.Column(db.String(512))  # Profile image URL from X
+    verified = db.Column(db.Boolean, default=False)  # X verification status
+    follower_count = db.Column(db.Integer, default=0)  # Follower count for relevance
+    is_test_account = db.Column(db.Boolean, default=False)  # Flag for test accounts
+    status = db.Column(db.String(20), default='active')  # active, suspended, deactivated
+    last_sync = db.Column(db.DateTime)  # Last time profile was synced from X
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
     markets = db.relationship('PredictionMarket', backref='actor')
-    actor_votes = db.relationship('ActorVote', backref='actor')
 
 class PredictionMarket(db.Model):
     __tablename__ = 'prediction_markets'
@@ -49,7 +50,6 @@ class PredictionMarket(db.Model):
     resolution_time = db.Column(db.DateTime)
     
     # X.com integration fields
-    twitter_handle = db.Column(db.String(256))  # X.com handle of the actor
     target_tweet_id = db.Column(db.String(128))  # Specific tweet ID if targeting
     xcom_only = db.Column(db.Boolean, default=True)  # Require X.com posts only
     
@@ -159,15 +159,7 @@ class NodeVote(db.Model):
     signature = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-class ActorVote(db.Model):
-    __tablename__ = 'actor_votes'
-    
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    actor_id = db.Column(UUID(as_uuid=True), db.ForeignKey('actors.id'), nullable=False)
-    voter_id = db.Column(UUID(as_uuid=True), db.ForeignKey('node_operators.id'), nullable=False)
-    vote = db.Column(db.String(10), nullable=False)  # 'approve' or 'reject'
-    signature = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+# ActorVote model removed - actors are now public X accounts, no voting needed
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'

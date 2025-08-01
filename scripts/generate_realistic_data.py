@@ -1,5 +1,6 @@
 """
 Generate realistic test data with proper status flows and real database calculations
+Updated for X.com usernames and BASE blockchain
 """
 import os
 import sys
@@ -17,22 +18,22 @@ import string
 from datetime import datetime, timedelta
 from decimal import Decimal
 import json
-import uuid
 import logging
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Sample data
+# Sample data - Using X.com usernames (same as create_test_actors.py)
 SAMPLE_ACTORS = [
-    ("Elon Musk", "CEO of Tesla and SpaceX, tech entrepreneur"),
-    ("Taylor Swift", "Global pop star and songwriter"),
-    ("Donald Trump", "Former US President and businessman"),
-    ("Oprah Winfrey", "Media mogul and talk show host"),
-    ("Bill Gates", "Microsoft founder and philanthropist"),
-    ("Joe Biden", "Current US President"),
-    ("LeBron James", "NBA superstar"),
-    ("Kim Kardashian", "Reality TV star and entrepreneur")
+    ("elonmusk", "Elon Musk", "CEO of Tesla and SpaceX, tech entrepreneur"),
+    ("taylorswift13", "Taylor Swift", "Global pop star and songwriter"),
+    ("BillGates", "Bill Gates", "Microsoft founder and philanthropist"),
+    ("Oprah", "Oprah Winfrey", "Media mogul and talk show host"),
+    ("GordonRamsay", "Gordon Ramsay", "Chef, TV personality"),
+    ("MrBeast", "MrBeast", "YouTuber, Philanthropist"),
+    ("cristiano", "Cristiano Ronaldo", "Professional footballer"),
+    ("jimmyfallon", "Jimmy Fallon", "Host of The Tonight Show")
 ]
 
 SAMPLE_PREDICTIONS = [
@@ -69,7 +70,9 @@ def create_transaction(tx_type, from_addr, to_addr, amount, status='confirmed',
         related_market_id=related_market_id,
         related_submission_id=related_submission_id,
         related_bet_id=related_bet_id,
-        block_number=random.randint(1000000, 9999999) if status == 'confirmed' else None
+        block_number=random.randint(1000000, 9999999) if status == 'confirmed' else None,
+        gas_used=random.randint(21000, 100000),
+        gas_price=Decimal('0.001')  # BASE gas price
     )
     db.session.add(tx)
     return tx
@@ -78,32 +81,39 @@ def generate_realistic_data():
     """Generate realistic test data with proper status flows"""
     with app.app_context():
         try:
-            # Clear existing data
-            logger.info("Clearing existing data...")
+            # Clear existing data (except actors)
+            logger.info("Clearing existing data (preserving actors)...")
             db.session.query(Transaction).delete()
             db.session.query(OracleSubmission).delete()
             db.session.query(Bet).delete()
             db.session.query(Submission).delete()
             db.session.query(PredictionMarket).delete()
-            db.session.query(Actor).delete()
+            # Don't delete actors, we'll use existing ones
             db.session.query(NodeOperator).filter(NodeOperator.operator_id != 'default-node-001').delete()
             db.session.commit()
             
-            # Create actors
-            logger.info("Creating actors...")
-            actors = []
-            for name, description in SAMPLE_ACTORS:
-                actor = Actor(
-                    name=name,
-                    description=description,
-                    wallet_address=generate_wallet_address(),
-                    status='approved',
-                    approval_votes=random.randint(15, 30),
-                    rejection_votes=random.randint(0, 3)
-                )
-                actors.append(actor)
-                db.session.add(actor)
-            db.session.commit()
+            # Get existing test actors or create them if needed
+            logger.info("Getting test actors...")
+            actors = Actor.query.filter_by(is_test_account=True).all()
+            
+            if not actors:
+                logger.info("No test actors found, creating them...")
+                for x_username, display_name, bio in SAMPLE_ACTORS:
+                    actor = Actor(
+                        x_username=x_username,
+                        display_name=display_name,
+                        bio=bio,
+                        verified=True,
+                        follower_count=random.randint(1000000, 100000000),
+                        is_test_account=True,
+                        status='active',
+                        last_sync=datetime.utcnow()
+                    )
+                    actors.append(actor)
+                    db.session.add(actor)
+                db.session.commit()
+            else:
+                logger.info(f"Found {len(actors)} existing test actors")
             
             # Create node operators for oracles
             logger.info("Creating node operators...")
@@ -114,7 +124,6 @@ def generate_realistic_data():
                     status='active',
                     public_key=f"pk_oracle_{i+1}_{uuid.uuid4().hex[:16]}",
                     node_address=generate_wallet_address(),
-                    consensus_weight=random.uniform(0.8, 1.0),
                     last_seen=datetime.utcnow()
                 )
                 nodes.append(node)
@@ -148,7 +157,7 @@ def generate_realistic_data():
                 predictions = random.sample(SAMPLE_PREDICTIONS, 3)
                 for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor', 'competitor'])):
                     creator_wallet = generate_wallet_address()
-                    stake_amount = Decimal(str(random.uniform(0.5, 2.0)))
+                    stake_amount = Decimal(str(random.uniform(0.005, 0.02)))  # BASE amounts
                     
                     submission = Submission(
                         market_id=market.id,
@@ -156,8 +165,7 @@ def generate_realistic_data():
                         predicted_text=pred_text,
                         submission_type=sub_type,
                         initial_stake_amount=stake_amount,
-                        currency='ETH',
-                        transaction_hash=generate_transaction_hash()
+                        base_tx_hash=generate_transaction_hash()
                     )
                     db.session.add(submission)
                     db.session.flush()
@@ -168,7 +176,6 @@ def generate_realistic_data():
                         creator_wallet,
                         'platform_pool',
                         stake_amount,
-                        'ETH',
                         'confirmed',
                         related_market_id=market.id,
                         related_submission_id=submission.id
@@ -177,14 +184,13 @@ def generate_realistic_data():
                     # Add some bets
                     for k in range(random.randint(2, 5)):
                         bettor_wallet = generate_wallet_address()
-                        bet_amount = Decimal(str(random.uniform(0.1, 0.5)))
+                        bet_amount = Decimal(str(random.uniform(0.001, 0.005)))  # BASE amounts
                         
                         bet = Bet(
                             submission_id=submission.id,
                             bettor_wallet=bettor_wallet,
                             amount=bet_amount,
-                            currency='ETH',
-                            transaction_hash=generate_transaction_hash(),
+                            base_tx_hash=generate_transaction_hash(),
                             status='confirmed'
                         )
                         db.session.add(bet)
@@ -196,7 +202,6 @@ def generate_realistic_data():
                             bettor_wallet,
                             'platform_pool',
                             bet_amount,
-                            'ETH',
                             'confirmed',
                             related_market_id=market.id,
                             related_submission_id=submission.id,
@@ -224,7 +229,7 @@ def generate_realistic_data():
                 predictions = random.sample(SAMPLE_PREDICTIONS, 2)
                 for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor'])):
                     creator_wallet = generate_wallet_address()
-                    stake_amount = Decimal(str(random.uniform(0.8, 1.5)))
+                    stake_amount = Decimal(str(random.uniform(0.008, 0.015)))  # BASE amounts
                     
                     submission = Submission(
                         market_id=market.id,
@@ -232,8 +237,7 @@ def generate_realistic_data():
                         predicted_text=pred_text,
                         submission_type=sub_type,
                         initial_stake_amount=stake_amount,
-                        currency='ETH',
-                        transaction_hash=generate_transaction_hash()
+                        base_tx_hash=generate_transaction_hash()
                     )
                     db.session.add(submission)
                     db.session.flush()
@@ -244,7 +248,6 @@ def generate_realistic_data():
                         creator_wallet,
                         'platform_pool',
                         stake_amount,
-                        'ETH',
                         'confirmed',
                         related_market_id=market.id,
                         related_submission_id=submission.id
@@ -253,14 +256,13 @@ def generate_realistic_data():
                     # Add bets
                     for k in range(random.randint(3, 6)):
                         bettor_wallet = generate_wallet_address()
-                        bet_amount = Decimal(str(random.uniform(0.2, 0.8)))
+                        bet_amount = Decimal(str(random.uniform(0.002, 0.008)))  # BASE amounts
                         
                         bet = Bet(
                             submission_id=submission.id,
                             bettor_wallet=bettor_wallet,
                             amount=bet_amount,
-                            currency='ETH',
-                            transaction_hash=generate_transaction_hash(),
+                            base_tx_hash=generate_transaction_hash(),
                             status='confirmed'
                         )
                         db.session.add(bet)
@@ -272,127 +274,35 @@ def generate_realistic_data():
                             bettor_wallet,
                             'platform_pool',
                             bet_amount,
-                            'ETH',
                             'confirmed',
                             related_market_id=market.id,
                             related_submission_id=submission.id,
                             related_bet_id=bet.id
                         )
             
-            # 3. Create VALIDATING market (1)
-            logger.info("Creating validating market...")
-            actor = random.choice(actors)
-            start_time = current_time - timedelta(hours=96)
-            end_time = current_time - timedelta(hours=48)
-            
-            market = PredictionMarket(
-                actor_id=actor.id,
-                start_time=start_time,
-                end_time=end_time,
-                oracle_wallets=json.dumps([node.node_address for node in random.sample(nodes, 3)]),
-                status='validating'
-            )
-            db.session.add(market)
-            db.session.flush()
-            
-            # Create submissions
-            predictions = random.sample(SAMPLE_PREDICTIONS, 3)
-            submissions = []
-            for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor', 'null'])):
-                creator_wallet = generate_wallet_address()
-                stake_amount = Decimal(str(random.uniform(1.0, 2.5)))
-                
-                submission = Submission(
-                    market_id=market.id,
-                    creator_wallet=creator_wallet,
-                    predicted_text=pred_text if sub_type != 'null' else None,
-                    submission_type=sub_type,
-                    initial_stake_amount=stake_amount,
-                    currency='ETH',
-                    transaction_hash=generate_transaction_hash()
-                )
-                submissions.append(submission)
-                db.session.add(submission)
-                db.session.flush()
-                
-                # Create initial stake transaction
-                create_transaction(
-                    'stake',
-                    creator_wallet,
-                    'platform_pool',
-                    stake_amount,
-                    'ETH',
-                    'confirmed',
-                    related_market_id=market.id,
-                    related_submission_id=submission.id
-                )
-                
-                # Add bets
-                for k in range(random.randint(4, 8)):
-                    bettor_wallet = generate_wallet_address()
-                    bet_amount = Decimal(str(random.uniform(0.3, 1.0)))
-                    
-                    bet = Bet(
-                        submission_id=submission.id,
-                        bettor_wallet=bettor_wallet,
-                        amount=bet_amount,
-                        currency='ETH',
-                        transaction_hash=generate_transaction_hash(),
-                        status='confirmed'
-                    )
-                    db.session.add(bet)
-                    db.session.flush()
-                    
-                    # Create bet transaction
-                    create_transaction(
-                        'stake',
-                        bettor_wallet,
-                        'platform_pool',
-                        bet_amount,
-                        'ETH',
-                        'confirmed',
-                        related_market_id=market.id,
-                        related_submission_id=submission.id,
-                        related_bet_id=bet.id
-                    )
-            
-            # Create oracle submission
-            oracle_text = random.choice(SAMPLE_PREDICTIONS)
-            oracle_submission = OracleSubmission(
-                market_id=market.id,
-                oracle_wallet=json.loads(market.oracle_wallets)[0],
-                submitted_text=oracle_text,
-                signature=f"sig_{uuid.uuid4().hex[:128]}",
-                votes_for=2,
-                votes_against=0,
-                status='pending',
-                is_consensus=False
-            )
-            db.session.add(oracle_submission)
-            
-            # 4. Create RESOLVED markets (3)
-            logger.info("Creating resolved markets...")
-            for i in range(3):
+            # 3. Create VALIDATING markets with oracle submissions (2)
+            logger.info("Creating validating markets...")
+            for i in range(2):
                 actor = random.choice(actors)
-                start_time = current_time - timedelta(days=random.randint(5, 10))
-                end_time = current_time - timedelta(days=random.randint(2, 4))
+                start_time = current_time - timedelta(hours=random.randint(96, 120))
+                end_time = current_time - timedelta(hours=random.randint(48, 72))
                 
                 market = PredictionMarket(
                     actor_id=actor.id,
                     start_time=start_time,
                     end_time=end_time,
                     oracle_wallets=json.dumps([node.node_address for node in random.sample(nodes, 3)]),
-                    status='validating'  # Will be resolved after oracle submission
+                    status='validating'
                 )
                 db.session.add(market)
                 db.session.flush()
                 
                 # Create submissions
-                predictions = random.sample(SAMPLE_PREDICTIONS, 3)
                 submissions = []
-                for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor', 'competitor'])):
+                predictions = random.sample(SAMPLE_PREDICTIONS, 2)
+                for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor'])):
                     creator_wallet = generate_wallet_address()
-                    stake_amount = Decimal(str(random.uniform(0.5, 2.0)))
+                    stake_amount = Decimal(str(random.uniform(0.01, 0.025)))  # BASE amounts
                     
                     submission = Submission(
                         market_id=market.id,
@@ -400,8 +310,7 @@ def generate_realistic_data():
                         predicted_text=pred_text,
                         submission_type=sub_type,
                         initial_stake_amount=stake_amount,
-                        currency='ETH',
-                        transaction_hash=generate_transaction_hash()
+                        base_tx_hash=generate_transaction_hash()
                     )
                     submissions.append(submission)
                     db.session.add(submission)
@@ -413,28 +322,22 @@ def generate_realistic_data():
                         creator_wallet,
                         'platform_pool',
                         stake_amount,
-                        'ETH',
                         'confirmed',
                         related_market_id=market.id,
                         related_submission_id=submission.id
                     )
                     
-                    # Add bets with varying statuses
-                    for k in range(random.randint(5, 10)):
+                    # Add bets
+                    for k in range(random.randint(4, 8)):
                         bettor_wallet = generate_wallet_address()
-                        bet_amount = Decimal(str(random.uniform(0.1, 0.5)))
-                        
-                        # Most bets are confirmed, some pending
-                        bet_status = 'confirmed' if random.random() > 0.1 else 'pending'
-                        tx_status = bet_status
+                        bet_amount = Decimal(str(random.uniform(0.003, 0.01)))  # BASE amounts
                         
                         bet = Bet(
                             submission_id=submission.id,
                             bettor_wallet=bettor_wallet,
                             amount=bet_amount,
-                            currency='ETH',
-                            transaction_hash=generate_transaction_hash(),
-                            status=bet_status
+                            base_tx_hash=generate_transaction_hash(),
+                            status='confirmed'
                         )
                         db.session.add(bet)
                         db.session.flush()
@@ -445,74 +348,160 @@ def generate_realistic_data():
                             bettor_wallet,
                             'platform_pool',
                             bet_amount,
-                            'ETH',
-                            tx_status,
+                            'confirmed',
                             related_market_id=market.id,
                             related_submission_id=submission.id,
                             related_bet_id=bet.id
                         )
                 
-                # Create oracle submission with consensus
-                oracle_text = random.choice([s.predicted_text for s in submissions if s.predicted_text])
-                oracle_submission = OracleSubmission(
-                    market_id=market.id,
-                    oracle_wallet=json.loads(market.oracle_wallets)[0],
-                    submitted_text=oracle_text,
-                    signature=f"sig_{uuid.uuid4().hex[:128]}",
-                    votes_for=3,
-                    votes_against=0,
-                    status='consensus',
-                    is_consensus=True
+                # Create oracle submissions
+                actual_text = random.choice(predictions)
+                for node in random.sample(nodes, 3):
+                    oracle_sub = OracleSubmission(
+                        market_id=market.id,
+                        oracle_wallet=node.node_address,
+                        submitted_text=actual_text,
+                        signature=f"sig_{uuid.uuid4().hex[:32]}",
+                        tweet_id=f"{random.randint(1000000000000000000, 9999999999999999999)}",
+                        tweet_timestamp=current_time - timedelta(hours=random.randint(24, 48))
+                    )
+                    db.session.add(oracle_sub)
+            
+            # 4. Create RESOLVED markets (3)
+            logger.info("Creating resolved markets...")
+            for i in range(3):
+                actor = random.choice(actors)
+                start_time = current_time - timedelta(days=random.randint(7, 14))
+                end_time = current_time - timedelta(days=random.randint(4, 6))
+                
+                market = PredictionMarket(
+                    actor_id=actor.id,
+                    start_time=start_time,
+                    end_time=end_time,
+                    oracle_wallets=json.dumps([node.node_address for node in random.sample(nodes, 3)]),
+                    status='resolved',
+                    resolution_time=end_time + timedelta(hours=2)
                 )
-                db.session.add(oracle_submission)
+                db.session.add(market)
                 db.session.flush()
                 
-                # Resolve the market
-                logger.info(f"Resolving market {market.id}...")
-                if resolution_service.resolve_market(str(market.id)):
-                    logger.info(f"Market {market.id} resolved successfully")
-                else:
-                    logger.warning(f"Failed to resolve market {market.id}")
+                # Create submissions
+                submissions = []
+                predictions = random.sample(SAMPLE_PREDICTIONS, 3)
+                for j, (pred_text, sub_type) in enumerate(zip(predictions, ['original', 'competitor', 'competitor'])):
+                    creator_wallet = generate_wallet_address()
+                    stake_amount = Decimal(str(random.uniform(0.015, 0.03)))  # BASE amounts
+                    
+                    submission = Submission(
+                        market_id=market.id,
+                        creator_wallet=creator_wallet,
+                        predicted_text=pred_text,
+                        submission_type=sub_type,
+                        initial_stake_amount=stake_amount,
+                        base_tx_hash=generate_transaction_hash(),
+                        levenshtein_distance=random.randint(0, 15) if j > 0 else 0
+                    )
+                    submissions.append(submission)
+                    db.session.add(submission)
+                    db.session.flush()
+                    
+                    # Create initial stake transaction
+                    create_transaction(
+                        'stake',
+                        creator_wallet,
+                        'platform_pool',
+                        stake_amount,
+                        'confirmed',
+                        related_market_id=market.id,
+                        related_submission_id=submission.id
+                    )
+                    
+                    # Add bets
+                    bet_count = random.randint(5, 10)
+                    for k in range(bet_count):
+                        bettor_wallet = generate_wallet_address()
+                        bet_amount = Decimal(str(random.uniform(0.005, 0.015)))  # BASE amounts
+                        
+                        bet = Bet(
+                            submission_id=submission.id,
+                            bettor_wallet=bettor_wallet,
+                            amount=bet_amount,
+                            base_tx_hash=generate_transaction_hash(),
+                            status='won' if j == 0 else 'lost',
+                            payout_amount=bet_amount * Decimal('2.5') if j == 0 else 0
+                        )
+                        db.session.add(bet)
+                        db.session.flush()
+                        
+                        # Create bet transaction
+                        create_transaction(
+                            'stake',
+                            bettor_wallet,
+                            'platform_pool',
+                            bet_amount,
+                            'confirmed',
+                            related_market_id=market.id,
+                            related_submission_id=submission.id,
+                            related_bet_id=bet.id
+                        )
+                        
+                        # Create payout transaction for winners
+                        if j == 0:
+                            create_transaction(
+                                'payout',
+                                'platform_pool',
+                                bettor_wallet,
+                                bet.payout_amount,
+                                'confirmed',
+                                related_market_id=market.id,
+                                related_submission_id=submission.id,
+                                related_bet_id=bet.id
+                            )
+                
+                # Set winning submission and resolution text
+                market.winning_submission_id = submissions[0].id
+                market.resolution_text = predictions[0]
+                submissions[0].is_winner = True
+                
+                # Create oracle submissions
+                for node in random.sample(nodes, 3):
+                    oracle_sub = OracleSubmission(
+                        market_id=market.id,
+                        oracle_wallet=node.node_address,
+                        submitted_text=predictions[0],
+                        signature=f"sig_{uuid.uuid4().hex[:32]}",
+                        status='consensus',
+                        is_consensus=True,
+                        consensus_percentage=100.0,
+                        tweet_id=f"{random.randint(1000000000000000000, 9999999999999999999)}",
+                        tweet_timestamp=end_time - timedelta(hours=1)
+                    )
+                    db.session.add(oracle_sub)
             
             db.session.commit()
             
-            # Get statistics
-            stats = {
-                'actors': Actor.query.count(),
-                'markets': {
-                    'active': PredictionMarket.query.filter_by(status='active').count(),
-                    'expired': PredictionMarket.query.filter_by(status='expired').count(),
-                    'validating': PredictionMarket.query.filter_by(status='validating').count(),
-                    'resolved': PredictionMarket.query.filter_by(status='resolved').count()
-                },
-                'submissions': Submission.query.count(),
-                'bets': {
-                    'total': Bet.query.count(),
-                    'confirmed': Bet.query.filter_by(status='confirmed').count(),
-                    'won': Bet.query.filter_by(status='won').count(),
-                    'lost': Bet.query.filter_by(status='lost').count()
-                },
-                'transactions': {
-                    'total': Transaction.query.count(),
-                    'confirmed': Transaction.query.filter_by(status='confirmed').count(),
-                    'pending': Transaction.query.filter_by(status='pending').count()
-                }
-            }
+            # Generate summary
+            logger.info("\n=== Test Data Generation Complete ===")
+            logger.info(f"Actors created: {len(actors)}")
+            logger.info(f"Total markets: {PredictionMarket.query.count()}")
+            logger.info(f"  - Active: {PredictionMarket.query.filter_by(status='active').count()}")
+            logger.info(f"  - Expired: {PredictionMarket.query.filter_by(status='expired').count()}")
+            logger.info(f"  - Validating: {PredictionMarket.query.filter_by(status='validating').count()}")
+            logger.info(f"  - Resolved: {PredictionMarket.query.filter_by(status='resolved').count()}")
+            logger.info(f"Total submissions: {Submission.query.count()}")
+            logger.info(f"Total bets: {Bet.query.count()}")
+            logger.info(f"Total transactions: {Transaction.query.count()}")
+            logger.info(f"Oracle submissions: {OracleSubmission.query.count()}")
             
-            logger.info("\n=== Test Data Generated Successfully ===")
-            logger.info(f"Actors: {stats['actors']}")
-            logger.info(f"Markets: {stats['markets']['active']} active, {stats['markets']['expired']} expired, "
-                       f"{stats['markets']['validating']} validating, {stats['markets']['resolved']} resolved")
-            logger.info(f"Submissions: {stats['submissions']}")
-            logger.info(f"Bets: {stats['bets']['total']} total ({stats['bets']['confirmed']} confirmed, "
-                       f"{stats['bets']['won']} won, {stats['bets']['lost']} lost)")
-            logger.info(f"Transactions: {stats['transactions']['total']} total "
-                       f"({stats['transactions']['confirmed']} confirmed, {stats['transactions']['pending']} pending)")
+            # Show sample actors
+            logger.info("\nSample Actors:")
+            for actor in actors[:5]:
+                logger.info(f"  @{actor.x_username} - {actor.display_name}")
             
         except Exception as e:
             logger.error(f"Error generating test data: {e}")
             db.session.rollback()
             raise
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     generate_realistic_data()

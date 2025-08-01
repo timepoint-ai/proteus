@@ -77,8 +77,11 @@ def clockchain_view():
                 'id': str(market.id),
                 'actor': {
                     'id': str(actor.id) if actor else None,
-                    'name': actor.name if actor else 'Unknown',
-                    'is_unknown': actor.is_unknown if actor else True
+                    'x_username': actor.x_username if actor else 'Unknown',
+                    'display_name': actor.display_name if actor else 'Unknown',
+                    'verified': actor.verified if actor else False,
+                    'follower_count': actor.follower_count if actor else 0,
+                    'is_test_account': actor.is_test_account if actor else False
                 },
                 'start_time': market.start_time,
                 'end_time': market.end_time,
