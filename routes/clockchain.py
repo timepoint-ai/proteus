@@ -87,7 +87,7 @@ def clockchain_view():
                 'status': market.status,
                 'submission_count': len(submissions),
                 'total_volume': str(total_volume),
-                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'currency': 'BASE',
                 'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
                 'creator_wallet': primary_submission.creator_wallet[:10] + '...' if primary_submission and primary_submission.creator_wallet else 'Unknown',
                 'initial_stake': str(primary_submission.initial_stake_amount) if primary_submission else '0',
@@ -106,7 +106,7 @@ def clockchain_view():
                     'submission_type': submission.submission_type,
                     'creator': submission.creator_wallet[:10] + '...' if submission.creator_wallet else '',
                     'initial_stake': str(submission.initial_stake_amount),
-                    'currency': submission.currency,
+                    'currency': 'BASE',
                     'is_winner': submission.is_winner
                 }
                 segment['submissions'].append(sub_data)
@@ -320,7 +320,7 @@ def submission_detail(submission_id):
                 'winning_submission_id': str(market.winning_submission_id) if market.winning_submission_id else None
             },
             'initial_stake_amount': str(submission.initial_stake_amount),
-            'currency': submission.currency,
+            'currency': 'BASE',
             'transaction_hash': submission.transaction_hash,
             'is_winner': submission.is_winner,
             'levenshtein_distance': submission.levenshtein_distance,
@@ -425,7 +425,7 @@ def resolved_view():
                 'status': market.status,
                 'submission_count': len(submissions),
                 'total_volume': str(total_volume),
-                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'currency': 'BASE',
                 'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
                 'resolution': {
                     'actual_text': market.resolution_text,
@@ -514,7 +514,7 @@ def active_view():
                 'status': market.status,
                 'submission_count': len(submissions),
                 'total_volume': str(total_volume),
-                'currency': primary_submission.currency if primary_submission else 'ETH',
+                'currency': 'BASE',
                 'predicted_text': primary_submission.predicted_text if primary_submission else '[No prediction]',
                 'oracle_allowed': oracle_allowed,
                 'time_until_oracle': time_until_oracle

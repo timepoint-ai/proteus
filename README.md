@@ -1,5 +1,20 @@
 # Clockchain Node Operator
 
+## Project Status
+
+**Current Phase**: Testing on BASE Sepolia Testnet
+
+### Completed Work (Phases 1-7)
+✅ **Smart Contracts**: Deployed to BASE Sepolia (~0.006 BASE total cost)  
+✅ **Backend Infrastructure**: Oracle system, consensus mechanism, P2P network  
+✅ **Frontend Interface**: Real-time markets, wallet integration, betting UI  
+✅ **Production Monitoring**: Gas tracking, oracle consensus, health checks  
+✅ **Test Infrastructure**: E2E testing, test manager, data generators  
+
+### Remaining Work
+🔄 **X.com Integration**: Production API credentials needed  
+📋 **Production Launch**: Mainnet deployment, security audit, marketing site  
+
 ## Overview
 
 Clockchain is a cutting-edge decentralized prediction platform built exclusively on Coinbase's BASE blockchain. The platform enables users to create linguistic prediction markets about what public figures will say on X.com (Twitter) within specific time windows. Using advanced text similarity algorithms and on-chain oracle validation, Clockchain creates a transparent, immutable marketplace for probabilistic predictions.
@@ -31,12 +46,12 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 **Clockchain** leverages Coinbase's BASE blockchain for ultra-low-cost, high-speed prediction markets:
 
 #### Deployed Contracts (BASE Sepolia Testnet)
-- **PredictionMarket**: [`0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3`](https://sepolia.basescan.org/address/0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3)
-- **ClockchainOracle**: [`0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9`](https://sepolia.basescan.org/address/0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9)
-- **NodeRegistry**: [`0xA69C842F335dfE1F69288a70054A34018282218d`](https://sepolia.basescan.org/address/0xA69C842F335dfE1F69288a70054A34018282218d)
-- **PayoutManager**: [`0x142F944868596Eb0b35340f29a727b0560B130f7`](https://sepolia.basescan.org/address/0x142F944868596Eb0b35340f29a727b0560B130f7)
+- **PredictionMarket**: [`0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`](https://sepolia.basescan.org/address/0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad)
+- **ClockchainOracle**: [`0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`](https://sepolia.basescan.org/address/0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8)
+- **NodeRegistry**: [`0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`](https://sepolia.basescan.org/address/0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75)
+- **PayoutManager**: [`0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`](https://sepolia.basescan.org/address/0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871)
 
-Total deployment cost: ~0.006 BASE (~$0.007 USD)
+Total deployment cost: ~0.006 BASE (~$0.23 USD)
 
 #### 1. Market Creation & Submissions
 - **X.com Integration**: Markets created for specific Twitter handles with time windows

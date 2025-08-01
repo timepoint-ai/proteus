@@ -158,7 +158,7 @@ class LedgerService:
                 
             # Calculate platform fee
             amount = Decimal(str(transaction_data['amount']))
-            platform_fee = amount * Decimal(str(Config.PLATFORM_FEE_RATE))
+            platform_fee = amount * Decimal(str(Config.PLATFORM_FEE))
             
             # Create transaction record
             transaction = Transaction(
@@ -166,7 +166,6 @@ class LedgerService:
                 from_address=transaction_data['from'],
                 to_address=transaction_data['to'],
                 amount=amount,
-                currency=transaction_data['currency'],
                 transaction_type=transaction_data['type'],
                 related_bet_id=transaction_data.get('bet_id'),
                 platform_fee=platform_fee,
@@ -182,7 +181,6 @@ class LedgerService:
                 'transaction_hash': transaction_data['hash'],
                 'type': transaction_data['type'],
                 'amount': str(amount),
-                'currency': transaction_data['currency'],
                 'platform_fee': str(platform_fee)
             }
             
@@ -199,24 +197,21 @@ class LedgerService:
     def calculate_platform_fees(self, start_time: datetime, end_time: datetime) -> Dict[str, Decimal]:
         """Calculate platform fees for a time period"""
         try:
-            fees = db.session.query(
-                Transaction.currency,
+            total_fee = db.session.query(
                 db.func.sum(Transaction.platform_fee).label('total_fee')
             ).filter(
                 Transaction.created_at >= start_time,
                 Transaction.created_at <= end_time,
                 Transaction.status == 'confirmed'
-            ).group_by(Transaction.currency).all()
+            ).scalar()
             
-            result = {}
-            for currency, total_fee in fees:
-                result[currency] = Decimal(str(total_fee or 0))
-                
-            return result
+            return {
+                'BASE': Decimal(str(total_fee or 0))
+            }
             
         except Exception as e:
             logger.error(f"Error calculating platform fees: {e}")
-            return {}
+            return {'BASE': Decimal('0')}
             
     def get_ledger_summary(self) -> Dict[str, Any]:
         """Get a summary of the current ledger state"""
@@ -226,33 +221,17 @@ class LedgerService:
             reconciled_entries = SyntheticTimeEntry.query.filter_by(reconciled=True).count()
             total_transactions = Transaction.query.count()
             
-            # Get volume by currency
-            volume_eth = db.session.query(
+            # Get volume (BASE only)
+            volume_base = db.session.query(
                 db.func.sum(Transaction.amount)
             ).filter(
-                Transaction.currency == 'ETH',
                 Transaction.status == 'confirmed'
             ).scalar() or 0
             
-            volume_btc = db.session.query(
-                db.func.sum(Transaction.amount)
-            ).filter(
-                Transaction.currency == 'BTC',
-                Transaction.status == 'confirmed'
-            ).scalar() or 0
-            
-            # Get fees
-            fees_eth = db.session.query(
+            # Get fees (BASE only)
+            fees_base = db.session.query(
                 db.func.sum(Transaction.platform_fee)
             ).filter(
-                Transaction.currency == 'ETH',
-                Transaction.status == 'confirmed'
-            ).scalar() or 0
-            
-            fees_btc = db.session.query(
-                db.func.sum(Transaction.platform_fee)
-            ).filter(
-                Transaction.currency == 'BTC',
                 Transaction.status == 'confirmed'
             ).scalar() or 0
             
@@ -261,10 +240,8 @@ class LedgerService:
                 'reconciled_entries': reconciled_entries,
                 'reconciliation_rate': reconciled_entries / max(total_entries, 1),
                 'total_transactions': total_transactions,
-                'volume_eth': str(volume_eth),
-                'volume_btc': str(volume_btc),
-                'fees_eth': str(fees_eth),
-                'fees_btc': str(fees_btc),
+                'volume_base': str(volume_base),
+                'fees_base': str(fees_base),
                 'last_reconciliation': self._get_last_reconciliation_time()
             }
             
@@ -275,10 +252,8 @@ class LedgerService:
                 'reconciled_entries': 0,
                 'reconciliation_rate': 0.0,
                 'total_transactions': 0,
-                'volume_eth': '0',
-                'volume_btc': '0',
-                'fees_eth': '0',
-                'fees_btc': '0',
+                'volume_base': '0',
+                'fees_base': '0',
                 'last_reconciliation': None
             }
             
@@ -305,35 +280,19 @@ class LedgerService:
             from models import NodeOperator
             active_nodes = NodeOperator.query.filter_by(status='active').count()
             total_bets = Bet.query.count()
-            total_stakes = Stake.query.count()
+            total_submissions = Submission.query.count()
             
-            # Calculate volumes
-            volume_eth = db.session.query(
+            # Calculate volumes (BASE only)
+            volume_base = db.session.query(
                 db.func.sum(Transaction.amount)
             ).filter(
-                Transaction.currency == 'ETH',
                 Transaction.status == 'confirmed'
             ).scalar() or 0
             
-            volume_btc = db.session.query(
-                db.func.sum(Transaction.amount)
-            ).filter(
-                Transaction.currency == 'BTC',
-                Transaction.status == 'confirmed'
-            ).scalar() or 0
-            
-            # Calculate fees
-            fees_eth = db.session.query(
+            # Calculate fees (BASE only)
+            fees_base = db.session.query(
                 db.func.sum(Transaction.platform_fee)
             ).filter(
-                Transaction.currency == 'ETH',
-                Transaction.status == 'confirmed'
-            ).scalar() or 0
-            
-            fees_btc = db.session.query(
-                db.func.sum(Transaction.platform_fee)
-            ).filter(
-                Transaction.currency == 'BTC',
                 Transaction.status == 'confirmed'
             ).scalar() or 0
             
@@ -346,11 +305,9 @@ class LedgerService:
             metrics = NetworkMetrics(
                 active_nodes=active_nodes,
                 total_bets=total_bets,
-                total_stakes=total_stakes,
-                total_volume_eth=Decimal(str(volume_eth)),
-                total_volume_btc=Decimal(str(volume_btc)),
-                platform_fees_eth=Decimal(str(fees_eth)),
-                platform_fees_btc=Decimal(str(fees_btc)),
+                total_submissions=total_submissions,
+                total_volume_base=Decimal(str(volume_base)),
+                platform_fees_base=Decimal(str(fees_base)),
                 consensus_accuracy=consensus_accuracy
             )
             

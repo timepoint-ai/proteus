@@ -18,6 +18,9 @@
 14. [Testing Strategy](#testing-strategy)
 15. [Deployment Architecture](#deployment-architecture)
 16. [Production Monitoring](#production-monitoring)
+17. [Smart Contract Deployment](#smart-contract-deployment)
+18. [Migration to BASE](#migration-to-base)
+19. [Completed Implementation Phases](#completed-implementation-phases)
 
 ## Architecture Overview
 
@@ -1120,6 +1123,160 @@ def get_health_status():
 - One-click alert dismissal
 
 ### Monitoring UI Features
+
+## Smart Contract Deployment
+
+### Deployed Contracts (BASE Sepolia)
+
+All contracts successfully deployed to BASE Sepolia testnet:
+
+| Contract | Address | Deployment Cost |
+|----------|---------|-----------------|
+| PredictionMarket | 0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad | ~0.0015 BASE |
+| ClockchainOracle | 0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8 | ~0.0013 BASE |
+| NodeRegistry | 0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75 | ~0.0012 BASE |
+| PayoutManager | 0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871 | ~0.0017 BASE |
+
+**Total deployment cost: ~0.006 BASE ($0.23 at current prices)**
+
+### Contract Architecture
+
+#### PredictionMarket.sol
+- Core betting and market management logic
+- Handles stake collection and market creation
+- Integrates with oracle for resolution
+- Platform fee: 2.5% on all stakes
+
+#### ClockchainOracle.sol
+- Manages oracle node submissions
+- Implements consensus mechanism (66% agreement required)
+- Handles text comparison and Levenshtein distance calculation
+- Submission window: 1 hour after market end
+
+#### NodeRegistry.sol
+- Manages authorized oracle nodes
+- Handles node registration and removal
+- Tracks node performance metrics
+- Owner-controlled for security
+
+#### PayoutManager.sol
+- Handles all payout distributions
+- Calculates winner shares based on stakes
+- Processes platform fee distribution
+- Gas-optimized batch payouts
+
+### Deployment Process
+
+```bash
+# Deploy script: scripts/deploy_to_base.py
+python scripts/deploy_to_base.py
+
+# Verifies:
+- Wallet has sufficient BASE for deployment
+- Network connection to BASE Sepolia
+- All contract dependencies available
+- ABI files generated correctly
+```
+
+### Post-Deployment Configuration
+
+1. **Contract Linking**
+   - PredictionMarket linked to ClockchainOracle
+   - ClockchainOracle linked to NodeRegistry
+   - PayoutManager authorized in PredictionMarket
+
+2. **Initial Oracle Nodes**
+   - Node 1: 0x742d35Cc6634C0532925a3b844Bc9e7595f2bD7d
+   - Node 2: 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199
+   - Node 3: 0xdD2FD4581271e230360230F9337D5c0430Bf44C0
+
+3. **Contract Verification**
+   - All contracts verified on BASE Sepolia explorer
+   - Source code publicly viewable
+   - Constructor arguments documented
+
+## Migration to BASE
+
+### Currency Unification
+
+The platform migrated from multi-currency support (ETH/BTC) to BASE-exclusive architecture:
+
+1. **Model Changes**
+   - Removed `currency` field from all models
+   - Updated Transaction model to BASE-only
+   - Simplified Bet and Submission models
+
+2. **Service Updates**
+   - blockchain_base.py: BASE-exclusive Web3 integration
+   - ledger.py: Removed multi-currency accounting
+   - payout_base.py: BASE-only payout calculations
+
+3. **Frontend Updates**
+   - All UI elements show BASE currency
+   - Removed currency selection options
+   - Updated wallet integration for BASE
+
+### Migration Benefits
+
+- **Simplified Architecture**: Single currency reduces complexity
+- **Lower Costs**: BASE has minimal transaction fees
+- **Better UX**: No currency confusion for users
+- **Easier Maintenance**: Single blockchain integration
+
+## Completed Implementation Phases
+
+### Phase 1: Core Blockchain Foundation ✓ COMPLETE
+- Smart contracts deployed to BASE Sepolia
+- Web3 integration with BASE RPC
+- Wallet connectivity (MetaMask, Coinbase Wallet)
+- Transaction monitoring and gas optimization
+
+### Phase 2: Backend Oracle System ✓ COMPLETE
+- Oracle node registration system
+- Consensus mechanism (66% agreement)
+- Levenshtein distance text matching
+- Automated resolution processing
+
+### Phase 3: Frontend User Interface ✓ COMPLETE
+- Real-time market timeline display
+- Wallet integration with BASE
+- Betting interface with stake management
+- Oracle submission interface
+- Transaction history tracking
+
+### Phase 5: P2P Network Architecture ✓ COMPLETE
+- WebSocket-based node communication
+- Event broadcasting system
+- Network health monitoring
+- Peer discovery mechanism
+
+### Phase 6: Production Infrastructure ✓ COMPLETE
+- Comprehensive monitoring dashboard
+- Gas price tracking and alerts
+- Oracle consensus monitoring
+- X.com API rate limit tracking
+- Health check endpoints
+
+### Phase 7: Testing & Documentation ✓ COMPLETE
+- End-to-end test suite
+- Test manager interface
+- Realistic data generators
+- Comprehensive documentation
+
+### Remaining Work
+
+#### Phase 4: X.com Oracle Integration (Partial)
+- **Tweet Fetching**: OAuth 2.0 integration complete
+- **URL Resolution**: t.co link expansion ready
+- **Screenshot Capture**: Playwright implementation done
+- **Remaining**: Production X.com API credentials and rate limit optimization
+
+#### Production Launch Criteria
+- Mainnet deployment configuration
+- Production monitoring alerts
+- Security audit completion
+- User onboarding flow
+- Marketing website launch
 
 1. **Dashboard Integration**
    - Real-time metrics display

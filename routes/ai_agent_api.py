@@ -184,26 +184,26 @@ def create_submission():
         if data['submission_type'] in ['competitor', 'null'] and not original_submission:
             return jsonify({'error': 'Cannot create competitor/null submission without an original submission'}), 400
         
-        # Validate wallet address
+        # Validate wallet address (BASE only)
         wallet_validation = validation_utils.validate_wallet_address(
             data['creator_wallet'], 
-            data['currency']
+            'BASE'
         )
         if not wallet_validation['valid']:
             return jsonify({'error': wallet_validation['error']}), 400
         
-        # Validate transaction hash
+        # Validate transaction hash (BASE only)
         tx_validation = validation_utils.validate_transaction_hash(
             data['transaction_hash'], 
-            data['currency']
+            'BASE'
         )
         if not tx_validation['valid']:
             return jsonify({'error': tx_validation['error']}), 400
         
-        # Validate amount
+        # Validate amount (BASE only)
         amount_validation = validation_utils.validate_amount(
             data['initial_stake_amount'], 
-            data['currency']
+            'BASE'
         )
         if not amount_validation['valid']:
             return jsonify({'error': amount_validation['error']}), 400
@@ -213,15 +213,13 @@ def create_submission():
         # Calculate required amount (stake + platform fee)
         required_amount = stake_amount * (1 + PLATFORM_FEE)
         
-        # Validate blockchain transaction
-        tx_data = None
-        if data['currency'] == 'ETH':
-            tx_data = blockchain_service.validate_eth_transaction(data['transaction_hash'])
-        elif data['currency'] == 'BTC':
-            tx_data = blockchain_service.validate_btc_transaction(data['transaction_hash'])
+        # Validate BASE blockchain transaction
+        from services.blockchain_base import BaseBlockchainService
+        base_service = BaseBlockchainService()
+        tx_data = base_service.validate_transaction(data['transaction_hash'])
         
         if not tx_data:
-            return jsonify({'error': 'Invalid transaction'}), 400
+            return jsonify({'error': 'Invalid BASE transaction'}), 400
         
         # Check transaction amount covers stake + fees
         tx_amount = Decimal(str(tx_data.get('value', tx_data.get('total_output', 0))))
@@ -245,7 +243,7 @@ def create_submission():
         
         # Check for duplicate transaction hash
         existing_submission = Submission.query.filter_by(
-            transaction_hash=data['transaction_hash']
+            base_tx_hash=data['transaction_hash']
         ).first()
         
         if existing_submission:
@@ -259,8 +257,7 @@ def create_submission():
         submission.predicted_text = data['predicted_text']
         submission.submission_type = data['submission_type']
         submission.initial_stake_amount = stake_amount
-        submission.currency = data['currency']
-        submission.transaction_hash = data['transaction_hash']
+        submission.base_tx_hash = data['transaction_hash']
         
         # Check if this is an AI agent submission
         if 'ai_agent_id' in data:
@@ -291,7 +288,6 @@ def create_submission():
         transaction.from_address = tx_data['from']
         transaction.to_address = tx_data['to']
         transaction.amount = tx_amount
-        transaction.currency = data['currency']
         transaction.transaction_type = 'submission'
         transaction.related_market_id = market.id
         transaction.related_submission_id = submission.id
@@ -309,7 +305,6 @@ def create_submission():
             'submission_type': submission.submission_type,
             'predicted_text': submission.predicted_text,
             'initial_stake_amount': str(submission.initial_stake_amount),
-            'currency': submission.currency,
             'platform_fee': str(stake_amount * PLATFORM_FEE)
         })
         

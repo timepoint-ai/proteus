@@ -56,7 +56,7 @@ def generate_transaction_hash():
     """Generate a realistic transaction hash"""
     return f"0x{''.join(random.choices(string.hexdigits.lower(), k=64))}"
 
-def create_transaction(tx_type, from_addr, to_addr, amount, currency, status='confirmed', 
+def create_transaction(tx_type, from_addr, to_addr, amount, status='confirmed', 
                       related_market_id=None, related_submission_id=None, related_bet_id=None):
     """Create a transaction record"""
     tx = Transaction(
@@ -64,7 +64,6 @@ def create_transaction(tx_type, from_addr, to_addr, amount, currency, status='co
         from_address=from_addr,
         to_address=to_addr,
         amount=amount,
-        currency=currency,
         transaction_type=tx_type,
         status=status,
         related_market_id=related_market_id,
