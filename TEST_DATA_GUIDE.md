@@ -1,5 +1,185 @@
 # Clockchain Test Data Generation Guide
 
+## Complete Blockchain Transaction Testing Plan
+
+### Overview
+This plan outlines the implementation of full BASE Sepolia blockchain transactions that propagate across the P2P node network, moving beyond simple function tests to real on-chain interactions with network-wide synchronization.
+
+### Phase 1: Transaction Creation & Broadcasting (Week 1)
+
+#### 1.1 Smart Contract Transaction Generator
+- **Create Market Transaction**: Deploy actual market creation transactions on BASE Sepolia
+  - Gas optimization for batch market creation
+  - Transaction signing with test wallets
+  - Contract event emission verification
+  
+- **Submission Transactions**: Real stake submissions to PredictionMarket contract
+  - Multi-wallet submission simulation
+  - Concurrent transaction handling
+  - Nonce management for rapid submissions
+
+- **Betting Transactions**: On-chain bet placement
+  - Variable stake amounts (0.001 - 0.1 BASE)
+  - Gas price optimization
+  - Transaction receipt verification
+
+#### 1.2 Transaction Broadcasting Service
+```python
+# New service: services/transaction_broadcaster.py
+class TransactionBroadcaster:
+    def broadcast_to_network(self, tx_hash, tx_data):
+        # Send to all connected nodes via WebSocket
+        # Include block confirmation status
+        # Track propagation metrics
+```
+
+### Phase 2: Node Synchronization (Week 1-2)
+
+#### 2.1 P2P Transaction Propagation
+- **WebSocket Event System**
+  - `new_transaction` event for immediate broadcast
+  - `transaction_confirmed` event with block details
+  - `transaction_failed` event for error handling
+
+- **Node Reception Handler**
+  - Verify transaction signatures
+  - Check transaction validity against local state
+  - Update local database with network transactions
+
+#### 2.2 Consensus Verification
+- **Transaction Pool Management**
+  - Maintain pending transaction pool per node
+  - Synchronize confirmed transactions across nodes
+  - Handle transaction conflicts and double-spends
+
+### Phase 3: Oracle Network Testing (Week 2)
+
+#### 3.1 Oracle Submission Transactions
+- **Multi-Node Oracle Submissions**
+  - Each oracle node submits actual blockchain transactions
+  - Test consensus with 3-5 oracle nodes
+  - Verify on-chain consensus calculation
+
+- **Screenshot Data On-Chain**
+  - Store base64 screenshots in transaction data
+  - Test gas limits for large data storage
+  - Implement IPFS integration for cost reduction
+
+### Phase 4: End-to-End Transaction Flow (Week 2-3)
+
+#### 4.1 Complete Market Lifecycle
+```bash
+# Test script: scripts/test_full_blockchain_flow.py
+1. Create market (Transaction 1)
+2. Submit predictions (Transactions 2-5)
+3. Place bets (Transactions 6-20)
+4. Wait for market expiration
+5. Submit oracle data (Transactions 21-25)
+6. Verify consensus on-chain
+7. Execute payouts (Transaction 26)
+8. Verify all nodes synchronized
+```
+
+#### 4.2 Network Stress Testing
+- **High Volume Testing**
+  - 100+ transactions per minute
+  - Multiple markets active simultaneously
+  - Node synchronization under load
+
+- **Network Partition Testing**
+  - Simulate node disconnections
+  - Test transaction replay on reconnection
+  - Verify eventual consistency
+
+### Phase 5: Monitoring & Verification (Week 3)
+
+#### 5.1 Transaction Monitoring Dashboard
+- **Real-time Transaction Feed**
+  - Show transactions as they propagate
+  - Node reception timestamps
+  - Confirmation status across network
+
+- **Network Health Metrics**
+  - Transaction propagation time
+  - Node synchronization lag
+  - Consensus achievement rate
+
+#### 5.2 Automated Verification
+```python
+# Verification service: services/transaction_verifier.py
+class TransactionVerifier:
+    def verify_network_state(self):
+        # Check all nodes have same transaction set
+        # Verify blockchain state consistency
+        # Alert on synchronization issues
+```
+
+### Implementation Steps
+
+#### Step 1: Update Transaction Model
+```python
+# Add network propagation tracking
+class Transaction(db.Model):
+    # Existing fields...
+    propagated_to_nodes = db.Column(db.JSON)  # ["node1", "node2", ...]
+    propagation_time = db.Column(db.Float)    # Seconds to reach all nodes
+    on_chain_block = db.Column(db.Integer)    # Actual block number
+    on_chain_gas_used = db.Column(db.Integer) # Actual gas consumed
+```
+
+#### Step 2: Create Network Test Suite
+```bash
+# New test suite: test_network_transactions.py
+- test_transaction_propagation()
+- test_node_synchronization()
+- test_oracle_consensus_on_chain()
+- test_payout_execution()
+- test_network_partition_recovery()
+```
+
+#### Step 3: Transaction Generator Script
+```bash
+# Script: scripts/generate_network_transactions.py
+python generate_network_transactions.py \
+  --nodes 5 \
+  --markets 10 \
+  --transactions-per-market 50 \
+  --verify-propagation
+```
+
+### Success Criteria
+
+1. **Transaction Propagation**: All transactions reach all nodes within 5 seconds
+2. **State Consistency**: All nodes maintain identical blockchain state
+3. **Oracle Consensus**: On-chain consensus matches off-chain calculations
+4. **Gas Efficiency**: Average transaction cost < 0.001 BASE
+5. **Network Resilience**: System recovers from 50% node failures
+
+### Testing Infrastructure
+
+#### Required Components
+- 5+ test nodes running simultaneously
+- BASE Sepolia test wallets with sufficient funds
+- WebSocket connection mesh between nodes
+- Transaction monitoring service
+- Automated verification scripts
+
+#### Test Execution Flow
+1. Start node network (5 nodes minimum)
+2. Fund test wallets via faucet
+3. Execute transaction generator
+4. Monitor propagation in real-time
+5. Verify network consistency
+6. Generate test report
+
+### Timeline
+- **Week 1**: Transaction creation and basic propagation
+- **Week 2**: Oracle network and consensus testing
+- **Week 3**: Full E2E testing and monitoring
+- **Week 4**: Performance optimization and documentation
+
+---
+
 ## Overview
 
 Clockchain provides a comprehensive test data generation ecosystem for BASE Sepolia testnet development. The system includes automated scripts, visual interfaces, and E2E testing tools.

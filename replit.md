@@ -20,35 +20,45 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend Architecture
 - **Framework**: Flask with SQLAlchemy ORM.
-- **Database**: SQLite, with PostgreSQL support via SQLAlchemy for production.
+- **Database**: PostgreSQL for production, SQLite for development.
 - **Task Queue**: Celery, utilizing Redis as both broker and result backend.
 - **Caching**: Redis for distributed caching and real-time data.
 - **Time Management**: Custom Pacific Time synchronization service.
+- **Blockchain**: BASE-exclusive integration (no ETH/BTC support).
 
 ### Frontend Architecture
 - **Templating**: Jinja2 templates, styled with Bootstrap for responsive UI.
 - **Interactivity**: Vanilla JavaScript with Chart.js for data visualization.
 - **Styling**: Custom CSS for the admin dashboard and Bootstrap theming.
 - **Real-time Updates**: WebSocket connections facilitate live data streaming.
+- **Wallet Integration**: MetaMask and Coinbase Wallet with BASE network auto-switching.
 
 ### Core Services and Features
-- **Consensus Service**: Manages node voting and network consensus.
-- **Oracle Service**: Validates text sources and performs Levenshtein analysis.
-- **Blockchain Service**: Handles ETH/BTC transaction validation for submissions and bets.
+- **Consensus Service**: Manages node voting and network consensus (66% agreement required).
+- **Oracle Service**: X.com integration with screenshot capture via Playwright.
+- **Blockchain Service**: BASE Sepolia/Mainnet transaction handling exclusively.
 - **Ledger Service**: Manages entries in the immutable synthetic time ledger.
 - **Time Sync Service**: Ensures node synchronization.
 - **Text Analysis Service**: Calculates speech similarity using Levenshtein distance.
-- **Node Communication**: WebSocket-based inter-node communication for real-time data exchange.
+- **Node Communication**: WebSocket-based P2P network for real-time data exchange.
+- **Production Monitoring**: Gas price tracking, oracle consensus monitoring, health checks.
+
+### Smart Contracts (BASE Sepolia)
+- **PredictionMarket**: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
+- **ClockchainOracle**: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
+- **NodeRegistry**: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- **PayoutManager**: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
+- **Total deployment cost**: ~0.006 BASE (~$0.23 USD)
 
 ### Data Models
-Key data models include `NodeOperator`, `Actor`, `Bet`, `Stake`, `Transaction`, `OracleSubmission`, and `SyntheticTimeEntry`, structuring the core entities of the prediction market.
+Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission`, `Bet`, `Transaction`, `OracleSubmission`, and `SyntheticTimeEntry`, all updated for BASE-exclusive operation.
 
 ### System Design Choices
 - **UI/UX**: Dark theme with gradient accents, prioritizing technical clarity and an authentic blockchain aesthetic. Includes responsive design elements and real-time data displays.
-- **Data Flow**: Encompasses node registration, actor management, submission creation, bet placement, oracle validation, consensus validation, automatic resolution based on Levenshtein distance, and immutable transaction recording.
-- **Background Tasks**: Includes network reconciliation, consensus processing, time ledger synchronization, and oracle data processing.
+- **Data Flow**: Market creation → submissions → betting → oracle resolution → payout distribution, all on BASE blockchain.
+- **Background Tasks**: Contract monitoring, network reconciliation, consensus processing, production metrics collection.
 - **Security**: Node-based authentication, RSA key pairs for digital signatures, robust input validation, and secure inter-node communication.
-- **Deployment**: Supports Docker containerization, Gunicorn for the web server, Celery workers, PostgreSQL for the database, Redis for caching, and Nginx for load balancing.
+- **Deployment**: Gunicorn web server, Celery workers, PostgreSQL database, Redis caching, production monitoring service.
 
 ## External Dependencies
 
@@ -68,13 +78,42 @@ Key data models include `NodeOperator`, `Actor`, `Bet`, `Stake`, `Transaction`, 
 - **WebSocket**: For real-time communication in the browser.
 
 ### Blockchain Integration
-- **Ethereum**: Primarily for ETH transaction validation via Web3.
-- **Bitcoin**: For BTC transaction validation via a REST API.
-- **Infura**: As an Ethereum RPC provider.
-- **BASE Blockchain**: Leveraged for smart contract deployment and transactions, with specific integration for BASE Sepolia testnet and mainnet.
+- **BASE Blockchain**: Exclusive blockchain platform (Coinbase L2)
+- **BASE Sepolia**: Testnet for development and testing
+- **Web3.py**: For BASE blockchain interaction
+- **Smart Contracts**: Custom Solidity contracts deployed on BASE
 
 ### Third-Party Services
 - **X.com API**: Integrated as the primary oracle source for tweet data and screenshot proofs.
+
+## Project Documentation
+
+### Documentation Structure
+- **README.md**: Project overview, current status, and deployed contract addresses
+- **ENGINEERING.md**: Technical implementation details, architecture, and completed phases
+- **CRYPTO_PLAN.md**: Remaining work plan (X.com integration and production launch)
+- **TEST_DATA_GUIDE.md**: Comprehensive test data generation and blockchain transaction testing guide
+- **TEST_WALLET_SETUP.md**: Test wallet configuration for BASE Sepolia
+
+### Test Infrastructure
+- **Test Manager Interface**: Visual UI at `/test_manager` for creating and managing test scenarios
+- **E2E Test Suite**: Automated testing with `test_e2e_runner.py`
+- **Data Generator**: Realistic test data via `scripts/generate_realistic_data.py`
+- **Network Transaction Testing**: Full blockchain transaction propagation plan (see TEST_DATA_GUIDE.md)
+
+## Recent Changes
+
+### January 31, 2025 - Documentation Reorganization
+- Moved completed phases (1-7) from CRYPTO_PLAN.md to ENGINEERING.md
+- Updated README.md with correct BASE Sepolia contract addresses
+- Created simplified CRYPTO_PLAN.md focusing on remaining X.com integration work
+- Fixed currency references throughout codebase (now BASE-exclusive)
+- Created TEST_DATA_GUIDE.md with comprehensive testing documentation
+- Added complete blockchain transaction testing plan for node network propagation
+
+### Project Status
+- **Completed**: Smart contracts deployed, backend/frontend integration, production monitoring
+- **Remaining**: Production X.com API credentials, mainnet deployment, security audit
 - **Basescan**: For contract verification and transaction exploration on the BASE blockchain.
 
 ## Recent Changes
