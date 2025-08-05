@@ -1,10 +1,181 @@
-# Clockchain Remaining Work Plan
+# Clockchain Remaining Work Plan - True Decentralization
 
-## Overview
+## Critical Issue: Current Architecture is NOT Decentralized
 
-Clockchain is a BASE-exclusive prediction market platform with X.com post oracle resolution. Most development phases (1-7) are complete with smart contracts deployed to BASE Sepolia testnet.
+**Current State**: The system uses PostgreSQL as the source of truth for all critical data. The blockchain is only used for payment processing. This violates the core principle of decentralization.
 
-**Total deployment cost: ~0.006 BASE (~$0.23 USD)**
+### What's Currently in PostgreSQL (NOT on-chain):
+1. **Actors** - All actor data (x_username, display_name, bio, verified status) stored locally
+2. **Market metadata** - Extended data beyond basic contract storage
+3. **All relational data** - Connections between entities
+4. **User authentication** - Completely centralized
+5. **Oracle validation logic** - Trust assumptions on local server
+
+### What's Currently On-Chain:
+1. Basic market parameters (creator, times, twitter handle as string)
+2. Submission text and stakes
+3. Bet amounts and addresses
+4. Node registry (but not used as source of truth)
+5. Oracle votes (but validation logic is off-chain)
+
+## New Phase Structure for True Decentralization
+
+### Phase 9: On-Chain Actor Registry
+
+**Goal**: Move all actor data to blockchain with decentralized approval mechanism
+
+#### 9A. Smart Contract Development
+```solidity
+contract ActorRegistry {
+    struct Actor {
+        string xUsername;
+        string displayName;
+        string bio;
+        bool verified;
+        uint256 followerCount;
+        address[] approvers;  // Node operators who approved
+        uint256 approvalCount;
+        bool active;
+        uint256 registrationTime;
+    }
+    
+    mapping(string => Actor) public actors;  // xUsername => Actor
+    uint256 public constant APPROVAL_THRESHOLD = 3;  // Need 3 nodes
+}
+```
+
+#### 9B. Node Operator Approval System
+- Any node operator can propose new actors
+- Requires 3+ node approvals to activate
+- Actors can be deactivated by node consensus
+- No single point of failure or control
+
+#### 9C. Migration Strategy
+- Deploy ActorRegistry contract
+- Migrate existing actors via node votes
+- Remove Actor table from PostgreSQL
+- Update all references to use on-chain data
+
+### Phase 10: Fully On-Chain Markets
+
+**Goal**: Remove all PostgreSQL dependencies for markets
+
+#### 10A. Enhanced Market Contract
+- Store ALL market data on-chain
+- Remove PredictionMarket table from PostgreSQL
+- Use events for historical queries
+- Implement efficient data structures for gas optimization
+
+#### 10B. On-Chain Submission Management
+- All submissions fully on-chain
+- Remove Submission table from PostgreSQL
+- Screenshot proofs stored via IPFS with on-chain hashes
+
+#### 10C. On-Chain Betting System
+- All bet data on blockchain
+- Remove Bet table from PostgreSQL
+- Real-time updates via event listening
+
+### Phase 11: Decentralized Oracle System
+
+**Goal**: Make oracle validation fully trustless
+
+#### 11A. On-Chain Oracle Logic
+```solidity
+contract DecentralizedOracle {
+    struct OracleData {
+        string actualText;
+        string screenshotIPFS;
+        bytes32 textHash;
+        uint256 levenshteinDistance;
+        address[] validators;
+        bool consensus;
+    }
+    
+    // All validation logic on-chain
+    function validateAndResolve() public {
+        // No off-chain dependencies
+    }
+}
+```
+
+#### 11B. Trustless Screenshot Verification
+- IPFS for screenshot storage
+- On-chain hash verification
+- Multi-oracle screenshot comparison
+- No single oracle can manipulate
+
+#### 11C. Automated Resolution
+- Smart contract calculates Levenshtein distance
+- Automatic payout triggers
+- No manual intervention possible
+
+### Phase 12: Remove PostgreSQL Completely
+
+**Goal**: Blockchain as single source of truth
+
+#### 12A. Data Migration Plan
+1. **User Data**: Move to decentralized identity (ENS/BASE Name Service)
+2. **Transaction History**: Use blockchain events + graph indexing
+3. **Node Registry**: Already on-chain, make it authoritative
+4. **All Relationships**: Implement via smart contract mappings
+
+#### 12B. New Architecture
+- Frontend connects directly to blockchain
+- Use The Graph Protocol for complex queries
+- IPFS for media storage
+- WebRTC for P2P communication
+
+#### 12C. Backup Strategy
+- Archive historical data to IPFS
+- Create migration scripts for existing users
+- Implement gradual rollout with fallbacks
+
+### Phase 13: Enhanced Decentralization Features
+
+**Goal**: Make system ungovernable and unstoppable
+
+#### 13A. Decentralized Frontend
+- Host on IPFS
+- ENS/BASE Name Service for addressing
+- No centralized domains
+- Multiple gateway access points
+
+#### 13B. DAO Governance (Optional)
+- Token for governance decisions
+- Protocol parameter updates via DAO
+- Emergency pause only via supermajority
+- Time-locked upgrades
+
+#### 13C. Cross-chain Bridges
+- Bridge to other EVM chains
+- Maintain BASE as primary
+- Enable multi-chain markets
+
+## Implementation Timeline
+
+**Phase 9 (2 weeks)**: On-chain Actor Registry
+**Phase 10 (3 weeks)**: Fully on-chain markets  
+**Phase 11 (2 weeks)**: Decentralized oracle
+**Phase 12 (4 weeks)**: PostgreSQL removal
+**Phase 13 (3 weeks)**: Enhanced decentralization
+
+**Total**: ~14 weeks to full decentralization
+
+## Cost Estimates
+
+- Contract deployments: ~0.1 ETH
+- IPFS pinning: ~$50/month
+- The Graph indexing: ~$100/month
+- Total migration gas: ~0.5 ETH
+
+## Success Metrics
+
+1. **Zero PostgreSQL queries** in production
+2. **100% data availability** via blockchain
+3. **No single points of failure**
+4. **Censorship resistance** verified
+5. **System operates without any centralized infrastructure**
 
 ## Completed Work Summary
 
@@ -21,129 +192,4 @@ Clockchain is a BASE-exclusive prediction market platform with X.com post oracle
   - Updated UI to display @username format with verification badges
   - Generated comprehensive test data (10 markets, 26 submissions, 132 bets)
 
-## Remaining Work
-
-### Phase 4: X.com Oracle Integration (Partial)
-
-#### Completed Components
-- ✅ X.com OAuth 2.0 authentication flow
-- ✅ Tweet fetching with bearer token
-- ✅ t.co URL expansion handling
-- ✅ Screenshot capture via Playwright
-- ✅ Base64 storage in database
-- ✅ Mock fallback system for testing
-
-#### Remaining Work
-1. **Production X.com API Credentials**
-   - Apply for elevated API access
-   - Configure production rate limits
-   - Set up API monitoring alerts
-
-2. **Rate Limit Optimization**
-   - Implement intelligent caching
-   - Add request batching
-   - Optimize screenshot frequency
-
-3. **Production Error Handling**
-   - Enhance fallback mechanisms
-   - Add retry logic with backoff
-   - Implement circuit breakers
-
-### Production Launch Criteria
-
-#### 1. BASE Mainnet Deployment
-- [ ] Update RPC endpoints to BASE mainnet
-- [ ] Deploy contracts with production parameters
-- [ ] Configure mainnet gas optimization
-- [ ] Set up contract verification
-
-#### 2. Security Audit
-- [ ] Smart contract audit completion
-- [ ] Fix any critical findings
-- [ ] Implement audit recommendations
-- [ ] Public audit report publication
-
-#### 3. Production Monitoring
-- [ ] Configure AlertManager for critical events
-- [ ] Set up PagerDuty integration
-- [ ] Implement automated rollback procedures
-- [ ] Create incident response playbook
-
-#### 4. User Onboarding
-- [ ] Create interactive tutorial
-- [ ] Build demo market for new users
-- [ ] Implement first-time user incentives
-- [ ] Add help documentation
-
-#### 5. Marketing Website
-- [ ] Landing page with live demo
-- [ ] Documentation portal
-- [ ] API developer guide
-- [ ] Community forum setup
-
-## Test Data Generation
-
-The platform includes comprehensive test data generators for development and testing:
-
-### Available Generators
-
-1. **generate_realistic_data.py**
-   - Creates realistic markets with time windows
-   - Generates diverse predictions
-   - Simulates betting patterns
-   - Creates transaction history
-
-2. **Test Manager Interface** (`/test_manager`)
-   - Visual test creation interface
-   - Automated wallet funding
-   - Contract interaction testing
-   - Result verification tools
-
-3. **E2E Test Suite**
-   - Automated market lifecycle tests
-   - Oracle submission validation
-   - Payout calculation verification
-   - Network consensus testing
-
-### Running Test Data Generation
-
-```bash
-# Generate comprehensive test data
-python scripts/generate_realistic_data.py
-
-# Run E2E tests
-python test_e2e_runner.py
-
-# Access Test Manager UI
-# Navigate to: http://localhost:5000/test_manager
-```
-
-## Implementation Priority
-
-1. **Immediate** (Week 1-2)
-   - Production X.com API application
-   - Mainnet deployment preparation
-   - Security audit scheduling
-
-2. **Short-term** (Week 3-4)
-   - User onboarding flow
-   - Marketing website development
-   - Production monitoring setup
-
-3. **Launch Phase** (Week 5-6)
-   - Mainnet contract deployment
-   - Beta user program
-   - Community building
-
-## Technical Debt
-
-- Optimize gas usage in PayoutManager contract
-- Implement event indexing for faster queries
-- Add multi-signature wallet for contract ownership
-- Enhance oracle dispute resolution mechanism
-
-## Contact & Resources
-
-- **Documentation**: See ENGINEERING.md for technical details
-- **Test Contracts**: Deployed on BASE Sepolia (see README.md)
-- **API Docs**: Available at `/ai_agent` endpoint
+**Total deployment cost so far**: ~0.006 BASE (~$0.23 USD)
