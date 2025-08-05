@@ -41,6 +41,33 @@ deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'tes
 if os.path.exists(deployment_file):
     blockchain_service.load_contracts(deployment_file)
 
+@api_bp.route('/contract-abi/<contract_name>', methods=['GET'])
+def get_contract_abi(contract_name):
+    """Get contract ABI for blockchain integration"""
+    try:
+        # Map of allowed contract names to their artifact paths
+        allowed_contracts = {
+            'EnhancedPredictionMarket': 'artifacts/contracts/src/EnhancedPredictionMarket.sol/EnhancedPredictionMarket.json',
+            'ActorRegistry': 'artifacts/contracts/src/ActorRegistry.sol/ActorRegistry.json',
+            'DecentralizedOracle': 'artifacts/contracts/src/DecentralizedOracle.sol/DecentralizedOracle.json',
+            'PayoutManager': 'artifacts/contracts/src/PayoutManager.sol/PayoutManager.json'
+        }
+        
+        if contract_name not in allowed_contracts:
+            return jsonify({'error': 'Invalid contract name'}), 404
+            
+        artifact_path = allowed_contracts[contract_name]
+        if os.path.exists(artifact_path):
+            with open(artifact_path, 'r') as f:
+                artifact = json.load(f)
+                return jsonify(artifact.get('abi', []))
+        else:
+            return jsonify({'error': 'Contract ABI not found'}), 404
+            
+    except Exception as e:
+        logger.error(f"Error loading contract ABI: {e}")
+        return jsonify({'error': 'Failed to load ABI'}), 500
+
 @api_bp.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

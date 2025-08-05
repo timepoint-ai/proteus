@@ -45,27 +45,24 @@ class ClockchainWallet {
     }
     
     initializeUI() {
-        // Add wallet status to navbar
-        const navbar = document.querySelector('.navbar-nav.ms-auto');
-        if (navbar) {
-            const walletItem = document.createElement('li');
-            walletItem.className = 'nav-item';
-            walletItem.innerHTML = `
-                <button id="wallet-connect-btn" class="btn btn-outline-primary btn-sm ms-2">
-                    <i class="fas fa-wallet"></i> Connect Wallet
-                </button>
-                <div id="wallet-status" class="d-none text-success ms-2">
-                    <i class="fas fa-circle text-success"></i>
-                    <span id="wallet-address"></span>
-                </div>
-            `;
-            navbar.appendChild(walletItem);
-            
-            // Add event listener
-            document.getElementById('wallet-connect-btn').addEventListener('click', () => {
+        // Add event listeners to existing UI elements
+        const connectBtn = document.getElementById('wallet-connect-btn');
+        const disconnectBtn = document.getElementById('wallet-disconnect-btn');
+        
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
                 this.connect();
             });
         }
+        
+        if (disconnectBtn) {
+            disconnectBtn.addEventListener('click', () => {
+                this.disconnect();
+            });
+        }
+        
+        // Update network display
+        this.updateNetworkDisplay();
     }
     
     async checkExistingConnection() {
@@ -110,6 +107,7 @@ class ClockchainWallet {
             
             // Update UI
             this.updateConnectionStatus();
+            this.updateNetworkDisplay();
             
             // Listen for account changes
             window.ethereum.on('accountsChanged', (accounts) => {
@@ -165,23 +163,61 @@ class ClockchainWallet {
         if (this.isConnected && this.address) {
             connectBtn.classList.add('d-none');
             statusDiv.classList.remove('d-none');
+            statusDiv.classList.add('d-flex');
             addressSpan.textContent = this.formatAddress(this.address);
+            
+            // Update balance
+            this.updateBalance();
         } else {
             connectBtn.classList.remove('d-none');
             statusDiv.classList.add('d-none');
+            statusDiv.classList.remove('d-flex');
+        }
+    }
+    
+    async updateBalance() {
+        if (!this.isConnected || !this.address) return;
+        
+        try {
+            const balance = await window.ethereum.request({
+                method: 'eth_getBalance',
+                params: [this.address, 'latest']
+            });
+            
+            // Convert from hex wei to ETH
+            const ethBalance = parseInt(balance, 16) / 1e18;
+            document.getElementById('wallet-balance').textContent = ethBalance.toFixed(4) + ' ETH';
+        } catch (error) {
+            console.error('Error fetching balance:', error);
+        }
+    }
+    
+    async disconnect() {
+        this.provider = null;
+        this.signer = null;
+        this.address = null;
+        this.isConnected = false;
+        this.chainId = null;
+        this.updateConnectionStatus();
+        this.updateNetworkDisplay();
+        this.showSuccess('Wallet disconnected');
+    }
+    
+    updateNetworkDisplay() {
+        const networkSpan = document.getElementById('network-name');
+        if (networkSpan) {
+            if (this.chainId === this.networks.base.chainId) {
+                networkSpan.textContent = 'BASE Mainnet';
+            } else if (this.chainId === this.networks.baseSepolia.chainId) {
+                networkSpan.textContent = 'BASE Sepolia';
+            } else {
+                networkSpan.textContent = 'Unknown Network';
+            }
         }
     }
     
     formatAddress(address) {
         return address.substring(0, 6) + '...' + address.substring(38);
-    }
-    
-    disconnect() {
-        this.provider = null;
-        this.signer = null;
-        this.address = null;
-        this.isConnected = false;
-        this.updateConnectionStatus();
     }
     
     async signMessage(message) {
