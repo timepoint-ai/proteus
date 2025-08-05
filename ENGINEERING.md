@@ -24,55 +24,125 @@
 
 ## Architecture Overview
 
-Clockchain is built as a BASE blockchain-native application with the following layers:
+Clockchain is built as a blockchain-first application currently in transition from database to fully on-chain:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Frontend Layer                          │
-│ (Jinja2 Templates, Bootstrap, Web3.js Integration,         │
-│  Wallet Connection UI, E2E Test Manager Dashboard)         │
+│ (Jinja2 Templates, Bootstrap, Web3.js v4.3.0,              │
+│  MetaMask Integration, Real-time Blockchain Queries)       │
+├─────────────────────────────────────────────────────────────┤
+│                    JavaScript Layer                          │
+│ (wallet.js, market-blockchain.js, timeline-blockchain.js,   │
+│  market-detail-blockchain.js, admin-blockchain-stats.js)    │
 ├─────────────────────────────────────────────────────────────┤
 │                    Application Layer                         │
-│ (Flask Routes, BASE API, Test Manager,                     │
+│ (Flask Routes, Contract ABI API, Test Manager,             │
 │  Admin Dashboard, WebSocket Handlers)                      │
 ├─────────────────────────────────────────────────────────────┤
 │                     Service Layer                            │
-│ (Business Logic, X.com Oracle Service, BASE Blockchain,    │
-│  Consensus, Text Analysis, Payout Management)              │
+│ (Read-only Database Access, X.com Oracle Service,          │
+│  BASE Blockchain Integration, Monitoring)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                  Infrastructure Layer                        │
 │ (Celery Tasks, Redis Cache, WebSocket Connections,         │
 │  Rate Limiting, Session Management)                        │
 ├─────────────────────────────────────────────────────────────┤
-│                     Data Layer                               │
-│ (PostgreSQL, SQLAlchemy ORM, Redis Store,                  │
-│  Market Data, Oracle Submissions, Test Sessions)           │
+│                     Data Layer (Transitional)                │
+│ (PostgreSQL Read-Only, Redis Store,                        │
+│  Historical Data Access, No New Writes)                    │
 ├─────────────────────────────────────────────────────────────┤
 │                   BASE Blockchain Layer                      │
-│ (BASE Sepolia/Mainnet, Smart Contracts, Web3 Provider,     │
-│  MetaMask/Coinbase Wallet, Basescan Integration)          │
+│ (BASE Sepolia, 9 Smart Contracts, Web3 Direct Access,      │
+│  MetaMask Transactions, Event Subscriptions)               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## System Design Principles
 
-### 1. Distributed First
+### 1. Blockchain-First Architecture
 
-- Every component designed for multi-node operation
-- No single point of failure in consensus mechanisms
-- Automatic reconciliation between nodes
-- Eventually consistent data model
+- Direct blockchain queries via Web3.js from frontend
+- MetaMask handles all transaction signing and submission
+- Smart contracts as single source of truth for new data
+- Event-driven updates for real-time synchronization
 
-### 2. Immutability
+### 2. Transitional Data Strategy
 
-- Synthetic Time Ledger entries are append-only
-- No retroactive modifications to predictions or bets
-- Blockchain-style verification chain
-- Cryptographic signatures on all node communications
+- Database writes completely disabled (Phase 1 complete)
+- Historical data accessible via read-only queries
+- New operations exclusively on BASE blockchain
+- Gradual migration path to eliminate database dependency
 
-### 3. Transparency
+### 3. User-Centric Web3 Experience
 
-- All predictions and resolutions publicly visible
+- Automatic wallet connection and network switching
+- Clear transaction feedback with loading states
+- Gas estimation and confirmation tracking
+- Graceful handling of wallet disconnections
+
+## Web3 Frontend Architecture (Phase 2 Implementation)
+
+### JavaScript Module Structure
+
+The frontend uses a modular JavaScript architecture for blockchain interaction:
+
+1. **wallet.js** - Core wallet management
+   - MetaMask connection handling
+   - Network switching to BASE Sepolia
+   - Balance display and updates
+   - Connection state persistence
+
+2. **market-blockchain.js** - Market data queries
+   - Direct contract calls via Web3.js
+   - ABI loading from API endpoint
+   - Market listing and detail fetching
+   - Event subscription management
+
+3. **timeline-blockchain.js** - Timeline updates
+   - Real-time market display
+   - Auto-refresh every 30 seconds
+   - Event-driven notifications
+   - Status synchronization
+
+4. **market-detail-blockchain.js** - Transaction handling
+   - Submission creation with MetaMask
+   - Bet placement transactions
+   - Transaction status tracking
+   - Error handling and recovery
+
+5. **admin-blockchain-stats.js** - Admin monitoring
+   - Contract balance tracking
+   - Network statistics display
+   - Gas price monitoring
+   - Real-time event notifications
+
+### API Endpoints
+
+**Contract ABI Endpoint**: `/api/contract-abi/<contract_name>`
+- Serves contract ABIs from artifacts directory
+- Supports: EnhancedPredictionMarket, ActorRegistry, DecentralizedOracle, PayoutManager
+
+### Current Migration Status
+
+**Phase 1 (Backend) ✅ Complete:**
+- Database writes disabled
+- Blockchain read methods implemented
+- Services operate in hybrid mode
+
+**Phase 2 (Frontend) ✅ Complete:**
+- Full Web3.js integration
+- MetaMask transaction handling
+- Real-time blockchain queries
+- Event-driven updates
+
+**Phase 3 (Testing) 🔄 In Progress:**
+- Test infrastructure migration to blockchain
+- Removal of database test generators
+
+**Phase 4 (Cleanup) 📋 Pending:**
+- Legacy code removal
+- Final documentation updates
 - Oracle submissions open for validation
 - Network health metrics exposed
 - Audit trail for all transactions

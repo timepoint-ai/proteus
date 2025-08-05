@@ -14,6 +14,13 @@ The project aims to create a robust and decentralized prediction market for ling
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Major Changes (August 2025)
+- **Phase 1 Complete**: Backend transitioned to blockchain-first with database writes disabled
+- **Phase 2 Complete**: Frontend fully integrated with Web3.js and MetaMask
+- **Architecture**: System now operates in hybrid mode - new data on blockchain, historical data read-only from database
+- **JavaScript Architecture**: Created modular Web3 integration (wallet.js, market-blockchain.js, etc.)
+- **Documentation**: Updated ON-CHAIN-CHANGES.md, README.md, and ENGINEERING.md to reflect current state
+
 ## System Architecture
 
 ### Backend Architecture

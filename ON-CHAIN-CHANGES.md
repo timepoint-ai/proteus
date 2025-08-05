@@ -5,98 +5,63 @@ This document outlines the phased approach to remove legacy code and align the e
 
 ## Current State
 - ✅ All 14 smart contracts deployed to BASE Sepolia
-- ❌ Frontend still references database models heavily
-- ❌ Backend has mixed database/blockchain calls
-- ❌ UI/UX doesn't reflect on-chain capabilities
-- ❌ Test data generation still uses database
+- ✅ Phase 1: Backend cleanup completed (database writes disabled)
+- ✅ Phase 2: Frontend Web3 integration completed
+- ❌ Phase 3: Test infrastructure still uses database
+- ❌ Phase 4: Documentation and final cleanup pending
 
-## Phase 1: Backend Cleanup (Priority: CRITICAL)
+## Completed Phases
 
-### 1.1 Remove Database Dependencies from Core Services
+### Phase 1: Backend Cleanup ✅ COMPLETED
+- Disabled all database write operations
+- Maintained read-only access for legacy data
+- Added blockchain read methods to services
+- System now operates in hybrid mode with blockchain as source of truth
 
-| Service | Current State | Required Changes | Files to Modify |
-|---------|--------------|------------------|-----------------|
-| **PredictionMarket** | Hybrid DB/Chain | Remove all DB writes, read-only from chain | `services/blockchain_base.py` |
-| **Submissions** | DB primary | Remove DB model, use EnhancedPredictionMarket | `models.py`, `routes/api.py` |
-| **Bets** | DB primary | Remove DB model, use EnhancedPredictionMarket | `models.py`, `routes/api.py` |
-| **Actors** | DB with chain sync | Remove DB model, use ActorRegistry only | `models.py`, `routes/actors.py` |
-| **Oracle** | DB submissions | Use DecentralizedOracle contract | `services/oracle_xcom.py` |
+### Phase 2: Frontend Alignment ✅ COMPLETED
+- Added MetaMask wallet integration in navbar
+- Created Web3.js market query system (market-blockchain.js)
+- Built transaction handlers for submissions and bets
+- Added real-time blockchain statistics to admin dashboard
+- Implemented event subscriptions for live updates
+- Added contract ABI endpoint for Web3 integration
 
-### 1.2 Database Model Removal Checklist
+## Phase 3: Test Infrastructure (Priority: HIGH)
 
-- [ ] **Phase 1A: Make Models Read-Only**
-  - [ ] Remove all `db.session.add()` calls
-  - [ ] Remove all `db.session.commit()` for these models
-  - [ ] Add deprecation warnings to model classes
-  
-- [ ] **Phase 1B: Replace with Blockchain Calls**
-  - [ ] `PredictionMarket` → `EnhancedPredictionMarket.getMarket()`
-  - [ ] `Submission` → `EnhancedPredictionMarket.getSubmission()`
-  - [ ] `Bet` → `EnhancedPredictionMarket.getBet()`
-  - [ ] `Actor` → `ActorRegistry.getActor()`
-  - [ ] `OracleSubmission` → `DecentralizedOracle.getSubmission()`
+### Completed Items from Phase 1 & 2:
 
-- [ ] **Phase 1C: Remove Models Entirely**
-  - [ ] Delete from `models.py`
-  - [ ] Remove all imports
-  - [ ] Update all references
+**Backend Changes (Phase 1):**
+- ✅ Disabled all database write operations 
+- ✅ Made models read-only with blockchain fallback
+- ✅ Added deprecation warnings to affected services
+- ✅ Blockchain read methods implemented in services
 
-### 1.3 Service Migration Table
+**Frontend Changes (Phase 2):**
+- ✅ Added MetaMask wallet connection widget to navbar
+- ✅ Implemented Web3.js for blockchain queries
+- ✅ Created transaction handlers for submissions/bets
+- ✅ Added real-time event subscriptions
+- ✅ Updated admin dashboard with contract statistics
+- ✅ Implemented loading states and transaction feedback
 
-| Old Service | New Contract | Migration Status | Action Required |
-|-------------|--------------|------------------|-----------------|
-| `services/ledger.py` | On-chain events | ❌ Not migrated | Remove file |
-| `services/consensus.py` | DecentralizedOracle | ❌ Not migrated | Remove file |
-| `services/bet_resolution.py` | DecentralizedOracle | ❌ Not migrated | Remove file |
-| `services/text_analysis.py` | DecentralizedOracle | ✅ On-chain | Remove file |
-| `services/payout_base.py` | PayoutManager | ⚠️ Partial | Update to chain-only |
-| `services/monitoring.py` | Keep | ✅ Still needed | Fix oracle_votes error |
+### Implementation Details:
 
-## Phase 2: Frontend Alignment (Priority: HIGH)
+**New JavaScript Files Created:**
+- `wallet.js` - MetaMask connection management
+- `market-blockchain.js` - Direct blockchain market queries
+- `timeline-blockchain.js` - Real-time timeline updates
+- `market-detail-blockchain.js` - Transaction handling
+- `admin-blockchain-stats.js` - Contract statistics display
 
-### 2.1 Route Updates
+**API Enhancements:**
+- Added `/api/contract-abi/<contract_name>` endpoint for Web3 integration
+- Contract ABIs served from artifacts directory
 
-| Route | Current Functionality | Required Changes | Template Updates |
-|-------|----------------------|------------------|------------------|
-| `/` | Shows DB markets | Query chain via web3 | `index.html` |
-| `/market/<id>` | DB market details | Get from EnhancedPredictionMarket | `market_detail.html` |
-| `/actors` | DB actor list | Get from ActorRegistry | `actors.html` |
-| `/submit` | DB submission | Call contract directly | `submit_prediction.html` |
-| `/admin` | Mixed DB/chain | Chain-only dashboard | `admin_dashboard.html` |
+## Remaining Phases
 
-### 2.2 UI/UX Improvements
+### Phase 3: Test Infrastructure (In Progress)
 
-- [ ] **Transaction Feedback**
-  - [ ] Add MetaMask transaction status modals
-  - [ ] Show gas estimation before transactions
-  - [ ] Display transaction hashes with Basescan links
-  - [ ] Add loading states during blockchain calls
-
-- [ ] **Wallet Integration**
-  - [ ] Prominent "Connect Wallet" button
-  - [ ] Show connected address and balance
-  - [ ] Network switching helper (BASE Sepolia/Mainnet)
-  - [ ] Handle disconnections gracefully
-
-- [ ] **Real-time Updates**
-  - [ ] Subscribe to contract events via WebSocket
-  - [ ] Update UI without page refresh
-  - [ ] Show pending transactions
-  - [ ] Display confirmation counts
-
-### 2.3 Template Specific Changes
-
-| Template | Remove | Add | Priority |
-|----------|--------|-----|----------|
-| `base.html` | DB connection status | Wallet connection widget | HIGH |
-| `index.html` | Database queries | Web3 market queries | HIGH |
-| `market_detail.html` | Form submissions | MetaMask transactions | HIGH |
-| `actors.html` | Admin approval buttons | On-chain voting interface | MEDIUM |
-| `admin_dashboard.html` | DB statistics | Contract statistics | MEDIUM |
-
-## Phase 3: Test Infrastructure (Priority: MEDIUM)
-
-### 3.1 Test Data Migration
+#### 3.1 Test Data Migration
 
 - [ ] **Remove Database Test Data**
   - [ ] Delete `routes/test_data.py`
@@ -110,7 +75,7 @@ This document outlines the phased approach to remove legacy code and align the e
   - [ ] Script to place test bets
   - [ ] Use test wallets from `.test_wallets.json`
 
-### 3.2 E2E Test Updates
+#### 3.2 E2E Test Updates
 
 | Test File | Current State | Required Changes |
 |-----------|--------------|------------------|
@@ -119,9 +84,9 @@ This document outlines the phased approach to remove legacy code and align the e
 | `test_phase11_12.py` | Contract tests | Keep as-is |
 | `test_phase13_14.py` | Contract tests | Keep as-is |
 
-## Phase 4: Documentation & Cleanup (Priority: LOW)
+### Phase 4: Documentation & Cleanup (Pending)
 
-### 4.1 File Deletion List
+#### 4.1 File Deletion List (After Phase 3)
 
 **Definitely Delete:**
 - [ ] `models_old.py` - Legacy models

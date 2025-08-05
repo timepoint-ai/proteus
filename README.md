@@ -2,25 +2,28 @@
 
 ## Project Status
 
-**Current Phase**: Production Ready - All 14 Phases Complete
+**Current Phase**: Blockchain Migration - Phase 1 & 2 Complete
 
-### Completed Work (All 14 Phases)
-✅ **Smart Contracts**: Deployed to BASE Sepolia (~0.01 BASE total cost)  
-✅ **Backend Infrastructure**: Oracle system, consensus mechanism, P2P network  
-✅ **Frontend Interface**: Real-time markets, wallet integration, betting UI  
+### Completed Work
+✅ **Smart Contracts**: All 14 phases deployed to BASE Sepolia  
+✅ **Phase 1 - Backend Cleanup**: Database writes disabled, blockchain read methods implemented  
+✅ **Phase 2 - Frontend Web3**: MetaMask integration, real-time blockchain queries, transaction handling  
 ✅ **Production Monitoring**: Gas tracking, oracle consensus, health checks  
-✅ **Test Infrastructure**: E2E testing, test manager, data generators  
-✅ **X.com Actor System**: Username-based actor identification with verification badges  
-✅ **On-Chain Actor Registry**: Decentralized approval with 3+ node operator consensus  
-✅ **Fully On-Chain Markets**: Complete blockchain-based data storage (no PostgreSQL dependency)  
-✅ **Decentralized Oracle**: On-chain Levenshtein calculation, multi-validator consensus, IPFS screenshots  
-✅ **PostgreSQL Elimination**: 100% blockchain-based architecture with P2P communication  
-✅ **Advanced Markets**: Multi-choice, conditional, and range predictions with reputation  
-✅ **Security & Production**: Rate limiting, emergency controls, blacklisting, monitoring  
+✅ **Test Infrastructure**: E2E testing, test manager (database-based, migration pending)  
+
+### Migration Status
+The platform is transitioning from a hybrid database/blockchain architecture to fully on-chain:
+- **Backend**: Operating in read-only database mode with blockchain as source of truth
+- **Frontend**: Full Web3 integration with MetaMask for all transactions
+- **Data**: New data goes to blockchain, historical data remains in database (read-only)
+
+### In Progress
+🔄 **Phase 3**: Test infrastructure migration to blockchain  
+🔄 **Phase 4**: Documentation updates and legacy code removal  
 
 ### Next Steps
+📝 **Complete Migration**: Finish Phase 3 & 4 as outlined in ON-CHAIN-CHANGES.md  
 🔑 **Production Deployment**: Get X.com production API credentials and deploy to BASE mainnet  
-🧹 **Code Cleanup**: Remove legacy database code as outlined in ON-CHAIN-CHANGES.md  
 🔒 **Security Audit**: Third-party audit before public launch  
 
 ## Overview
@@ -38,19 +41,25 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 
 ### Key Features
 
+**Blockchain Integration:**
 - **BASE Blockchain Native**: Built exclusively on Coinbase's L2 blockchain with sub-cent transaction costs
-- **X.com Username Actors**: Public figures identified by their X.com handles (no wallet addresses required)
-- **X.com Oracle Integration**: Real-time validation of tweets with on-chain screenshot storage
-- **Verified Account Support**: Blue checkmark verification status displayed for authenticated accounts
-- **Wallet Integration**: Seamless MetaMask and Coinbase Wallet support with automatic network switching
-- **Smart Contract Architecture**: Deployed contracts for markets, oracles, node registry, and payouts
-- **E2E Test Manager**: Comprehensive testing dashboard for BASE Sepolia testnet integration
-- **Linguistic Analysis**: Levenshtein distance algorithm preserving X.com formatting
-- **Decentralized Node Network**: Multi-node consensus without KYC/DBS requirements
-- **Real-time Visualization**: Interactive timeline showing active and resolved prediction markets
-- **Platform Fee System**: 7% fee structure covering gas costs and network maintenance
-- **Production Monitoring**: Comprehensive health monitoring with gas price alerts and oracle consensus tracking
-- **Automated Test Infrastructure**: E2E testing with automated wallet generation and contract interaction
+- **MetaMask Integration**: Full wallet connection with automatic BASE Sepolia network switching
+- **Web3.js Frontend**: Direct blockchain queries and transaction handling without backend intermediaries
+- **Real-time Updates**: Event subscriptions for live market updates and notifications
+- **Smart Contract Architecture**: 9 deployed contracts managing all platform operations
+
+**Platform Capabilities:**
+- **X.com Actor System**: Public figures identified by X.com handles (e.g., @elonmusk)
+- **Linguistic Predictions**: Users predict exact phrases that actors will post
+- **Competitive Markets**: Multiple submissions compete using Levenshtein distance algorithm
+- **Decentralized Oracle**: On-chain text validation with screenshot proofs
+- **7% Platform Fee**: Covers gas costs and network maintenance
+
+**User Experience:**
+- **Timeline Visualization**: Real-time display of active and resolved markets
+- **Transaction Feedback**: Loading states, gas estimation, and confirmation tracking
+- **Admin Dashboard**: Blockchain statistics, contract balances, and network monitoring
+- **Hybrid Data Access**: New data on blockchain, historical data read-only from database
 
 ### BASE Blockchain Integration
 
