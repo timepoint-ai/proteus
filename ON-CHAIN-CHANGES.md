@@ -91,32 +91,32 @@ This document outlines the phased approach to remove legacy code and align the e
 | `test_phase11_12.py` | Contract tests | Keep as-is | ✅ Confirmed |
 | `test_phase13_14.py` | Contract tests | Keep as-is | ✅ Confirmed |
 
-### Phase 4: Documentation & Cleanup (Pending)
+### Phase 4: Documentation & Cleanup ✅ COMPLETED (August 5, 2025)
 
 #### 4.1 File Deletion List (After Phase 3)
 
 **Definitely Delete:**
-- [ ] `models_old.py` - Legacy models
-- [ ] `services/bet_resolution_old.py` - Replaced by on-chain
-- [ ] `services/oracle_old.py` - Replaced by DecentralizedOracle
-- [ ] `services/ledger.py` - Now on-chain events
-- [ ] `services/consensus.py` - In DecentralizedOracle
-- [ ] `services/mock_node_registry.py` - Use real NodeRegistry
-- [ ] All `test_data*.py` routes
+- [x] `models_old.py` - Legacy models ✅ Deleted
+- [x] `services/bet_resolution_old.py` - Replaced by on-chain ✅ Deleted
+- [x] `services/oracle_old.py` - Replaced by DecentralizedOracle ✅ Deleted
+- [x] `services/ledger.py` - Now on-chain events (Not found - already removed)
+- [x] `services/consensus.py` - In DecentralizedOracle (Not found - already removed)
+- [x] `services/mock_node_registry.py` - Use real NodeRegistry ✅ Deleted
+- [x] All `test_data*.py` routes ✅ Completed in Phase 3
 
 **Consider Deleting:**
-- [ ] `CRYPTO_PLAN.md` - All phases complete
-- [ ] `LAUNCH.md` - If launch plan executed
-- [ ] `services/node_registry_service.py` - If fully on-chain
+- [x] `CRYPTO_PLAN.md` - All phases complete (Not found)
+- [x] `LAUNCH.md` - If launch plan executed (Not found)
+- [x] `services/node_registry_service.py` - If fully on-chain ✅ Deleted
 
 ### 4.2 Documentation Updates
 
-| Document | Updates Required | Priority |
-|----------|-----------------|----------|
-| `README.md` | Remove DB setup, add chain-only instructions | HIGH |
-| `ENGINEERING.md` | Document on-chain architecture | HIGH |
-| `replit.md` | Update architecture section | MEDIUM |
-| `TEST_DATA_GUIDE.md` | Rewrite for on-chain testing | LOW |
+| Document | Updates Required | Priority | Status |
+|----------|-----------------|----------|--------|
+| `README.md` | Remove DB setup, add chain-only instructions | HIGH | ✅ Complete |
+| `ENGINEERING.md` | Document on-chain architecture | HIGH | ✅ Complete |
+| `replit.md` | Update architecture section | MEDIUM | ✅ Complete |
+| `TEST_DATA_GUIDE.md` | Rewrite for on-chain testing | LOW | ✅ Complete |
 
 ## Phase 5: Production Readiness (Priority: MEDIUM)
 

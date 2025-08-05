@@ -1,37 +1,93 @@
 # Clockchain Test Data Generation Guide
 
-## Complete Blockchain Transaction Testing Plan
+## Blockchain-Only Testing Infrastructure
 
 ### Overview
-This plan outlines the implementation of full BASE Sepolia blockchain transactions that propagate across the P2P node network, moving beyond simple function tests to real on-chain interactions with network-wide synchronization.
+This guide documents the blockchain-based test data generation system for Clockchain, which operates exclusively on BASE Sepolia blockchain without any database dependencies.
 
-### Phase 1: Transaction Creation & Broadcasting (Week 1)
+### Test Data Scripts
 
-#### 1.1 Smart Contract Transaction Generator
-- **Create Market Transaction**: Deploy actual market creation transactions on BASE Sepolia
-  - Gas optimization for batch market creation
-  - Transaction signing with test wallets
-  - Contract event emission verification
-  
-- **Submission Transactions**: Real stake submissions to PredictionMarket contract
-  - Multi-wallet submission simulation
-  - Concurrent transaction handling
-  - Nonce management for rapid submissions
+#### 1. Blockchain Test Data Generation
+**Script**: `scripts/blockchain_test_data.py`
 
-- **Betting Transactions**: On-chain bet placement
-  - Variable stake amounts (0.001 - 0.1 BASE)
-  - Gas price optimization
-  - Transaction receipt verification
+Generates comprehensive test data directly on the BASE Sepolia blockchain:
+- Creates test markets with realistic parameters
+- Deploys test actors with funded wallets
+- Generates submissions from multiple actors
+- Places test bets across markets
+- Uses test wallets from `.test_wallets.json`
 
-#### 1.2 Transaction Broadcasting Service
-```python
-# New service: services/transaction_broadcaster.py
-class TransactionBroadcaster:
-    def broadcast_to_network(self, tx_hash, tx_data):
-        # Send to all connected nodes via WebSocket
-        # Include block confirmation status
-        # Track propagation metrics
+**Usage**:
+```bash
+python scripts/blockchain_test_data.py
 ```
+
+**Features**:
+- Automatic wallet funding from deployer account
+- Realistic data generation (actor names, submission texts)
+- Proper gas price estimation
+- Transaction receipt tracking
+- Progress indicators during generation
+
+#### 1.2 Blockchain Test Data Cleanup
+**Script**: `scripts/clean_blockchain_test_data.py`
+
+Safely removes test data from the blockchain:
+- Resolves markets marked with test flag
+- Processes payouts for test bets
+- Maintains blockchain integrity
+- Only affects test-generated markets
+
+**Usage**:
+```bash
+python scripts/clean_blockchain_test_data.py
+```
+
+### Test Manager Integration
+
+The Test Manager UI at `/test_manager` provides a web interface for test data operations:
+
+#### Features
+- **Generate Test Data**: One-click blockchain test data generation
+- **Clean Test Data**: Remove all test data from blockchain
+- **Authenticated Access**: Protected with passcode
+- **Blockchain Integration**: Direct interaction with smart contracts
+
+#### Test Flow
+1. Navigate to `/test_manager`
+2. Enter authentication passcode
+3. Click "Generate Test Data" to create blockchain test data
+4. Verify markets appear in main interface
+5. Click "Clean Test Data" to resolve test markets
+
+### Test Wallet Configuration
+
+Test wallets are configured in `.test_wallets.json`:
+```json
+{
+  "wallets": [
+    {
+      "address": "0x...",
+      "private_key": "0x..."
+    }
+  ]
+}
+```
+
+### Contract Test Scripts
+
+Additional blockchain test scripts:
+- `scripts/test_phase11_12.py` - Tests decentralized oracle functionality
+- `scripts/test_phase13_14.py` - Tests advanced contract features
+- `scripts/test_real_contracts.py` - Tests deployed contracts on BASE Sepolia
+
+### Best Practices
+
+1. **Gas Management**: Monitor gas prices before generating large test datasets
+2. **Wallet Funding**: Ensure test wallets have sufficient BASE ETH
+3. **Test Isolation**: Use test flag to distinguish test data from production
+4. **Cleanup**: Always clean test data after testing sessions
+5. **Transaction Monitoring**: Use Basescan to verify test transactions
 
 ### Phase 2: Node Synchronization (Week 1-2)
 

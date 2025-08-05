@@ -2,29 +2,27 @@
 
 ## Project Status
 
-**Current Phase**: Blockchain Migration - Phase 1 & 2 Complete
+**Current Phase**: Blockchain Migration Complete - All 4 Phases Done! 🎉
 
 ### Completed Work
 ✅ **Smart Contracts**: All 14 phases deployed to BASE Sepolia  
 ✅ **Phase 1 - Backend Cleanup**: Database writes disabled, blockchain read methods implemented  
 ✅ **Phase 2 - Frontend Web3**: MetaMask integration, real-time blockchain queries, transaction handling  
+✅ **Phase 3 - Test Infrastructure**: Blockchain-based test data generation and cleanup tools  
+✅ **Phase 4 - Documentation & Cleanup**: Legacy files removed, documentation updated (August 5, 2025)  
 ✅ **Production Monitoring**: Gas tracking, oracle consensus, health checks  
-✅ **Test Infrastructure**: E2E testing, test manager (database-based, migration pending)  
 
-### Migration Status
-The platform is transitioning from a hybrid database/blockchain architecture to fully on-chain:
-- **Backend**: Operating in read-only database mode with blockchain as source of truth
+### Architecture Status
+The platform now operates as a fully blockchain-native application:
+- **Backend**: Blockchain-only operations, database completely removed from core functionality
 - **Frontend**: Full Web3 integration with MetaMask for all transactions
-- **Data**: New data goes to blockchain, historical data remains in database (read-only)
-
-### In Progress
-🔄 **Phase 3**: Test infrastructure migration to blockchain  
-🔄 **Phase 4**: Documentation updates and legacy code removal  
+- **Test Infrastructure**: Blockchain-based test data generation using real smart contracts
+- **Data**: All data stored on BASE Sepolia blockchain
 
 ### Next Steps
-📝 **Complete Migration**: Finish Phase 3 & 4 as outlined in ON-CHAIN-CHANGES.md  
 🔑 **Production Deployment**: Get X.com production API credentials and deploy to BASE mainnet  
 🔒 **Security Audit**: Third-party audit before public launch  
+📈 **Scale Testing**: Load test with high transaction volumes on testnet  
 
 ## Overview
 
@@ -199,9 +197,9 @@ Total deployment cost: ~0.015 BASE (~$0.60 USD)
 ### Prerequisites
 
 - Python 3.11+
-- PostgreSQL database
-- Redis server (optional for development)
+- Node.js (for Hardhat smart contract tools)
 - BASE blockchain access (public RPC or Alchemy)
+- MetaMask or Coinbase Wallet
 
 ### Installation
 
@@ -219,39 +217,26 @@ npm install  # For smart contract tools
 
 3. Set up environment variables:
 ```bash
-# Database
-export DATABASE_URL="postgresql://user:password@localhost/clockchain"
-
-# Redis (optional)
-export REDIS_HOST="localhost"
-export REDIS_PORT="6379"
-
-# Celery (optional)
-export CELERY_BROKER_URL="redis://localhost:6379/0"
-export CELERY_RESULT_BACKEND="redis://localhost:6379/0"
-
 # BASE Blockchain Configuration
-export BASE_RPC_URL="https://base-sepolia.g.alchemy.com/public"  # Testnet
-export BASE_MAINNET_RPC_URL="https://base.g.alchemy.com/public"  # Mainnet
-export BASE_CHAIN_ID="84532"  # Sepolia: 84532, Mainnet: 8453
+export BASE_RPC_URL="https://sepolia.base.org"  # Public RPC
+export BASE_CHAIN_ID="84532"  # BASE Sepolia
+export PRIVATE_KEY="your-deployer-private-key"  # For deployments
 
-# Smart Contract Addresses (BASE Sepolia Testnet - Already Deployed)
-export PREDICTION_MARKET_ADDRESS="0x06D194A64e5276b6Be33bbe4e3e6a644a68358b3"
-export ORACLE_CONTRACT_ADDRESS="0xFcdCB8bafa5505E33487ED32eE3F8b14b65E37f9"
+# Smart Contract Addresses (BASE Sepolia - Already Deployed)
+export PREDICTION_MARKET_ADDRESS="0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad"
+export ORACLE_CONTRACT_ADDRESS="0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8"
 export NODE_REGISTRY_ADDRESS="0xA69C842F335dfE1F69288a70054A34018282218d"
-export PAYOUT_MANAGER_ADDRESS="0x142F944868596Eb0b35340f29a727b0560B130f7"
+export PAYOUT_MANAGER_ADDRESS="0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871"
+export ACTOR_REGISTRY_ADDRESS="0xC71CC19C5573C5E1E144829800cD0005D0eDB723"
+export ENHANCED_MARKET_ADDRESS="0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C"
+export DECENTRALIZED_ORACLE_ADDRESS="0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1"
+export ADVANCED_MARKETS_ADDRESS="0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B"
+export SECURITY_AUDIT_ADDRESS="0x0539ad4a63E76130d76a21163960906Eb47c1a9a"
 
 # X.com API Configuration (Required for Oracle)
 export X_API_KEY="your-x-api-key"
 export X_API_KEY_SECRET="your-x-api-key-secret"
 export X_BEARER_TOKEN="your-x-bearer-token"
-
-# Test Wallet Configuration (For Test Manager)
-export TEST_WALLET_ADDRESS="0x1234...abcd"  # Main test wallet address
-export TEST_WALLET_PRIVATE_KEY="0xabcd...1234"  # Private key (keep secure!)
-export TEST_ORACLE_WALLETS='["0xaaaa...","0xbbbb...","0xcccc..."]'  # JSON array
-export TEST_NETWORK_RPC="https://base-sepolia.g.alchemy.com/public"  # Optional
-export TEST_CHAIN_ID="84532"  # BASE Sepolia
 
 # Security
 export SESSION_SECRET="your-secret-key"
@@ -259,26 +244,9 @@ export PLATFORM_FEE="0.07"  # 7% platform fee
 export TEST_MANAGER_PASSCODE="your-test-passcode"  # For test manager access
 ```
 
-4. Initialize the database:
-```bash
-python -c "from app import app, db; app.app_context().push(); db.create_all()"
-```
-
-5. Start the services:
-
-Web server:
+4. Start the application:
 ```bash
 gunicorn --bind 0.0.0.0:5000 main:app
-```
-
-Celery worker:
-```bash
-celery -A app.celery worker --loglevel=info
-```
-
-Celery beat (for periodic tasks):
-```bash
-celery -A app.celery beat --loglevel=info
 ```
 
 ## Usage Guide
@@ -349,11 +317,11 @@ Access oracle functionality at `http://localhost:5000/oracles` to:
 
 **Clockchain** prioritizes authentic data throughout the platform:
 
-- **No Hardcoded Values**: All status indicators, transaction states, and market resolutions are calculated in real-time from database queries
-- **Dynamic Status Calculation**: Winner/Lost/Pending statuses computed based on actual market resolution states and Levenshtein distance scores
+- **No Hardcoded Values**: All status indicators, transaction states, and market resolutions are calculated in real-time from blockchain queries
+- **Dynamic Status Calculation**: Winner/Lost/Pending statuses computed based on actual on-chain resolution states and Levenshtein distance scores
 - **Live Transaction Tracking**: Every transaction status reflects actual blockchain confirmation states
-- **Real Oracle Consensus**: Oracle voting and consensus results pulled directly from distributed node submissions
-- **Authentic Market Statistics**: Betting volumes, submission counts, and participation metrics aggregated from actual transaction records
+- **Real Oracle Consensus**: Oracle voting and consensus results pulled directly from on-chain DecentralizedOracle contract
+- **Authentic Market Statistics**: Betting volumes, submission counts, and participation metrics aggregated from actual blockchain events
 
 ## BASE Blockchain API Documentation
 
