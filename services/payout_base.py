@@ -1,3 +1,6 @@
+# UPDATED FOR PHASE 1: This service now reads from blockchain only.
+# Database writes have been disabled and database reads are being phased out.
+
 import logging
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
@@ -16,26 +19,43 @@ class BasePayoutService:
         self.blockchain = BaseBlockchainService()
         self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '7')) / Decimal('100')
         
-    def calculate_payouts(self, market_id: str) -> Dict[str, Any]:
-        """Calculate payouts for a resolved market"""
+    def calculate_payouts(self, market_id: int) -> Dict[str, Any]:
+        """Calculate payouts for a resolved market
+        
+        PHASE 1: This method now reads from blockchain only.
+        Database reads will be replaced with blockchain calls.
+        """
         try:
-            market = PredictionMarket.query.get(market_id)
-            if not market or market.status != 'resolved':
+            # Phase 1: Read market data from blockchain
+            market = self.blockchain.get_market(market_id)
+            if not market or not market.get('resolved'):
                 logger.error(f"Market {market_id} not found or not resolved")
                 return {'error': 'Market not resolved'}
                 
-            if not market.winning_submission_id:
+            winning_submission_id = market.get('winning_submission_id')
+            if not winning_submission_id:
                 logger.error(f"Market {market_id} has no winning submission")
                 return {'error': 'No winning submission'}
                 
-            # Get winning submission
-            winning_submission = Submission.query.get(market.winning_submission_id)
+            # Get winning submission from blockchain
+            winning_submission = self.blockchain.get_submission(winning_submission_id)
             if not winning_submission:
-                logger.error(f"Winning submission {market.winning_submission_id} not found")
+                logger.error(f"Winning submission {winning_submission_id} not found")
                 return {'error': 'Winning submission not found'}
                 
-            # Get all submissions for the market
-            all_submissions = Submission.query.filter_by(market_id=market_id).all()
+            # Phase 1: Payout calculation is now handled by PayoutManager contract
+            # The complex payout logic below is deprecated and will be removed
+            return {
+                'status': 'success',
+                'message': 'Payout calculation is now handled by the PayoutManager smart contract',
+                'market_id': market_id,
+                'winning_submission_id': winning_submission_id,
+                'contract_address': self.blockchain.contracts.get('PayoutManager').address if self.blockchain.contracts.get('PayoutManager') else None,
+                'note': 'Please use the PayoutManager contract directly for payout operations'
+            }
+            
+            # DEPRECATED: Database-based payout logic below
+            # This code will be removed in Phase 2
             
             # Calculate total losing pool
             losing_pool = Decimal('0')

@@ -98,9 +98,10 @@ def create_app():
         import models
         db.create_all()
         
+        # Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
         # Initialize node operator if not exists
-        from services.consensus import ConsensusService
-        ConsensusService.initialize_node()
+        # from services.consensus import ConsensusService
+        # ConsensusService.initialize_node()
         
         # Start production monitoring service
         try:

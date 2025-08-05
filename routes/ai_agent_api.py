@@ -16,7 +16,8 @@ from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils
 from services.text_analysis import TextAnalysisService
 from services.blockchain import BlockchainService
-from services.ledger import LedgerService
+# Phase 1: Ledger service deprecated - handled by blockchain events
+# from services.ledger import LedgerService
 from services.node_communication import NodeCommunicationService
 from services.ai_transparency import AITransparencyService
 from models import db, PredictionMarket, Submission, Actor, Transaction, AIAgentProfile, VerificationModule
@@ -38,7 +39,8 @@ validation_utils = ValidationUtils()
 crypto_utils = CryptoUtils()
 text_analysis_service = TextAnalysisService()
 blockchain_service = BlockchainService()
-ledger_service = LedgerService()
+# Phase 1: Ledger service deprecated
+# ledger_service = LedgerService()
 node_comm_service = NodeCommunicationService()
 ai_transparency_service = AITransparencyService()
 

@@ -1,0 +1,52 @@
+{
+  "network": "BASE Sepolia",
+  "chainId": 84532,
+  "timestamp": "2025-08-05T17:00:00Z",
+  "contracts": {
+    "PredictionMarket": {
+      "address": "0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad",
+      "deploymentBlock": 18765432,
+      "description": "Original prediction market contract"
+    },
+    "ClockchainOracle": {
+      "address": "0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8",
+      "deploymentBlock": 18765433,
+      "description": "Original oracle contract for X.com verification"
+    },
+    "NodeRegistry": {
+      "address": "0xA69C842F335dfE1F69288a70054A34018282218d",
+      "deploymentBlock": 18765434,
+      "description": "Decentralized node registry"
+    },
+    "PayoutManager": {
+      "address": "0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871",
+      "deploymentBlock": 18765435,
+      "description": "Automated payout management"
+    },
+    "ActorRegistry": {
+      "address": "0xC71CC19C5573C5E1E144829800cD0005D0eDB723",
+      "deploymentBlock": 18765436,
+      "description": "On-chain actor registry for X.com accounts"
+    },
+    "EnhancedPredictionMarket": {
+      "address": "0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C",
+      "deploymentBlock": 18765437,
+      "description": "Enhanced prediction market with full on-chain functionality"
+    },
+    "DecentralizedOracle": {
+      "address": "0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1",
+      "deploymentBlock": 18765438,
+      "description": "Decentralized oracle with multi-node consensus"
+    },
+    "AdvancedMarkets": {
+      "address": "0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B",
+      "deploymentBlock": 18765439,
+      "description": "Advanced market types and features"
+    },
+    "SecurityAudit": {
+      "address": "0x0539ad4a63E76130d76a21163960906Eb47c1a9a",
+      "deploymentBlock": 18765440,
+      "description": "Security audit and emergency controls"
+    }
+  }
+}

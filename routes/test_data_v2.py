@@ -10,12 +10,14 @@ from datetime import datetime, timedelta
 import random
 import uuid
 from decimal import Decimal
-from services.bet_resolution import MarketResolutionService
+# Phase 1: Bet resolution service deprecated - handled by DecentralizedOracle contract
+# from services.bet_resolution import MarketResolutionService
 import logging
 
 logger = logging.getLogger(__name__)
 test_data_v2_bp = Blueprint('test_data_v2', __name__)
-resolution_service = MarketResolutionService()
+# Phase 1: Resolution service deprecated
+# resolution_service = MarketResolutionService()
 
 @test_data_v2_bp.route('/')
 def index():

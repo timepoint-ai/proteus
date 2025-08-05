@@ -12,7 +12,8 @@ import json
 import uuid
 import logging
 from services.blockchain import BlockchainService
-from services.ledger import LedgerService
+# Phase 1: Ledger service deprecated - handled by blockchain events
+# from services.ledger import LedgerService
 from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from utils.crypto import CryptoUtils
@@ -24,7 +25,8 @@ test_transactions_bp = Blueprint('test_transactions', __name__)
 
 # Initialize services
 blockchain_service = BlockchainService()
-ledger_service = LedgerService()
+# Phase 1: Ledger service deprecated
+# ledger_service = LedgerService()
 oracle_service = OracleService()
 time_sync_service = TimeSyncService()
 crypto_utils = CryptoUtils()

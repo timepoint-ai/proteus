@@ -12,6 +12,28 @@ Key capabilities include:
 
 The project aims to create a robust and decentralized prediction market for linguistic data, leveraging blockchain technology for transparency and immutability.
 
+## Phase 1 Implementation Status (2025-08-05) ✅ COMPLETE
+**Critical Backend Cleanup - Removing Legacy Database Dependencies**
+- ✅ Added deprecation warnings to database models (Actor, PredictionMarket, Submission, Bet, OracleSubmission)
+- ✅ Created deployment-base-sepolia.json with all contract addresses
+- ✅ Updated blockchain_base.py with read-only methods for blockchain data:
+  - get_actor() - reads from ActorRegistry contract
+  - get_market() - reads from EnhancedPredictionMarket contract
+  - get_submission() - reads from EnhancedPredictionMarket contract
+  - get_oracle_submission() - reads from DecentralizedOracle contract
+- ✅ Disabled database writes in API endpoints:
+  - /bets/<bet_id>/stakes - returns 503 with blockchain redirect message
+  - /oracle_submissions/<submission_id>/vote - returns 503 with blockchain redirect message
+- ✅ Added TODO comments for Phase 1B blockchain integration
+- ✅ Removed deprecated services (renamed to .deprecated):
+  - services/ledger.py → services/ledger.py.deprecated
+  - services/consensus.py → services/consensus.py.deprecated
+  - services/bet_resolution.py → services/bet_resolution.py.deprecated
+- ✅ Updated payout_base.py to be chain-only:
+  - Now reads market data from blockchain instead of database
+  - Returns message that payouts are handled by PayoutManager contract
+  - Deprecated database-based payout logic remains commented for reference
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

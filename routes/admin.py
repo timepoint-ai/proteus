@@ -9,8 +9,10 @@ from models import (
     AIAgentProfile, VerificationModule, BittensorIntegration, TransparencyAudit
 )
 from app import db
-from services.consensus import ConsensusService
-from services.ledger import LedgerService
+# Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
+# from services.consensus import ConsensusService
+# Phase 1: Ledger service deprecated - handled by blockchain events
+# from services.ledger import LedgerService
 from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from services.node_communication import NodeCommunicationService
@@ -23,8 +25,9 @@ logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
 
 # Initialize services
-consensus_service = ConsensusService()
-ledger_service = LedgerService()
+# Phase 1: Deprecated services - commented out
+# consensus_service = ConsensusService()
+# ledger_service = LedgerService()
 oracle_service = OracleService()
 time_sync_service = TimeSyncService()
 node_comm_service = NodeCommunicationService()

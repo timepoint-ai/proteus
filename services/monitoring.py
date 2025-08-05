@@ -146,11 +146,11 @@ class MonitoringService:
                 
                 # Get votes for this submission
                 votes = OracleVote.query.filter_by(
-                    oracle_submission_id=submission.id
+                    submission_id=submission.id
                 ).all()
                 
                 if votes:
-                    approve_votes = sum(1 for v in votes if v.vote_type == 'approve')
+                    approve_votes = sum(1 for v in votes if v.vote == 'for')
                     consensus_percentage = (approve_votes / len(votes)) * 100
                     
                     if consensus_percentage < 66:

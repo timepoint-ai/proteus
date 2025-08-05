@@ -7,7 +7,8 @@ from models import (
     Actor, PredictionMarket, Submission, Bet, Transaction, 
     OracleSubmission, NodeOperator
 )
-from services.bet_resolution import MarketResolutionService
+# Phase 1: Bet resolution service deprecated - handled by DecentralizedOracle contract
+# from services.bet_resolution import MarketResolutionService
 from services.text_analysis import TextAnalysisService
 import random
 import string

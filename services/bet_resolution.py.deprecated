@@ -1,4 +1,8 @@
 """
+DEPRECATED: This service is being replaced by DecentralizedOracle contract.
+Phase 1: This file will be removed as part of the blockchain migration.
+All market resolution logic should now be handled by the on-chain oracle system.
+
 Market Resolution Service
 Handles the proper status workflow for market and bet resolution
 """

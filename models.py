@@ -19,6 +19,11 @@ class NodeOperator(db.Model):
     votes_received = db.relationship('NodeVote', foreign_keys='NodeVote.candidate_id', backref='candidate')
 
 class Actor(db.Model):
+    """
+    DEPRECATED: This model is being migrated to on-chain ActorRegistry contract.
+    Use ActorRegistry.getActor() for reading actor data.
+    Database writes are disabled for this model.
+    """
     __tablename__ = 'actors'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -37,6 +42,11 @@ class Actor(db.Model):
     markets = db.relationship('PredictionMarket', backref='actor')
 
 class PredictionMarket(db.Model):
+    """
+    DEPRECATED: This model is being migrated to on-chain EnhancedPredictionMarket contract.
+    Use EnhancedPredictionMarket.getMarket() for reading market data.
+    Database writes are disabled for this model.
+    """
     __tablename__ = 'prediction_markets'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -66,6 +76,11 @@ class PredictionMarket(db.Model):
     oracle_submissions = db.relationship('OracleSubmission', backref='market')
 
 class Submission(db.Model):
+    """
+    DEPRECATED: This model is being migrated to on-chain EnhancedPredictionMarket contract.
+    Use EnhancedPredictionMarket.getSubmission() for reading submission data.
+    Database writes are disabled for this model.
+    """
     __tablename__ = 'submissions'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -97,6 +112,11 @@ class Submission(db.Model):
     verification_modules = db.relationship('VerificationModule', backref='submission', cascade='all, delete-orphan')
 
 class Bet(db.Model):
+    """
+    DEPRECATED: This model is being migrated to on-chain EnhancedPredictionMarket contract.
+    Use EnhancedPredictionMarket.getBet() for reading bet data.
+    Database writes are disabled for this model.
+    """
     __tablename__ = 'bets'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -113,6 +133,11 @@ class Bet(db.Model):
 # Stakes are now Bets on Submissions
 
 class OracleSubmission(db.Model):
+    """
+    DEPRECATED: This model is being migrated to on-chain DecentralizedOracle contract.
+    Use DecentralizedOracle.getSubmission() for reading oracle data.
+    Database writes are disabled for this model.
+    """
     __tablename__ = 'oracle_submissions'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

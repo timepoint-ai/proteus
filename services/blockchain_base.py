@@ -46,6 +46,40 @@ class BaseBlockchainService:
         # Platform fee percentage
         self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '7')) / Decimal('100')
         
+        # Auto-load deployment configuration
+        deployment_file = 'deployment-base-sepolia.json' if self.is_testnet else 'deployment-base-mainnet.json'
+        if os.path.exists(deployment_file):
+            self.load_contracts(deployment_file)
+            logger.info(f"Loaded contracts from {deployment_file}")
+            self.is_testnet = True
+            
+        self.w3 = Web3(Web3.HTTPProvider(self.rpc_url))
+        
+        # Contract addresses (to be loaded from deployment files)
+        self.contracts = {
+            'PredictionMarket': None,
+            'ClockchainOracle': None,
+            'NodeRegistry': None,
+            'PayoutManager': None,
+            'ActorRegistry': None,
+            'EnhancedPredictionMarket': None,
+            'DecentralizedOracle': None,
+            'AdvancedMarkets': None,
+            'SecurityAudit': None
+        }
+        
+        # Load ABIs
+        self.abis = self._load_abis()
+        
+        # Platform fee percentage
+        self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '7')) / Decimal('100')
+        
+        # Auto-load deployment configuration
+        deployment_file = 'deployment-base-sepolia.json' if self.is_testnet else 'deployment-base-mainnet.json'
+        if os.path.exists(deployment_file):
+            self.load_contracts(deployment_file)
+            logger.info(f"Loaded contracts from {deployment_file}")
+        
     def _load_abis(self) -> Dict[str, Any]:
         """Load contract ABIs from compiled artifacts"""
         abis = {}
@@ -76,26 +110,23 @@ class BaseBlockchainService:
             with open(deployment_file, 'r') as f:
                 deployment = json.load(f)
                 
-                # Handle both old and new deployment file formats
+                # Handle deployment file format
                 if 'contracts' in deployment:
-                    # Old format
-                    for contract_name, address in deployment['contracts'].items():
+                    for contract_name, contract_info in deployment['contracts'].items():
                         if contract_name in self.abis:
+                            # Handle both string addresses and dict format
+                            if isinstance(contract_info, str):
+                                address = contract_info
+                            elif isinstance(contract_info, dict) and 'address' in contract_info:
+                                address = contract_info['address']
+                            else:
+                                continue
+                                
                             self.contracts[contract_name] = self.w3.eth.contract(
-                                address=Web3.toChecksumAddress(address),
+                                address=Web3.to_checksum_address(address),
                                 abi=self.abis[contract_name]
                             )
                             logger.info(f"Loaded {contract_name} at {address}")
-                else:
-                    # New format
-                    for contract_name, contract_data in deployment.items():
-                        if isinstance(contract_data, dict) and 'address' in contract_data:
-                            if contract_name in self.abis:
-                                self.contracts[contract_name] = self.w3.eth.contract(
-                                    address=Web3.toChecksumAddress(contract_data['address']),
-                                    abi=self.abis[contract_name]
-                                )
-                                logger.info(f"Loaded {contract_name} at {contract_data['address']}")
         except Exception as e:
             logger.error(f"Error loading contracts: {e}")
     
@@ -167,6 +198,108 @@ class BaseBlockchainService:
                 'fast': 1200000000,      # 1.2 gwei
                 'slow': 800000000        # 0.8 gwei
             }
+            
+    # READ-ONLY BLOCKCHAIN METHODS (Phase 1B Implementation)
+    
+    def get_actor(self, actor_address: str) -> Optional[Dict[str, Any]]:
+        """Get actor details from ActorRegistry contract"""
+        try:
+            contract = self.contracts.get('ActorRegistry')
+            if not contract:
+                logger.error("ActorRegistry contract not loaded")
+                return None
+                
+            # Call getActor function
+            result = contract.functions.getActor(Web3.to_checksum_address(actor_address)).call()
+            if result[0]:  # isRegistered
+                return {
+                    'address': actor_address,
+                    'username': result[1],
+                    'is_registered': result[0],
+                    'registration_time': result[2],
+                    'reputation': result[3]
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting actor {actor_address}: {e}")
+            return None
+            
+    def get_market(self, market_id: int) -> Optional[Dict[str, Any]]:
+        """Get market details from EnhancedPredictionMarket contract"""
+        try:
+            contract = self.contracts.get('EnhancedPredictionMarket')
+            if not contract:
+                logger.error("EnhancedPredictionMarket contract not loaded")
+                return None
+                
+            # Call getMarket function
+            result = contract.functions.getMarket(market_id).call()
+            return {
+                'id': market_id,
+                'question': result[0],
+                'actor_username': result[1],
+                'creator': result[2],
+                'start_time': result[3],
+                'end_time': result[4],
+                'resolved': result[5],
+                'winning_submission_id': result[6],
+                'total_volume': result[7],
+                'platform_fee_collected': result[8]
+            }
+        except Exception as e:
+            logger.error(f"Error getting market {market_id}: {e}")
+            return None
+            
+    def get_submission(self, submission_id: int) -> Optional[Dict[str, Any]]:
+        """Get submission details from EnhancedPredictionMarket contract"""
+        try:
+            contract = self.contracts.get('EnhancedPredictionMarket')
+            if not contract:
+                logger.error("EnhancedPredictionMarket contract not loaded")
+                return None
+                
+            # Call getSubmission function
+            result = contract.functions.getSubmission(submission_id).call()
+            return {
+                'id': submission_id,
+                'market_id': result[0],
+                'creator': result[1],
+                'predicted_text': result[2],
+                'stake': result[3],
+                'total_bets': result[4],
+                'bet_count': result[5],
+                'levenshtein_distance': result[6],
+                'is_winner': result[7]
+            }
+        except Exception as e:
+            logger.error(f"Error getting submission {submission_id}: {e}")
+            return None
+            
+    def get_oracle_submission(self, market_id: int, submission_id: int) -> Optional[Dict[str, Any]]:
+        """Get oracle submission from DecentralizedOracle contract"""
+        try:
+            contract = self.contracts.get('DecentralizedOracle')
+            if not contract:
+                logger.error("DecentralizedOracle contract not loaded")
+                return None
+                
+            # Call getOracleData function
+            result = contract.functions.getOracleData(
+                Web3.keccak(text=str(market_id)),
+                Web3.keccak(text=str(submission_id))
+            ).call()
+            
+            return {
+                'actual_text': result[0],
+                'screenshot_ipfs': result[1],
+                'text_hash': result[2].hex(),
+                'levenshtein_distance': result[3],
+                'validators': result[4],
+                'consensus_reached': result[5]
+            }
+        except Exception as e:
+            logger.error(f"Error getting oracle submission: {e}")
+            return None
             
     def create_market(self, question: str, duration: int, actor_handle: str, 
                      xcom_only: bool, initial_stake: Decimal, from_address: str) -> Dict[str, Any]:

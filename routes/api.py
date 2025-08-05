@@ -4,8 +4,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import json
 from services.blockchain_base import BaseBlockchainService
-from services.consensus import ConsensusService
-from services.ledger import LedgerService
+# Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
+# from services.consensus import ConsensusService
+# Phase 1: Ledger service deprecated - handled by blockchain events
+# from services.ledger import LedgerService
 from services.oracle_xcom import XcomOracleService
 from services.payout_base import BasePayoutService
 from services.time_sync import TimeSyncService
@@ -23,8 +25,9 @@ api_bp = Blueprint('api', __name__)
 
 # Initialize services
 blockchain_service = BaseBlockchainService()
-consensus_service = ConsensusService()
-ledger_service = LedgerService()
+# Phase 1: Deprecated services - commented out
+# consensus_service = ConsensusService()
+# ledger_service = LedgerService()
 oracle_service = XcomOracleService()
 payout_service = BasePayoutService()
 time_sync_service = TimeSyncService()
@@ -63,8 +66,13 @@ def get_current_time():
 
 @api_bp.route('/actors', methods=['GET'])
 def get_actors():
-    """Get all approved actors"""
+    """Get all approved actors
+    
+    DEPRECATED: This endpoint currently reads from the database.
+    Phase 1B: Will be updated to read from ActorRegistry contract.
+    """
     try:
+        # TODO: Phase 1B - Replace with blockchain_service.get_all_actors()
         exclude_unknown = request.args.get('exclude_unknown', 'false').lower() == 'true'
         
         query = Actor.query.filter_by(status='approved')
@@ -152,8 +160,13 @@ def vote_on_actor(actor_id):
 
 @api_bp.route('/bets', methods=['GET'])
 def get_bets():
-    """Get all bets"""
+    """Get all bets
+    
+    DEPRECATED: This endpoint currently reads from the database.
+    Phase 1B: Will be updated to read from EnhancedPredictionMarket contract.
+    """
     try:
+        # TODO: Phase 1B - Replace with blockchain_service.get_all_markets()
         status = request.args.get('status', 'active')
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 20))
@@ -304,7 +317,19 @@ def create_bet():
 
 @api_bp.route('/bets/<bet_id>/stakes', methods=['POST'])
 def place_stake(bet_id):
-    """Place a stake on a bet"""
+    """Place a stake on a bet
+    
+    DEPRECATED: This endpoint writes to the database.
+    Phase 1: Database writes disabled - will return error.
+    Phase 2: Will be replaced with blockchain transaction.
+    """
+    # Phase 1: Disable database writes
+    return jsonify({
+        'error': 'Database writes are disabled. Please use the blockchain directly.',
+        'message': 'This functionality will be restored in Phase 2 with direct blockchain integration.'
+    }), 503
+    
+    # Original code below - to be removed in Phase 2
     try:
         data = request.get_json()
         
@@ -480,8 +505,13 @@ def cancel_bet(bet_id):
 
 @api_bp.route('/oracle_submissions/<submission_id>', methods=['GET'])
 def get_oracle_submission_details(submission_id):
-    """Get details about a specific oracle submission"""
+    """Get details about a specific oracle submission
+    
+    DEPRECATED: This endpoint currently reads from the database.
+    Phase 1B: Will be updated to read from DecentralizedOracle contract.
+    """
     try:
+        # TODO: Phase 1B - Replace with blockchain_service.get_oracle_submission()
         submission = OracleSubmission.query.get(submission_id)
         if not submission:
             return jsonify({'error': 'Submission not found'}), 404
@@ -504,7 +534,19 @@ def get_oracle_submission_details(submission_id):
 
 @api_bp.route('/oracle_submissions/<submission_id>/vote', methods=['POST'])
 def vote_on_oracle_submission(submission_id):
-    """Vote on an oracle submission"""
+    """Vote on an oracle submission
+    
+    DEPRECATED: This endpoint writes to the database.
+    Phase 1: Database writes disabled - will return error.
+    Phase 2: Will be replaced with blockchain transaction.
+    """
+    # Phase 1: Disable database writes
+    return jsonify({
+        'error': 'Database writes are disabled. Please use the blockchain directly.',
+        'message': 'This functionality will be restored in Phase 2 with direct blockchain integration.'
+    }), 503
+    
+    # Original code below - to be removed in Phase 2
     try:
         data = request.get_json()
         vote = data.get('vote')
