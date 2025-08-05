@@ -1283,6 +1283,24 @@ The platform migrated from multi-currency support (ETH/BTC) to BASE-exclusive ar
 - Realistic data generators
 - Comprehensive documentation
 
+### Phase 8: X.com Actor System ✓ COMPLETE
+- Migrated from wallet-based to X.com username-based actor identification
+- Updated database schema with X.com fields (username, display name, bio, verified, follower count)
+- Created test actors with real X.com handles
+- Updated UI to display @username format with verification badges
+
+### Phase 9: On-Chain Actor Registry ✓ COMPLETE
+- Implemented ActorRegistry.sol smart contract
+- Decentralized approval system requiring 3+ node operator votes
+- Backend service (actor_registry.py) for on-chain actor management
+- Migration scripts for transitioning existing actors to blockchain
+
+### Phase 10: Fully On-Chain Markets ✓ COMPLETE
+- Created EnhancedPredictionMarket.sol for complete on-chain data storage
+- Removed PostgreSQL dependencies for market data
+- All submissions, bets, and market data now stored on blockchain
+- Enhanced blockchain service (blockchain_enhanced.py) for on-chain operations
+
 ### Remaining Work
 
 #### Phase 4: X.com Oracle Integration (Partial)

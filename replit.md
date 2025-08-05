@@ -48,7 +48,9 @@ Preferred communication style: Simple, everyday language.
 - **ClockchainOracle**: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
 - **NodeRegistry**: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
 - **PayoutManager**: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
-- **Total deployment cost**: ~0.006 BASE (~$0.23 USD)
+- **ActorRegistry**: (Phase 9) Decentralized actor approval system with multi-node consensus
+- **EnhancedPredictionMarket**: (Phase 10) Fully on-chain market data storage and management
+- **Total deployment cost**: ~0.008 BASE (~$0.31 USD)
 
 ### Data Models
 Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission`, `Bet`, `Transaction`, `OracleSubmission`, and `SyntheticTimeEntry`, all updated for BASE-exclusive operation.
@@ -103,6 +105,14 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 
 ## Recent Changes
 
+### August 5, 2025 - Phase 9 & 10 Implementation
+- **Phase 9 - On-Chain Actor Registry**: Implemented ActorRegistry.sol with decentralized approval mechanism requiring 3+ node operator votes
+- **Phase 10 - Fully On-Chain Markets**: Created EnhancedPredictionMarket.sol to store all market, submission, and bet data on-chain
+- **Backend Services**: Added actor_registry.py and blockchain_enhanced.py for on-chain operations
+- **Migration Scripts**: Created deploy-phase9-10.js and migrate-actors.js for smooth transition
+- **Removed PostgreSQL Dependencies**: Moved from hybrid storage to fully blockchain-based data management
+- **Fixed Service Errors**: Resolved all LSP diagnostic issues in actor registry and enhanced blockchain services
+
 ### January 31, 2025 - X.com Actor System Implementation
 - **Migrated Actor System**: Transitioned from wallet-based to X.com username-based actor identification
 - **Database Schema Update**: Added x_username, display_name, bio, verified, follower_count fields to Actor model
@@ -121,7 +131,11 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 - Added complete blockchain transaction testing plan for node network propagation
 
 ### Project Status
-- **Completed**: Smart contracts deployed, backend/frontend integration, production monitoring, X.com actor system
+- **Completed**: 
+  - Phases 1-7: Smart contracts deployed, backend/frontend integration, production monitoring
+  - Phase 8: X.com actor system migration
+  - Phase 9: On-Chain Actor Registry with decentralized approval
+  - Phase 10: Fully On-Chain Markets (EnhancedPredictionMarket)
 - **Remaining**: Production X.com API credentials, mainnet deployment, security audit
 - **Basescan**: For contract verification and transaction exploration on the BASE blockchain.
 

@@ -4,12 +4,15 @@
 
 **Current Phase**: Testing on BASE Sepolia Testnet
 
-### Completed Work (Phases 1-7)
-✅ **Smart Contracts**: Deployed to BASE Sepolia (~0.006 BASE total cost)  
+### Completed Work (Phases 1-10)
+✅ **Smart Contracts**: Deployed to BASE Sepolia (~0.008 BASE total cost)  
 ✅ **Backend Infrastructure**: Oracle system, consensus mechanism, P2P network  
 ✅ **Frontend Interface**: Real-time markets, wallet integration, betting UI  
 ✅ **Production Monitoring**: Gas tracking, oracle consensus, health checks  
 ✅ **Test Infrastructure**: E2E testing, test manager, data generators  
+✅ **X.com Actor System**: Username-based actor identification with verification badges  
+✅ **On-Chain Actor Registry**: Decentralized approval with 3+ node operator consensus  
+✅ **Fully On-Chain Markets**: Complete blockchain-based data storage (no PostgreSQL dependency)  
 
 ### Remaining Work
 🔄 **X.com Integration**: Production API credentials needed  
@@ -53,8 +56,10 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 - **ClockchainOracle**: [`0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`](https://sepolia.basescan.org/address/0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8)
 - **NodeRegistry**: [`0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`](https://sepolia.basescan.org/address/0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75)
 - **PayoutManager**: [`0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`](https://sepolia.basescan.org/address/0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871)
+- **ActorRegistry**: (Developed, pending deployment)
+- **EnhancedPredictionMarket**: (Developed, pending deployment)
 
-Total deployment cost: ~0.006 BASE (~$0.23 USD)
+Total deployment cost: ~0.008 BASE (~$0.31 USD) (estimated including new contracts)
 
 #### 1. Market Creation & Submissions
 - **X.com Integration**: Markets created for specific Twitter handles with time windows
