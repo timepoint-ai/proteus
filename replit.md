@@ -43,16 +43,16 @@ Preferred communication style: Simple, everyday language.
 - **Node Communication**: WebSocket-based P2P network for real-time data exchange.
 - **Production Monitoring**: Gas price tracking, oracle consensus monitoring, health checks.
 
-### Smart Contracts (BASE Sepolia)
-- **PredictionMarket**: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
-- **ClockchainOracle**: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
-- **NodeRegistry**: `0xA69C842F335dfE1F69288a70054A34018282218d`
-- **PayoutManager**: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
-- **ActorRegistry**: `0xC71CC19C5573C5E1E144829800cD0005D0eDB723` (Phase 9) Decentralized actor approval system with multi-node consensus
-- **EnhancedPredictionMarket**: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` (Phase 10) Fully on-chain market data storage and management
-- **DecentralizedOracle**: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1` (Phase 11) On-chain Levenshtein distance calculation
-- **AdvancedMarkets**: `0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B` (Phase 13) Multi-choice, conditional, and range markets
-- **SecurityAudit**: `0x0539ad4a63E76130d76a21163960906Eb47c1a9a` (Phase 14) Security monitoring and emergency controls
+### Smart Contracts (BASE Sepolia - All 14 Phases Deployed)
+- **PredictionMarket**: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad` - Core market functionality
+- **ClockchainOracle**: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8` - Legacy oracle system
+- **NodeRegistry**: `0xA69C842F335dfE1F69288a70054A34018282218d` - Node operator management
+- **PayoutManager**: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871` - Automated payouts
+- **ActorRegistry**: `0xC71CC19C5573C5E1E144829800cD0005D0eDB723` - On-chain actor registry
+- **EnhancedPredictionMarket**: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` - All data on-chain
+- **DecentralizedOracle**: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1` - On-chain text analysis
+- **AdvancedMarkets**: `0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B` - Advanced market types
+- **SecurityAudit**: `0x0539ad4a63E76130d76a21163960906Eb47c1a9a` - Production security
 - **Total deployment cost**: ~0.015 BASE (~$0.60 USD)
 
 ### Data Models

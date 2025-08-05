@@ -696,16 +696,16 @@ WebRTC-based P2P network:
 4. **Identity**: Blockchain wallet-based
 5. **Consensus**: Multi-node validation
 
-### Deployment Summary
+### Deployment Summary (Phase 1-12)
 
 BASE Sepolia Contracts:
 - PredictionMarket: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
 - ClockchainOracle: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
-- NodeRegistry: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- NodeRegistry: `0xA69C842F335dfE1F69288a70054A34018282218d`
 - PayoutManager: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
-- ActorRegistry: `0x[Phase 9 Address]`
-- EnhancedPredictionMarket: `0x[Phase 10 Address]`
-- DecentralizedOracle: `0x[Phase 11 Address]`
+- ActorRegistry: `0xC71CC19C5573C5E1E144829800cD0005D0eDB723`
+- EnhancedPredictionMarket: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C`
+- DecentralizedOracle: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1`
 
 ## Phase 13-14: Advanced Features & Production Readiness
 
@@ -775,18 +775,20 @@ Production security monitoring:
 - Security metrics collection
 - Risk level calculation
 
-### Deployment Summary
+### Deployment Summary (All 14 Phases Complete)
 
-BASE Sepolia Contracts (All Phases):
+BASE Sepolia Contracts:
 - PredictionMarket: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
 - ClockchainOracle: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
-- NodeRegistry: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- NodeRegistry: `0xA69C842F335dfE1F69288a70054A34018282218d`
 - PayoutManager: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
-- ActorRegistry: `0x[Phase 9 Address]`
-- EnhancedPredictionMarket: `0x[Phase 10 Address]`
-- DecentralizedOracle: `0x[Phase 11 Address]`
-- AdvancedMarkets: `0x[Phase 13 Address]`
-- SecurityAudit: `0x[Phase 14 Address]`
+- ActorRegistry: `0xC71CC19C5573C5E1E144829800cD0005D0eDB723`
+- EnhancedPredictionMarket: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C`
+- DecentralizedOracle: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1`
+- AdvancedMarkets: `0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B`
+- SecurityAudit: `0x0539ad4a63E76130d76a21163960906Eb47c1a9a`
+
+Total deployment cost: ~0.015 BASE (~$0.60 USD)
 
 ### Similarity Scoring
 
