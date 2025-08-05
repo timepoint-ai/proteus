@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 test_data_new_bp = Blueprint('test_data_new', __name__)
 
 SAMPLE_ACTORS = [
-    ("Elon Musk", "Tech entrepreneur and CEO of Tesla, SpaceX"),
-    ("Donald Trump", "Former US President"),
-    ("Joe Biden", "Current US President"),
-    ("Taylor Swift", "Pop music artist"),
-    ("Oprah Winfrey", "Media mogul and talk show host"),
+    ("elonmusk", "Elon Musk", "Tech entrepreneur and CEO of Tesla, SpaceX"),
+    ("realDonaldTrump", "Donald Trump", "Former US President"),
+    ("POTUS", "Joe Biden", "Current US President"),
+    ("taylorswift13", "Taylor Swift", "Pop music artist"),
+    ("Oprah", "Oprah Winfrey", "Media mogul and talk show host"),
 ]
 
 SAMPLE_PREDICTIONS = [
@@ -65,14 +65,16 @@ def generate():
         
         # 1. Create Actors
         actors = []
-        for name, description in SAMPLE_ACTORS:
+        for x_username, display_name, bio in SAMPLE_ACTORS:
             actor = Actor(
-                name=name,
-                description=description,
-                wallet_address=f"0x{''.join(random.choices('0123456789abcdef', k=40))}",
-                status='approved',
-                approval_votes=random.randint(10, 50),
-                rejection_votes=random.randint(0, 5)
+                x_username=x_username,
+                display_name=display_name,
+                bio=bio,
+                verified=True,
+                follower_count=random.randint(1000000, 100000000),
+                is_test_account=True,
+                status='active',
+                last_sync=datetime.utcnow()
             )
             actors.append(actor)
             db.session.add(actor)

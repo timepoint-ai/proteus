@@ -30,13 +30,14 @@ async function main() {
     const advancedMarkets = await AdvancedMarkets.deploy(
         deployments.EnhancedPredictionMarket.address
     );
-    await advancedMarkets.deployed();
+    await advancedMarkets.waitForDeployment();
     
-    console.log("✓ AdvancedMarkets deployed to:", advancedMarkets.address);
+    const advancedMarketsAddress = await advancedMarkets.getAddress();
+    console.log("✓ AdvancedMarkets deployed to:", advancedMarketsAddress);
     
     // Update deployments
     deployments.AdvancedMarkets = {
-        address: advancedMarkets.address,
+        address: advancedMarketsAddress,
         deployedAt: new Date().toISOString(),
         phase: 13
     };
@@ -44,13 +45,14 @@ async function main() {
     console.log("\n2. Deploying SecurityAudit (Phase 14)...");
     const SecurityAudit = await ethers.getContractFactory("SecurityAudit");
     const securityAudit = await SecurityAudit.deploy();
-    await securityAudit.deployed();
+    await securityAudit.waitForDeployment();
     
-    console.log("✓ SecurityAudit deployed to:", securityAudit.address);
+    const securityAuditAddress = await securityAudit.getAddress();
+    console.log("✓ SecurityAudit deployed to:", securityAuditAddress);
     
     // Update deployments
     deployments.SecurityAudit = {
-        address: securityAudit.address,
+        address: securityAuditAddress,
         deployedAt: new Date().toISOString(),
         phase: 14
     };
@@ -70,8 +72,8 @@ async function main() {
     await fs.writeFile(deploymentPath, JSON.stringify(deployments, null, 2));
     
     console.log("\n=== Phase 13 & 14 Deployment Complete ===");
-    console.log("AdvancedMarkets:", advancedMarkets.address);
-    console.log("SecurityAudit:", securityAudit.address);
+    console.log("AdvancedMarkets:", advancedMarketsAddress);
+    console.log("SecurityAudit:", securityAuditAddress);
     
     console.log("\nPhase 13 Features:");
     console.log("- Multi-choice markets");
@@ -88,11 +90,11 @@ async function main() {
     console.log("- Transaction limits");
     
     // Estimate total gas used
-    const receipt1 = await advancedMarkets.deployTransaction.wait();
-    const receipt2 = await securityAudit.deployTransaction.wait();
-    const totalGasUsed = receipt1.gasUsed.add(receipt2.gasUsed);
-    const gasPrice = receipt1.effectiveGasPrice;
-    const deploymentCost = ethers.utils.formatEther(totalGasUsed.mul(gasPrice));
+    const receipt1 = await advancedMarkets.deploymentTransaction().wait();
+    const receipt2 = await securityAudit.deploymentTransaction().wait();
+    const totalGasUsed = receipt1.gasUsed + receipt2.gasUsed;
+    const gasPrice = receipt1.gasPrice;
+    const deploymentCost = ethers.formatEther(totalGasUsed * gasPrice);
     
     console.log(`\nTotal deployment cost: ${deploymentCost} BASE`);
 }

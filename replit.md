@@ -46,11 +46,14 @@ Preferred communication style: Simple, everyday language.
 ### Smart Contracts (BASE Sepolia)
 - **PredictionMarket**: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
 - **ClockchainOracle**: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
-- **NodeRegistry**: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- **NodeRegistry**: `0xA69C842F335dfE1F69288a70054A34018282218d`
 - **PayoutManager**: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
-- **ActorRegistry**: (Phase 9) Decentralized actor approval system with multi-node consensus
-- **EnhancedPredictionMarket**: (Phase 10) Fully on-chain market data storage and management
-- **Total deployment cost**: ~0.008 BASE (~$0.31 USD)
+- **ActorRegistry**: `0xC71CC19C5573C5E1E144829800cD0005D0eDB723` (Phase 9) Decentralized actor approval system with multi-node consensus
+- **EnhancedPredictionMarket**: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` (Phase 10) Fully on-chain market data storage and management
+- **DecentralizedOracle**: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1` (Phase 11) On-chain Levenshtein distance calculation
+- **AdvancedMarkets**: `0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B` (Phase 13) Multi-choice, conditional, and range markets
+- **SecurityAudit**: `0x0539ad4a63E76130d76a21163960906Eb47c1a9a` (Phase 14) Security monitoring and emergency controls
+- **Total deployment cost**: ~0.015 BASE (~$0.60 USD)
 
 ### Data Models
 Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission`, `Bet`, `Transaction`, `OracleSubmission`, and `SyntheticTimeEntry`, all updated for BASE-exclusive operation.
@@ -104,6 +107,15 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 - **Network Transaction Testing**: Full blockchain transaction propagation plan (see TEST_DATA_GUIDE.md)
 
 ## Recent Changes
+
+### August 5, 2025 - Phases 9-14 Successfully Deployed to BASE Sepolia
+- **Phase 9 - ActorRegistry**: Deployed at 0xC71CC19C5573C5E1E144829800cD0005D0eDB723
+- **Phase 10 - EnhancedPredictionMarket**: Deployed at 0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C
+- **Phase 11 - DecentralizedOracle**: Deployed at 0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1
+- **Phase 13 - AdvancedMarkets**: Deployed at 0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B
+- **Phase 14 - SecurityAudit**: Deployed at 0x0539ad4a63E76130d76a21163960906Eb47c1a9a
+- **Fixed Issues**: Updated OpenZeppelin v5 import paths and ethers v6 deployment scripts
+- **Deployment Scripts**: Created deploy-phase9-10.js, deploy-phase11-12.js, and deploy-phase13-14.js
 
 ### August 5, 2025 - Phases 11-14 Complete Implementation
 - **Phase 11 - Decentralized Oracle System**: 

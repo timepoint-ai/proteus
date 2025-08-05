@@ -45,8 +45,8 @@ class E2ETestRunner:
                 OracleSubmission.query.filter(OracleSubmission.tweet_id.like('test%')).delete()
                 Bet.query.filter(Bet.bettor_wallet.like('0xtest%')).delete()
                 Submission.query.filter(Submission.creator_wallet.like('0xtest%')).delete()
-                PredictionMarket.query.filter(PredictionMarket.twitter_handle.like('test_%')).delete()
-                Actor.query.filter(Actor.name.like('Test%')).delete()
+                PredictionMarket.query.filter(PredictionMarket.status == 'test').delete()
+                Actor.query.filter(Actor.x_username.like('test_%')).delete()
                 db.session.commit()
                 self.log_step("Clean Test Data", "passed")
         except Exception as e:
@@ -104,9 +104,13 @@ class E2ETestRunner:
                 
                 # Create test actor
                 actor = Actor(
-                    name="Test X User",
-                    description="Test actor for X.com integration",
-                    status="approved"
+                    x_username="test_x_user",
+                    display_name="Test X User",
+                    bio="Test actor for X.com integration",
+                    verified=True,
+                    follower_count=1000,
+                    is_test_account=True,
+                    status="active"
                 )
                 db.session.add(actor)
                 db.session.commit()
@@ -114,11 +118,10 @@ class E2ETestRunner:
                 # Create test market
                 market = PredictionMarket(
                     actor_id=actor.id,
-                    twitter_handle="test_x_user",
                     start_time=datetime.utcnow(),
                     end_time=datetime.utcnow(),  # Already expired for testing
                     oracle_wallets='["0xtest_oracle1", "0xtest_oracle2", "0xtest_oracle3"]',
-                    status='expired'
+                    status='test'  # Mark as test for cleanup
                 )
                 db.session.add(market)
                 db.session.commit()

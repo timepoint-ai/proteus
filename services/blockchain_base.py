@@ -32,7 +32,12 @@ class BaseBlockchainService:
             'PredictionMarket': None,
             'ClockchainOracle': None,
             'NodeRegistry': None,
-            'PayoutManager': None
+            'PayoutManager': None,
+            'ActorRegistry': None,
+            'EnhancedPredictionMarket': None,
+            'DecentralizedOracle': None,
+            'AdvancedMarkets': None,
+            'SecurityAudit': None
         }
         
         # Load ABIs
@@ -47,7 +52,12 @@ class BaseBlockchainService:
         try:
             # Load from Hardhat artifacts
             artifacts_dir = 'artifacts/contracts/src'
-            for contract_name in ['PredictionMarket', 'ClockchainOracle', 'NodeRegistry', 'PayoutManager']:
+            contract_names = [
+                'PredictionMarket', 'ClockchainOracle', 'NodeRegistry', 'PayoutManager',
+                'ActorRegistry', 'EnhancedPredictionMarket', 'DecentralizedOracle',
+                'AdvancedMarkets', 'SecurityAudit'
+            ]
+            for contract_name in contract_names:
                 abi_path = f"{artifacts_dir}/{contract_name}.sol/{contract_name}.json"
                 if os.path.exists(abi_path):
                     with open(abi_path, 'r') as f:
@@ -65,13 +75,27 @@ class BaseBlockchainService:
         try:
             with open(deployment_file, 'r') as f:
                 deployment = json.load(f)
-                for contract_name, address in deployment['contracts'].items():
-                    if contract_name in self.abis:
-                        self.contracts[contract_name] = self.w3.eth.contract(
-                            address=Web3.toChecksumAddress(address),
-                            abi=self.abis[contract_name]
-                        )
-                        logger.info(f"Loaded {contract_name} at {address}")
+                
+                # Handle both old and new deployment file formats
+                if 'contracts' in deployment:
+                    # Old format
+                    for contract_name, address in deployment['contracts'].items():
+                        if contract_name in self.abis:
+                            self.contracts[contract_name] = self.w3.eth.contract(
+                                address=Web3.toChecksumAddress(address),
+                                abi=self.abis[contract_name]
+                            )
+                            logger.info(f"Loaded {contract_name} at {address}")
+                else:
+                    # New format
+                    for contract_name, contract_data in deployment.items():
+                        if isinstance(contract_data, dict) and 'address' in contract_data:
+                            if contract_name in self.abis:
+                                self.contracts[contract_name] = self.w3.eth.contract(
+                                    address=Web3.toChecksumAddress(contract_data['address']),
+                                    abi=self.abis[contract_name]
+                                )
+                                logger.info(f"Loaded {contract_name} at {contract_data['address']}")
         except Exception as e:
             logger.error(f"Error loading contracts: {e}")
     

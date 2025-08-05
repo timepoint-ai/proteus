@@ -65,7 +65,7 @@ contract ActorRegistry is AccessControl, ReentrancyGuard {
     
     modifier onlyActiveNode() {
         require(nodeRegistry.isNode(msg.sender), "Not a registered node");
-        (, , bool active, , , , , ) = nodeRegistry.nodes(msg.sender);
+        (, , , bool active, , , , , ) = nodeRegistry.nodes(msg.sender);
         require(active, "Node is not active");
         _;
     }

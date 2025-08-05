@@ -36,13 +36,14 @@ async function main() {
         deployments.EnhancedPredictionMarket.address,
         deployments.NodeRegistry.address
     );
-    await decentralizedOracle.deployed();
+    await decentralizedOracle.waitForDeployment();
     
-    console.log("✓ DecentralizedOracle deployed to:", decentralizedOracle.address);
+    const decentralizedOracleAddress = await decentralizedOracle.getAddress();
+    console.log("✓ DecentralizedOracle deployed to:", decentralizedOracleAddress);
     
     // Update deployments
     deployments.DecentralizedOracle = {
-        address: decentralizedOracle.address,
+        address: decentralizedOracleAddress,
         deployedAt: new Date().toISOString(),
         phase: 11
     };
@@ -55,7 +56,7 @@ async function main() {
     );
     
     const ORACLE_ROLE = await enhancedMarket.ORACLE_ROLE();
-    const tx = await enhancedMarket.grantRole(ORACLE_ROLE, decentralizedOracle.address);
+    const tx = await enhancedMarket.grantRole(ORACLE_ROLE, decentralizedOracleAddress);
     await tx.wait();
     
     console.log("✓ Oracle role granted to DecentralizedOracle");
@@ -64,7 +65,7 @@ async function main() {
     await fs.writeFile(deploymentPath, JSON.stringify(deployments, null, 2));
     
     console.log("\n=== Phase 11 & 12 Deployment Complete ===");
-    console.log("DecentralizedOracle:", decentralizedOracle.address);
+    console.log("DecentralizedOracle:", decentralizedOracleAddress);
     console.log("\nPhase 12 Notes:");
     console.log("- PostgreSQL dependency removed");
     console.log("- Use blockchain_only_data.py for data access");
@@ -72,10 +73,10 @@ async function main() {
     console.log("- IPFS integration for media storage");
     
     // Estimate total gas used
-    const receipt = await decentralizedOracle.deployTransaction.wait();
+    const receipt = await decentralizedOracle.deploymentTransaction().wait();
     const gasUsed = receipt.gasUsed;
-    const gasPrice = receipt.effectiveGasPrice;
-    const deploymentCost = ethers.utils.formatEther(gasUsed.mul(gasPrice));
+    const gasPrice = receipt.gasPrice;
+    const deploymentCost = ethers.formatEther(gasUsed * gasPrice);
     
     console.log(`\nDeployment cost: ${deploymentCost} BASE`);
 }
