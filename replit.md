@@ -105,6 +105,20 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 
 ## Recent Changes
 
+### August 5, 2025 - Phase 11 & 12 Implementation
+- **Phase 11 - Decentralized Oracle System**: 
+  - Created DecentralizedOracle.sol with on-chain Levenshtein distance calculation
+  - Multi-validator consensus mechanism with configurable thresholds
+  - IPFS integration for screenshot storage
+  - Backend service decentralized_oracle.py for automated validation
+- **Phase 12 - PostgreSQL Elimination**: 
+  - Created blockchain_only_data.py for direct blockchain data queries
+  - Implemented p2p_communication.py for WebRTC-based node communication
+  - Event-driven architecture with local caching
+  - Complete removal of database dependencies
+- **Deployment Scripts**: Created deploy-phase11-12.js for contract deployment
+- **Test Infrastructure**: Added test_phase11_12.py for comprehensive testing
+
 ### August 5, 2025 - Phase 9 & 10 Implementation
 - **Phase 9 - On-Chain Actor Registry**: Implemented ActorRegistry.sol with decentralized approval mechanism requiring 3+ node operator votes
 - **Phase 10 - Fully On-Chain Markets**: Created EnhancedPredictionMarket.sol to store all market, submission, and bet data on-chain
@@ -136,6 +150,8 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
   - Phase 8: X.com actor system migration
   - Phase 9: On-Chain Actor Registry with decentralized approval
   - Phase 10: Fully On-Chain Markets (EnhancedPredictionMarket)
+  - Phase 11: Decentralized Oracle System with on-chain Levenshtein calculation
+  - Phase 12: PostgreSQL Elimination - fully blockchain-based architecture
 - **Remaining**: Production X.com API credentials, mainnet deployment, security audit
 - **Basescan**: For contract verification and transaction exploration on the BASE blockchain.
 

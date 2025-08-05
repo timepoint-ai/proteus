@@ -625,6 +625,88 @@ def calculate_distance(text1, text2):
     return Levenshtein.distance(clean1, clean2)
 ```
 
+## Phase 8-12: Advanced Decentralization
+
+### Phase 8: X.com Actor System (Completed)
+- Migrated from wallet-based to X.com username-based actor identification
+- Added actor verification and follower count tracking
+- Implemented @username display format with verification badges
+
+### Phase 9: On-Chain Actor Registry (Completed)
+- Deployed ActorRegistry.sol for decentralized actor approval
+- Multi-node consensus requirement (3+ votes)
+- Removed centralized actor management
+
+### Phase 10: Fully On-Chain Markets (Completed)
+- Created EnhancedPredictionMarket.sol
+- All market data stored on blockchain
+- Eliminated hybrid storage approach
+
+### Phase 11: Decentralized Oracle System (Completed)
+
+#### Smart Contract: DecentralizedOracle.sol
+- On-chain Levenshtein distance calculation
+- Multi-validator consensus mechanism
+- IPFS integration for screenshot storage
+- Automatic market resolution
+
+Key Features:
+```solidity
+// On-chain text comparison
+function calculateLevenshteinDistance(string memory a, string memory b) public pure returns (uint256)
+
+// Multi-validator submission
+function submitOracleData(
+    bytes32 marketId,
+    bytes32 submissionId,
+    string memory actualText,
+    string memory screenshotIPFS
+) external onlyRegisteredNode
+
+// Consensus-based resolution
+function checkConsensus(bytes32 marketId, bytes32 submissionId) public
+```
+
+#### Backend Service: decentralized_oracle.py
+- IPFS client for screenshot uploads
+- Automated oracle data submission
+- Consensus monitoring
+- Event-driven architecture
+
+### Phase 12: PostgreSQL Elimination (Completed)
+
+#### blockchain_only_data.py
+Complete data access through blockchain:
+- Event-based data retrieval
+- Local cache rebuilt from chain
+- Real-time event subscriptions
+- No database dependencies
+
+#### p2p_communication.py
+WebRTC-based P2P network:
+- Direct node-to-node communication
+- Decentralized data synchronization
+- Signaling server for peer discovery
+- Message routing without central server
+
+#### Architecture Changes:
+1. **Data Storage**: 100% on-chain
+2. **Media Storage**: IPFS for screenshots
+3. **Communication**: P2P WebRTC mesh
+4. **Identity**: Blockchain wallet-based
+5. **Consensus**: Multi-node validation
+
+### Deployment Summary
+
+BASE Sepolia Contracts:
+- PredictionMarket: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
+- ClockchainOracle: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
+- NodeRegistry: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- PayoutManager: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
+- ActorRegistry: `0x[Phase 9 Address]`
+- EnhancedPredictionMarket: `0x[Phase 10 Address]`
+- DecentralizedOracle: `0x[Phase 11 Address]`
+
 ### Similarity Scoring
 
 ```python
