@@ -14,6 +14,12 @@ Clockchain is a BASE-exclusive prediction market platform with X.com post oracle
 ✅ Phase 5: P2P Network Architecture  
 ✅ Phase 6: Production Infrastructure  
 ✅ Phase 7: Testing & Documentation  
+✅ Phase 8: X.com Actor System (January 31, 2025)
+  - Migrated from wallet-based to X.com username-based actor identification
+  - Updated Actor model with x_username, display_name, bio, verified status
+  - Created 8 test actors with real X.com handles (@elonmusk, @taylorswift13, etc.)
+  - Updated UI to display @username format with verification badges
+  - Generated comprehensive test data (10 markets, 26 submissions, 132 bets)
 
 ## Remaining Work
 

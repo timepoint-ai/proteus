@@ -209,10 +209,30 @@ class XComOracleService:
 
 ### Data Models
 
+#### X.com Actor System
+```python
+class Actor(db.Model):
+    """Public figures identified exclusively by X.com username"""
+    id = db.Column(db.String(36), primary_key=True)
+    x_username = db.Column(db.String(100), unique=True, nullable=False)  # e.g., "elonmusk"
+    display_name = db.Column(db.String(200))  # e.g., "Elon Musk"
+    bio = db.Column(db.Text)  # Profile description
+    profile_image_url = db.Column(db.String(500))
+    verified = db.Column(db.Boolean, default=False)  # Blue checkmark status
+    follower_count = db.Column(db.BigInteger, default=0)
+    is_test_account = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(20), default='active')
+    last_sync = db.Column(db.DateTime)
+    # Legacy fields (retained for compatibility, nullable)
+    name = db.Column(db.String(100))  # Deprecated
+    description = db.Column(db.Text)  # Deprecated
+    wallet_address = db.Column(db.String(42))  # Deprecated
+```
+
 #### BASE-Specific Fields
 ```python
 class PredictionMarket(db.Model):
-    twitter_handle = db.Column(db.String(100))  # X.com handle
+    actor_id = db.Column(db.String(36), db.ForeignKey('actors.id'))  # Links to X.com actor
     contract_address = db.Column(db.String(42))  # BASE contract
     total_volume = db.Column(db.Numeric(20, 8))  # In BASE ETH
     

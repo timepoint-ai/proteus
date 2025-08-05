@@ -103,6 +103,15 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 
 ## Recent Changes
 
+### January 31, 2025 - X.com Actor System Implementation
+- **Migrated Actor System**: Transitioned from wallet-based to X.com username-based actor identification
+- **Database Schema Update**: Added x_username, display_name, bio, verified, follower_count fields to Actor model
+- **Legacy Field Handling**: Made old fields (name, description, wallet_address) nullable for compatibility
+- **Test Data Creation**: Generated 8 test actors with real X.com handles (@elonmusk, @taylorswift13, etc.)
+- **UI Updates**: Modified templates to display @username format with verification badges
+- **Documentation Updates**: Updated README.md, ENGINEERING.md, and CRYPTO_PLAN.md with new architecture
+- **Launch Guide**: Created comprehensive LAUNCH.md for production deployment on BASE mainnet
+
 ### January 31, 2025 - Documentation Reorganization
 - Moved completed phases (1-7) from CRYPTO_PLAN.md to ENGINEERING.md
 - Updated README.md with correct BASE Sepolia contract addresses
@@ -112,7 +121,7 @@ Key data models include `NodeOperator`, `Actor`, `PredictionMarket`, `Submission
 - Added complete blockchain transaction testing plan for node network propagation
 
 ### Project Status
-- **Completed**: Smart contracts deployed, backend/frontend integration, production monitoring
+- **Completed**: Smart contracts deployed, backend/frontend integration, production monitoring, X.com actor system
 - **Remaining**: Production X.com API credentials, mainnet deployment, security audit
 - **Basescan**: For contract verification and transaction exploration on the BASE blockchain.
 

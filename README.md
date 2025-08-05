@@ -24,13 +24,16 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 **Clockchain** operates on the BASE blockchain with three fundamental components:
 
 1. **Prediction Markets**: Time-bounded containers for predictions about specific X.com accounts
-2. **Competitive Submissions**: Original, competitor, and null predictions competing within each market
-3. **On-chain Oracle System**: BASE smart contracts managing validation and consensus with screenshot proofs
+2. **X.com Actor System**: Public figures identified exclusively by X.com username (e.g., @elonmusk, @taylorswift13)
+3. **Competitive Submissions**: Original, competitor, and null predictions competing within each market
+4. **On-chain Oracle System**: BASE smart contracts managing validation and consensus with screenshot proofs
 
 ### Key Features
 
 - **BASE Blockchain Native**: Built exclusively on Coinbase's L2 blockchain with sub-cent transaction costs
+- **X.com Username Actors**: Public figures identified by their X.com handles (no wallet addresses required)
 - **X.com Oracle Integration**: Real-time validation of tweets with on-chain screenshot storage
+- **Verified Account Support**: Blue checkmark verification status displayed for authenticated accounts
 - **Wallet Integration**: Seamless MetaMask and Coinbase Wallet support with automatic network switching
 - **Smart Contract Architecture**: Deployed contracts for markets, oracles, node registry, and payouts
 - **E2E Test Manager**: Comprehensive testing dashboard for BASE Sepolia testnet integration
