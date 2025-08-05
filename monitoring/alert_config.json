@@ -1,0 +1,194 @@
+{
+  "name": "Clockchain Production Monitoring",
+  "created": "2025-08-05T17:08:04.366193",
+  "network": "base-mainnet",
+  "alerts": [
+    {
+      "type": "contract_balance",
+      "name": "Low Contract Balance Alert",
+      "description": "Alert when any contract balance falls below threshold",
+      "threshold": "0.01 ETH",
+      "contracts": [
+        "PredictionMarket",
+        "PayoutManager",
+        "EnhancedPredictionMarket"
+      ],
+      "severity": "high",
+      "channels": [
+        "webhook",
+        "email",
+        "logs"
+      ]
+    },
+    {
+      "type": "transaction_failed",
+      "name": "Failed Transaction Alert",
+      "description": "Alert on any failed contract transactions",
+      "severity": "critical",
+      "channels": [
+        "webhook",
+        "email",
+        "logs",
+        "sms"
+      ]
+    },
+    {
+      "type": "emergency_function_called",
+      "name": "Emergency Function Usage",
+      "description": "Alert when emergency functions are called",
+      "functions": [
+        "toggleEmergencyStop",
+        "pause",
+        "unpause",
+        "addToBlacklist"
+      ],
+      "severity": "critical",
+      "channels": [
+        "webhook",
+        "email",
+        "logs",
+        "sms"
+      ]
+    },
+    {
+      "type": "gas_price_spike",
+      "name": "Gas Price Spike Alert",
+      "description": "Alert when gas prices spike above threshold",
+      "threshold": "5 gwei",
+      "severity": "medium",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    },
+    {
+      "type": "gas_price_low",
+      "name": "Low Gas Price Opportunity",
+      "description": "Alert when gas prices are very low",
+      "threshold": "0.1 gwei",
+      "severity": "info",
+      "channels": [
+        "webhook",
+        "email"
+      ]
+    },
+    {
+      "type": "oracle_consensus_failure",
+      "name": "Oracle Consensus Failure",
+      "description": "Alert when oracle consensus cannot be reached",
+      "threshold": "3 consecutive failures",
+      "severity": "high",
+      "channels": [
+        "webhook",
+        "email",
+        "logs"
+      ]
+    },
+    {
+      "type": "oracle_submission_delay",
+      "name": "Oracle Submission Delay",
+      "description": "Alert when oracle submissions are delayed",
+      "threshold": "30 minutes",
+      "severity": "medium",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    },
+    {
+      "type": "xcom_api_error",
+      "name": "X.com API Error",
+      "description": "Alert on X.com API failures",
+      "threshold": "5 errors in 10 minutes",
+      "severity": "high",
+      "channels": [
+        "webhook",
+        "email",
+        "logs"
+      ]
+    },
+    {
+      "type": "xcom_rate_limit",
+      "name": "X.com Rate Limit Warning",
+      "description": "Alert when approaching X.com rate limits",
+      "threshold": "80% of limit",
+      "severity": "medium",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    },
+    {
+      "type": "suspicious_activity",
+      "name": "Suspicious Activity Detection",
+      "description": "Alert on unusual transaction patterns",
+      "patterns": [
+        "Multiple failed transactions from same address",
+        "Unusually large bets",
+        "Rapid successive transactions"
+      ],
+      "severity": "high",
+      "channels": [
+        "webhook",
+        "email",
+        "logs"
+      ]
+    },
+    {
+      "type": "blacklist_activity",
+      "name": "Blacklisted Address Activity",
+      "description": "Alert when blacklisted addresses attempt transactions",
+      "severity": "high",
+      "channels": [
+        "webhook",
+        "email",
+        "logs"
+      ]
+    },
+    {
+      "type": "high_response_time",
+      "name": "High Response Time",
+      "description": "Alert when API response times are high",
+      "threshold": "2000ms",
+      "severity": "medium",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    },
+    {
+      "type": "database_connection_failure",
+      "name": "Database Connection Issues",
+      "description": "Alert on database connection failures",
+      "severity": "critical",
+      "channels": [
+        "webhook",
+        "email",
+        "logs",
+        "sms"
+      ]
+    },
+    {
+      "type": "market_resolution_pending",
+      "name": "Pending Market Resolution",
+      "description": "Alert when markets need resolution",
+      "threshold": "30 minutes after end time",
+      "severity": "medium",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    },
+    {
+      "type": "high_volume_activity",
+      "name": "High Volume Activity",
+      "description": "Alert on unusually high betting volume",
+      "threshold": "10x average volume",
+      "severity": "info",
+      "channels": [
+        "webhook",
+        "logs"
+      ]
+    }
+  ]
+}

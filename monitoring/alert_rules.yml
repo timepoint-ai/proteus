@@ -1,0 +1,58 @@
+{
+  "groups": [
+    {
+      "name": "clockchain_alerts",
+      "interval": "30s",
+      "rules": [
+        {
+          "alert": "ContractLowBalance",
+          "expr": "contract_balance_eth < 0.01",
+          "for": "5m",
+          "labels": {
+            "severity": "warning"
+          },
+          "annotations": {
+            "summary": "Contract balance is low",
+            "description": "Contract {{ $labels.contract }} balance is {{ $value }} ETH"
+          }
+        },
+        {
+          "alert": "HighGasPrice",
+          "expr": "gas_price_gwei > 5",
+          "for": "10m",
+          "labels": {
+            "severity": "info"
+          },
+          "annotations": {
+            "summary": "Gas prices are high",
+            "description": "Current gas price is {{ $value }} gwei"
+          }
+        },
+        {
+          "alert": "OracleConsensusFailure",
+          "expr": "oracle_consensus_failures > 3",
+          "for": "5m",
+          "labels": {
+            "severity": "critical"
+          },
+          "annotations": {
+            "summary": "Oracle consensus is failing",
+            "description": "Oracle consensus has failed {{ $value }} times"
+          }
+        },
+        {
+          "alert": "XComAPIErrors",
+          "expr": "rate(xcom_api_errors[5m]) > 1",
+          "for": "5m",
+          "labels": {
+            "severity": "warning"
+          },
+          "annotations": {
+            "summary": "X.com API errors detected",
+            "description": "X.com API error rate is {{ $value }} per minute"
+          }
+        }
+      ]
+    }
+  ]
+}

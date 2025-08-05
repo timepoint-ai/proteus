@@ -1,0 +1,52 @@
+{
+  "timestamp": "2025-08-05T17:07:55.764Z",
+  "tester": "0xBa4C1B6f3F14FC00F804a1f66e307B90d079F20f",
+  "network": "base-sepolia",
+  "results": [
+    {
+      "contract": "SecurityAudit",
+      "function": "emergencyStop",
+      "status": "FAILED",
+      "error": "securityAudit.emergencyStop is not a function"
+    },
+    {
+      "contract": "SecurityAudit",
+      "function": "toggleEmergencyStop",
+      "status": "UNAUTHORIZED"
+    },
+    {
+      "contract": "SecurityAudit",
+      "function": "blacklist",
+      "status": "FAILED",
+      "error": "securityAudit.blacklist is not a function"
+    },
+    {
+      "contract": "PredictionMarket",
+      "function": "paused",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "contract": "AdvancedMarkets",
+      "function": "hasRole",
+      "status": "READABLE",
+      "isAdmin": true
+    },
+    {
+      "contract": "AdvancedMarkets",
+      "function": "MARKET_CREATOR_ROLE",
+      "status": "READABLE",
+      "hasRole": true
+    },
+    {
+      "contract": "EnhancedPredictionMarket",
+      "function": "owner",
+      "status": "READABLE",
+      "isOwner": true
+    }
+  ],
+  "summary": {
+    "authorized": 2,
+    "readable": 3,
+    "failed": 2
+  }
+}
