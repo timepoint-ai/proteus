@@ -707,6 +707,87 @@ BASE Sepolia Contracts:
 - EnhancedPredictionMarket: `0x[Phase 10 Address]`
 - DecentralizedOracle: `0x[Phase 11 Address]`
 
+## Phase 13-14: Advanced Features & Production Readiness
+
+### Phase 13: Advanced Market Features (Completed)
+
+#### Smart Contract: AdvancedMarkets.sol
+Advanced prediction market types:
+- **Multi-Choice Markets**: Up to 10 options per market
+- **Conditional Markets**: Depend on other market outcomes
+- **Range Markets**: Numeric predictions within bounds
+- **Reputation System**: User participation tracking
+
+Key Features:
+```solidity
+// Multi-choice betting
+function betOnOption(bytes32 marketId, bytes32 optionId) external payable
+
+// Create advanced market types
+function createMultiChoiceMarket(bytes32 marketId, string[] options, uint256 endTime)
+function createConditionalMarket(bytes32 marketId, bytes32 dependsOn, uint256 endTime)
+function createRangeMarket(bytes32 marketId, uint256 minValue, uint256 maxValue, uint256 endTime)
+```
+
+#### Service: distributed_storage.py
+IPFS integration for distributed storage:
+- Screenshot storage and retrieval
+- Market metadata persistence
+- Oracle proof archival
+- Analytics report storage
+
+#### Service: advanced_markets.py
+Backend for advanced market operations:
+- Multi-choice market creation
+- Conditional logic handling
+- Range validation
+- Reputation calculation
+
+### Phase 14: Security & Production Readiness (Completed)
+
+#### Smart Contract: SecurityAudit.sol
+Comprehensive security controls:
+- **Rate Limiting**: Transaction frequency controls
+- **Value Limits**: Maximum transaction and daily limits
+- **Blacklisting**: User blocking capability
+- **Emergency Mode**: Instant system shutdown
+- **Pausable**: Admin-controlled pause functionality
+
+Security Features:
+```solidity
+// Security checks
+function checkTransactionSecurity(address user, uint256 value) returns (bool)
+
+// Emergency controls
+function activateEmergencyMode(string reason)
+function blacklistUser(address user, string reason)
+
+// Threshold management
+function updateMaxTransactionValue(uint256 newValue)
+function updateDailyWithdrawLimit(uint256 newValue)
+```
+
+#### Service: security_audit.py
+Production security monitoring:
+- Real-time transaction analysis
+- Suspicious pattern detection
+- Alert generation and tracking
+- Security metrics collection
+- Risk level calculation
+
+### Deployment Summary
+
+BASE Sepolia Contracts (All Phases):
+- PredictionMarket: `0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`
+- ClockchainOracle: `0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`
+- NodeRegistry: `0xa1234554321B86b1f3f24A9151B8cbaE5C8BDb75`
+- PayoutManager: `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`
+- ActorRegistry: `0x[Phase 9 Address]`
+- EnhancedPredictionMarket: `0x[Phase 10 Address]`
+- DecentralizedOracle: `0x[Phase 11 Address]`
+- AdvancedMarkets: `0x[Phase 13 Address]`
+- SecurityAudit: `0x[Phase 14 Address]`
+
 ### Similarity Scoring
 
 ```python
