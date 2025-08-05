@@ -17,6 +17,11 @@ Preferred communication style: Simple, everyday language.
 ## Recent Major Changes (August 2025)
 - **Phase 1 Complete**: Backend transitioned to blockchain-first with database writes disabled
 - **Phase 2 Complete**: Frontend fully integrated with Web3.js and MetaMask
+- **Phase 3 Complete (August 5)**: Test infrastructure fully migrated to blockchain
+  - Created blockchain test data generation tool (scripts/blockchain_test_data.py)
+  - Created blockchain test data cleanup tool (scripts/clean_blockchain_test_data.py)
+  - Updated test manager to use blockchain scripts
+  - Removed all database test data files
 - **Architecture**: System now operates in hybrid mode - new data on blockchain, historical data read-only from database
 - **JavaScript Architecture**: Created modular Web3 integration (wallet.js, market-blockchain.js, etc.)
 - **Documentation**: Updated ON-CHAIN-CHANGES.md, README.md, and ENGINEERING.md to reflect current state

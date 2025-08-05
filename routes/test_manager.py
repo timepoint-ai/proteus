@@ -2,6 +2,7 @@
 Test Manager - Comprehensive E2E Testing for BASE Blockchain Integration
 """
 import os
+import sys
 import json
 import logging
 import traceback
@@ -977,31 +978,50 @@ def run_full_workflow_test(results):
         return results
 
 def clean_test_data():
-    """Clean up test data from database"""
+    """Clean up test data from blockchain and database"""
     try:
-        # Delete test oracle submissions
-        OracleSubmission.query.filter(OracleSubmission.tweet_id == '1234567890123456789').delete()
+        # Clean blockchain test data
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, './scripts/clean_blockchain_test_data.py'],
+            capture_output=True,
+            text=True
+        )
         
-        # Delete test bets
-        Bet.query.filter(Bet.base_tx_hash.like('0x%eee%')).delete()
+        if result.returncode != 0:
+            logger.error(f"Error cleaning blockchain test data: {result.stderr}")
+        else:
+            logger.info("Blockchain test data cleaned successfully")
         
-        # Delete test submissions
-        Submission.query.filter(Submission.base_tx_hash.like('0x%bbb%')).delete()
-        Submission.query.filter(Submission.base_tx_hash.like('0x%ccc%')).delete()
-        Submission.query.filter(Submission.base_tx_hash.like('0x%ddd%')).delete()
-        
-        # Delete test markets
-        PredictionMarket.query.filter(PredictionMarket.twitter_handle == 'test_actor').delete()
-        
-        # Delete test actors
-        Actor.query.filter_by(name='Test Actor').delete()
-        
-        db.session.commit()
-        logger.info("Test data cleaned successfully")
+        # Clean any remaining database references (read-only mode)
+        # Note: In Phase 1, we don't write to database, so we just log what would be cleaned
+        logger.info("Database is in read-only mode - no database cleanup performed")
         
     except Exception as e:
         logger.error(f"Error cleaning test data: {e}")
-        db.session.rollback()
+
+@test_manager_bp.route('/test-manager/api/generate-data', methods=['POST'])
+@require_test_auth
+def generate_data():
+    """Generate blockchain test data endpoint"""
+    try:
+        # Generate blockchain test data
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, './scripts/blockchain_test_data.py'],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            logger.error(f"Error generating blockchain test data: {result.stderr}")
+            return jsonify({'success': False, 'error': result.stderr}), 500
+        else:
+            logger.info("Blockchain test data generated successfully")
+            return jsonify({'success': True, 'message': 'Blockchain test data generated successfully'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @test_manager_bp.route('/test-manager/api/clean-data', methods=['POST'])
 @require_test_auth

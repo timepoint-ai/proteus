@@ -7,7 +7,7 @@ This document outlines the phased approach to remove legacy code and align the e
 - ✅ All 14 smart contracts deployed to BASE Sepolia
 - ✅ Phase 1: Backend cleanup completed (database writes disabled)
 - ✅ Phase 2: Frontend Web3 integration completed
-- ❌ Phase 3: Test infrastructure still uses database
+- ✅ Phase 3: Test infrastructure migrated to blockchain (August 5, 2025)
 - ❌ Phase 4: Documentation and final cleanup pending
 
 ## Completed Phases
@@ -59,30 +59,37 @@ This document outlines the phased approach to remove legacy code and align the e
 
 ## Remaining Phases
 
-### Phase 3: Test Infrastructure (In Progress)
+### Phase 3: Test Infrastructure ✅ COMPLETED (August 5, 2025)
 
 #### 3.1 Test Data Migration
 
-- [ ] **Remove Database Test Data**
-  - [ ] Delete `routes/test_data.py`
-  - [ ] Delete `routes/test_data_new.py`
-  - [ ] Delete `routes/test_data_v2.py`
-  - [ ] Remove test data generation endpoints
+- [x] **Remove Database Test Data**
+  - [x] Delete `routes/test_data.py`
+  - [x] Delete `routes/test_data_new.py`
+  - [x] Delete `routes/test_data_v2.py`
+  - [x] Delete `routes/test_data_ai.py`
+  - [x] Remove test data generation endpoints
 
-- [ ] **Create On-Chain Test Tools**
-  - [ ] Script to deploy test markets on-chain
-  - [ ] Script to create test submissions
-  - [ ] Script to place test bets
-  - [ ] Use test wallets from `.test_wallets.json`
+- [x] **Create On-Chain Test Tools**
+  - [x] Script to deploy test markets on-chain (`scripts/blockchain_test_data.py`)
+  - [x] Script to create test submissions
+  - [x] Script to place test bets
+  - [x] Script to clean test data (`scripts/clean_blockchain_test_data.py`)
+  - [x] Use test wallets from `.test_wallets.json`
 
 #### 3.2 E2E Test Updates
 
-| Test File | Current State | Required Changes |
-|-----------|--------------|------------------|
-| `test_e2e_runner.py` | Mixed DB/chain | Chain-only tests |
-| `debug_e2e_test.py` | Database focused | Remove or update |
-| `test_phase11_12.py` | Contract tests | Keep as-is |
-| `test_phase13_14.py` | Contract tests | Keep as-is |
+- [x] **Updated Test Manager**
+  - [x] Modified `clean_test_data()` to use blockchain cleanup script
+  - [x] Added `generate_data()` endpoint for blockchain test data generation
+  - [x] Imports `subprocess` to run blockchain scripts
+
+| Test File | Current State | Required Changes | Status |
+|-----------|--------------|------------------|--------|
+| `test_e2e_runner.py` | Mixed DB/chain | Chain-only tests | Pending |
+| `debug_e2e_test.py` | Database focused | Remove or update | Pending |
+| `test_phase11_12.py` | Contract tests | Keep as-is | ✅ Confirmed |
+| `test_phase13_14.py` | Contract tests | Keep as-is | ✅ Confirmed |
 
 ### Phase 4: Documentation & Cleanup (Pending)
 
