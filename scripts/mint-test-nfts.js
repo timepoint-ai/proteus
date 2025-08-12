@@ -29,15 +29,17 @@ async function main() {
   
   // Check current status
   const totalMinted = await genesisNFT.totalMinted();
-  const isFinalized = await genesisNFT.finalized();
+  const remainingSupply = await genesisNFT.remainingSupply();
+  const isMintingActive = await genesisNFT.isMintingActive();
   
   console.log("📊 Current Status:");
   console.log("- Total Minted:", totalMinted.toString(), "/ 100");
-  console.log("- Finalized:", isFinalized);
+  console.log("- Remaining Supply:", remainingSupply.toString());
+  console.log("- Minting Active:", isMintingActive);
   console.log("\n");
   
-  if (isFinalized) {
-    console.log("⚠️  Minting has been finalized! No more NFTs can be minted.");
+  if (!isMintingActive) {
+    console.log("⚠️  Minting has been disabled! No more NFTs can be minted.");
     process.exit(0);
   }
   
@@ -85,12 +87,12 @@ async function main() {
   
   // Check final status
   const finalMinted = await genesisNFT.totalMinted();
-  const finalFinalized = await genesisNFT.finalized();
+  const finalMintingActive = await genesisNFT.isMintingActive();
   
   console.log("📊 Final Status:");
   console.log("=====================================");
   console.log("- Total Minted:", finalMinted.toString(), "/ 100");
-  console.log("- Finalized:", finalFinalized);
+  console.log("- Minting Active:", finalMintingActive);
   console.log("- Remaining Supply:", (100n - finalMinted).toString());
   console.log("\n");
   
