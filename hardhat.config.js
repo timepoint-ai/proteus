@@ -1,6 +1,17 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+// Helper function to get accounts
+function getAccounts() {
+  const pk = process.env.DEPLOYER_PRIVATE_KEY;
+  if (!pk || pk.length < 64) {
+    // Return empty array if no valid private key
+    return [];
+  }
+  // Ensure proper formatting
+  return [pk.startsWith('0x') ? pk : `0x${pk}`];
+}
+
 module.exports = {
   solidity: {
     version: "0.8.20",
@@ -18,12 +29,12 @@ module.exports = {
     },
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
-      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [`0x${process.env.DEPLOYER_PRIVATE_KEY}`] : [],
+      accounts: getAccounts(),
       chainId: 84532
     },
     base: {
       url: process.env.BASE_RPC_URL || "https://mainnet.base.org",
-      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [`0x${process.env.DEPLOYER_PRIVATE_KEY}`] : [],
+      accounts: getAccounts(),
       chainId: 8453
     }
   },
