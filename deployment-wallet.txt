@@ -1,0 +1,4 @@
+New Wallet Created:
+Address: 0xA9111436FCc96ebF18a269801A65D45484FCC5b9
+Private Key: 0xdff3e7b94f84417463f456f8165eb8adfcb88c8a7df13b662e4636ead1e30b44
+Mnemonic: cheap matter worry web tray chase grocery extra kid spider gauge weapon
