@@ -1497,6 +1497,46 @@ The platform migrated from multi-currency support (ETH/BTC) to BASE-exclusive ar
 - **Better UX**: No currency confusion for users
 - **Easier Maintenance**: Single blockchain integration
 
+## Migration History
+
+### Phase 1: Backend Migration (Completed)
+- Disabled all database write operations
+- Made models read-only with blockchain fallback
+- Added deprecation warnings to affected services
+- Implemented blockchain read methods in services
+
+### Phase 2: Frontend Web3 Integration (Completed)
+- Added MetaMask wallet connection widget to navbar
+- Implemented Web3.js for blockchain queries
+- Created transaction handlers for submissions/bets
+- Added real-time event subscriptions
+- Updated admin dashboard with contract statistics
+- Implemented loading states and transaction feedback
+
+**JavaScript Files Created:**
+- `wallet.js` - MetaMask connection management
+- `market-blockchain.js` - Direct blockchain market queries
+- `timeline-blockchain.js` - Real-time timeline updates
+- `market-detail-blockchain.js` - Transaction handling
+- `admin-blockchain-stats.js` - Contract statistics display
+
+### Phase 3: Test Infrastructure (Completed August 5, 2025)
+- Created `scripts/blockchain_test_data.py` for on-chain test data
+- Created `scripts/clean_blockchain_test_data.py` for cleanup
+- Removed all database test data files
+- Updated test manager to use blockchain scripts
+
+### Phase 4: Documentation & Cleanup (Completed August 5, 2025)
+- Deleted legacy files: models_old.py, bet_resolution_old.py, oracle_old.py, mock_node_registry.py, node_registry_service.py
+- Updated README.md, ENGINEERING.md, replit.md
+- Removed all database setup instructions
+
+### Phase 5: Bittensor AI Integration (Completed August 12, 2025)
+- Integrated BittensorIntegration and AIAgentProfile models
+- Added AI transparency framework with 4 verification modules
+- Implemented TAO token staking and rewards
+- Created BITTENSOR_INTEGRATION.md documentation
+
 ## Completed Implementation Phases
 
 ### Phase 1: Core Blockchain Foundation ✓ COMPLETE

@@ -1,193 +1,75 @@
-# On-Chain Migration & Cleanup Plan
+# Production Readiness Plan
 
 ## Overview
-This document outlines the phased approach to remove legacy code and align the entire system with the fully on-chain architecture deployed on BASE Sepolia. All 14 phases are now live, requiring significant cleanup of database-dependent code and UI/UX alignment.
+This document tracks the remaining tasks for production deployment on BASE mainnet. The blockchain migration is complete (Phases 1-4), and the Bittensor AI integration is complete (Phase 5). Only production configuration and deployment tasks remain.
 
 ## Current State
 - ✅ All 14 smart contracts deployed to BASE Sepolia
-- ✅ Phase 1: Backend cleanup completed (database writes disabled)
-- ✅ Phase 2: Frontend Web3 integration completed
-- ✅ Phase 3: Test infrastructure migrated to blockchain (August 5, 2025)
-- ❌ Phase 4: Documentation and final cleanup pending
+- ✅ Phase 1-4: Complete blockchain migration (August 5, 2025)
+- ✅ Phase 5: Bittensor AI integration (August 12, 2025)
+- ⏳ Production deployment preparation in progress
 
-## Completed Phases
+## Remaining Tasks for Production Deployment
 
-### Phase 1: Backend Cleanup ✅ COMPLETED
-- Disabled all database write operations
-- Maintained read-only access for legacy data
-- Added blockchain read methods to services
-- System now operates in hybrid mode with blockchain as source of truth
-
-### Phase 2: Frontend Alignment ✅ COMPLETED
-- Added MetaMask wallet integration in navbar
-- Created Web3.js market query system (market-blockchain.js)
-- Built transaction handlers for submissions and bets
-- Added real-time blockchain statistics to admin dashboard
-- Implemented event subscriptions for live updates
-- Added contract ABI endpoint for Web3 integration
-
-## Phase 3: Test Infrastructure (Priority: HIGH)
-
-### Completed Items from Phase 1 & 2:
-
-**Backend Changes (Phase 1):**
-- ✅ Disabled all database write operations 
-- ✅ Made models read-only with blockchain fallback
-- ✅ Added deprecation warnings to affected services
-- ✅ Blockchain read methods implemented in services
-
-**Frontend Changes (Phase 2):**
-- ✅ Added MetaMask wallet connection widget to navbar
-- ✅ Implemented Web3.js for blockchain queries
-- ✅ Created transaction handlers for submissions/bets
-- ✅ Added real-time event subscriptions
-- ✅ Updated admin dashboard with contract statistics
-- ✅ Implemented loading states and transaction feedback
-
-### Implementation Details:
-
-**New JavaScript Files Created:**
-- `wallet.js` - MetaMask connection management
-- `market-blockchain.js` - Direct blockchain market queries
-- `timeline-blockchain.js` - Real-time timeline updates
-- `market-detail-blockchain.js` - Transaction handling
-- `admin-blockchain-stats.js` - Contract statistics display
-
-**API Enhancements:**
-- Added `/api/contract-abi/<contract_name>` endpoint for Web3 integration
-- Contract ABIs served from artifacts directory
-
-## Remaining Phases
-
-### Phase 3: Test Infrastructure ✅ COMPLETED (August 5, 2025)
-
-#### 3.1 Test Data Migration
-
-- [x] **Remove Database Test Data**
-  - [x] Delete `routes/test_data.py`
-  - [x] Delete `routes/test_data_new.py`
-  - [x] Delete `routes/test_data_v2.py`
-  - [x] Delete `routes/test_data_ai.py`
-  - [x] Remove test data generation endpoints
-
-- [x] **Create On-Chain Test Tools**
-  - [x] Script to deploy test markets on-chain (`scripts/blockchain_test_data.py`)
-  - [x] Script to create test submissions
-  - [x] Script to place test bets
-  - [x] Script to clean test data (`scripts/clean_blockchain_test_data.py`)
-  - [x] Use test wallets from `.test_wallets.json`
-
-#### 3.2 E2E Test Updates
-
-- [x] **Updated Test Manager**
-  - [x] Modified `clean_test_data()` to use blockchain cleanup script
-  - [x] Added `generate_data()` endpoint for blockchain test data generation
-  - [x] Imports `subprocess` to run blockchain scripts
-
-| Test File | Current State | Required Changes | Status |
-|-----------|--------------|------------------|--------|
-| `test_e2e_runner.py` | Mixed DB/chain | Chain-only tests | Pending |
-| `debug_e2e_test.py` | Database focused | Remove or update | Pending |
-| `test_phase11_12.py` | Contract tests | Keep as-is | ✅ Confirmed |
-| `test_phase13_14.py` | Contract tests | Keep as-is | ✅ Confirmed |
-
-### Phase 4: Documentation & Cleanup ✅ COMPLETED (August 5, 2025)
-
-#### 4.1 File Deletion List (After Phase 3)
-
-**Definitely Delete:**
-- [x] `models_old.py` - Legacy models ✅ Deleted
-- [x] `services/bet_resolution_old.py` - Replaced by on-chain ✅ Deleted
-- [x] `services/oracle_old.py` - Replaced by DecentralizedOracle ✅ Deleted
-- [x] `services/ledger.py` - Now on-chain events (Not found - already removed)
-- [x] `services/consensus.py` - In DecentralizedOracle (Not found - already removed)
-- [x] `services/mock_node_registry.py` - Use real NodeRegistry ✅ Deleted
-- [x] All `test_data*.py` routes ✅ Completed in Phase 3
-
-**Consider Deleting:**
-- [x] `CRYPTO_PLAN.md` - All phases complete (Not found)
-- [x] `LAUNCH.md` - If launch plan executed (Not found)
-- [x] `services/node_registry_service.py` - If fully on-chain ✅ Deleted
-
-### 4.2 Documentation Updates
-
-| Document | Updates Required | Priority | Status |
-|----------|-----------------|----------|--------|
-| `README.md` | Remove DB setup, add chain-only instructions | HIGH | ✅ Complete |
-| `ENGINEERING.md` | Document on-chain architecture | HIGH | ✅ Complete |
-| `replit.md` | Update architecture section | MEDIUM | ✅ Complete |
-| `TEST_DATA_GUIDE.md` | Rewrite for on-chain testing | LOW | ✅ Complete |
-
-## Phase 5: Production Readiness (Priority: MEDIUM)
-
-### 5.1 Environment Configuration
+### 1. Environment Configuration
 
 - [ ] **Remove Database URLs**
-  - [ ] Remove DATABASE_URL from production
-  - [ ] Remove Redis dependency if not needed
+  - [ ] Remove DATABASE_URL from production config
+  - [ ] Remove Redis dependency if not needed for caching
   - [ ] Keep only blockchain RPC endpoints
 
 - [ ] **Add Production Variables**
-  - [ ] `BASE_MAINNET_RPC`
-  - [ ] `PRODUCTION_PRIVATE_KEY`
-  - [ ] `BASESCAN_API_KEY`
-  - [ ] `X_API_KEY` (production)
+  - [ ] `BASE_MAINNET_RPC` - Production BASE RPC endpoint
+  - [ ] `PRODUCTION_PRIVATE_KEY` - Secure wallet for mainnet operations
+  - [ ] `BASESCAN_API_KEY` - For contract verification
+  - [ ] `X_API_KEY` - Production X.com API credentials
 
-### 5.2 Deployment Changes
+### 2. Deployment Changes
 
-- [ ] Update `main.py` to remove DB initialization
-- [ ] Update `app.py` to remove SQLAlchemy
-- [ ] Simplify deployment to static + RPC calls
-- [ ] Remove Celery/Redis if not needed
+- [ ] **Code Cleanup**
+  - [ ] Update `main.py` to remove DB initialization
+  - [ ] Update `app.py` to remove SQLAlchemy if not needed
+  - [ ] Simplify deployment to static frontend + RPC calls
+  - [ ] Evaluate if Celery/Redis still needed
 
-## Implementation Order
+- [ ] **Contract Deployment**
+  - [ ] Deploy all 14 contracts to BASE mainnet
+  - [ ] Verify contracts on Basescan
+  - [ ] Update deployment configuration files
+  - [ ] Test mainnet contract interactions
 
-1. **Week 1**: Backend cleanup (Phase 1)
-   - Start with read-only models
-   - Migrate one service at a time
-   - Test each migration thoroughly
+### 3. Security & Testing
 
-2. **Week 2**: Frontend alignment (Phase 2)
-   - Update templates for Web3
-   - Add wallet integration
-   - Improve transaction UX
+- [ ] **Security Audit**
+  - [ ] Third-party smart contract audit
+  - [ ] Penetration testing for web application
+  - [ ] Review wallet security implementation
 
-3. **Week 3**: Test & Documentation (Phase 3-4)
-   - Clean up test infrastructure
-   - Update all documentation
-   - Delete legacy files
+- [ ] **Performance Testing**
+  - [ ] Load test with high transaction volumes
+  - [ ] Test gas optimization strategies
+  - [ ] Validate oracle response times
 
-4. **Week 4**: Production prep (Phase 5)
-   - Final testing
-   - Environment cleanup
-   - Mainnet deployment
+### 4. Launch Checklist
 
-## Success Metrics
+- [ ] Production X.com API credentials obtained
+- [ ] Mainnet contracts deployed and verified
+- [ ] DNS and SSL certificates configured
+- [ ] Monitoring and alerting set up
+- [ ] User documentation finalized
+- [ ] Marketing website live
 
-- [ ] Zero database writes for core functionality
-- [ ] All data sourced from blockchain
-- [ ] Wallet-first user experience
-- [ ] Clean codebase with no legacy files
-- [ ] Updated documentation reflecting reality
-- [ ] Successful BASE mainnet deployment
+## Timeline
 
-## Risk Mitigation
+- **Week 1**: Environment setup and contract deployment
+- **Week 2**: Security audit and testing
+- **Week 3**: Final preparations and soft launch
+- **Week 4**: Public launch
 
-1. **Keep database read-only during transition**
-   - Don't delete models until replacements work
-   - Maintain backwards compatibility temporarily
+## Success Criteria
 
-2. **Test on Sepolia first**
-   - Each change tested on testnet
-   - User acceptance testing before mainnet
-
-3. **Gradual rollout**
-   - Feature flags for new functionality
-   - A/B testing if needed
-
-## Next Steps
-
-1. Create feature branch: `on-chain-migration`
-2. Start with Phase 1.1 - Backend cleanup
-3. Daily progress updates in this document
-4. Code review after each phase
+✅ All functionality working on BASE mainnet  
+✅ Gas costs optimized below $0.01 per transaction  
+✅ X.com oracle integration validated  
+✅ Bittensor AI agents successfully participating  
+✅ User onboarding flow tested and smooth
