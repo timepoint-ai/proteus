@@ -2,8 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IPredictionMarket {
     function markets(uint256) external view returns (
@@ -43,14 +44,20 @@ interface IBittensorRewardPool {
     function deposit() external payable;
 }
 
+interface IGenesisNFT is IERC721 {
+    function totalSupply() external view returns (uint256);
+    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256);
+}
+
 /**
  * @title DistributedPayoutManager
  * @dev Manages distributed payouts for the Clockchain prediction market
- * Distributes fees to multiple stakeholders instead of single owner
+ * Distributes fees to multiple stakeholders including Genesis NFT holders
  */
 contract DistributedPayoutManager is ReentrancyGuard, Pausable {
     // Fee distribution percentages (out of 700 = 7%)
-    uint16 public constant ORACLE_SHARE = 200;      // 2%
+    uint16 public constant GENESIS_SHARE = 20;      // 0.2% (0.002% per NFT with 100 NFTs)
+    uint16 public constant ORACLE_SHARE = 180;      // 1.8%
     uint16 public constant NODE_SHARE = 100;        // 1%
     uint16 public constant CREATOR_SHARE = 100;     // 1%
     uint16 public constant BUILDER_POOL_SHARE = 200; // 2%
@@ -60,6 +67,7 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
     IPredictionMarket public predictionMarket;
     IBuilderRewardPool public builderRewardPool;
     IBittensorRewardPool public bittensorRewardPool;
+    IGenesisNFT public genesisNFT;
     
     // Track oracle contributions per market
     mapping(uint256 => mapping(address => uint256)) public oracleContributions;
@@ -83,6 +91,7 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
     // Events
     event FeesDistributed(
         uint256 indexed marketId,
+        uint256 genesisRewards,
         uint256 oracleRewards,
         uint256 nodeRewards,
         uint256 creatorReward,
@@ -90,6 +99,7 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
         uint256 bittensorPoolDeposit
     );
     
+    event GenesisHolderRewarded(address indexed holder, uint256 amount, uint256 marketId);
     event OracleRewarded(address indexed oracle, uint256 amount, uint256 marketId);
     event NodeRewarded(address indexed node, uint256 amount);
     event CreatorRewarded(address indexed creator, uint256 amount, uint256 marketId);
@@ -98,11 +108,13 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
     constructor(
         address _predictionMarket,
         address _builderRewardPool,
-        address _bittensorRewardPool
+        address _bittensorRewardPool,
+        address _genesisNFT
     ) {
         predictionMarket = IPredictionMarket(_predictionMarket);
         builderRewardPool = IBuilderRewardPool(_builderRewardPool);
         bittensorRewardPool = IBittensorRewardPool(_bittensorRewardPool);
+        genesisNFT = IGenesisNFT(_genesisNFT);
     }
     
     /**
@@ -128,11 +140,15 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
         require(platformFeeCollected > 0, "No fees to distribute");
         
         // Calculate distribution amounts
+        uint256 genesisReward = (platformFeeCollected * GENESIS_SHARE) / TOTAL_FEE;
         uint256 oracleReward = (platformFeeCollected * ORACLE_SHARE) / TOTAL_FEE;
         uint256 nodeReward = (platformFeeCollected * NODE_SHARE) / TOTAL_FEE;
         uint256 creatorReward = (platformFeeCollected * CREATOR_SHARE) / TOTAL_FEE;
         uint256 builderReward = (platformFeeCollected * BUILDER_POOL_SHARE) / TOTAL_FEE;
         uint256 bittensorReward = (platformFeeCollected * BITTENSOR_POOL_SHARE) / TOTAL_FEE;
+        
+        // Distribute to Genesis NFT holders
+        _distributeToGenesisHolders(_marketId, genesisReward);
         
         // Distribute to oracles who participated
         _distributeToOracles(_marketId, oracleReward);
@@ -156,12 +172,57 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
         
         emit FeesDistributed(
             _marketId,
+            genesisReward,
             oracleReward,
             nodeReward,
             creatorReward,
             builderReward,
             bittensorReward
         );
+    }
+    
+    /**
+     * @dev Distribute rewards to Genesis NFT holders
+     * Each NFT holder gets an equal share (0.002% of platform volume per NFT)
+     */
+    function _distributeToGenesisHolders(uint256 _marketId, uint256 _totalReward) internal {
+        if (_totalReward == 0 || address(genesisNFT) == address(0)) return;
+        
+        uint256 totalSupply = genesisNFT.totalSupply();
+        if (totalSupply == 0) return;
+        
+        // Track unique holders to avoid double rewards
+        address[] memory processedHolders = new address[](totalSupply);
+        uint256 uniqueHolderCount = 0;
+        
+        // Calculate reward per NFT
+        uint256 rewardPerNFT = _totalReward / totalSupply;
+        
+        // Distribute to each NFT holder
+        for (uint256 tokenId = 1; tokenId <= totalSupply; tokenId++) {
+            address holder = genesisNFT.ownerOf(tokenId);
+            
+            // Check if we've already processed this holder
+            bool alreadyProcessed = false;
+            for (uint256 j = 0; j < uniqueHolderCount; j++) {
+                if (processedHolders[j] == holder) {
+                    alreadyProcessed = true;
+                    break;
+                }
+            }
+            
+            if (!alreadyProcessed) {
+                // Count how many NFTs this holder owns
+                uint256 holderBalance = genesisNFT.balanceOf(holder);
+                uint256 holderReward = rewardPerNFT * holderBalance;
+                
+                unclaimedRewards[holder] += holderReward;
+                emit GenesisHolderRewarded(holder, holderReward, _marketId);
+                
+                processedHolders[uniqueHolderCount] = holder;
+                uniqueHolderCount++;
+            }
+        }
     }
     
     /**
@@ -324,6 +385,14 @@ contract DistributedPayoutManager is ReentrancyGuard, Pausable {
     function updateBittensorRewardPool(address _newPool) external {
         // In production, this should have access controls
         bittensorRewardPool = IBittensorRewardPool(_newPool);
+    }
+    
+    /**
+     * @dev Update Genesis NFT contract address
+     */
+    function updateGenesisNFT(address _newNFT) external {
+        // In production, this should have access controls
+        genesisNFT = IGenesisNFT(_newNFT);
     }
     
     /**

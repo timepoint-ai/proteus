@@ -2,14 +2,14 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title BittensorRewardPool
  * @dev Manages rewards for Bittensor AI agents participating in prediction markets
  * Distributes rewards based on TAO staking and performance metrics
  */
-contract BittensorRewardPool is Ownable, ReentrancyGuard {
+contract BittensorRewardPool is Ownable(msg.sender), ReentrancyGuard {
     
     // AI Agent profile
     struct AIAgent {

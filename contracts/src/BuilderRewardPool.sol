@@ -2,14 +2,14 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title BuilderRewardPool
  * @dev Manages builder rewards distribution following BASE's model
  * Weekly ETH distributions to top contributors
  */
-contract BuilderRewardPool is Ownable, ReentrancyGuard {
+contract BuilderRewardPool is Ownable(msg.sender), ReentrancyGuard {
     
     // Weekly reward tracking
     struct WeeklyReward {

@@ -1,0 +1,18 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MockRewardPool",
+  "sourceName": "contracts/src/MockContracts.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346013576067908160198239f35b600080fdfe6004361015600c57600080fd5b6000803560e01c63d0e30db014602157600080fd5b80600319360112602e5780f35b80fdfea264697066735822122052e0ecf8bceae0cebaf2cca7e2c2751c4fa6e4a039d3ff5af7be9d890c542aad64736f6c63430008140033",
+  "deployedBytecode": "0x6004361015600c57600080fd5b6000803560e01c63d0e30db014602157600080fd5b80600319360112602e5780f35b80fdfea264697066735822122052e0ecf8bceae0cebaf2cca7e2c2751c4fa6e4a039d3ff5af7be9d890c542aad64736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
