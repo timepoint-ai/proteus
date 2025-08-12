@@ -33,9 +33,14 @@ Preferred communication style: Simple, everyday language.
   - Implemented AI transparency framework with 60% bonus rewards
   - Updated all documentation to include Bittensor integration details
   - Fixed CSS visibility issues on landing page (grey-on-black text)
+- **Critical Logic Analysis (August 12)**: Identified fundamental platform flaw
+  - Created LOGIC.md documenting centralized fee distribution issue
+  - Platform fee (7%) currently goes to single owner address - contradicts "distributed" claim
+  - Proposed distributed fee model: Oracles (2%), Nodes (1%), Creators (1%), Liquidity (2%), DAO (1%)
+  - Documented AI agent financial tracking requirements and API improvements needed
 - **Architecture**: System now operates in hybrid mode - new data on blockchain, historical data read-only from database
 - **JavaScript Architecture**: Created modular Web3 integration (wallet.js, market-blockchain.js, etc.)
-- **Documentation**: Updated ON-CHAIN-CHANGES.md, README.md, and ENGINEERING.md to reflect current state
+- **Documentation**: Updated ON-CHAIN-CHANGES.md to Production Readiness Plan, created LOGIC.md for mechanism analysis
 
 ## System Architecture
 
