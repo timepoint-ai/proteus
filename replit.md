@@ -27,6 +27,12 @@ Preferred communication style: Simple, everyday language.
   - Updated README.md for blockchain-only operations
   - Updated ENGINEERING.md to reflect current architecture
   - Eliminated all database setup instructions
+- **Bittensor AI Integration (August 12)**: Added comprehensive Bittensor network support
+  - Integrated TAO token economics for AI agent rewards
+  - Added Yuma consensus scoring for performance tracking
+  - Implemented AI transparency framework with 60% bonus rewards
+  - Updated all documentation to include Bittensor integration details
+  - Fixed CSS visibility issues on landing page (grey-on-black text)
 - **Architecture**: System now operates in hybrid mode - new data on blockchain, historical data read-only from database
 - **JavaScript Architecture**: Created modular Web3 integration (wallet.js, market-blockchain.js, etc.)
 - **Documentation**: Updated ON-CHAIN-CHANGES.md, README.md, and ENGINEERING.md to reflect current state
@@ -57,6 +63,8 @@ Preferred communication style: Simple, everyday language.
 - **Text Analysis Service**: Calculates speech similarity using Levenshtein distance.
 - **Node Communication**: WebSocket-based P2P network for real-time data exchange.
 - **Production Monitoring**: Gas price tracking, oracle consensus monitoring, health checks.
+- **Bittensor AI Integration**: Enables AI agents from Bittensor subnets to participate as validators/miners.
+- **AI Transparency Framework**: Rewards transparent AI models with up to 60% bonus payouts.
 
 ### Smart Contracts (Deployed on BASE Sepolia)
 - **PredictionMarket**: Core market functionality.

@@ -54,6 +54,28 @@ Clockchain is a fully blockchain-native application running exclusively on BASE 
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Bittensor AI Integration
+
+Clockchain includes comprehensive integration with Bittensor's decentralized AI network:
+
+### AI Agent Participation
+- **Validators & Miners**: Both types of Bittensor neurons can participate
+- **Subnet Support**: Agents from any Bittensor subnet (1-50+) can connect
+- **TAO Economics**: Stake and earn TAO tokens for successful predictions
+- **Yuma Consensus**: Performance metrics tracked via Yuma consensus scores
+
+### Technical Implementation
+- **Database Models**: `BittensorIntegration` model manages AI agent connections
+- **Authentication**: Hotkey/coldkey wallet pair for secure operations
+- **Performance Tracking**: Success rates, trust scores, and prediction accuracy
+- **Transparency Framework**: Up to 60% bonus rewards for transparent AI operations
+
+### AI Transparency Modules
+1. **Open Source Commitment**: IPFS hash storage for model code
+2. **Architecture Disclosure**: JSON storage of model architecture
+3. **Reasoning Transparency**: Detailed reasoning traces for predictions
+4. **Audit Participation**: Third-party verification support
+
 ## System Design Principles
 
 ### 1. Blockchain-First Architecture
@@ -62,6 +84,7 @@ Clockchain is a fully blockchain-native application running exclusively on BASE 
 - MetaMask handles all transaction signing and submission
 - Smart contracts as single source of truth for new data
 - Event-driven updates for real-time synchronization
+- Bittensor AI integration for enhanced prediction accuracy
 
 ### 2. Blockchain-Only Data Strategy
 

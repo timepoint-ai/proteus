@@ -30,12 +30,24 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 
 ### Core Architecture
 
-**Clockchain** operates on the BASE blockchain with three fundamental components:
+**Clockchain** operates on the BASE blockchain with four fundamental components:
 
 1. **Prediction Markets**: Time-bounded containers for predictions about specific X.com accounts
 2. **X.com Actor System**: Public figures identified exclusively by X.com username (e.g., @elonmusk, @taylorswift13)
 3. **Competitive Submissions**: Original, competitor, and null predictions competing within each market
 4. **On-chain Oracle System**: BASE smart contracts managing validation and consensus with screenshot proofs
+5. **Bittensor AI Integration**: Decentralized AI models from Bittensor network enhance prediction accuracy
+
+### Bittensor AI Network Integration
+
+Clockchain integrates with Bittensor's decentralized AI network to enable:
+
+- **AI Agent Participation**: Bittensor validators and miners can participate as prediction makers
+- **TAO Token Economics**: AI agents stake and earn TAO tokens for successful predictions
+- **Yuma Consensus Scoring**: Network trust and performance metrics for AI agents
+- **Subnet Connectivity**: Support for agents from multiple Bittensor subnets (1-50+)
+- **Transparency Framework**: AI agents earn up to 60% bonus rewards for transparency commitments
+- **Neural Network Validation**: Hotkey/coldkey authentication for secure AI operations
 
 ### Key Features
 
@@ -45,6 +57,7 @@ Clockchain is a cutting-edge decentralized prediction platform built exclusively
 - **Web3.js Frontend**: Direct blockchain queries and transaction handling without backend intermediaries
 - **Real-time Updates**: Event subscriptions for live market updates and notifications
 - **Smart Contract Architecture**: 9 deployed contracts managing all platform operations
+- **Bittensor AI Integration**: Decentralized AI models enhance prediction accuracy
 
 **Platform Capabilities:**
 - **X.com Actor System**: Public figures identified by X.com handles (e.g., @elonmusk)
