@@ -31,35 +31,80 @@ def clockchain_view():
         # Initialize timeline segments - Phase 7: All data from blockchain
         timeline_segments = []
         
-        # Create a placeholder message for BASE Sepolia testnet
-        test_message_segment = {
-            'id': 'blockchain-message',
-            'actor': {
-                'id': None,
-                'x_username': 'Clockchain',
-                'display_name': 'Clockchain Network',
-                'verified': True,
-                'follower_count': 0,
-                'is_test_account': True
-            },
-            'start_time': current_time - timedelta(hours=1),
-            'end_time': current_time + timedelta(hours=1),
-            'start_ms': int((current_time - timedelta(hours=1)).timestamp() * 1000),
-            'end_ms': int((current_time + timedelta(hours=1)).timestamp() * 1000),
-            'status': 'active',
-            'submission_count': 0,
-            'total_volume': '0',
-            'currency': 'BASE',
-            'predicted_text': 'Phase 7 Complete: Fully decentralized on BASE Sepolia. No markets created yet. Use test scripts to create markets on blockchain.',
-            'creator_wallet': '0x2b5fBAC3CA...',
-            'initial_stake': '0',
-            'stake_count': 0,
-            'oracle_allowed': False,
-            'time_until_oracle': 0,
-            'submissions': [],
-            'competing_bets': []
-        }
-        timeline_segments.append(test_message_segment)
+        # Try to get actual markets from blockchain
+        try:
+            # Check if we have the EnhancedPredictionMarket contract  
+            if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
+                # Try to get some markets (we'll just try a few IDs)
+                for market_id in range(0, 5):  # Try first 5 market IDs
+                    try:
+                        market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
+                        
+                        # Convert market data to timeline segment
+                        segment = {
+                            'id': str(market_id),  # Use actual market ID
+                            'actor': {
+                                'id': market_id,
+                                'x_username': market[2] if market[2] else 'Unknown',  # actorName
+                                'display_name': market[2] if market[2] else 'Unknown Actor',
+                                'verified': False,
+                                'follower_count': 0,
+                                'is_test_account': False
+                            },
+                            'start_time': datetime.fromtimestamp(market[3]),  # startTime
+                            'end_time': datetime.fromtimestamp(market[4]),  # endTime
+                            'start_ms': market[3] * 1000,
+                            'end_ms': market[4] * 1000,
+                            'status': 'resolved' if market[5] else 'active',  # isResolved
+                            'submission_count': len(market[6]) if len(market) > 6 else 0,
+                            'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 else '0',
+                            'currency': 'ETH',
+                            'predicted_text': market[1],  # question
+                            'creator_wallet': market[0][:10] + '...',  # creator address shortened
+                            'initial_stake': '0.01',
+                            'stake_count': 1,
+                            'oracle_allowed': market[4] < int(current_time.timestamp()),
+                            'time_until_oracle': max(0, market[4] - int(current_time.timestamp())),
+                            'submissions': [],
+                            'competing_bets': []
+                        }
+                        timeline_segments.append(segment)
+                    except Exception as e:
+                        logger.debug(f"Error fetching market {market_id}: {e}")
+                        continue
+        except Exception as e:
+            logger.error(f"Error fetching markets from blockchain: {e}")
+            
+        # If no markets found, show a helpful message
+        if not timeline_segments:
+            test_message_segment = {
+                'id': '0',  # Use a numeric ID to avoid routing issues
+                'actor': {
+                    'id': None,
+                    'x_username': 'Clockchain',
+                    'display_name': 'Clockchain Network',
+                    'verified': True,
+                    'follower_count': 0,
+                    'is_test_account': True
+                },
+                'start_time': current_time - timedelta(hours=1),
+                'end_time': current_time + timedelta(hours=1),
+                'start_ms': int((current_time - timedelta(hours=1)).timestamp() * 1000),
+                'end_ms': int((current_time + timedelta(hours=1)).timestamp() * 1000),
+                'status': 'active',
+                'submission_count': 0,
+                'total_volume': '0',
+                'currency': 'BASE',
+                'predicted_text': 'No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.',
+                'creator_wallet': '0x0000000000...',
+                'initial_stake': '0',
+                'stake_count': 0,
+                'oracle_allowed': False,
+                'time_until_oracle': 0,
+                'submissions': [],
+                'competing_bets': []
+            }
+            timeline_segments.append(test_message_segment)
         
         # Blockchain stats (placeholder for now)
         active_market_count = 0
