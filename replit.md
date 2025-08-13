@@ -16,6 +16,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Major Changes (August 2025)
 
+### Phase 1 Cleanup: BASE-Only Architecture Migration (August 13, 2025) 🚧 IN PROGRESS
+- **Objective**: Remove all database write operations and convert to pure blockchain reads
+- **Completed Services**:
+  - ✅ monitoring.py - Removed all database dependencies, now chain-only
+  - ✅ blockchain_base.py - Removed all write operations, now read-only from chain
+  - ✅ contract_monitoring.py - Converted to chain-only event processing with in-memory cache
+- **Pending Services**:
+  - 🔄 oracle.py - Heavy DB dependencies, needs contract rewrite
+  - 🔄 consensus.py - Already deprecated (consensus.py.deprecated)
+  - 🔄 Routes - Need conversion to chain-only reads
+- **Architecture Decision**: All write operations must go through smart contracts directly from frontend
+
 ### Phase 1 Genesis NFT Implementation with Improved Economics (January 17, 2025) ✅
 - **Genesis NFT Contract**: Implemented 100 fixed-supply NFTs with on-chain SVG art
 - **IMPROVED Distributed Payout Manager**: Genesis holders now get 1.4% of platform volume (20% of fees) - a 7X improvement!

@@ -8,16 +8,16 @@ This document provides a comprehensive audit of all code components that need mo
 
 ### 1.1 Core Services (/services)
 
-| Service | Current State | Required Changes | Priority |
-|---------|--------------|------------------|----------|
-| **blockchain_base.py** | Hybrid DB/chain reads | Remove all DB reads, pure chain queries | HIGH |
-| **oracle.py** | DB writes for submissions | Chain-only oracle submissions | HIGH |
-| **consensus.py** | DB-based voting | On-chain consensus via smart contract | HIGH |
-| **text_analysis.py** | Local Levenshtein calc | Move to on-chain oracle contract | MEDIUM |
-| **ledger.py** | PostgreSQL ledger | Remove entirely (use chain events) | HIGH |
-| **time_sync.py** | Local time management | Use block timestamps | MEDIUM |
-| **monitoring.py** | Mixed DB/chain metrics | Chain-only monitoring | LOW |
-| **contract_monitoring.py** | Event tracking to DB | Remove DB writes, use logs | HIGH |
+| Service | Current State | Required Changes | Priority | Status |
+|---------|--------------|------------------|----------|--------|
+| **blockchain_base.py** | ~~Hybrid DB/chain reads~~ | ~~Remove all DB reads, pure chain queries~~ | HIGH | ✅ DONE - All write ops removed |
+| **oracle.py** | DB writes for submissions | Chain-only oracle submissions | HIGH | 🔄 TODO |
+| **consensus.py** | ~~DB-based voting~~ | ~~On-chain consensus via smart contract~~ | HIGH | ✅ DEPRECATED - File already removed |
+| **text_analysis.py** | Local Levenshtein calc | Move to on-chain oracle contract | MEDIUM | 🔄 TODO |
+| **ledger.py** | ~~PostgreSQL ledger~~ | ~~Remove entirely (use chain events)~~ | HIGH | ✅ REMOVED - File not found |
+| **time_sync.py** | Local time management | Use block timestamps | MEDIUM | 🔄 TODO |
+| **monitoring.py** | ~~Mixed DB/chain metrics~~ | ~~Chain-only monitoring~~ | LOW | ✅ DONE - No DB deps |
+| **contract_monitoring.py** | ~~Event tracking to DB~~ | ~~Remove DB writes, use logs~~ | HIGH | ✅ DONE - Chain-only |
 
 #### Code Changes Required:
 
@@ -110,17 +110,17 @@ async function loadMarkets() {
 }
 ```
 
-## 3. API Routes Audit (/routes)
+## 3. API Routes Audit (/routes) 
 
 ### 3.1 API Endpoints
 
-| Route File | Endpoints | Action Required |
-|------------|-----------|-----------------|
-| **main.py** | DB-based routes | Remove or convert to chain readers |
-| **market_routes.py** | CRUD operations | Direct contract calls only |
-| **admin_routes.py** | DB statistics | Chain analytics endpoints |
-| **node_routes.py** | Node management | On-chain registry only |
-| **api_routes.py** | Mixed DB/chain | Pure chain data APIs |
+| Route File | Endpoints | Action Required | Status |
+|------------|-----------|-----------------|--------|
+| **main.py** | DB-based routes | Remove or convert to chain readers | 🔄 TODO |
+| **api.py** | Mixed DB/chain | Pure chain data APIs | 🔄 TODO - Heavy DB deps |
+| **admin.py** | DB statistics | Chain analytics endpoints | 🔄 TODO |
+| **clockchain.py** | Node management | On-chain registry only | 🔄 TODO |
+| **actors.py** | Actor management | Use ActorRegistry contract | 🔄 TODO |
 
 ### 3.2 Routes to Remove
 

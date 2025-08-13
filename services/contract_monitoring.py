@@ -67,7 +67,7 @@ class ContractMonitoringService:
             logger.error(f"Error initializing contract filters: {e}")
             
     def process_events(self) -> Dict[str, Any]:
-        """Process new events from all contracts"""
+        """Process new events from all contracts (chain-only, no database)"""
         results = {
             'events_processed': 0,
             'errors': [],
@@ -79,11 +79,22 @@ class ContractMonitoringService:
             # Get current block
             current_block = self.w3.eth.block_number
             
-            # Process events from each filter
-            for event_name, event_filter in self.event_filters.items():
+            # Determine block range to scan
+            if self.last_processed_block is None:
+                # Start from 100 blocks ago on first run
+                from_block = max(0, current_block - 100)
+            else:
+                from_block = self.last_processed_block + 1
+                
+            # Don't process if we're already up to date
+            if from_block > current_block:
+                return results
+                
+            # Get events using getLogs for each contract
+            for event_name in self.event_filters.keys():
                 try:
-                    new_events = event_filter.get_new_entries()
-                    for event in new_events:
+                    events = self._get_events_in_range(event_name, from_block, current_block)
+                    for event in events:
                         self._process_single_event(event_name, event, results)
                         results['events_processed'] += 1
                 except Exception as e:
@@ -93,7 +104,7 @@ class ContractMonitoringService:
             # Check for gas price spikes
             self._check_gas_price_alerts(results)
             
-            # Check for consensus failures
+            # Check for consensus failures (chain-only)
             self._check_consensus_failures(results)
             
             # Update last processed block
@@ -105,8 +116,43 @@ class ContractMonitoringService:
             
         return results
         
+    def _get_events_in_range(self, event_name: str, from_block: int, to_block: int) -> List[Dict]:
+        """Get events in a specific block range"""
+        events = []
+        try:
+            # Get the appropriate contract and event
+            contract = None
+            event = None
+            
+            if event_name in ['MarketCreated', 'BetPlaced', 'MarketResolved']:
+                contract = self.blockchain_service.get_contract('PredictionMarket')
+                if contract:
+                    event = getattr(contract.events, event_name, None)
+            elif event_name in ['OracleDataSubmitted', 'ConsensusReached']:
+                contract = self.blockchain_service.get_contract('ClockchainOracle')
+                if contract:
+                    event = getattr(contract.events, event_name, None)
+            elif event_name in ['NodeRegistered', 'NodeStaked', 'NodeSlashed']:
+                contract = self.blockchain_service.get_contract('NodeRegistry')
+                if contract:
+                    event = getattr(contract.events, event_name, None)
+            elif event_name == 'PayoutDistributed':
+                contract = self.blockchain_service.get_contract('PayoutManager')
+                if contract:
+                    event = getattr(contract.events, event_name, None)
+                    
+            if event:
+                # Use get_logs with correct parameter names for web3.py
+                event_logs = event.get_logs(from_block=from_block, to_block=to_block)
+                events.extend(event_logs)
+                
+        except Exception as e:
+            logger.error(f"Error getting {event_name} events: {e}")
+            
+        return events
+    
     def _process_single_event(self, event_name: str, event: Dict, results: Dict):
-        """Process a single contract event"""
+        """Process a single contract event (chain-only, no database)"""
         try:
             # Extract common event data
             event_data = {
@@ -118,39 +164,45 @@ class ContractMonitoringService:
                 'timestamp': datetime.utcnow()
             }
             
-            # Store event in database
-            contract_event = ContractEvent()
-            contract_event.event_type = event_name
-            contract_event.contract_address = event_data['address']
-            contract_event.transaction_hash = event_data['transaction_hash']
-            contract_event.block_number = event_data['block_number']
-            contract_event.event_data = event_data['args']
-            contract_event.timestamp = event_data['timestamp']
-            db.session.add(contract_event)
+            # Add to in-memory cache instead of database
+            self.event_cache.append(event_data)
+            
+            # Update metrics cache
+            self.metrics_cache['total_events'] += 1
+            if event_name not in self.metrics_cache['events_by_type']:
+                self.metrics_cache['events_by_type'][event_name] = 0
+            self.metrics_cache['events_by_type'][event_name] += 1
             
             # Special handling for specific events
             if event_name == 'MarketCreated':
                 self._handle_market_created(event_data)
             elif event_name == 'ConsensusReached':
-                self._handle_consensus_reached(event_data)
+                self._handle_consensus_reached(event_data, results)
             elif event_name == 'NodeSlashed':
                 self._handle_node_slashed(event_data)
                 
-            db.session.commit()
+            # Log significant events
+            logger.debug(f"Processed {event_name} event at block {event_data['block_number']}")
             
         except Exception as e:
             logger.error(f"Error processing event {event_name}: {e}")
-            db.session.rollback()
             
     def _handle_market_created(self, event_data: Dict):
         """Handle MarketCreated event"""
         logger.info(f"New market created: {event_data['args'].get('marketId')}")
         
-    def _handle_consensus_reached(self, event_data: Dict):
+    def _handle_consensus_reached(self, event_data: Dict, results: Dict):
         """Handle ConsensusReached event"""
         consensus_percentage = event_data['args'].get('consensusPercentage', 0)
         if consensus_percentage < 66:
             logger.warning(f"Low consensus reached: {consensus_percentage}%")
+            # Add to results for monitoring
+            results['consensus_failures'].append({
+                'market_id': event_data['args'].get('marketId'),
+                'consensus_percentage': consensus_percentage,
+                'timestamp': event_data['timestamp'].isoformat()
+            })
+            self.metrics_cache['consensus_failure_count'] += 1
             
     def _handle_node_slashed(self, event_data: Dict):
         """Handle NodeSlashed event"""
@@ -179,58 +231,49 @@ class ContractMonitoringService:
             logger.error(f"Error checking gas prices: {e}")
             
     def _check_consensus_failures(self, results: Dict):
-        """Check for oracle consensus failures"""
+        """Check for oracle consensus failures (chain-only)"""
         try:
-            # Query recent oracle submissions with low consensus
+            # Check recent events in cache for consensus failures
             recent_time = datetime.utcnow() - timedelta(hours=1)
-            from models import OracleSubmission
             
-            recent_submissions = OracleSubmission.query.filter(
-                OracleSubmission.created_at >= recent_time,
-                OracleSubmission.consensus_percentage < 66
-            ).all()
-            
-            for submission in recent_submissions:
-                failure = {
-                    'market_id': str(submission.market_id),
-                    'consensus_percentage': submission.consensus_percentage,
-                    'timestamp': submission.created_at.isoformat()
-                }
-                results['consensus_failures'].append(failure)
+            # Look through cached events for recent consensus failures
+            recent_failures = []
+            for event in self.event_cache:
+                if (event.get('event_name') == 'ConsensusReached' and 
+                    event.get('timestamp') and event['timestamp'] >= recent_time):
+                    consensus_pct = event.get('args', {}).get('consensusPercentage', 100)
+                    if consensus_pct < 66:
+                        recent_failures.append(event)
+                        
+            if recent_failures:
+                logger.warning(f"Found {len(recent_failures)} consensus failures in recent events")
                 
-            if recent_submissions:
-                logger.warning(f"Found {len(recent_submissions)} consensus failures in the last hour")
+            # Note: Consensus failures are already added to results in _handle_consensus_reached
                 
         except Exception as e:
             logger.error(f"Error checking consensus failures: {e}")
             
     def get_event_statistics(self) -> Dict[str, Any]:
-        """Get statistics about contract events"""
+        """Get statistics about contract events (chain-only, from cache)"""
         try:
-            # Get event counts by type
-            event_counts = db.session.query(
-                ContractEvent.event_type,
-                db.func.count(ContractEvent.id)
-            ).group_by(ContractEvent.event_type).all()
-            
-            # Get recent events
-            recent_time = datetime.utcnow() - timedelta(hours=24)
-            recent_events = ContractEvent.query.filter(
-                ContractEvent.timestamp >= recent_time
-            ).order_by(ContractEvent.timestamp.desc()).limit(10).all()
+            # Get recent events from cache (last 10)
+            recent_events = list(self.event_cache)[-10:] if self.event_cache else []
             
             return {
-                'event_counts': dict(event_counts),
+                'event_counts': dict(self.metrics_cache['events_by_type']),
                 'recent_events': [
                     {
-                        'type': event.event_type,
-                        'tx_hash': event.transaction_hash[:10] + '...' if event.transaction_hash else None,
-                        'block': event.block_number,
-                        'timestamp': event.timestamp.isoformat()
+                        'type': event.get('event_name'),
+                        'tx_hash': event.get('transaction_hash', '')[:10] + '...' if event.get('transaction_hash') else None,
+                        'block': event.get('block_number'),
+                        'timestamp': event.get('timestamp').isoformat() if event.get('timestamp') else None
                     }
                     for event in recent_events
                 ],
-                'last_processed_block': self.last_processed_block
+                'last_processed_block': self.last_processed_block,
+                'total_events_processed': self.metrics_cache['total_events'],
+                'gas_spike_count': self.metrics_cache['gas_spike_count'],
+                'consensus_failure_count': self.metrics_cache['consensus_failure_count']
             }
             
         except Exception as e:
