@@ -1431,6 +1431,44 @@
         "MockPredictionMarket",
         "MockRewardPool"
       ]
+    },
+    "/home/runner/workspace/contracts/src/TestMarketWithPayouts.sol": {
+      "lastModificationDate": 1755044988688,
+      "contentHash": "2d73fe3fc35792f493b735612239cab3",
+      "sourceName": "contracts/src/TestMarketWithPayouts.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "IDistributedPayoutManager",
+        "TestMarketWithPayouts"
+      ]
     }
   }
 }
