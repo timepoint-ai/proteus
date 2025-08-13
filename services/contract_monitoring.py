@@ -1,13 +1,13 @@
-"""Contract event monitoring service for BASE blockchain"""
+"""Contract event monitoring service for BASE blockchain (Chain-only, no database)"""
 import logging
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from decimal import Decimal
 from web3 import Web3
 from web3.exceptions import BlockNotFound
-from models import db, ContractEvent, NetworkMetrics
 from services.blockchain_base import BaseBlockchainService
 import time
+from collections import deque
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,14 @@ class ContractMonitoringService:
         self.w3 = self.blockchain_service.w3
         self.last_processed_block = None
         self.event_filters = {}
+        # In-memory cache for recent events (no database)
+        self.event_cache = deque(maxlen=1000)  # Keep last 1000 events
+        self.metrics_cache = {
+            'total_events': 0,
+            'events_by_type': {},
+            'gas_spike_count': 0,
+            'consensus_failure_count': 0
+        }
         self._init_contract_filters()
         
     def _init_contract_filters(self):
@@ -28,30 +36,31 @@ class ContractMonitoringService:
             # PredictionMarket events
             market_contract = self.blockchain_service.get_contract('PredictionMarket')
             if market_contract:
-                self.event_filters['MarketCreated'] = market_contract.events.MarketCreated.create_filter(fromBlock='latest')
-                self.event_filters['BetPlaced'] = market_contract.events.BetPlaced.create_filter(fromBlock='latest')
-                self.event_filters['MarketResolved'] = market_contract.events.MarketResolved.create_filter(fromBlock='latest')
+                # Use build_filter() instead of create_filter() for proper web3.py usage
+                self.event_filters['MarketCreated'] = market_contract.events.MarketCreated.build_filter()
+                self.event_filters['BetPlaced'] = market_contract.events.BetPlaced.build_filter()
+                self.event_filters['MarketResolved'] = market_contract.events.MarketResolved.build_filter()
                 logger.info("PredictionMarket event filters initialized")
             
             # ClockchainOracle events
             oracle_contract = self.blockchain_service.get_contract('ClockchainOracle')
             if oracle_contract:
-                self.event_filters['OracleDataSubmitted'] = oracle_contract.events.OracleDataSubmitted.create_filter(fromBlock='latest')
-                self.event_filters['ConsensusReached'] = oracle_contract.events.ConsensusReached.create_filter(fromBlock='latest')
+                self.event_filters['OracleDataSubmitted'] = oracle_contract.events.OracleDataSubmitted.build_filter()
+                self.event_filters['ConsensusReached'] = oracle_contract.events.ConsensusReached.build_filter()
                 logger.info("ClockchainOracle event filters initialized")
                 
             # NodeRegistry events
             node_contract = self.blockchain_service.get_contract('NodeRegistry')
             if node_contract:
-                self.event_filters['NodeRegistered'] = node_contract.events.NodeRegistered.create_filter(fromBlock='latest')
-                self.event_filters['NodeStaked'] = node_contract.events.NodeStaked.create_filter(fromBlock='latest')
-                self.event_filters['NodeSlashed'] = node_contract.events.NodeSlashed.create_filter(fromBlock='latest')
+                self.event_filters['NodeRegistered'] = node_contract.events.NodeRegistered.build_filter()
+                self.event_filters['NodeStaked'] = node_contract.events.NodeStaked.build_filter()
+                self.event_filters['NodeSlashed'] = node_contract.events.NodeSlashed.build_filter()
                 logger.info("NodeRegistry event filters initialized")
                 
             # PayoutManager events
             payout_contract = self.blockchain_service.get_contract('PayoutManager')
             if payout_contract:
-                self.event_filters['PayoutDistributed'] = payout_contract.events.PayoutDistributed.create_filter(fromBlock='latest')
+                self.event_filters['PayoutDistributed'] = payout_contract.events.PayoutDistributed.build_filter()
                 logger.info("PayoutManager event filters initialized")
                 
         except Exception as e:
