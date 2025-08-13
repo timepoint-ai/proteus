@@ -52,6 +52,7 @@ def create_app():
     # Register blueprints
     from routes.api import api_bp
     from routes.admin import admin_bp
+    from routes.auth import auth_bp  # Phase 2: Wallet-only authentication
 
     from routes.test_transactions import test_transactions_bp
     from routes.clockchain import clockchain_bp
@@ -66,6 +67,7 @@ def create_app():
     from routes.node_api import node_api_bp
     
     app.register_blueprint(marketing_bp)
+    app.register_blueprint(auth_bp)  # Phase 2: Register auth routes
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(base_api_bp, url_prefix='/api/base')
     app.register_blueprint(admin_bp, url_prefix='/admin')

@@ -1,0 +1,349 @@
+/**
+ * Wallet Authentication Module for BASE-only Architecture
+ * Phase 2: Wallet-only authentication implementation
+ */
+
+class WalletAuth {
+    constructor() {
+        this.token = localStorage.getItem('auth_token');
+        this.address = localStorage.getItem('wallet_address');
+        this.web3 = null;
+        this.provider = null;
+    }
+
+    /**
+     * Initialize Web3 and connect wallet
+     */
+    async initWeb3() {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                // Request account access
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Create Web3 instance
+                this.web3 = new Web3(window.ethereum);
+                this.provider = window.ethereum;
+                
+                // Get connected accounts
+                const accounts = await this.web3.eth.getAccounts();
+                if (accounts.length > 0) {
+                    this.address = accounts[0];
+                    return true;
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error initializing Web3:', error);
+                throw new Error('Failed to connect wallet');
+            }
+        } else {
+            throw new Error('Please install MetaMask or another Web3 wallet');
+        }
+    }
+
+    /**
+     * Authenticate wallet using signature
+     */
+    async authenticate() {
+        try {
+            // Initialize Web3 if not already done
+            if (!this.web3) {
+                await this.initWeb3();
+            }
+
+            // Get accounts
+            const accounts = await this.web3.eth.getAccounts();
+            if (accounts.length === 0) {
+                throw new Error('No wallet connected');
+            }
+
+            const address = accounts[0];
+
+            // Get nonce from server
+            const nonceResponse = await fetch(`/auth/nonce/${address}`);
+            if (!nonceResponse.ok) {
+                throw new Error('Failed to get authentication nonce');
+            }
+
+            const { nonce, message } = await nonceResponse.json();
+
+            // Request signature from wallet
+            const signature = await this.web3.eth.personal.sign(
+                message,
+                address,
+                '' // Password not needed for MetaMask
+            );
+
+            // Verify signature with server
+            const verifyResponse = await fetch('/auth/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    address,
+                    signature,
+                    message
+                })
+            });
+
+            if (!verifyResponse.ok) {
+                const error = await verifyResponse.json();
+                throw new Error(error.error || 'Authentication failed');
+            }
+
+            const result = await verifyResponse.json();
+
+            if (result.success) {
+                // Store authentication data
+                this.token = result.token;
+                this.address = result.address;
+                
+                localStorage.setItem('auth_token', this.token);
+                localStorage.setItem('wallet_address', this.address);
+                
+                // Update UI
+                this.updateAuthUI();
+                
+                return result;
+            } else {
+                throw new Error(result.error || 'Authentication failed');
+            }
+
+        } catch (error) {
+            console.error('Authentication error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return this.token !== null && this.address !== null;
+    }
+
+    /**
+     * Get authorization headers for API requests
+     */
+    getAuthHeaders() {
+        if (this.token) {
+            return {
+                'Authorization': `Bearer ${this.token}`
+            };
+        }
+        return {};
+    }
+
+    /**
+     * Refresh authentication token
+     */
+    async refreshToken() {
+        if (!this.token) {
+            throw new Error('No token to refresh');
+        }
+
+        try {
+            const response = await fetch('/auth/refresh', {
+                method: 'POST',
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                this.token = result.token;
+                localStorage.setItem('auth_token', this.token);
+                return result;
+            } else {
+                throw new Error('Token refresh failed');
+            }
+
+        } catch (error) {
+            console.error('Token refresh error:', error);
+            // Clear authentication on refresh failure
+            this.logout();
+            throw error;
+        }
+    }
+
+    /**
+     * Logout user
+     */
+    async logout() {
+        try {
+            // Notify server (optional)
+            if (this.token) {
+                await fetch('/auth/logout', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders()
+                });
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+
+        // Clear local storage
+        this.token = null;
+        this.address = null;
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('wallet_address');
+        
+        // Update UI
+        this.updateAuthUI();
+    }
+
+    /**
+     * Update UI based on authentication status
+     */
+    updateAuthUI() {
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        const addressDisplay = document.getElementById('wallet-address');
+        const authStatus = document.getElementById('auth-status');
+
+        if (this.isAuthenticated()) {
+            // User is authenticated
+            if (connectBtn) {
+                connectBtn.textContent = 'Disconnect';
+                connectBtn.onclick = () => this.logout();
+            }
+            
+            if (addressDisplay) {
+                // Display truncated address
+                const shortAddress = `${this.address.slice(0, 6)}...${this.address.slice(-4)}`;
+                addressDisplay.textContent = shortAddress;
+                addressDisplay.style.display = 'inline';
+            }
+            
+            if (authStatus) {
+                authStatus.textContent = 'Connected';
+                authStatus.className = 'badge bg-success';
+            }
+
+            // Show authenticated elements
+            document.querySelectorAll('.auth-required').forEach(el => {
+                el.style.display = 'block';
+            });
+
+            // Hide login prompts
+            document.querySelectorAll('.auth-prompt').forEach(el => {
+                el.style.display = 'none';
+            });
+
+        } else {
+            // User is not authenticated
+            if (connectBtn) {
+                connectBtn.textContent = 'Connect Wallet';
+                connectBtn.onclick = () => this.authenticate();
+            }
+            
+            if (addressDisplay) {
+                addressDisplay.style.display = 'none';
+            }
+            
+            if (authStatus) {
+                authStatus.textContent = 'Not Connected';
+                authStatus.className = 'badge bg-secondary';
+            }
+
+            // Hide authenticated elements
+            document.querySelectorAll('.auth-required').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Show login prompts
+            document.querySelectorAll('.auth-prompt').forEach(el => {
+                el.style.display = 'block';
+            });
+        }
+    }
+
+    /**
+     * Check authentication status with server
+     */
+    async checkAuthStatus() {
+        if (!this.token) {
+            return false;
+        }
+
+        try {
+            const response = await fetch('/auth/status', {
+                headers: this.getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                return false;
+            }
+
+            const result = await response.json();
+            return result.authenticated;
+
+        } catch (error) {
+            console.error('Auth status check error:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Initialize authentication on page load
+     */
+    async init() {
+        // Check if token is still valid
+        if (this.token) {
+            const isValid = await this.checkAuthStatus();
+            
+            if (!isValid) {
+                // Token is invalid, clear it
+                this.logout();
+            }
+        }
+
+        // Update UI
+        this.updateAuthUI();
+
+        // Set up auto-refresh (refresh token every 12 hours)
+        if (this.isAuthenticated()) {
+            setInterval(() => {
+                this.refreshToken().catch(error => {
+                    console.error('Auto-refresh failed:', error);
+                });
+            }, 12 * 60 * 60 * 1000);
+        }
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    // User disconnected wallet
+                    this.logout();
+                } else if (accounts[0].toLowerCase() !== this.address?.toLowerCase()) {
+                    // User switched accounts
+                    this.logout();
+                    // Optionally, auto-authenticate with new account
+                    // this.authenticate();
+                }
+            });
+
+            // Listen for chain changes
+            window.ethereum.on('chainChanged', (chainId) => {
+                // Reload page on chain change
+                window.location.reload();
+            });
+        }
+    }
+}
+
+// Create global instance
+const walletAuth = new WalletAuth();
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    walletAuth.init();
+});
+
+// Export for use in other modules
+window.walletAuth = walletAuth;
