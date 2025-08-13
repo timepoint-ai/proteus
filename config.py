@@ -1,19 +1,21 @@
 import os
 from datetime import timedelta
 
+# ⚠️  DEPRECATED: This config file is being phased out
+# Use config_chain.py for chain-only configuration
+
 class Config:
-    # Flask configuration
-    SECRET_KEY = os.environ.get('SESSION_SECRET') or 'dev-secret-key'
+    # ===== PHASE 4 CLEANUP: Database configs removed =====
+    # The following database configurations have been removed:
+    # - SQLALCHEMY_DATABASE_URI (no database)
+    # - SQLALCHEMY_ENGINE_OPTIONS (no database)
+    # - SQLALCHEMY_TRACK_MODIFICATIONS (no database)
+    # - SECRET_KEY (no Flask sessions)
     
-    # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///clockchain.db'
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_recycle": 300,
-        "pool_pre_ping": True,
-    }
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Keep minimal config for backward compatibility during transition
+    # These will be removed in final cleanup
     
-    # Celery configuration
+    # Celery configuration (kept for background blockchain monitoring)
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL') or 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or 'redis://localhost:6379/0'
     

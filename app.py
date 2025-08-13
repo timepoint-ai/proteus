@@ -35,15 +35,21 @@ redis_client = redis.Redis(
 def create_app():
     logger = logging.getLogger(__name__)
     app = Flask(__name__)
-    app.secret_key = os.environ.get("SESSION_SECRET")
+    # Phase 4: No Flask sessions in chain-only mode
+    # JWT-based wallet auth doesn't need Flask sessions
+    app.secret_key = os.urandom(32).hex()  # Random key, not used for sessions
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     
     # Load configuration
-    from config import Config
-    app.config.from_object(Config)
+    # Phase 4: Use chain-only configuration
+    from config_chain import chain_config
     
-    # Initialize extensions
-    db.init_app(app)
+    # Apply chain configuration to Flask app
+    app.config['CELERY_BROKER_URL'] = chain_config.CELERY_BROKER_URL
+    app.config['CELERY_RESULT_BACKEND'] = chain_config.CELERY_RESULT_BACKEND
+    
+    # Phase 4: Skip database initialization - chain-only mode
+    # db.init_app(app) - REMOVED: No database in chain-only mode
     
     # Initialize Celery
     celery = make_celery(app)
@@ -91,23 +97,23 @@ def create_app():
     # Initialize rate limiter
     init_limiter(app)
     
-    # Create database tables
-    with app.app_context():
-        import models
-        db.create_all()
-        
-        # Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
-        # Initialize node operator if not exists
-        # from services.consensus import ConsensusService
-        # ConsensusService.initialize_node()
-        
-        # Start production monitoring service
-        try:
-            from services.monitoring import monitoring_service
-            monitoring_service.start_monitoring(app)
-            logger.info("Production monitoring service started")
-        except Exception as e:
-            logger.error(f"Failed to start monitoring service: {e}")
+    # Phase 4: Database initialization removed - chain-only mode
+    # with app.app_context():
+    #     import models  # REMOVED: No database models
+    #     db.create_all()  # REMOVED: No database tables
+    
+    # Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
+    # Initialize node operator if not exists
+    # from services.consensus import ConsensusService
+    # ConsensusService.initialize_node()
+    
+    # Start production monitoring service
+    try:
+        from services.monitoring import monitoring_service
+        monitoring_service.start_monitoring(app)
+        logger.info("Production monitoring service started")
+    except Exception as e:
+        logger.error(f"Failed to start monitoring service: {e}")
     
     return app, celery
 
