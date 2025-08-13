@@ -4,8 +4,8 @@ Allows admins to create and manage real test transactions through the entire lif
 """
 
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
-from models import *
-from app import db
+# from models import *  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from datetime import datetime, timedelta
 from decimal import Decimal
 import json

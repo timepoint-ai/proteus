@@ -1,10 +1,10 @@
 """Routes for oracle pages"""
 import logging
 from flask import Blueprint, render_template, abort
-from models import OracleSubmission, PredictionMarket, Actor, Submission, NodeOperator
-from app import db
+# from models import OracleSubmission, PredictionMarket, Actor, Submission, NodeOperator  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from datetime import datetime
-from sqlalchemy import desc, func
+# from sqlalchemy import desc, func  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
 oracles_bp = Blueprint('oracles', __name__)

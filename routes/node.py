@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
-from models import NodeOperator, SyntheticTimeEntry, Transaction
+# from models import NodeOperator, SyntheticTimeEntry, Transaction  # Phase 7: Models removed
 from services.network import NetworkService
 from services.consensus import ConsensusService
 from services.reconciliation import ReconciliationService
 from services.time_ledger import TimeLedgerService
 from utils.auth import require_node_auth
-from app import db, redis_client
+# from app import db, redis_client  # Phase 7: Database removed
 import logging
 import json
 

@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import json
 from services.blockchain_base import BaseBlockchainService
-from services.oracle_xcom import XcomOracleService
-from services.payout_base import BasePayoutService
-from models import PredictionMarket, Submission, Bet, Actor, Transaction
-from app import db
+# from services.oracle_xcom import XcomOracleService  # Phase 7: Database-dependent
+# from services.payout_base import BasePayoutService  # Phase 7: Database-dependent
+# from models import PredictionMarket, Submission, Bet, Actor, Transaction  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 import os
 
 logger = logging.getLogger(__name__)
@@ -16,8 +16,8 @@ base_api_bp = Blueprint('base_api', __name__)
 
 # Initialize services
 blockchain_service = BaseBlockchainService()
-oracle_service = XcomOracleService()
-payout_service = BasePayoutService()
+# oracle_service = XcomOracleService()  # Phase 7: Database-dependent
+# payout_service = BasePayoutService()  # Phase 7: Database-dependent
 
 # Load contract deployment if available
 deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'testnet' else 'deployment-mainnet.json'

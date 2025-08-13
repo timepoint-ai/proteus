@@ -1,10 +1,10 @@
 """Routes for actors pages"""
 import logging
 from flask import Blueprint, render_template, abort
-from models import Actor, PredictionMarket, Submission, Bet
-from app import db
+# from models import Actor, PredictionMarket, Submission, Bet  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from datetime import datetime
-from sqlalchemy import desc
+# from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
 actors_bp = Blueprint('actors', __name__)

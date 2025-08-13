@@ -3,14 +3,14 @@ import logging
 import json
 import asyncio
 from flask import Blueprint, render_template, request, jsonify, abort, session
-from models import PredictionMarket, OracleSubmission, Actor
-from services.oracle_xcom import XcomOracleService
+# from models import PredictionMarket, OracleSubmission, Actor  # Phase 7: Models removed
+# from services.oracle_xcom import XcomOracleService  # Phase 7: Database-dependent
 from services.xcom_api_service import XComAPIService
 from services.blockchain_base import BaseBlockchainService
 from utils.crypto import CryptoUtils
-from app import db
+# from app import db  # Phase 7: Database removed
 from datetime import datetime
-from sqlalchemy import desc
+# from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
 oracle_manual_bp = Blueprint('oracle_manual', __name__)

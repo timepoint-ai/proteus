@@ -2,13 +2,13 @@ from flask import Blueprint, render_template, jsonify, request, redirect, url_fo
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
-from sqlalchemy import func, desc
-from models import (
-    NodeOperator, Actor, PredictionMarket, Submission, Bet, Transaction, 
-    OracleSubmission, SyntheticTimeEntry, NetworkMetrics,
-    AIAgentProfile, VerificationModule, BittensorIntegration, TransparencyAudit
-)
-from app import db
+# from sqlalchemy import func, desc  # Phase 7: SQLAlchemy removed
+# from models import (  # Phase 7: Models removed
+#     NodeOperator, Actor, PredictionMarket, Submission, Bet, Transaction, 
+#     OracleSubmission, SyntheticTimeEntry, NetworkMetrics,
+#     AIAgentProfile, VerificationModule, BittensorIntegration, TransparencyAudit
+# )
+# from app import db  # Phase 7: Database removed
 # Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
 # from services.consensus import ConsensusService
 # Phase 1: Ledger service deprecated - handled by blockchain events
@@ -17,7 +17,7 @@ from services.oracle import OracleService
 from services.time_sync import TimeSyncService
 from services.node_communication import NodeCommunicationService
 from services.blockchain import BlockchainService
-from services.ai_transparency import AITransparencyService
+# from services.ai_transparency import AITransparencyService  # Phase 7: Database-dependent
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ oracle_service = OracleService()
 time_sync_service = TimeSyncService()
 node_comm_service = NodeCommunicationService()
 blockchain_service = BlockchainService()
-ai_transparency_service = AITransparencyService()
+# ai_transparency_service = AITransparencyService()  # Phase 7: Database-dependent
 
 @admin_bp.route('/')
 def dashboard():

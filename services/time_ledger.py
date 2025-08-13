@@ -1,5 +1,5 @@
-from models import SyntheticTimeEntry, NodeOperator
-from app import db, redis_client
+# from models import SyntheticTimeEntry, NodeOperator  # Phase 7: Models removed
+# from app import db, redis_client  # Phase 7: Database removed
 from config import Config
 import logging
 from datetime import datetime, timezone
@@ -49,9 +49,9 @@ class TimeLedgerService:
             timestamp_ms = TimeLedgerService.get_current_time_ms()
             
             # Create hash chain entry
-            previous_entry = SyntheticTimeEntry.query.order_by(
+    # previous_entry = SyntheticTimeEntry.query.order_by(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             # Create hash chain
             if previous_entry:
@@ -80,8 +80,8 @@ class TimeLedgerService:
                 hash_chain=current_hash
             )
             
-            db.session.add(entry)
-            db.session.commit()
+    # db.session.add(entry)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             # Cache in Redis for fast access
             redis_client.zadd(
@@ -94,22 +94,22 @@ class TimeLedgerService:
             
         except Exception as e:
             logging.error(f"Error recording time ledger entry: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False
     
     @staticmethod
     def get_entries_in_range(start_time_ms, end_time_ms, entry_type=None):
         """Get time ledger entries within a time range"""
         try:
-            query = SyntheticTimeEntry.query.filter(
+    # query = SyntheticTimeEntry.query.filter(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms >= start_time_ms,
                 SyntheticTimeEntry.timestamp_ms <= end_time_ms
             )
             
             if entry_type:
-                query = query.filter(SyntheticTimeEntry.entry_type == entry_type)
+    # query = query.filter(SyntheticTimeEntry.entry_type == entry_type)  # Phase 7: Database removed
             
-            entries = query.order_by(SyntheticTimeEntry.timestamp_ms.asc()).all()
+    # entries = query.order_by(SyntheticTimeEntry.timestamp_ms.asc()).all()  # Phase 7: Database removed
             
             return entries
             
@@ -121,9 +121,9 @@ class TimeLedgerService:
     def validate_time_chain():
         """Validate the integrity of the time chain"""
         try:
-            entries = SyntheticTimeEntry.query.order_by(
+    # entries = SyntheticTimeEntry.query.order_by(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms.asc()
-            ).all()
+    # ).all()  # Phase 7: Database removed
             
             if not entries:
                 return True
@@ -168,11 +168,11 @@ class TimeLedgerService:
                     return False
             
             # Check if entry already exists
-            existing = SyntheticTimeEntry.query.filter_by(
+    # existing = SyntheticTimeEntry.query.filter_by(  # Phase 7: Database removed
                 timestamp_ms=entry_data['timestamp_ms'],
                 node_id=entry_data['node_id'],
                 hash_chain=entry_data['hash_chain']
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             if existing:
                 logging.debug(f"Entry already exists: {entry_data['hash_chain']}")
@@ -192,15 +192,15 @@ class TimeLedgerService:
                 hash_chain=entry_data['hash_chain']
             )
             
-            db.session.add(entry)
-            db.session.commit()
+    # db.session.add(entry)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             logging.info(f"Synchronized time ledger entry from node: {source_node_id}")
             return True
             
         except Exception as e:
             logging.error(f"Error synchronizing time ledger entry: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False
     
     @staticmethod
@@ -208,9 +208,9 @@ class TimeLedgerService:
         """Validate the hash of a time ledger entry"""
         try:
             # Find previous entry
-            previous_entry = SyntheticTimeEntry.query.filter(
+    # previous_entry = SyntheticTimeEntry.query.filter(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms < entry_data['timestamp_ms']
-            ).order_by(SyntheticTimeEntry.timestamp_ms.desc()).first()
+    # ).order_by(SyntheticTimeEntry.timestamp_ms.desc()).first()  # Phase 7: Database removed
             
             if previous_entry:
                 previous_hash = previous_entry.hash_chain
@@ -239,24 +239,24 @@ class TimeLedgerService:
     def get_ledger_statistics():
         """Get time ledger statistics"""
         try:
-            total_entries = SyntheticTimeEntry.query.count()
+    # total_entries = SyntheticTimeEntry.query.count()  # Phase 7: Database removed
             
             # Get entries by type
-            entry_types = db.session.query(
+    # entry_types = db.session.query(  # Phase 7: Database removed
                 SyntheticTimeEntry.entry_type,
                 db.func.count(SyntheticTimeEntry.id)
-            ).group_by(SyntheticTimeEntry.entry_type).all()
+    # ).group_by(SyntheticTimeEntry.entry_type).all()  # Phase 7: Database removed
             
             # Get entries by node
-            node_counts = db.session.query(
+    # node_counts = db.session.query(  # Phase 7: Database removed
                 SyntheticTimeEntry.node_id,
                 db.func.count(SyntheticTimeEntry.id)
-            ).group_by(SyntheticTimeEntry.node_id).all()
+    # ).group_by(SyntheticTimeEntry.node_id).all()  # Phase 7: Database removed
             
             # Get latest timestamp
-            latest_entry = SyntheticTimeEntry.query.order_by(
+    # latest_entry = SyntheticTimeEntry.query.order_by(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             return {
                 'total_entries': total_entries,
@@ -277,16 +277,16 @@ class TimeLedgerService:
             cutoff_time = TimeLedgerService.get_current_time_ms() - (days_to_keep * 24 * 60 * 60 * 1000)
             
             # Delete old entries
-            deleted_count = SyntheticTimeEntry.query.filter(
+    # deleted_count = SyntheticTimeEntry.query.filter(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms < cutoff_time
             ).delete()
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             logging.info(f"Cleaned up {deleted_count} old time ledger entries")
             return deleted_count
             
         except Exception as e:
             logging.error(f"Error cleaning up old entries: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return 0

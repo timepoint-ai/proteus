@@ -12,10 +12,10 @@ from decimal import Decimal
 import os
 
 from web3 import Web3
-from sqlalchemy import func
+# from sqlalchemy import func  # Phase 7: SQLAlchemy removed
 
-from app import db
-from models import (
+# from app import db  # Phase 7: Database removed
+# from models import (  # Phase 7: Models removed
     NodeOperator, PredictionMarket, OracleSubmission,
     Transaction, NetworkMetrics, Submission, Bet
 )
@@ -75,7 +75,7 @@ class HealthCheckService:
                 # Track failures
                 if result['status'] == 'error':
                     failed_checks += 1
-                    if result.get('critical', False):
+    # if result.get('critical', False):  # Phase 7: Database removed
                         critical_failures += 1
                         
             except Exception as e:
@@ -247,9 +247,9 @@ class HealthCheckService:
             # Get consensus health from consensus service
             health = self.consensus_service.get_network_health()
             
-            active_nodes = health.get('active_nodes', 0)
-            total_nodes = health.get('total_nodes', 0)
-            network_health_score = health.get('network_health', 0)
+    # active_nodes = health.get('active_nodes', 0)  # Phase 7: Database removed
+    # total_nodes = health.get('total_nodes', 0)  # Phase 7: Database removed
+    # network_health_score = health.get('network_health', 0)  # Phase 7: Database removed
             
             # Check if we have minimum nodes for consensus
             if active_nodes < 3:
@@ -277,7 +277,7 @@ class HealthCheckService:
                 'active_nodes': active_nodes,
                 'total_nodes': total_nodes,
                 'health_score': network_health_score,
-                'pending_nodes': health.get('pending_nodes', 0)
+    # 'pending_nodes': health.get('pending_nodes', 0)  # Phase 7: Database removed
             }
             
         except Exception as e:
@@ -291,9 +291,9 @@ class HealthCheckService:
         """Check if contract state is synchronized with database"""
         try:
             # Check a few recent markets
-            recent_markets = PredictionMarket.query.order_by(
+    # recent_markets = PredictionMarket.query.order_by(  # Phase 7: Database removed
                 PredictionMarket.created_at.desc()
-            ).limit(5).all()
+    # ).limit(5).all()  # Phase 7: Database removed
             
             sync_errors = []
             
@@ -336,19 +336,19 @@ class HealthCheckService:
         """Check database connectivity and basic operations"""
         try:
             # Try a simple query
-            count = db.session.query(func.count(PredictionMarket.id)).scalar()
+    # count = db.session.query(func.count(PredictionMarket.id)).scalar()  # Phase 7: Database removed
             
             # Check if we can write
             test_metric = NetworkMetrics()
             test_metric.timestamp = datetime.utcnow()
             test_metric.active_nodes = 0
             
-            db.session.add(test_metric)
-            db.session.flush()
+    # db.session.add(test_metric)  # Phase 7: Database removed
+    # db.session.flush()  # Phase 7: Database removed
             
             # Delete the test record
-            db.session.delete(test_metric)
-            db.session.commit()
+    # db.session.delete(test_metric)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             return {
                 'status': 'healthy',
@@ -357,7 +357,7 @@ class HealthCheckService:
             }
             
         except Exception as e:
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return {
                 'status': 'error',
                 'message': f'Database error: {str(e)}',
@@ -369,12 +369,12 @@ class HealthCheckService:
         try:
             # Get recent oracle activity
             recent_cutoff = datetime.utcnow() - timedelta(hours=24)
-            recent_submissions = OracleSubmission.query.filter(
+    # recent_submissions = OracleSubmission.query.filter(  # Phase 7: Database removed
                 OracleSubmission.created_at > recent_cutoff
             ).count()
             
             # Check for stuck validations
-            stuck_validations = PredictionMarket.query.filter(
+    # stuck_validations = PredictionMarket.query.filter(  # Phase 7: Database removed
                 PredictionMarket.status == 'validating',
                 PredictionMarket.end_time < datetime.utcnow() - timedelta(hours=2)
             ).count()
@@ -405,17 +405,17 @@ class HealthCheckService:
         """Check transaction processing system"""
         try:
             # Check for pending transactions
-            pending_txs = Transaction.query.filter_by(
+    # pending_txs = Transaction.query.filter_by(  # Phase 7: Database removed
                 status='pending'
-            ).filter(
+    # ).filter(  # Phase 7: Database removed
                 Transaction.created_at < datetime.utcnow() - timedelta(minutes=10)
             ).count()
             
             # Check recent transaction success rate
             recent_cutoff = datetime.utcnow() - timedelta(hours=1)
-            recent_txs = Transaction.query.filter(
+    # recent_txs = Transaction.query.filter(  # Phase 7: Database removed
                 Transaction.created_at > recent_cutoff
-            ).all()
+    # ).all()  # Phase 7: Database removed
             
             if recent_txs:
                 success_count = sum(1 for tx in recent_txs if tx.status == 'confirmed')
@@ -465,7 +465,7 @@ class HealthCheckService:
             
             # Check each node's connection status
             for node_id, status in connection_status.items():
-                if isinstance(status, dict) and status.get('connected'):
+    # if isinstance(status, dict) and status.get('connected'):  # Phase 7: Database removed
                     connected_nodes += 1
                 elif isinstance(status, str) and status == 'connected':
                     connected_nodes += 1

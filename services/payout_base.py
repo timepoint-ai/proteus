@@ -4,8 +4,8 @@
 import logging
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
-from app import db
-from models import PredictionMarket, Submission, Bet, Transaction
+# from app import db  # Phase 7: Database removed
+# from models import PredictionMarket, Submission, Bet, Transaction  # Phase 7: Models removed
 from services.blockchain_base import BaseBlockchainService
 from datetime import datetime
 import os
@@ -17,7 +17,7 @@ class BasePayoutService:
     
     def __init__(self):
         self.blockchain = BaseBlockchainService()
-        self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '7')) / Decimal('100')
+    # self.platform_fee_percentage = Decimal(os.environ.get('PLATFORM_FEE', '7')) / Decimal('100')  # Phase 7: Database removed
         
     def calculate_payouts(self, market_id: int) -> Dict[str, Any]:
         """Calculate payouts for a resolved market
@@ -28,11 +28,11 @@ class BasePayoutService:
         try:
             # Phase 1: Read market data from blockchain
             market = self.blockchain.get_market(market_id)
-            if not market or not market.get('resolved'):
+    # if not market or not market.get('resolved'):  # Phase 7: Database removed
                 logger.error(f"Market {market_id} not found or not resolved")
                 return {'error': 'Market not resolved'}
                 
-            winning_submission_id = market.get('winning_submission_id')
+    # winning_submission_id = market.get('winning_submission_id')  # Phase 7: Database removed
             if not winning_submission_id:
                 logger.error(f"Market {market_id} has no winning submission")
                 return {'error': 'No winning submission'}
@@ -50,7 +50,7 @@ class BasePayoutService:
                 'message': 'Payout calculation is now handled by the PayoutManager smart contract',
                 'market_id': market_id,
                 'winning_submission_id': winning_submission_id,
-                'contract_address': self.blockchain.contracts.get('PayoutManager').address if self.blockchain.contracts.get('PayoutManager') else None,
+    # 'contract_address': self.blockchain.contracts.get('PayoutManager').address if self.blockchain.contracts.get('PayoutManager') else None,  # Phase 7: Database removed
                 'note': 'Please use the PayoutManager contract directly for payout operations'
             }
             
@@ -63,7 +63,7 @@ class BasePayoutService:
             
             for submission in all_submissions:
                 # Get all bets for this submission
-                bets = Bet.query.filter_by(submission_id=submission.id).all()
+    # bets = Bet.query.filter_by(submission_id=submission.id).all()  # Phase 7: Database removed
                 total_bets = sum(Decimal(str(bet.amount)) for bet in bets)
                 
                 # Add initial stake
@@ -99,7 +99,7 @@ class BasePayoutService:
             payouts.append(creator_payout)
             
             # Payouts for winning bettors
-            winning_bets = Bet.query.filter_by(submission_id=market.winning_submission_id).all()
+    # winning_bets = Bet.query.filter_by(submission_id=market.winning_submission_id).all()  # Phase 7: Database removed
             
             for bet in winning_bets:
                 bet_amount = Decimal(str(bet.amount))
@@ -127,7 +127,7 @@ class BasePayoutService:
             market.platform_fee_collected = platform_fees
             market.total_volume = total_volume
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             return {
                 'market_id': str(market_id),
@@ -158,7 +158,7 @@ class BasePayoutService:
             failed_payouts = []
             
             # Load contract deployment info
-            deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'testnet' else 'deployment-mainnet.json'
+    # deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'testnet' else 'deployment-mainnet.json'  # Phase 7: Database removed
             if os.path.exists(deployment_file):
                 self.blockchain.load_contracts(deployment_file)
             else:
@@ -202,11 +202,11 @@ class BasePayoutService:
                             related_market_id=market_id,
                             platform_fee=Decimal('0')
                         )
-                        db.session.add(transaction)
+    # db.session.add(transaction)  # Phase 7: Database removed
                         
                         # Update bet payout status
                         if payout['type'] == 'bet' and 'bet_id' in payout:
-                            bet = Bet.query.get(payout['bet_id'])
+    # bet = Bet.query.get(payout['bet_id'])  # Phase 7: Database removed
                             if bet:
                                 bet.payout_tx_hash = tx_hash
                                 bet.status = 'won'
@@ -225,7 +225,7 @@ class BasePayoutService:
                     logger.error(f"Error processing payout to {payout['recipient']}: {e}")
                     failed_payouts.append(payout)
                     
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             return {
                 'market_id': str(market_id),
@@ -237,7 +237,7 @@ class BasePayoutService:
             
         except Exception as e:
             logger.error(f"Error processing payouts: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return {'error': str(e)}
             
     def estimate_payout_gas(self, market_id: str) -> Dict[str, Any]:

@@ -7,7 +7,7 @@ from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
 import hashlib
 
-from models import (
+# from models import (  # Phase 7: Models removed
     db, Submission, VerificationModule, AIAgentProfile, 
     BittensorIntegration, TransparencyAudit
 )
@@ -41,7 +41,7 @@ class AITransparencyService:
             Tuple of (success, result_dict)
         """
         try:
-            submission = Submission.query.get(submission_id)
+    # submission = Submission.query.get(submission_id)  # Phase 7: Database removed
             if not submission:
                 return False, {'error': 'Submission not found'}
             
@@ -52,15 +52,15 @@ class AITransparencyService:
             processed_modules = []
             
             for module_data in modules_data:
-                module_type = module_data.get('module_type')
+    # module_type = module_data.get('module_type')  # Phase 7: Database removed
                 if module_type not in cls.MODULE_BONUSES:
                     continue
                 
                 # Check if module already exists
-                existing_module = VerificationModule.query.filter_by(
+    # existing_module = VerificationModule.query.filter_by(  # Phase 7: Database removed
                     submission_id=submission_id,
                     module_type=module_type
-                ).first()
+    # ).first()  # Phase 7: Database removed
                 
                 if existing_module:
                     logger.warning(f"Module {module_type} already exists for submission {submission_id}")
@@ -75,22 +75,22 @@ class AITransparencyService:
                 
                 # Set module-specific data
                 if module_type == 'open_source':
-                    module.ipfs_hash = module_data.get('ipfs_hash')
-                    module.blockchain_reference = module_data.get('blockchain_reference')
-                    module.model_architecture = json.dumps(module_data.get('model_architecture', {}))
-                    module.training_data_hash = module_data.get('training_data_hash')
+    # module.ipfs_hash = module_data.get('ipfs_hash')  # Phase 7: Database removed
+    # module.blockchain_reference = module_data.get('blockchain_reference')  # Phase 7: Database removed
+    # module.model_architecture = json.dumps(module_data.get('model_architecture', {}))  # Phase 7: Database removed
+    # module.training_data_hash = module_data.get('training_data_hash')  # Phase 7: Database removed
                     
                 elif module_type == 'architecture':
-                    module.model_architecture = json.dumps(module_data.get('architecture_details', {}))
-                    module.training_data_hash = module_data.get('training_data_hash')
+    # module.model_architecture = json.dumps(module_data.get('architecture_details', {}))  # Phase 7: Database removed
+    # module.training_data_hash = module_data.get('training_data_hash')  # Phase 7: Database removed
                     
                 elif module_type == 'reasoning':
-                    module.reasoning_trace = json.dumps(module_data.get('reasoning_trace', {}))
-                    module.computational_proof = module_data.get('computational_proof')
+    # module.reasoning_trace = json.dumps(module_data.get('reasoning_trace', {}))  # Phase 7: Database removed
+    # module.computational_proof = module_data.get('computational_proof')  # Phase 7: Database removed
                     
                 elif module_type == 'audit':
-                    module.audit_report_hash = module_data.get('audit_report_hash')
-                    module.verification_details = json.dumps(module_data.get('audit_details', {}))
+    # module.audit_report_hash = module_data.get('audit_report_hash')  # Phase 7: Database removed
+    # module.verification_details = json.dumps(module_data.get('audit_details', {}))  # Phase 7: Database removed
                 
                 # Verify the module data
                 verification_result = cls._verify_module(module_type, module_data)
@@ -98,7 +98,7 @@ class AITransparencyService:
                 module.verification_timestamp = datetime.utcnow()
                 module.verification_details = json.dumps(verification_result)
                 
-                db.session.add(module)
+    # db.session.add(module)  # Phase 7: Database removed
                 processed_modules.append(module_type)
                 
                 if module.is_verified:
@@ -114,7 +114,7 @@ class AITransparencyService:
             # Update AI agent profile
             cls._update_agent_profile(submission.ai_agent_id, processed_modules)
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             return True, {
                 'processed_modules': processed_modules,
@@ -124,7 +124,7 @@ class AITransparencyService:
             
         except Exception as e:
             logger.error(f"Error processing verification modules: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False, {'error': str(e)}
     
     @classmethod
@@ -147,7 +147,7 @@ class AITransparencyService:
         
         if module_type == 'open_source':
             # Check IPFS hash format
-            ipfs_hash = module_data.get('ipfs_hash', '')
+    # ipfs_hash = module_data.get('ipfs_hash', '')  # Phase 7: Database removed
             if ipfs_hash and ipfs_hash.startswith('Qm') and len(ipfs_hash) == 46:
                 verification_result['checks']['ipfs_valid'] = True
                 verification_result['verified'] = True
@@ -156,7 +156,7 @@ class AITransparencyService:
                 
         elif module_type == 'architecture':
             # Check architecture details provided
-            arch_details = module_data.get('architecture_details', {})
+    # arch_details = module_data.get('architecture_details', {})  # Phase 7: Database removed
             if arch_details and 'model_type' in arch_details:
                 verification_result['checks']['architecture_complete'] = True
                 verification_result['verified'] = True
@@ -165,7 +165,7 @@ class AITransparencyService:
                 
         elif module_type == 'reasoning':
             # Check reasoning trace exists
-            reasoning = module_data.get('reasoning_trace', {})
+    # reasoning = module_data.get('reasoning_trace', {})  # Phase 7: Database removed
             if reasoning and len(str(reasoning)) > 100:  # Basic length check
                 verification_result['checks']['reasoning_provided'] = True
                 verification_result['verified'] = True
@@ -174,7 +174,7 @@ class AITransparencyService:
                 
         elif module_type == 'audit':
             # Check audit hash
-            audit_hash = module_data.get('audit_report_hash', '')
+    # audit_hash = module_data.get('audit_report_hash', '')  # Phase 7: Database removed
             if audit_hash and len(audit_hash) == 64:  # SHA256 hash
                 verification_result['checks']['audit_hash_valid'] = True
                 verification_result['verified'] = True
@@ -186,11 +186,11 @@ class AITransparencyService:
     @classmethod
     def _update_agent_profile(cls, agent_id: str, modules: List[str]) -> None:
         """Update AI agent profile with transparency commitments"""
-        profile = AIAgentProfile.query.filter_by(agent_id=agent_id).first()
+    # profile = AIAgentProfile.query.filter_by(agent_id=agent_id).first()  # Phase 7: Database removed
         
         if not profile:
             profile = AIAgentProfile(agent_id=agent_id)
-            db.session.add(profile)
+    # db.session.add(profile)  # Phase 7: Database removed
         
         # Update transparency commitments
         if 'open_source' in modules:
@@ -208,7 +208,7 @@ class AITransparencyService:
     @classmethod
     def get_agent_transparency_score(cls, agent_id: str) -> Dict:
         """Get comprehensive transparency score for an AI agent"""
-        profile = AIAgentProfile.query.filter_by(agent_id=agent_id).first()
+    # profile = AIAgentProfile.query.filter_by(agent_id=agent_id).first()  # Phase 7: Database removed
         
         if not profile:
             return {
@@ -232,10 +232,10 @@ class AITransparencyService:
         base_score = len(modules_used) * 25
         
         # Add bonus for consistency
-        submissions_with_transparency = Submission.query.filter_by(
+    # submissions_with_transparency = Submission.query.filter_by(  # Phase 7: Database removed
             ai_agent_id=agent_id,
             is_ai_agent=True
-        ).filter(Submission.transparency_level > 0).count()
+    # ).filter(Submission.transparency_level > 0).count()  # Phase 7: Database removed
         
         consistency_bonus = 0
         if profile.total_submissions > 0:
@@ -259,24 +259,24 @@ class AITransparencyService:
     def process_bittensor_integration(cls, agent_id: str, bittensor_data: Dict) -> Tuple[bool, Dict]:
         """Process Bittensor integration for an AI agent"""
         try:
-            integration = BittensorIntegration.query.filter_by(ai_agent_id=agent_id).first()
+    # integration = BittensorIntegration.query.filter_by(ai_agent_id=agent_id).first()  # Phase 7: Database removed
             
             if not integration:
                 integration = BittensorIntegration(
                     ai_agent_id=agent_id,
                     hotkey_address=bittensor_data['hotkey_address']
                 )
-                db.session.add(integration)
+    # db.session.add(integration)  # Phase 7: Database removed
             
             # Update integration data
-            integration.subnet_id = bittensor_data.get('subnet_id')
-            integration.neuron_type = bittensor_data.get('neuron_type', 'miner')
-            integration.coldkey_address = bittensor_data.get('coldkey_address')
-            integration.yuma_score = bittensor_data.get('yuma_score')
-            integration.trust_score = bittensor_data.get('trust_score')
+    # integration.subnet_id = bittensor_data.get('subnet_id')  # Phase 7: Database removed
+    # integration.neuron_type = bittensor_data.get('neuron_type', 'miner')  # Phase 7: Database removed
+    # integration.coldkey_address = bittensor_data.get('coldkey_address')  # Phase 7: Database removed
+    # integration.yuma_score = bittensor_data.get('yuma_score')  # Phase 7: Database removed
+    # integration.trust_score = bittensor_data.get('trust_score')  # Phase 7: Database removed
             integration.last_sync = datetime.utcnow()
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             return True, {
                 'agent_id': agent_id,
@@ -287,13 +287,13 @@ class AITransparencyService:
             
         except Exception as e:
             logger.error(f"Error processing Bittensor integration: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False, {'error': str(e)}
     
     @classmethod
     def calculate_effective_payout(cls, submission_id: str, base_payout: Decimal) -> Decimal:
         """Calculate effective payout including transparency bonuses"""
-        submission = Submission.query.get(submission_id)
+    # submission = Submission.query.get(submission_id)  # Phase 7: Database removed
         
         if not submission or not submission.is_ai_agent:
             return base_payout
@@ -303,11 +303,11 @@ class AITransparencyService:
         effective_payout = base_payout * bonus_multiplier
         
         # Update agent profile with earnings
-        profile = AIAgentProfile.query.filter_by(agent_id=submission.ai_agent_id).first()
+    # profile = AIAgentProfile.query.filter_by(agent_id=submission.ai_agent_id).first()  # Phase 7: Database removed
         if profile:
             bonus_amount = effective_payout - base_payout
             profile.total_bonuses = (profile.total_bonuses or Decimal('0')) + bonus_amount
             profile.total_earned = (profile.total_earned or Decimal('0')) + effective_payout
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
         
         return effective_payout

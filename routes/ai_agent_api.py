@@ -11,7 +11,7 @@ from decimal import Decimal
 from flask import Blueprint, jsonify, request, render_template
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from sqlalchemy import and_
+# from sqlalchemy import and_  # Phase 7: SQLAlchemy removed
 from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils
 from services.text_analysis import TextAnalysisService
@@ -19,8 +19,8 @@ from services.blockchain import BlockchainService
 # Phase 1: Ledger service deprecated - handled by blockchain events
 # from services.ledger import LedgerService
 from services.node_communication import NodeCommunicationService
-from services.ai_transparency import AITransparencyService
-from models import db, PredictionMarket, Submission, Actor, Transaction, AIAgentProfile, VerificationModule
+# from services.ai_transparency import AITransparencyService  # Phase 7: Database-dependent
+# from models import db, PredictionMarket, Submission, Actor, Transaction, AIAgentProfile, VerificationModule  # Phase 7: Models removed
 import uuid
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ blockchain_service = BlockchainService()
 # Phase 1: Ledger service deprecated
 # ledger_service = LedgerService()
 node_comm_service = NodeCommunicationService()
-ai_transparency_service = AITransparencyService()
+# ai_transparency_service = AITransparencyService()  # Phase 7: Database-dependent
 
 # Get platform fee from environment
 PLATFORM_FEE = Decimal(os.environ.get('PLATFORM_FEE', '0.07'))  # Default 7%

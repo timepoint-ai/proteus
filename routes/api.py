@@ -8,13 +8,13 @@ from services.blockchain_base import BaseBlockchainService
 # from services.consensus import ConsensusService
 # Phase 1: Ledger service deprecated - handled by blockchain events
 # from services.ledger import LedgerService
-from services.oracle_xcom import XcomOracleService
-from services.payout_base import BasePayoutService
+# from services.oracle_xcom import XcomOracleService  # Phase 7: Deprecated service
+# from services.payout_base import BasePayoutService  # Phase 7: Database-dependent
 from services.time_sync import TimeSyncService
 from services.text_analysis import TextAnalysisService
 from services.node_communication import NodeCommunicationService
-from models import PredictionMarket, Submission, Bet, Actor, NodeOperator, Transaction, OracleSubmission, SyntheticTimeEntry
-from app import db
+# from models import PredictionMarket, Submission, Bet, Actor, NodeOperator, Transaction, OracleSubmission, SyntheticTimeEntry  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from utils.validation import ValidationUtils
 from utils.crypto import CryptoUtils
 import os
@@ -28,8 +28,8 @@ blockchain_service = BaseBlockchainService()
 # Phase 1: Deprecated services - commented out
 # consensus_service = ConsensusService()
 # ledger_service = LedgerService()
-oracle_service = XcomOracleService()
-payout_service = BasePayoutService()
+# oracle_service = XcomOracleService()  # Phase 7: Deprecated
+# payout_service = BasePayoutService()  # Phase 7: Deprecated
 time_sync_service = TimeSyncService()
 text_analysis_service = TextAnalysisService()
 node_comm_service = NodeCommunicationService()

@@ -1,5 +1,5 @@
-from models import NodeOperator, SyntheticTimeEntry, Transaction
-from app import db, redis_client
+# from models import NodeOperator, SyntheticTimeEntry, Transaction  # Phase 7: Models removed
+# from app import db, redis_client  # Phase 7: Database removed
 from config import Config
 import logging
 import requests
@@ -21,7 +21,7 @@ class NetworkService:
                 return False
             
             # Check if node exists
-            node = NodeOperator.query.filter_by(operator_id=node_id).first()
+    # node = NodeOperator.query.filter_by(operator_id=node_id).first()  # Phase 7: Database removed
             
             if not node:
                 # Create new node
@@ -30,8 +30,8 @@ class NetworkService:
                     public_key=Config.NODE_PRIVATE_KEY,  # In production, derive public key
                     status='pending'
                 )
-                db.session.add(node)
-                db.session.commit()
+    # db.session.add(node)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
                 
                 logging.info(f"Node initialized: {node_id}")
             else:
@@ -70,10 +70,10 @@ class NetworkService:
                 return
             
             # Update local heartbeat
-            node = NodeOperator.query.filter_by(operator_id=node_id).first()
+    # node = NodeOperator.query.filter_by(operator_id=node_id).first()  # Phase 7: Database removed
             if node:
                 node.last_heartbeat = datetime.utcnow()
-                db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             # Send heartbeat to other nodes
             network_nodes = Config.NETWORK_NODES
@@ -98,7 +98,7 @@ class NetworkService:
     def broadcast_node_registration(node_id):
         """Broadcast node registration to network"""
         try:
-            node = NodeOperator.query.get(node_id)
+    # node = NodeOperator.query.get(node_id)  # Phase 7: Database removed
             if not node:
                 return False
             
@@ -209,14 +209,14 @@ class NetworkService:
         """Sync time ledger with a specific node"""
         try:
             # Get our latest timestamp
-            latest_local = SyntheticTimeEntry.query.order_by(
+    # latest_local = SyntheticTimeEntry.query.order_by(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             since_timestamp = latest_local.timestamp_ms if latest_local else 0
             
             # Request entries from other node
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/node/sync/time",
                 params={'since': since_timestamp},
                 timeout=30
@@ -224,7 +224,7 @@ class NetworkService:
             
             if response.status_code == 200:
                 data = response.json()
-                entries = data.get('entries', [])
+    # entries = data.get('entries', [])  # Phase 7: Database removed
                 
                 # Process entries
                 for entry in entries:
@@ -241,14 +241,14 @@ class NetworkService:
         """Sync transactions with a specific node"""
         try:
             # Get our latest transaction
-            latest_local = Transaction.query.order_by(
+    # latest_local = Transaction.query.order_by(  # Phase 7: Database removed
                 Transaction.created_at.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             since_time = latest_local.created_at if latest_local else datetime.utcnow() - timedelta(days=1)
             
             # Request transactions from other node
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/node/sync/transactions",
                 params={'since': since_time.isoformat()},
                 timeout=30
@@ -256,7 +256,7 @@ class NetworkService:
             
             if response.status_code == 200:
                 data = response.json()
-                transactions = data.get('transactions', [])
+    # transactions = data.get('transactions', [])  # Phase 7: Database removed
                 
                 # Process transactions
                 for tx in transactions:
@@ -273,7 +273,7 @@ class NetworkService:
         """Get current network status"""
         try:
             # Get all nodes
-            all_nodes = NodeOperator.query.all()
+    # all_nodes = NodeOperator.query.all()  # Phase 7: Database removed
             
             # Check node health
             healthy_nodes = 0
@@ -291,13 +291,13 @@ class NetworkService:
             
             return {
                 'total_nodes': len(all_nodes),
-                'active_nodes': NodeOperator.query.filter_by(status='active').count(),
-                'pending_nodes': NodeOperator.query.filter_by(status='pending').count(),
+    # 'active_nodes': NodeOperator.query.filter_by(status='active').count(),  # Phase 7: Database removed
+    # 'pending_nodes': NodeOperator.query.filter_by(status='pending').count(),  # Phase 7: Database removed
                 'healthy_nodes': healthy_nodes,
                 'stale_nodes': stale_nodes,
                 'configured_nodes': configured_nodes,
                 'network_connected': configured_nodes > 0,
-                'last_sync': redis_client.get('network:last_sync')
+    # 'last_sync': redis_client.get('network:last_sync')  # Phase 7: Database removed
             }
             
         except Exception as e:
@@ -317,7 +317,7 @@ class NetworkService:
             for node_url in network_nodes:
                 if node_url.strip():
                     try:
-                        response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                             f"{node_url}/node/status",
                             timeout=10
                         )

@@ -14,7 +14,7 @@ import websockets
 from threading import Thread, Lock
 
 from config import Config
-from models import NodeOperator, db
+# from models import NodeOperator, db  # Phase 7: Models removed
 from utils.crypto import CryptoUtils
 
 logger = logging.getLogger(__name__)
@@ -79,9 +79,9 @@ class NodeDiscovery:
                     handshake_data = await websocket.recv()
                     handshake = json.loads(handshake_data)
                     
-                    if handshake.get('type') == 'handshake':
-                        peer_id = handshake.get('node_id')
-                        peer_endpoint = handshake.get('endpoint')
+    # if handshake.get('type') == 'handshake':  # Phase 7: Database removed
+    # peer_id = handshake.get('node_id')  # Phase 7: Database removed
+    # peer_endpoint = handshake.get('endpoint')  # Phase 7: Database removed
                         
                         # Verify signature
                         if self._verify_peer_signature(handshake):
@@ -162,10 +162,10 @@ class NodeDiscovery:
             ack_data = await websocket.recv()
             ack = json.loads(ack_data)
             
-            if ack.get('type') == 'handshake_ack':
-                peer_id = ack.get('node_id')
-                peer_endpoint = ack.get('endpoint')
-                new_peers = ack.get('peers', [])
+    # if ack.get('type') == 'handshake_ack':  # Phase 7: Database removed
+    # peer_id = ack.get('node_id')  # Phase 7: Database removed
+    # peer_endpoint = ack.get('endpoint')  # Phase 7: Database removed
+    # new_peers = ack.get('peers', [])  # Phase 7: Database removed
                 
                 # Add to active peers
                 with self.lock:
@@ -179,7 +179,7 @@ class NodeDiscovery:
                     # Add new peers to known nodes
                     for peer in new_peers:
                         if peer not in self.known_nodes and peer != self.node_id:
-                            self.known_nodes.add(peer)
+    # self.known_nodes.add(peer)  # Phase 7: Database removed
                             
                 logger.info(f"Connected to peer: {peer_id}")
                 
@@ -198,7 +198,7 @@ class NodeDiscovery:
             while self.running:
                 message_data = await websocket.recv()
                 message = json.loads(message_data)
-                msg_type = message.get('type')
+    # msg_type = message.get('type')  # Phase 7: Database removed
                 
                 if msg_type == 'ping':
                     # Respond to ping
@@ -221,8 +221,8 @@ class NodeDiscovery:
                     
                 elif msg_type == 'dht_store':
                     # Store in DHT
-                    key = message.get('key')
-                    value = message.get('value')
+    # key = message.get('key')  # Phase 7: Database removed
+    # value = message.get('value')  # Phase 7: Database removed
                     if key and value:
                         with self.lock:
                             if key not in self.dht:
@@ -231,8 +231,8 @@ class NodeDiscovery:
                             
                 elif msg_type == 'dht_lookup':
                     # Lookup in DHT
-                    key = message.get('key')
-                    values = self.dht.get(key, [])
+    # key = message.get('key')  # Phase 7: Database removed
+    # values = self.dht.get(key, [])  # Phase 7: Database removed
                     response = {
                         'type': 'dht_response',
                         'key': key,
@@ -286,7 +286,7 @@ class NodeDiscovery:
                         await websocket.send(json.dumps(ping))
                         
                         # Check for timeout
-                        last_seen = peer_info.get('last_seen', 0)
+    # last_seen = peer_info.get('last_seen', 0)  # Phase 7: Database removed
                         if time.time() - last_seen > self.timeout_threshold:
                             disconnected_peers.append(peer_id)
                             
@@ -314,7 +314,7 @@ class NodeDiscovery:
             with app.app_context():
                 # Update known nodes
                 for peer_id in self.active_peers:
-                    node = NodeOperator.query.filter_by(operator_id=peer_id).first()
+    # node = NodeOperator.query.filter_by(operator_id=peer_id).first()  # Phase 7: Database removed
                     if node:
                         node.last_seen = datetime.utcnow()
                         node.status = 'active'
@@ -327,16 +327,16 @@ class NodeDiscovery:
                             node_address=peer_info['endpoint'],
                             status='active'
                         )
-                        db.session.add(node)
+    # db.session.add(node)  # Phase 7: Database removed
                         
                 # Mark inactive nodes
                 inactive_threshold = datetime.utcnow() - timedelta(seconds=self.timeout_threshold)
-                NodeOperator.query.filter(
+    # NodeOperator.query.filter(  # Phase 7: Database removed
                     NodeOperator.last_seen < inactive_threshold,
                     NodeOperator.status == 'active'
                 ).update({'status': 'inactive'})
                 
-                db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
                 
         except Exception as e:
             logger.error(f"Error updating node registry: {e}")
@@ -361,7 +361,7 @@ class NodeDiscovery:
         
     def get_peer_info(self, peer_id: str) -> Optional[Dict]:
         """Get information about a specific peer"""
-        return self.active_peers.get(peer_id)
+    # return self.active_peers.get(peer_id)  # Phase 7: Database removed
         
     async def broadcast_to_peers(self, message: Dict):
         """Broadcast a message to all active peers"""

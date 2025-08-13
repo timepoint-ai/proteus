@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from decimal import Decimal, InvalidOperation
 import json
-from models import Actor, Bet, NodeOperator
-from app import db
+# from models import Actor, Bet, NodeOperator  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from config import Config
 
 logger = logging.getLogger(__name__)

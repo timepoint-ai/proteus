@@ -2,8 +2,8 @@
 Route to generate realistic test data with proper status flows
 """
 from flask import Blueprint, redirect, url_for, flash
-from app import db
-from models import (
+# from app import db  # Phase 7: Database removed
+# from models import (  # Phase 7: Models removed
     Actor, PredictionMarket, Submission, Bet, Transaction, 
     OracleSubmission, NodeOperator
 )

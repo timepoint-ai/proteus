@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
-from app import db, redis_client
-from models import NodeOperator, SyntheticTimeEntry
+# from app import db, redis_client  # Phase 7: Database removed
+# from models import NodeOperator, SyntheticTimeEntry  # Phase 7: Models removed
 from utils.crypto import CryptoUtils
 from config import Config
 import json
@@ -138,7 +138,7 @@ class TimeConsensusService:
         """Get time consensus from all active nodes"""
         try:
             # Get all active nodes
-            active_nodes = NodeOperator.query.filter_by(status='active').all()
+    # active_nodes = NodeOperator.query.filter_by(status='active').all()  # Phase 7: Database removed
             
             time_reports = []
             current_time = self.get_synchronized_time()
@@ -146,7 +146,7 @@ class TimeConsensusService:
             # Collect time reports from all nodes
             for node in active_nodes:
                 redis_key = f"time_sync:{node.operator_id}"
-                sync_data = redis_client.get(redis_key)
+    # sync_data = redis_client.get(redis_key)  # Phase 7: Database removed
                 
                 if sync_data:
                     try:
@@ -261,13 +261,13 @@ class TimeConsensusService:
                 reconciled=True  # Checkpoints are immediately reconciled
             )
             
-            db.session.add(checkpoint_entry)
-            db.session.commit()
+    # db.session.add(checkpoint_entry)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             logger.info(f"Created time checkpoint: {checkpoint_entry.id}")
             return str(checkpoint_entry.id)
             
         except Exception as e:
             logger.error(f"Error creating time checkpoint: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return None

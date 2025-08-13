@@ -1,10 +1,10 @@
 """API endpoints for Clockchain pagination"""
 import logging
 from flask import Blueprint, request, jsonify
-from models import PredictionMarket, Actor, Submission, Bet
-from app import db
+# from models import PredictionMarket, Actor, Submission, Bet  # Phase 7: Models removed
+# from app import db  # Phase 7: Database removed
 from datetime import datetime
-from sqlalchemy import desc
+# from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
 clockchain_api_bp = Blueprint('clockchain_api', __name__)

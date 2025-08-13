@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from models import db, EmailCapture
+# from models import db, EmailCapture  # Phase 7: Models removed
 from datetime import datetime
 import uuid
 

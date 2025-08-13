@@ -5,7 +5,7 @@ Node API endpoints for multi-node communication
 from flask import Blueprint, request, jsonify
 import logging
 from datetime import datetime
-from models import db, NodeOperator
+# from models import db, NodeOperator  # Phase 7: Models removed
 
 logger = logging.getLogger(__name__)
 

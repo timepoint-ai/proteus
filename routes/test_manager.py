@@ -9,11 +9,11 @@ import traceback
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session
 from functools import wraps
-from models import db, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, Actor
+# from models import db, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, Actor  # Phase 7: Models removed
 from services.blockchain_base import BaseBlockchainService
-from services.payout_base import BasePayoutService
+# from services.payout_base import BasePayoutService  # Phase 7: Database-dependent
 from services.xcom_api_service import XComAPIService
-from services.oracle_xcom import XcomOracleService
+# from services.oracle_xcom import XcomOracleService  # Phase 7: Database-dependent
 from web3 import Web3
 from eth_account import Account
 import time
@@ -690,7 +690,7 @@ def run_oracle_submission_test(results):
         
         # Initialize X.com services
         xcom_api = XComAPIService()
-        oracle_service = XcomOracleService()
+        # oracle_service = XcomOracleService()  # Phase 7: Database-dependent
         
         # Test tweet data - using a known test tweet ID
         test_tweet_url = "https://x.com/test_user/status/1234567890123456789"

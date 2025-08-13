@@ -1,19 +1,16 @@
 import os
 import logging
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from celery import Celery
 import redis
 
+# Phase 7: All SQLAlchemy imports removed - chain-only mode
+
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-class Base(DeclarativeBase):
-    pass
-
-db = SQLAlchemy(model_class=Base)
+# Phase 7: Database classes removed - chain-only mode
 
 # Initialize Celery
 def make_celery(app):
@@ -35,9 +32,7 @@ redis_client = redis.Redis(
 def create_app():
     logger = logging.getLogger(__name__)
     app = Flask(__name__)
-    # Phase 4: No Flask sessions in chain-only mode
-    # JWT-based wallet auth doesn't need Flask sessions
-    app.secret_key = os.urandom(32).hex()  # Random key, not used for sessions
+    # Chain-only mode: No sessions needed with JWT auth
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     
     # Load configuration
@@ -48,7 +43,7 @@ def create_app():
     app.config['CELERY_BROKER_URL'] = chain_config.CELERY_BROKER_URL
     app.config['CELERY_RESULT_BACKEND'] = chain_config.CELERY_RESULT_BACKEND
     
-    # Phase 4: Skip database initialization - chain-only mode
+    # Chain-only mode: No database needed
     # db.init_app(app) - REMOVED: No database in chain-only mode
     
     # Initialize Celery
@@ -68,7 +63,7 @@ def create_app():
     from routes.actors import actors_bp
     from routes.clockchain_api import clockchain_api_bp
     from routes.oracles import oracles_bp
-    from routes.generate_realistic_data import generate_data_bp
+    # from routes.generate_realistic_data import generate_data_bp  # Phase 7: Test route removed
     from routes.base_api import base_api_bp
     from routes.oracle_manual import oracle_manual_bp
     from routes.node_api import node_api_bp
@@ -87,7 +82,7 @@ def create_app():
     app.register_blueprint(clockchain_api_bp)
     app.register_blueprint(oracles_bp)
     app.register_blueprint(oracle_manual_bp)
-    app.register_blueprint(generate_data_bp)
+    # app.register_blueprint(generate_data_bp)  # Phase 7: Test route removed
     app.register_blueprint(node_api_bp)
     
     # Test Manager Routes (Protected)
@@ -97,15 +92,9 @@ def create_app():
     # Initialize rate limiter
     init_limiter(app)
     
-    # Phase 4: Database initialization removed - chain-only mode
-    # with app.app_context():
-    #     import models  # REMOVED: No database models
-    #     db.create_all()  # REMOVED: No database tables
+    # Chain-only mode: All data stored on blockchain
     
-    # Phase 1: Consensus service deprecated - handled by DecentralizedOracle contract
-    # Initialize node operator if not exists
-    # from services.consensus import ConsensusService
-    # ConsensusService.initialize_node()
+    # Initialize chain-only services
     
     # Start production monitoring service
     try:

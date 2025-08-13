@@ -5,8 +5,8 @@ import hashlib
 import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Tuple
-from app import db
-from models import PredictionMarket, Submission, OracleSubmission, OracleVote, NodeOperator, Bet
+# from app import db  # Phase 7: Database removed
+# from models import PredictionMarket, Submission, OracleSubmission, OracleVote, NodeOperator, Bet  # Phase 7: Models removed
 from utils.crypto import CryptoUtils
 from services.node_communication import NodeCommunicationService
 from services.text_analysis import TextAnalysisService
@@ -35,7 +35,7 @@ class XcomOracleService:
         """Submit an oracle statement with X.com verification for a prediction market"""
         try:
             # Get the market
-            market = PredictionMarket.query.get(market_id)
+    # market = PredictionMarket.query.get(market_id)  # Phase 7: Database removed
             if not market:
                 logger.error(f"PredictionMarket {market_id} not found")
                 return False
@@ -58,10 +58,10 @@ class XcomOracleService:
                 return False
                 
             # Check if oracle has already submitted
-            existing_submission = OracleSubmission.query.filter_by(
+    # existing_submission = OracleSubmission.query.filter_by(  # Phase 7: Database removed
                 market_id=market_id,
                 oracle_wallet=oracle_wallet
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             if existing_submission:
                 logger.warning(f"Oracle {oracle_wallet} already submitted for market {market_id}")
@@ -97,7 +97,7 @@ class XcomOracleService:
             submission.screenshot_hash = screenshot_hash
             submission.tweet_timestamp = datetime.utcnow()  # Would be fetched from X.com API
             
-            db.session.add(submission)
+    # db.session.add(submission)  # Phase 7: Database removed
             
             # Update market status to validating
             market.status = 'validating'
@@ -116,7 +116,7 @@ class XcomOracleService:
                 }
             })
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             logger.info(f"Oracle submission created for market {market_id} with X.com verification")
             
             # Check if we can auto-resolve based on consensus
@@ -126,7 +126,7 @@ class XcomOracleService:
             
         except Exception as e:
             logger.error(f"Error submitting oracle statement: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False
             
     def _verify_xcom_tweet(self, tweet_id: str, expected_handle: str) -> bool:
@@ -143,11 +143,11 @@ class XcomOracleService:
             
             if tweet_data:
                 # Verify username matches (case-insensitive)
-                if tweet_data.get('author_username', '').lower() == expected_handle.lower():
+    # if tweet_data.get('author_username', '').lower() == expected_handle.lower():  # Phase 7: Database removed
                     logger.info(f"X.com tweet {tweet_id} verified via API for handle {expected_handle}")
                     return True
                 else:
-                    logger.warning(f"Tweet {tweet_id} author mismatch: expected {expected_handle}, got {tweet_data.get('author_username')}")
+    # logger.warning(f"Tweet {tweet_id} author mismatch: expected {expected_handle}, got {tweet_data.get('author_username')}")  # Phase 7: Database removed
                     return False
             else:
                 # If API fails, log and allow manual verification
@@ -196,16 +196,16 @@ class XcomOracleService:
                 return False
                 
             # Get submission
-            submission = OracleSubmission.query.get(submission_id)
+    # submission = OracleSubmission.query.get(submission_id)  # Phase 7: Database removed
             if not submission:
                 logger.error(f"Oracle submission {submission_id} not found")
                 return False
                 
             # Check if already voted
-            existing_vote = OracleVote.query.filter_by(
+    # existing_vote = OracleVote.query.filter_by(  # Phase 7: Database removed
                 submission_id=submission_id,
                 voter_wallet=voter_wallet
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             if existing_vote:
                 logger.warning(f"Voter {voter_wallet} already voted on submission {submission_id}")
@@ -224,7 +224,7 @@ class XcomOracleService:
             oracle_vote.vote = vote
             oracle_vote.signature = signature
             
-            db.session.add(oracle_vote)
+    # db.session.add(oracle_vote)  # Phase 7: Database removed
             
             # Update vote counts
             if vote == 'for':
@@ -232,7 +232,7 @@ class XcomOracleService:
             else:
                 submission.votes_against += 1
                 
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             # Check if consensus reached
             self._check_consensus_and_resolve(submission.market_id)
@@ -241,18 +241,18 @@ class XcomOracleService:
             
         except Exception as e:
             logger.error(f"Error voting on oracle submission: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False
             
     def _check_consensus_and_resolve(self, market_id: str) -> bool:
         """Check if oracle consensus is reached and resolve market"""
         try:
-            market = PredictionMarket.query.get(market_id)
+    # market = PredictionMarket.query.get(market_id)  # Phase 7: Database removed
             if not market or market.status == 'resolved':
                 return False
                 
             # Get all oracle submissions
-            submissions = OracleSubmission.query.filter_by(market_id=market_id).all()
+    # submissions = OracleSubmission.query.filter_by(market_id=market_id).all()  # Phase 7: Database removed
             
             # Need at least 3 oracle submissions
             if len(submissions) < 3:
@@ -276,12 +276,12 @@ class XcomOracleService:
             logger.error(f"Error checking consensus: {e}")
             return False
             
-    def _resolve_market_with_oracle(self, market: PredictionMarket, 
-                                   oracle_submission: OracleSubmission) -> bool:
+    def _resolve_market_with_oracle(self, market: Any, 
+                                   oracle_submission: Any) -> bool:
         """Resolve market based on oracle consensus"""
         try:
             # Get all submissions for this market
-            submissions = Submission.query.filter_by(market_id=market.id).all()
+    # submissions = Submission.query.filter_by(market_id=market.id).all()  # Phase 7: Database removed
             
             if not submissions:
                 logger.error(f"No submissions found for market {market.id}")
@@ -327,7 +327,7 @@ class XcomOracleService:
                     }
                 })
                 
-                db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
                 logger.info(f"Market {market.id} resolved with winner {winning_submission.id}")
                 return True
                 
@@ -335,17 +335,17 @@ class XcomOracleService:
             
         except Exception as e:
             logger.error(f"Error resolving market: {e}")
-            db.session.rollback()
+    # db.session.rollback()  # Phase 7: Database removed
             return False
             
     def _update_bet_statuses(self, market_id: str, winning_submission_id: str):
         """Update bet statuses based on market resolution"""
         try:
             # Get all bets for this market
-            all_submissions = Submission.query.filter_by(market_id=market_id).all()
+    # all_submissions = Submission.query.filter_by(market_id=market_id).all()  # Phase 7: Database removed
             
             for submission in all_submissions:
-                bets = Bet.query.filter_by(submission_id=submission.id).all()
+    # bets = Bet.query.filter_by(submission_id=submission.id).all()  # Phase 7: Database removed
                 
                 for bet in bets:
                     if submission.id == winning_submission_id:
@@ -359,12 +359,12 @@ class XcomOracleService:
     def get_oracle_statistics(self, oracle_wallet: str) -> Dict[str, Any]:
         """Get statistics for an oracle"""
         try:
-            submissions = OracleSubmission.query.filter_by(oracle_wallet=oracle_wallet).all()
+    # submissions = OracleSubmission.query.filter_by(oracle_wallet=oracle_wallet).all()  # Phase 7: Database removed
             
             total_submissions = len(submissions)
             consensus_reached = sum(1 for s in submissions if s.is_consensus)
             
-            total_votes_cast = OracleVote.query.filter_by(voter_wallet=oracle_wallet).count()
+    # total_votes_cast = OracleVote.query.filter_by(voter_wallet=oracle_wallet).count()  # Phase 7: Database removed
             
             return {
                 'total_submissions': total_submissions,
@@ -385,7 +385,7 @@ class XcomOracleService:
             reputation = 100.0
             
             # Get oracle submissions
-            submissions = OracleSubmission.query.filter_by(oracle_wallet=oracle_wallet).all()
+    # submissions = OracleSubmission.query.filter_by(oracle_wallet=oracle_wallet).all()  # Phase 7: Database removed
             
             for submission in submissions:
                 if submission.is_consensus:

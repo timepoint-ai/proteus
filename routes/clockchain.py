@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from models import SyntheticTimeEntry, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, NodeOperator, Actor
-from sqlalchemy import desc
-from app import db
+# from models import SyntheticTimeEntry, PredictionMarket, Submission, Bet, Transaction, OracleSubmission, NodeOperator, Actor  # Phase 7: Models removed
+# from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
+# from app import db  # Phase 7: Database removed
 import json
 import logging
 from datetime import datetime, timedelta

@@ -1,8 +1,8 @@
-from models import Transaction, SyntheticTimeEntry, NodeOperator, Bet, Stake
+# from models import Transaction, SyntheticTimeEntry, NodeOperator, Bet, Stake  # Phase 7: Models removed
 from services.blockchain import BlockchainService
 from services.time_ledger import TimeLedgerService
 from services.network import NetworkService
-from app import db, redis_client
+# from app import db, redis_client  # Phase 7: Database removed
 from config import Config
 import logging
 from datetime import datetime, timedelta
@@ -60,9 +60,9 @@ class ReconciliationService:
                 return {'status': 'no_network'}
             
             # Get our latest entry
-            latest_local = SyntheticTimeEntry.query.order_by(
+    # latest_local = SyntheticTimeEntry.query.order_by(  # Phase 7: Database removed
                 SyntheticTimeEntry.timestamp_ms.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             since_timestamp = latest_local.timestamp_ms if latest_local else 0
             
@@ -124,9 +124,9 @@ class ReconciliationService:
                 return {'status': 'no_network'}
             
             # Get our latest transaction
-            latest_local = Transaction.query.order_by(
+    # latest_local = Transaction.query.order_by(  # Phase 7: Database removed
                 Transaction.created_at.desc()
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             since_time = latest_local.created_at if latest_local else datetime.utcnow() - timedelta(days=1)
             
@@ -242,7 +242,7 @@ class ReconciliationService:
         try:
             import requests
             
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/api/sync/time",
                 params={'since': since_timestamp},
                 timeout=30
@@ -250,7 +250,7 @@ class ReconciliationService:
             
             if response.status_code == 200:
                 data = response.json()
-                return data.get('entries', [])
+    # return data.get('entries', [])  # Phase 7: Database removed
             else:
                 logging.error(f"Failed to fetch time entries from {node_url}: {response.status_code}")
                 return []
@@ -265,7 +265,7 @@ class ReconciliationService:
         try:
             import requests
             
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/api/sync/transactions",
                 params={'since': since_time.isoformat()},
                 timeout=30
@@ -273,7 +273,7 @@ class ReconciliationService:
             
             if response.status_code == 200:
                 data = response.json()
-                return data.get('transactions', [])
+    # return data.get('transactions', [])  # Phase 7: Database removed
             else:
                 logging.error(f"Failed to fetch transactions from {node_url}: {response.status_code}")
                 return []
@@ -288,14 +288,14 @@ class ReconciliationService:
         try:
             import requests
             
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/api/sync/bets",
                 timeout=30
             )
             
             if response.status_code == 200:
                 data = response.json()
-                return data.get('bets', [])
+    # return data.get('bets', [])  # Phase 7: Database removed
             else:
                 logging.error(f"Failed to fetch bets from {node_url}: {response.status_code}")
                 return []
@@ -310,14 +310,14 @@ class ReconciliationService:
         try:
             import requests
             
-            response = requests.get(
+    # response = requests.get(  # Phase 7: Database removed
                 f"{node_url}/api/sync/stakes",
                 timeout=30
             )
             
             if response.status_code == 200:
                 data = response.json()
-                return data.get('stakes', [])
+    # return data.get('stakes', [])  # Phase 7: Database removed
             else:
                 logging.error(f"Failed to fetch stakes from {node_url}: {response.status_code}")
                 return []
@@ -331,11 +331,11 @@ class ReconciliationService:
         """Reconcile a single time entry"""
         try:
             # Check if entry already exists
-            existing = SyntheticTimeEntry.query.filter_by(
+    # existing = SyntheticTimeEntry.query.filter_by(  # Phase 7: Database removed
                 timestamp_ms=entry_data['timestamp_ms'],
                 node_id=entry_data['node_id'],
                 hash_chain=entry_data['hash_chain']
-            ).first()
+    # ).first()  # Phase 7: Database removed
             
             if existing:
                 return {'status': 'exists', 'entry_id': existing.id}
@@ -353,8 +353,8 @@ class ReconciliationService:
                 hash_chain=entry_data['hash_chain']
             )
             
-            db.session.add(entry)
-            db.session.commit()
+    # db.session.add(entry)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             return {'status': 'reconciled', 'entry_id': entry.id}
             
@@ -367,7 +367,7 @@ class ReconciliationService:
         """Reconcile a single transaction"""
         try:
             # Check if transaction already exists
-            existing = Transaction.query.filter_by(tx_hash=tx_data['tx_hash']).first()
+    # existing = Transaction.query.filter_by(tx_hash=tx_data['tx_hash']).first()  # Phase 7: Database removed
             
             if existing:
                 # Check for conflicts
@@ -392,14 +392,14 @@ class ReconciliationService:
                 to_address=tx_data['to_address'],
                 amount=Decimal(tx_data['amount']),
                 currency=tx_data['currency'],
-                block_number=tx_data.get('block_number'),
-                status=tx_data.get('status', 'confirmed'),
+    # block_number=tx_data.get('block_number'),  # Phase 7: Database removed
+    # status=tx_data.get('status', 'confirmed'),  # Phase 7: Database removed
                 platform_fee=BlockchainService.calculate_platform_fee(tx_data['amount']),
                 created_at=datetime.fromisoformat(tx_data['created_at'])
             )
             
-            db.session.add(transaction)
-            db.session.commit()
+    # db.session.add(transaction)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             return {'status': 'reconciled', 'tx_id': transaction.id}
             
@@ -412,7 +412,7 @@ class ReconciliationService:
         """Reconcile a single bet"""
         try:
             # Check if bet already exists
-            existing = Bet.query.get(bet_data['id'])
+    # existing = Bet.query.get(bet_data['id'])  # Phase 7: Database removed
             
             if existing:
                 # Check for conflicts
@@ -442,12 +442,12 @@ class ReconciliationService:
                 stake_amount=Decimal(bet_data['stake_amount']),
                 stake_currency=bet_data['stake_currency'],
                 tx_hash=bet_data['tx_hash'],
-                status=bet_data.get('status', 'active'),
+    # status=bet_data.get('status', 'active'),  # Phase 7: Database removed
                 created_at=datetime.fromisoformat(bet_data['created_at'])
             )
             
-            db.session.add(bet)
-            db.session.commit()
+    # db.session.add(bet)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             return {'status': 'reconciled', 'bet_id': bet.id}
             
@@ -460,7 +460,7 @@ class ReconciliationService:
         """Reconcile a single stake"""
         try:
             # Check if stake already exists
-            existing = Stake.query.get(stake_data['id'])
+    # existing = Stake.query.get(stake_data['id'])  # Phase 7: Database removed
             
             if existing:
                 # Check for conflicts
@@ -490,8 +490,8 @@ class ReconciliationService:
                 created_at=datetime.fromisoformat(stake_data['created_at'])
             )
             
-            db.session.add(stake)
-            db.session.commit()
+    # db.session.add(stake)  # Phase 7: Database removed
+    # db.session.commit()  # Phase 7: Database removed
             
             return {'status': 'reconciled', 'stake_id': stake.id}
             
@@ -504,25 +504,25 @@ class ReconciliationService:
         """Validate transaction integrity"""
         try:
             # Check for duplicate transactions
-            duplicates = db.session.query(Transaction.tx_hash).group_by(Transaction.tx_hash).having(db.func.count(Transaction.id) > 1).all()
+    # duplicates = db.session.query(Transaction.tx_hash).group_by(Transaction.tx_hash).having(db.func.count(Transaction.id) > 1).all()  # Phase 7: Database removed
             
             if duplicates:
                 logging.error(f"Found {len(duplicates)} duplicate transactions")
                 return False
             
             # Check transaction amounts
-            invalid_amounts = Transaction.query.filter(Transaction.amount <= 0).count()
+    # invalid_amounts = Transaction.query.filter(Transaction.amount <= 0).count()  # Phase 7: Database removed
             
             if invalid_amounts > 0:
                 logging.error(f"Found {invalid_amounts} transactions with invalid amounts")
                 return False
             
             # Check platform fees
-            for tx in Transaction.query.filter(Transaction.platform_fee.is_(None)).all():
+    # for tx in Transaction.query.filter(Transaction.platform_fee.is_(None)).all():  # Phase 7: Database removed
                 expected_fee = BlockchainService.calculate_platform_fee(tx.amount)
                 tx.platform_fee = expected_fee
             
-            db.session.commit()
+    # db.session.commit()  # Phase 7: Database removed
             
             return True
             
@@ -556,15 +556,15 @@ class ReconciliationService:
             current_node = Config.NODE_ID
             
             # Get last reconciliation times
-            last_full = redis_client.get(f'node:{current_node}:last_reconcile')
-            last_time = redis_client.get(f'node:{current_node}:last_time_reconcile')
-            last_tx = redis_client.get(f'node:{current_node}:last_tx_reconcile')
+    # last_full = redis_client.get(f'node:{current_node}:last_reconcile')  # Phase 7: Database removed
+    # last_time = redis_client.get(f'node:{current_node}:last_time_reconcile')  # Phase 7: Database removed
+    # last_tx = redis_client.get(f'node:{current_node}:last_tx_reconcile')  # Phase 7: Database removed
             
             # Get network status
             network_status = NetworkService.get_network_status()
             
             # Get conflict count
-            conflict_count = redis_client.get(f'node:{current_node}:conflict_count') or 0
+    # conflict_count = redis_client.get(f'node:{current_node}:conflict_count') or 0  # Phase 7: Database removed
             
             return {
                 'node_id': current_node,
