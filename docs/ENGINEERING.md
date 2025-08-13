@@ -71,12 +71,14 @@ User Submission → Smart Contract Validation → Event Emission
 
 ### Backend Architecture
 
-#### Technology Stack
-- **Framework**: Flask 3.0+ with async support
-- **Blockchain**: Web3.py 6.0+ for BASE interaction
+#### Technology Stack (Phase 7 Complete - Fully Decentralized)
+- **Framework**: Flask 3.0+ (chain-only API routes)
+- **Blockchain**: Web3.py 6.0+ with BASE RPC endpoints
+- **Authentication**: Wallet-based JWT tokens only
+- **Caching**: Redis with TTL for blockchain data
+- **Performance**: RPC retry logic with exponential backoff
 - **Task Queue**: Celery 5.3+ with Redis broker
-- **Database**: PostgreSQL (legacy, read-only)
-- **Cache**: Redis for real-time data
+- **Database**: REMOVED - All data now on blockchain
 - **WebSockets**: Socket.IO for live updates
 
 #### Service Architecture
