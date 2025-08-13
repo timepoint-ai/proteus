@@ -16,14 +16,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Major Changes (August 2025)
 
-### Phase 1 Genesis NFT Implementation (August 12, 2025) ✅
+### Phase 1 Genesis NFT Implementation with Improved Economics (January 17, 2025) ✅
 - **Genesis NFT Contract**: Implemented 100 fixed-supply NFTs with on-chain SVG art
-- **Distributed Payout Manager**: Updated to distribute 0.2% rewards to Genesis holders
-- **Testing**: Comprehensive test suite achieving 96.7% pass rate (8.5/10 overall score)
-- **Gas Analysis**: Deployment ~2.5M gas, minting ~900k gas per 10 NFTs
-- **Security**: No admin functions, truly decentralized from day one
-- **Documentation**: Complete technical docs in docs/PHASE_1_COMPLETE_TESTED.md
-- **Status**: Ready for BASE Sepolia deployment (pending wallet configuration)
+- **IMPROVED Distributed Payout Manager**: Genesis holders now get 1.4% of platform volume (20% of fees) - a 7X improvement!
+  - Old payout: 0.2% of volume (2.8% of platform fees) - too low for 100% ownership
+  - New payout: 1.4% of volume (20% of platform fees) - fair reward for founders
+  - Deployed to BASE Sepolia: 0xE9eE183b76A8BDfDa8EA926b2f44137Aa65379B5
+- **Economics Justification**: User holding 100% of Genesis NFTs deserves substantial rewards as early supporter
+- **Revenue Potential**: At $1M daily volume, 100 Genesis NFTs earn $14,000/day ($420,000/month)
+- **Testing**: Successfully executed test markets generating actual platform fees
+- **Status**: Improved payout system deployed and tested on BASE Sepolia
 
 ### Previous Major Changes
 - **Phase 1 Complete**: Backend transitioned to blockchain-first with database writes disabled

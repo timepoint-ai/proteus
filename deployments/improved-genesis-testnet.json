@@ -1,0 +1,20 @@
+{
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "deployer": "0x2b5fBAC3CAAf8937767b458ac6Ed38Cf0DF6b6EF",
+  "timestamp": "2025-08-12T22:57:31.384Z",
+  "contracts": {
+    "GenesisNFT": "0x1A5D4475881B93e876251303757E60E524286A24",
+    "DistributedPayoutManager": "0xe7f7b5f022b3933988E832a2bea59e1d12e844Ba",
+    "MockPredictionMarket": "0x16a21A4B3CbC8A81ae1b26FaE843e5F62579F515"
+  },
+  "improvedContracts": {
+    "ImprovedDistributedPayoutManager": "0xE9eE183b76A8BDfDa8EA926b2f44137Aa65379B5",
+    "deployedAt": "2025-08-13T00:47:52.929Z",
+    "improvements": {
+      "genesisShare": "20% of fees (1.4% of volume)",
+      "oldShare": "2.8% of fees (0.2% of volume)",
+      "multiplier": "7X increase"
+    }
+  }
+}
