@@ -35,6 +35,9 @@ def create_app():
     # Chain-only mode: No sessions needed with JWT auth
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     
+    # Set secret key for flash messages only (not for sessions)
+    app.secret_key = os.environ.get("SESSION_SECRET", "phase7-blockchain-only-flash-messages")
+    
     # Load configuration
     # Phase 4: Use chain-only configuration
     from config_chain import chain_config

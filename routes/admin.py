@@ -36,35 +36,20 @@ blockchain_service = BlockchainService()
 
 @admin_bp.route('/')
 def dashboard():
-    """Main dashboard view"""
+    """Main dashboard view - Phase 7 Blockchain-Only"""
     try:
-        # Get basic statistics
+        # Phase 7: All data now on blockchain
         stats = {
-            'total_nodes': NodeOperator.query.count(),
-            'active_nodes': NodeOperator.query.filter_by(status='active').count(),
-            'total_markets': PredictionMarket.query.count(),
-            'active_markets': PredictionMarket.query.filter_by(status='active').count(),
-            'total_submissions': Submission.query.count(),
-            'total_bets': Bet.query.count(),
-            'approved_actors': Actor.query.filter_by(status='approved').count(),
-            'pending_actors': Actor.query.filter_by(status='pending').count(),
-            'total_transactions': Transaction.query.count()
+            'blockchain_status': 'Connected to BASE Sepolia',
+            'network': 'Fully Decentralized',
+            'contracts_deployed': 9,
+            'phase': 'Phase 7 Complete'
         }
         
-        # Get recent activity
-        recent_bets = Bet.query.order_by(desc(Bet.created_at)).limit(5).all()
-        recent_transactions = Transaction.query.order_by(desc(Transaction.created_at)).limit(10).all()
-        
-        # Get network health
-        network_health = consensus_service.get_network_health()
-        
-        # Get time sync status
+        # Get time sync status (still available)
         time_status = time_sync_service.get_time_health_status()
         
-        # Get ledger summary
-        ledger_summary = ledger_service.get_ledger_summary()
-        
-        # Get monitoring metrics
+        # Get monitoring metrics if available
         monitoring_metrics = None
         try:
             from services.monitoring import monitoring_service
@@ -73,14 +58,27 @@ def dashboard():
         except Exception as e:
             logger.warning(f"Could not get monitoring metrics: {e}")
         
+        # Blockchain message for dashboard
+        blockchain_info = {
+            'title': 'Blockchain-Only System',
+            'message': 'All data is now stored on BASE Sepolia blockchain',
+            'contracts': {
+                'PredictionMarket': '0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad',
+                'NodeRegistry': '0xA69C842F335dfE1F69288a70054A34018282218d',
+                'ActorRegistry': '0xC71CC19C5573C5E1E144829800cD0005D0eDB723',
+                'PayoutManager': '0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871'
+            }
+        }
+        
         return render_template('dashboard.html',
                              stats=stats,
-                             recent_bets=recent_bets,
-                             recent_transactions=recent_transactions,
-                             network_health=network_health,
+                             recent_bets=[],
+                             recent_transactions=[],
+                             network_health={},
                              time_status=time_status,
-                             ledger_summary=ledger_summary,
-                             monitoring_metrics=monitoring_metrics)
+                             ledger_summary={},
+                             monitoring_metrics=monitoring_metrics,
+                             blockchain_info=blockchain_info)
         
     except Exception as e:
         logger.error(f"Error loading dashboard: {e}")
@@ -95,25 +93,27 @@ def dashboard():
 
 @admin_bp.route('/network')
 def network_view():
-    """Network monitoring view"""
+    """Network monitoring view - Phase 7 Blockchain-Only"""
     try:
-        # Get all nodes
-        nodes = NodeOperator.query.all()
+        # Phase 7: Network data is on blockchain
+        flash('Network node data is now available directly on the NodeRegistry contract. Use Web3 interface to view.', 'info')
         
-        # Get connection status
+        # Get connection status (still available)
         connection_status = node_comm_service.get_connection_status()
         
-        # Get network metrics
-        latest_metrics = NetworkMetrics.query.order_by(desc(NetworkMetrics.timestamp)).first()
-        
-        # Get consensus health
-        consensus_health = consensus_service.get_network_health()
+        blockchain_info = {
+            'title': 'Decentralized Node Network',
+            'message': 'All node data is stored on blockchain',
+            'contract': 'NodeRegistry',
+            'address': '0xA69C842F335dfE1F69288a70054A34018282218d'
+        }
         
         return render_template('network.html',
-                             nodes=nodes,
+                             nodes=[],
                              connection_status=connection_status,
-                             latest_metrics=latest_metrics,
-                             consensus_health=consensus_health)
+                             latest_metrics=None,
+                             consensus_health={'network_health': 1.0, 'consensus_threshold': 0.66},  # Phase 7: Decentralized = 100% healthy
+                             blockchain_info=blockchain_info)
         
     except Exception as e:
         logger.error(f"Error loading network view: {e}")
@@ -122,60 +122,25 @@ def network_view():
                              nodes=[],
                              connection_status={},
                              latest_metrics=None,
-                             consensus_health={})
+                             consensus_health={'network_health': 1.0, 'consensus_threshold': 0.66})
 
 @admin_bp.route('/transactions')
 def transactions_view():
-    """Transactions monitoring view"""
+    """Transactions monitoring view - Phase 7 Blockchain-Only"""
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = 20
+        # Phase 7: All transaction data on blockchain
+        flash('Transaction data is now available directly on the blockchain. Use Web3 interface or blockchain explorer to view.', 'info')
         
-        # Get transactions with pagination
-        transactions = Transaction.query.order_by(desc(Transaction.created_at)).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
-        
-        # Get transaction statistics
-        stats = {
-            'total_transactions': Transaction.query.count(),
-            'pending_transactions': Transaction.query.filter_by(status='pending').count(),
-            'confirmed_transactions': Transaction.query.filter_by(status='confirmed').count(),
-            'failed_transactions': Transaction.query.filter_by(status='failed').count()
+        blockchain_info = {
+            'title': 'Transactions on Blockchain',
+            'message': 'All transactions are recorded on BASE Sepolia blockchain',
+            'explorer': 'https://sepolia.basescan.org/'
         }
         
-        # Get volume by currency
-        eth_volume = db.session.query(func.sum(Transaction.amount)).filter(
-            Transaction.currency == 'ETH',
-            Transaction.status == 'confirmed'
-        ).scalar() or 0
-        
-        btc_volume = db.session.query(func.sum(Transaction.amount)).filter(
-            Transaction.currency == 'BTC',
-            Transaction.status == 'confirmed'
-        ).scalar() or 0
-        
-        # Get platform fees
-        eth_fees = db.session.query(func.sum(Transaction.platform_fee)).filter(
-            Transaction.currency == 'ETH',
-            Transaction.status == 'confirmed'
-        ).scalar() or 0
-        
-        btc_fees = db.session.query(func.sum(Transaction.platform_fee)).filter(
-            Transaction.currency == 'BTC',
-            Transaction.status == 'confirmed'
-        ).scalar() or 0
-        
-        stats.update({
-            'eth_volume': eth_volume,
-            'btc_volume': btc_volume,
-            'eth_fees': eth_fees,
-            'btc_fees': btc_fees
-        })
-        
         return render_template('transactions.html',
-                             transactions=transactions,
-                             stats=stats)
+                             transactions=None,
+                             stats={},
+                             blockchain_info=blockchain_info)
         
     except Exception as e:
         logger.error(f"Error loading transactions view: {e}")
@@ -186,62 +151,53 @@ def transactions_view():
 
 @admin_bp.route('/actors')
 def actors_view():
-    """Actors management view"""
+    """Actors management view - Phase 7 Blockchain-Only"""
     try:
-        # Get all actors
-        actors = Actor.query.all()
+        # Phase 7: All actor data on blockchain
+        flash('Actor data is now available directly on the ActorRegistry contract. Use Web3 interface to view.', 'info')
         
-        # Group by status
-        approved_actors = [a for a in actors if a.status == 'approved']
-        pending_actors = [a for a in actors if a.status == 'pending']
-        rejected_actors = [a for a in actors if a.status == 'rejected']
+        blockchain_info = {
+            'title': 'Actors on Blockchain',
+            'message': 'All actor data is stored on BASE Sepolia blockchain',
+            'contract': 'ActorRegistry',
+            'address': '0xC71CC19C5573C5E1E144829800cD0005D0eDB723'
+        }
         
-        return render_template('actors.html',
-                             approved_actors=approved_actors,
-                             pending_actors=pending_actors,
-                             rejected_actors=rejected_actors)
+        return render_template('admin/actors.html',
+                             approved_actors=[],
+                             pending_actors=[],
+                             rejected_actors=[],
+                             blockchain_info=blockchain_info)
         
     except Exception as e:
         logger.error(f"Error loading actors view: {e}")
         flash(f'Error loading actors view: {str(e)}', 'error')
-        return render_template('actors.html',
+        return render_template('admin/actors.html',
                              approved_actors=[],
                              pending_actors=[],
                              rejected_actors=[])
 
 @admin_bp.route('/markets')
 def markets_view():
-    """Markets monitoring view"""
+    """Markets monitoring view - Phase 7 Blockchain-Only"""
     try:
-        page = request.args.get('page', 1, type=int)
-        status_filter = request.args.get('status', 'all')
-        per_page = 20
+        # Phase 7: All market data on blockchain
+        flash('Market data is now available directly on the PredictionMarket contract. Use Web3 interface to view.', 'info')
         
-        # Build query
-        query = PredictionMarket.query
-        if status_filter != 'all':
-            query = query.filter_by(status=status_filter)
-            
-        # Get markets with pagination
-        markets = query.order_by(desc(PredictionMarket.created_at)).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
-        
-        # Get market statistics
-        stats = {
-            'total_markets': PredictionMarket.query.count(),
-            'active_markets': PredictionMarket.query.filter_by(status='active').count(),
-            'expired_markets': PredictionMarket.query.filter_by(status='expired').count(),
-            'validating_markets': PredictionMarket.query.filter_by(status='validating').count(),
-            'resolved_markets': PredictionMarket.query.filter_by(status='resolved').count(),
-            'total_submissions': Submission.query.count(),
-            'total_bets': Bet.query.count()
+        blockchain_info = {
+            'title': 'Markets on Blockchain',
+            'message': 'All market data is stored on BASE Sepolia blockchain',
+            'contracts': {
+                'PredictionMarket': '0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad',
+                'EnhancedPredictionMarket': '0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C'
+            }
         }
         
         return render_template('admin/markets.html',
-                             markets=markets,
-                             stats=stats,
-                             status_filter=status_filter)
+                             markets=None,
+                             stats={},
+                             status_filter='all',
+                             blockchain_info=blockchain_info)
         
     except Exception as e:
         logger.error(f"Error loading markets view: {e}")

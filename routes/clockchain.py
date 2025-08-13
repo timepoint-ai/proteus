@@ -126,11 +126,17 @@ def create_market():
     return render_template('markets/create.html')
 
 @clockchain_bp.route('/clockchain/market/<market_id>')
-def market_detail(market_id):
+@clockchain_bp.route('/clockchain/market/blockchain-message')
+def market_detail(market_id='blockchain-message'):
     """Display detailed view of a prediction market - Phase 7 Blockchain-Only"""
     try:
-        # Phase 7: Redirect to clockchain view with message
-        flash('Market details are now available directly on the blockchain. Use Web3 interface to view.', 'info')
+        # Phase 7: All market data is on blockchain
+        if market_id == 'blockchain-message':
+            # Special blockchain message market
+            flash('Market data is stored on the blockchain. Use Web3 interface to view.', 'info')
+        else:
+            flash(f'Market {market_id} details are available on the blockchain. Use Web3 interface to view.', 'info')
+        
         return redirect(url_for('clockchain.clockchain_view'))
                              
     except Exception as e:

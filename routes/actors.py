@@ -1,10 +1,7 @@
-"""Routes for actors pages"""
+"""Routes for actors pages - Phase 7 Blockchain-Only"""
 import logging
-from flask import Blueprint, render_template, abort
-# from models import Actor, PredictionMarket, Submission, Bet  # Phase 7: Models removed
-# from app import db  # Phase 7: Database removed
+from flask import Blueprint, render_template, flash, redirect, url_for
 from datetime import datetime
-# from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
 actors_bp = Blueprint('actors', __name__)
@@ -12,35 +9,24 @@ actors_bp = Blueprint('actors', __name__)
 
 @actors_bp.route('/actors')
 def actors_list():
-    """Display list of all actors"""
+    """Display list of all actors - Phase 7 Blockchain-Only"""
     try:
-        # Get all actors with their statistics
-        actors = Actor.query.order_by(Actor.x_username).all()
+        # Phase 7: All actor data is now on blockchain
+        # Redirect to blockchain interface with message
+        flash('Actor data is now available directly on the blockchain through the ActorRegistry contract. Use Web3 interface to view.', 'info')
         
-        actor_stats = []
-        for actor in actors:
-            # Get market statistics
-            markets = PredictionMarket.query.filter_by(actor_id=actor.id).all()
-            active_markets = [m for m in markets if m.status == 'active']
-            resolved_markets = [m for m in markets if m.status == 'resolved']
-            
-            # Calculate total volume
-            total_volume = 0
-            for market in markets:
-                submissions = Submission.query.filter_by(market_id=market.id).all()
-                for submission in submissions:
-                    bets = Bet.query.filter_by(submission_id=submission.id).all()
-                    total_volume += sum(bet.amount for bet in bets)
-            
-            actor_stats.append({
-                'actor': actor,
-                'total_markets': len(markets),
-                'active_markets': len(active_markets),
-                'resolved_markets': len(resolved_markets),
-                'total_volume': total_volume
-            })
+        # Return empty template with blockchain message
+        blockchain_message = {
+            'title': 'Actors on Blockchain',
+            'message': 'All actor data is now stored on the BASE Sepolia blockchain.',
+            'contract': 'ActorRegistry',
+            'address': '0xC71CC19C5573C5E1E144829800cD0005D0eDB723',
+            'info': 'Use the Web3 interface or blockchain explorer to view actor information.'
+        }
         
-        return render_template('actors/list.html', actor_stats=actor_stats)
+        return render_template('actors/list.html', 
+                             actor_stats=[],
+                             blockchain_message=blockchain_message)
     except Exception as e:
         logger.error(f"Error loading actors list: {e}")
         return render_template('actors/list.html', actor_stats=[])
@@ -48,76 +34,13 @@ def actors_list():
 
 @actors_bp.route('/actors/<actor_id>')
 def actor_detail(actor_id):
-    """Display detailed page for a specific actor"""
+    """Display detailed page for a specific actor - Phase 7 Blockchain-Only"""
     try:
-        actor = Actor.query.get_or_404(actor_id)
-        
-        # Get all markets for this actor
-        markets_query = PredictionMarket.query.filter_by(actor_id=actor.id)
-        
-        # Separate active and resolved markets
-        active_markets = markets_query.filter_by(status='active').order_by(PredictionMarket.start_time).all()
-        resolved_markets = markets_query.filter_by(status='resolved').order_by(desc(PredictionMarket.resolution_time)).limit(10).all()
-        
-        # Calculate statistics
-        total_markets = markets_query.count()
-        total_volume = 0
-        total_predictions = 0
-        
-        # Process markets to get detailed info
-        active_market_data = []
-        resolved_market_data = []
-        
-        for market in active_markets:
-            submissions = Submission.query.filter_by(market_id=market.id).all()
-            market_volume = 0
-            
-            for submission in submissions:
-                bets = Bet.query.filter_by(submission_id=submission.id).all()
-                market_volume += sum(bet.amount for bet in bets)
-            
-            total_volume += market_volume
-            total_predictions += len(submissions)
-            
-            primary_submission = next((s for s in submissions if s.submission_type == 'original'), submissions[0] if submissions else None)
-            
-            active_market_data.append({
-                'market': market,
-                'submissions': submissions,
-                'volume': market_volume,
-                'primary_submission': primary_submission
-            })
-        
-        for market in resolved_markets:
-            submissions = Submission.query.filter_by(market_id=market.id).all()
-            market_volume = 0
-            
-            for submission in submissions:
-                bets = Bet.query.filter_by(submission_id=submission.id).all()
-                market_volume += sum(bet.amount for bet in bets)
-            
-            total_volume += market_volume
-            total_predictions += len(submissions)
-            
-            primary_submission = next((s for s in submissions if s.submission_type == 'original'), submissions[0] if submissions else None)
-            winning_submission = Submission.query.get(market.winning_submission_id) if market.winning_submission_id else None
-            
-            resolved_market_data.append({
-                'market': market,
-                'submissions': submissions,
-                'volume': market_volume,
-                'primary_submission': primary_submission,
-                'winning_submission': winning_submission
-            })
-        
-        return render_template('actors/detail.html',
-                             actor=actor,
-                             active_markets=active_market_data,
-                             resolved_markets=resolved_market_data,
-                             total_markets=total_markets,
-                             total_volume=total_volume,
-                             total_predictions=total_predictions)
+        # Phase 7: Redirect to actors list with blockchain message
+        flash(f'Actor details for ID {actor_id} are now available directly on the blockchain. Use Web3 interface to view.', 'info')
+        return redirect(url_for('actors.actors_list'))
                              
     except Exception as e:
         logger.error(f"Error loading actor detail: {e}")
-        abort(404)
+        flash('Error loading actor details', 'error')
+        return redirect(url_for('actors.actors_list'))
