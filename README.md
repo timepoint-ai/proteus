@@ -1,678 +1,243 @@
-# Clockchain Node Operator
+# Clockchain - Decentralized Linguistic Prediction Platform
 
-## Project Status
+A revolutionary blockchain-based prediction market platform where users bet on the exact words public figures will say. Built exclusively on BASE blockchain with advanced oracle systems and distributed governance.
 
-**Current Phase**: Blockchain Migration Complete - All 4 Phases Done! 🎉
+## 🎯 What is Clockchain?
 
-### Completed Migration Phases
+Clockchain creates prediction markets for linguistic outputs - users predict specific phrases that public figures will say within defined time windows. Winners are determined by measuring the Levenshtein distance between predictions and actual speech, with automated resolution through decentralized oracles.
 
-✅ **Smart Contracts**: All 14 phases deployed to BASE Sepolia  
+## 💎 Genesis NFT System (Phase 1 Complete - January 2025)
 
-✅ **Phase 1 - Backend Migration**: 
-- Disabled all database write operations
-- Implemented blockchain read methods in all services
-- System operates in hybrid mode with blockchain as source of truth
+### Improved Economics (7X Payout Increase!)
+- **100 Genesis NFTs**: Fixed supply, on-chain minting window
+- **Revenue Share**: 1.4% of ALL platform volume (20% of the 7% platform fees)
+- **Per NFT**: 0.014% of platform volume
+- **Deployment**: ImprovedDistributedPayoutManager at `0xE9eE183b76A8BDfDa8EA926b2f44137Aa65379B5`
+- **SVG Art**: Generated entirely on-chain in `contracts/src/GenesisNFT.sol` using the `generateSVG()` function
 
-✅ **Phase 2 - Frontend Web3 Integration**:
-- Added MetaMask wallet connection to navbar
-- Created Web3.js modules: `wallet.js`, `market-blockchain.js`, `timeline-blockchain.js`, `market-detail-blockchain.js`, `admin-blockchain-stats.js`
-- Implemented real-time event subscriptions and transaction handlers
-- Added `/api/contract-abi/<contract_name>` endpoint for Web3 integration
+### Revenue Projections
+With 100 Genesis NFTs at $1M daily volume:
+- Daily earnings: $14,000
+- Monthly income: $420,000
+- Annual income: $5,110,000
 
-✅ **Phase 3 - Test Infrastructure**: 
-- Created blockchain test data scripts: `blockchain_test_data.py`, `clean_blockchain_test_data.py`
-- Removed legacy database test files (test_data.py, test_data_new.py, test_data_v2.py, test_data_ai.py)
-- Updated test manager for blockchain-only testing
-
-✅ **Phase 4 - Documentation & Cleanup** (August 5, 2025):
-- Deleted 5 legacy files: `models_old.py`, `bet_resolution_old.py`, `oracle_old.py`, `mock_node_registry.py`, `node_registry_service.py`
-- Updated all documentation for blockchain-only architecture
-- Removed database setup instructions
-
-✅ **Phase 5 - Bittensor AI Integration** (August 12, 2025):
-- Added TAO token economics and Yuma consensus scoring
-- Implemented AI transparency framework with 60% bonus rewards
-- Created comprehensive Bittensor documentation
-
-✅ **Production Monitoring**: Gas tracking, oracle consensus, health checks  
-
-### Architecture Status
-The platform now operates as a fully blockchain-native application:
-- **Backend**: Blockchain-only operations, database completely removed from core functionality
-- **Frontend**: Full Web3 integration with MetaMask for all transactions
-- **Test Infrastructure**: Blockchain-based test data generation using real smart contracts
-- **Data**: All data stored on BASE Sepolia blockchain
-
-### Next Steps
-🔑 **Production Deployment**: Get X.com production API credentials and deploy to BASE mainnet  
-🔒 **Security Audit**: Third-party audit before public launch  
-📈 **Scale Testing**: Load test with high transaction volumes on testnet  
-
-## Overview
-
-Clockchain is a cutting-edge decentralized prediction platform built exclusively on Coinbase's BASE blockchain. The platform enables users to create linguistic prediction markets about what public figures will say on X.com (Twitter) within specific time windows. Using advanced text similarity algorithms and on-chain oracle validation, Clockchain creates a transparent, immutable marketplace for probabilistic predictions.
-
-### Core Architecture
-
-**Clockchain** operates on the BASE blockchain with four fundamental components:
-
-1. **Prediction Markets**: Time-bounded containers for predictions about specific X.com accounts
-2. **X.com Actor System**: Public figures identified exclusively by X.com username (e.g., @elonmusk, @taylorswift13)
-3. **Competitive Submissions**: Original, competitor, and null predictions competing within each market
-4. **On-chain Oracle System**: BASE smart contracts managing validation and consensus with screenshot proofs
-5. **Bittensor AI Integration**: Decentralized AI models from Bittensor network enhance prediction accuracy
-
-### Bittensor AI Network Integration
-
-Clockchain integrates with Bittensor's decentralized AI network to enable:
-
-- **AI Agent Participation**: Bittensor validators and miners can participate as prediction makers
-- **TAO Token Economics**: AI agents stake and earn TAO tokens for successful predictions
-- **Yuma Consensus Scoring**: Network trust and performance metrics for AI agents
-- **Subnet Connectivity**: Support for agents from multiple Bittensor subnets (1-50+)
-- **Transparency Framework**: AI agents earn up to 60% bonus rewards for transparency commitments
-- **Neural Network Validation**: Hotkey/coldkey authentication for secure AI operations
-
-### Key Features
-
-**Blockchain Integration:**
-- **BASE Blockchain Native**: Built exclusively on Coinbase's L2 blockchain with sub-cent transaction costs
-- **MetaMask Integration**: Full wallet connection with automatic BASE Sepolia network switching
-- **Web3.js Frontend**: Direct blockchain queries and transaction handling without backend intermediaries
-- **Real-time Updates**: Event subscriptions for live market updates and notifications
-- **Smart Contract Architecture**: 9 deployed contracts managing all platform operations
-- **Bittensor AI Integration**: Decentralized AI models enhance prediction accuracy
-
-**Platform Capabilities:**
-- **X.com Actor System**: Public figures identified by X.com handles (e.g., @elonmusk)
-- **Linguistic Predictions**: Users predict exact phrases that actors will post
-- **Competitive Markets**: Multiple submissions compete using Levenshtein distance algorithm
-- **Decentralized Oracle**: On-chain text validation with screenshot proofs
-- **7% Platform Fee**: Covers gas costs and network maintenance
-
-**User Experience:**
-- **Timeline Visualization**: Real-time display of active and resolved markets
-- **Transaction Feedback**: Loading states, gas estimation, and confirmation tracking
-- **Admin Dashboard**: Blockchain statistics, contract balances, and network monitoring
-- **Hybrid Data Access**: New data on blockchain, historical data read-only from database
-
-### BASE Blockchain Integration
-
-**Clockchain** leverages Coinbase's BASE blockchain for ultra-low-cost, high-speed prediction markets:
-
-#### Deployed Contracts (BASE Sepolia Testnet)
-- **PredictionMarket**: [`0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad`](https://sepolia.basescan.org/address/0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad)
-- **ClockchainOracle**: [`0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8`](https://sepolia.basescan.org/address/0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8)
-- **NodeRegistry**: [`0xA69C842F335dfE1F69288a70054A34018282218d`](https://sepolia.basescan.org/address/0xA69C842F335dfE1F69288a70054A34018282218d)
-- **PayoutManager**: [`0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871`](https://sepolia.basescan.org/address/0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871)
-- **ActorRegistry**: [`0xC71CC19C5573C5E1E144829800cD0005D0eDB723`](https://sepolia.basescan.org/address/0xC71CC19C5573C5E1E144829800cD0005D0eDB723)
-- **EnhancedPredictionMarket**: [`0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C`](https://sepolia.basescan.org/address/0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C)
-- **DecentralizedOracle**: [`0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1`](https://sepolia.basescan.org/address/0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1)
-- **AdvancedMarkets**: [`0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B`](https://sepolia.basescan.org/address/0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B)
-- **SecurityAudit**: [`0x0539ad4a63E76130d76a21163960906Eb47c1a9a`](https://sepolia.basescan.org/address/0x0539ad4a63E76130d76a21163960906Eb47c1a9a)
-
-Total deployment cost: ~0.015 BASE (~$0.60 USD)
-
-#### 1. Market Creation & Submissions
-- **X.com Integration**: Markets created for specific Twitter handles with time windows
-- **Smart Contract Deployment**: Each market managed by on-chain contracts
-- **BASE Token Stakes**: All transactions use BASE ETH with gas costs < 0.001 gwei
-- **Platform Fee**: 7% fee covers gas costs and network operations
-
-#### 2. Competitive Submission System
-- **Original Submissions**: First prediction creates the market
-- **Competitor Submissions**: Alternative predictions within the same market
-- **Null Submissions**: Betting no matching statement will be made
-- **On-chain Validation**: All submissions recorded on BASE blockchain
-
-#### 3. Oracle Resolution Process
-- **Time Enforcement**: Oracles can only submit after market expiration
-- **Screenshot Proof**: Base64 encoded screenshots stored on-chain
-- **X.com Verification**: Tweet IDs and timestamps validated
-- **Levenshtein Analysis**: Text similarity calculated preserving formatting
-- **Consensus Mechanism**: Multiple oracles vote on submissions
-
-#### 4. Smart Contract Architecture
-- **PredictionMarket.sol**: Core market functionality
-- **ClockchainOracle.sol**: Oracle submission and validation
-- **NodeRegistry.sol**: Decentralized node management
-- **PayoutManager.sol**: Automated reward distribution
-
-### AI Agent Integration
-
-**Clockchain** provides a comprehensive API for automated agents:
-
-#### Rate-Limited API Endpoints
-- **Market Discovery**: `/ai_agent/v1/markets` - Find active prediction markets
-- **Submission Creation**: `/ai_agent/v1/submissions` - Create original or competitor predictions
-- **Fee Calculation**: `/ai_agent/v1/calculate_fees` - Determine required transaction amounts
-- **Market Analysis**: `/ai_agent/v1/markets/{id}/submissions` - Analyze existing competition
-
-#### Security & Validation
-- **Wallet Signature Verification**: All submissions require cryptographic signatures
-- **Transaction Validation**: Real-time blockchain confirmation before submission acceptance
-- **Rate Limiting**: 10 submissions per minute to prevent spam and ensure fair participation
-- **Duplicate Prevention**: Transaction hash uniqueness enforced across all submissions
-
-### BASE Sepolia Test Manager
-
-**Clockchain** includes a comprehensive E2E testing dashboard for BASE Sepolia testnet:
-
-#### Test Manager Features
-- **Authenticated Dashboard**: Secure test environment at `/test-manager`
-- **Individual Test Cases**: Wallet, Market, Submission, Betting, Oracle, Resolution
-- **Full E2E Test**: Complete workflow validation in one click
-- **Network Monitoring**: Real-time BASE Sepolia gas prices and block numbers
-- **Test Data Management**: Clean test data with single button click
-
-#### E2E Test Workflow
-1. **Wallet Connection**: Verify BASE blockchain connectivity
-2. **Market Creation**: Deploy prediction market for test actor
-3. **Submission Creation**: Generate original, competitor, and null submissions
-4. **Bet Placement**: Test betting functionality with fee calculations
-5. **Oracle Submission**: Submit tweet data with Levenshtein analysis
-6. **Market Resolution**: Determine winners and calculate payouts
-7. **Data Cleanup**: Remove all test data after completion
-
-#### Test Configuration
-- **BASE Sepolia RPC**: Public endpoint for testnet access
-- **Test Wallets**: Pre-configured addresses for different roles
-- **Gas Optimization**: Minimal gas usage for test transactions
-- **Session Tracking**: Real-time test progress monitoring
-
-### Wallet Integration & Frontend
-
-**Clockchain** provides seamless Web3 integration for BASE blockchain:
-
-#### Wallet Support
-- **MetaMask Integration**: Automatic connection and network switching
-- **Coinbase Wallet**: Native support for Coinbase's wallet
-- **Network Management**: Auto-switch to BASE Sepolia/Mainnet
-- **Transaction Signing**: In-wallet confirmation for all operations
-
-#### Frontend Features
-- **Market Creation UI**: Create markets with oracle wallet configuration
-- **Betting Interface**: Place bets on competing submissions
-- **Oracle Dashboard**: Submit tweet data with screenshot proofs
-- **Network Monitor**: Real-time gas prices and connection status
-- **Transaction History**: Track all blockchain interactions
-
-#### User Experience
-- **BASE Branding**: Signature blue (#0052FF) theme
-- **Basescan Integration**: Direct links to transaction explorers
-- **Loading States**: Clear feedback during blockchain operations
-- **Error Handling**: Descriptive messages for failed transactions
-
-### Production Monitoring Dashboard
-
-**Clockchain** includes comprehensive production monitoring integrated into the admin dashboard:
-
-#### Health Monitoring Features
-- **Gas Price Tracking**: Real-time BASE gas prices with 50 gwei alert threshold
-- **Oracle Consensus Monitoring**: Detection of consensus failures (<66% agreement)
-- **X.com API Status**: Rate limit tracking and availability monitoring
-- **Screenshot Storage Metrics**: Usage tracking for base64 screenshot proofs
-- **Contract Event Monitoring**: Real-time tracking of on-chain events
-
-#### Alert System
-- **Automatic Alerts**: Triggers when thresholds exceeded
-- **Gas Price Alerts**: Warning when gas exceeds 0.002 gwei (50x normal)
-- **Consensus Failures**: Alert when oracle agreement falls below 66%
-- **API Rate Limits**: Warning when X.com API limits approached
-
-### Important: Temporal Integrity
-
-**Critical timing constraints ensure market fairness:**
-
-- **Oracle Prohibition**: Oracle submissions strictly forbidden before market end time
-- **Immutable Ledger**: Synthetic Time Ledger prevents any retroactive modifications
-- **Time Synchronization**: Distributed consensus mechanism ensures network-wide time accuracy
-- **Consensus Enforcement**: Byzantine fault tolerance prevents temporal manipulation attacks
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
-
-- Python 3.11+
-- Node.js (for Hardhat smart contract tools)
-- BASE blockchain access (public RPC or Alchemy)
 - MetaMask or Coinbase Wallet
+- BASE Sepolia ETH for testing
+- Node.js 18+ and Python 3.10+
 
 ### Installation
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/your-org/clockchain-node
-cd clockchain-node
-```
+# Clone repository
+git clone <repository>
 
-2. Install dependencies:
-```bash
+# Install dependencies (auto-installed on Replit)
+npm install
 pip install -r requirements.txt
-npm install  # For smart contract tools
+
+# Configure environment
+cp .env.example .env
+# Add your DEPLOYER_PRIVATE_KEY and other secrets
 ```
 
-3. Set up environment variables:
-```bash
-# BASE Blockchain Configuration
-export BASE_RPC_URL="https://sepolia.base.org"  # Public RPC
-export BASE_CHAIN_ID="84532"  # BASE Sepolia
-export PRIVATE_KEY="your-deployer-private-key"  # For deployments
-
-# Smart Contract Addresses (BASE Sepolia - Already Deployed)
-export PREDICTION_MARKET_ADDRESS="0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad"
-export ORACLE_CONTRACT_ADDRESS="0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8"
-export NODE_REGISTRY_ADDRESS="0xA69C842F335dfE1F69288a70054A34018282218d"
-export PAYOUT_MANAGER_ADDRESS="0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871"
-export ACTOR_REGISTRY_ADDRESS="0xC71CC19C5573C5E1E144829800cD0005D0eDB723"
-export ENHANCED_MARKET_ADDRESS="0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C"
-export DECENTRALIZED_ORACLE_ADDRESS="0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1"
-export ADVANCED_MARKETS_ADDRESS="0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B"
-export SECURITY_AUDIT_ADDRESS="0x0539ad4a63E76130d76a21163960906Eb47c1a9a"
-
-# X.com API Configuration (Required for Oracle)
-export X_API_KEY="your-x-api-key"
-export X_API_KEY_SECRET="your-x-api-key-secret"
-export X_BEARER_TOKEN="your-x-bearer-token"
-
-# Security
-export SESSION_SECRET="your-secret-key"
-export PLATFORM_FEE="0.07"  # 7% platform fee
-export TEST_MANAGER_PASSCODE="your-test-passcode"  # For test manager access
-```
-
-4. Start the application:
-```bash
-gunicorn --bind 0.0.0.0:5000 main:app
-```
-
-## Usage Guide
-
-### Main Dashboard
-
-Access the main dashboard at `http://localhost:5000/dashboard` to:
-
-- Monitor network health and BASE blockchain connection status
-- View active prediction markets with real-time BASE transaction data
-- Track X.com oracle submissions and screenshot proofs
-- Manage actors (Twitter handles) for prediction markets
-- Configure node settings and consensus parameters
-- Monitor gas prices and transaction costs on BASE
-
-### BASE Sepolia Test Manager
-
-Access the E2E test manager at `http://localhost:5000/test-manager/login` to:
-
-- Run individual test cases for each component
-- Execute full E2E test workflow with one click
-- Monitor BASE Sepolia network status and gas prices
-- Clean test data between test runs
-- View test wallet configurations
-- Track real-time test execution progress
-
-### Market Creation Interface
-
-Create new prediction markets at `http://localhost:5000/clockchain/markets/create` to:
-
-- Connect MetaMask or Coinbase Wallet
-- Specify Twitter handle and prediction time window
-- Configure oracle wallets for resolution
-- Sign and submit transactions to BASE blockchain
-- Monitor transaction confirmation on Basescan
-- View created markets in the timeline
-
-### AI Agent API
-
-Access the programmatic interface at `http://localhost:5000/ai_agent/docs` to:
-
-- Review comprehensive API documentation
-- Create automated submissions with rate limiting
-- Calculate required fees and stake amounts
-- Monitor transaction status and market competition
-- Integrate AI agents with transparent verification
-
-### Clockchain Timeline
-
-The main interface at `http://localhost:5000/clockchain` provides:
-
-- Visual timeline of all predictions with real-time database-calculated statuses
-- Live betting volumes and competing submission counts from actual transactions
-- Detailed market views showing winner/lost/pending statuses based on resolution state
-- Individual submission pages with complete transaction histories
-- Historical analysis of resolved predictions with actual Levenshtein distance scores
-
-### Oracle Management
-
-Access oracle functionality at `http://localhost:5000/oracles` to:
-
-- View all oracle submissions with consensus voting status
-- Track oracle validation results and text similarity calculations
-- Monitor distributed time consensus across the network
-- Analyze oracle performance metrics and accuracy rates
-
-## Data Integrity & Real-time Calculations
-
-**Clockchain** prioritizes authentic data throughout the platform:
-
-- **No Hardcoded Values**: All status indicators, transaction states, and market resolutions are calculated in real-time from blockchain queries
-- **Dynamic Status Calculation**: Winner/Lost/Pending statuses computed based on actual on-chain resolution states and Levenshtein distance scores
-- **Live Transaction Tracking**: Every transaction status reflects actual blockchain confirmation states
-- **Real Oracle Consensus**: Oracle voting and consensus results pulled directly from on-chain DecentralizedOracle contract
-- **Authentic Market Statistics**: Betting volumes, submission counts, and participation metrics aggregated from actual blockchain events
-
-## BASE Blockchain API Documentation
-
-### BASE Integration API
-
-**Clockchain** provides a comprehensive API for BASE blockchain integration. Access the full documentation at `/api/base/docs` on your node.
-
-#### Quick Start for BASE Integration
-
-1. **Network Status**: Check BASE blockchain connection
-```bash
-curl -X GET "https://your-node.repl.co/api/base/network/status"
-```
-
-2. **Create Market**: Deploy prediction market on BASE
-```bash
-curl -X POST "https://your-node.repl.co/api/base/markets/create" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "twitter_handle": "elonmusk",
-    "start_time": "2024-01-01T00:00:00Z",
-    "end_time": "2024-01-01T01:00:00Z",
-    "oracle_wallets": ["0x..."],
-    "creator_wallet": "0x...",
-    "base_tx_hash": "0x..."
-  }'
-```
-
-3. **Estimate Gas**: Calculate transaction costs on BASE
-```bash
-curl -X POST "https://your-node.repl.co/api/base/transactions/estimate-gas" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "from": "0x...",
-    "to": "0x...",
-    "value": "1000000000000000000",
-    "data": "0x..."
-  }'
-```
-
-4. **Submit Oracle Data**: Post X.com verification
-```bash
-curl -X POST "https://your-node.repl.co/api/base/markets/{id}/oracle/submit" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "oracle_wallet": "0x...",
-    "tweet_id": "1234567890",
-    "tweet_text": "Actual tweet content",
-    "screenshot_base64": "data:image/png;base64,...",
-    "base_tx_hash": "0x..."
-  }'
-```
-
-#### API Endpoints Summary
-
-| Endpoint | Method | Rate Limit | Purpose |
-|----------|--------|------------|---------|
-| `/ai_agent/v1/health` | GET | None | API health check |
-| `/ai_agent/v1/markets` | GET | 60/min | Active markets |
-| `/ai_agent/v1/markets/{id}/submissions` | GET | 60/min | Market submissions |
-| `/ai_agent/v1/submissions` | POST | 10/min | Create submissions |
-| `/ai_agent/v1/calculate_fees` | POST | 60/min | Fee calculation |
-
-#### Authentication & Security
-
-**All BASE transactions require:**
-- Valid BASE blockchain transaction
-- Transaction amount = Stake + Platform Fee (7%)
-- MetaMask or Coinbase Wallet signature
-- Unique transaction hash on BASE
-
-**Smart Contract Interaction:**
-- All operations go through deployed contracts
-- Gas fees automatically calculated
-- Transaction confirmation via Basescan
-- Multi-signature oracle consensus
-
-#### Market Types
-
-- **Twitter/X.com Markets**: Predictions about specific tweets
-- **Time Windows**: Precise start/end times for predictions
-- **Oracle Resolution**: Screenshot proof with tweet verification
-
-#### JavaScript/Web3 Example
-
-```javascript
-// Connect to BASE
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-
-// Switch to BASE Sepolia
-await window.ethereum.request({
-  method: 'wallet_switchEthereumChain',
-  params: [{ chainId: '0x14a34' }] // 84532 in hex
-});
-
-// Create market transaction
-const marketData = {
-  twitter_handle: 'elonmusk',
-  start_time: Math.floor(Date.now() / 1000),
-  end_time: Math.floor(Date.now() / 1000) + 3600,
-  oracle_wallets: ['0x...']
-};
-
-// Send transaction
-const tx = await signer.sendTransaction({
-  to: PREDICTION_MARKET_ADDRESS,
-  data: encodeFunctionData('createMarket', marketData),
-  value: ethers.utils.parseEther('0.1')
-});
-
-// Wait for confirmation
-const receipt = await tx.wait();
-console.log('Market created on BASE:', receipt.transactionHash);
-```
-
-## Advanced Configuration
-
-### BASE Platform Configuration
-
-**Network Parameters:**
-- **BASE Sepolia**: Chain ID 84532 for testing
-- **BASE Mainnet**: Chain ID 8453 for production
-- **Gas Costs**: < 0.002 gwei typical transaction cost
-- **Block Time**: ~2 seconds on BASE L2
-
-**Market Parameters:**
-- **Platform Fee**: 7% of all stakes for network operations
-- **Consensus Threshold**: 66% oracle agreement required
-- **Levenshtein Distance**: Text similarity with X.com formatting
-- **Oracle Window**: 1 hour after market expiration
-- **Max Tweet Length**: 280 characters (X.com limit)
-
-### BASE Test Environment
-
-**BASE Sepolia Testnet Configuration:**
-
-For running the E2E test manager, configure the following environment variables:
+### Deploy Genesis NFTs
 
 ```bash
-# BASE Sepolia Configuration
-BASE_RPC_URL="https://base-sepolia.g.alchemy.com/public"
-BASE_CHAIN_ID="84532"  # BASE Sepolia testnet
+# Deploy to BASE Sepolia
+npx hardhat run scripts/deploy-genesis-phase1.js --network baseSepolia
 
-# Test Manager Access
-TEST_MANAGER_PASSCODE="your-secure-passcode"  # Required for /test-manager access
+# Deploy improved payout system
+npx hardhat run scripts/deploy-improved-payouts.js --network baseSepolia
 
-# Test Wallets (for E2E testing)
-TEST_WALLET_1="0x..."  # Market creator wallet
-TEST_WALLET_2="0x..."  # Bettor wallet
-TEST_WALLET_3="0x..."  # Oracle wallet
+# Mint Genesis NFTs
+npx hardhat run scripts/mint-genesis.js --network baseSepolia
 
-# Smart Contract Addresses (deploy your own)
-PREDICTION_MARKET_ADDRESS="0x..."
-ORACLE_CONTRACT_ADDRESS="0x..."
-NODE_REGISTRY_ADDRESS="0x..."
-PAYOUT_MANAGER_ADDRESS="0x..."
+# Verify payouts
+npx hardhat run scripts/verify-final-status.js --network baseSepolia
 ```
 
-**Safety Guidelines:**
-- Only use test networks (Sepolia, Goerli) or local development networks
-- Never use mainnet wallets or wallets containing real funds
-- Test wallet private keys should be dedicated to testing only
-- Get free testnet ETH from faucets before running tests
+## 📊 Platform Architecture
 
-**Test Scenarios Available:**
-- **Elon Musk Tweet**: 10-minute prediction window for "abc 123 xyz"
-- **Trump Truth Social**: 10-minute window for economy-related posts  
-- **Taylor Swift Album**: 15-minute window for new album announcements
+### Smart Contract Stack (BASE Exclusive)
+- **GenesisNFT**: 100 founder NFTs with on-chain SVG art generation
+- **ImprovedDistributedPayoutManager**: 1.4% volume distribution to Genesis holders
+- **EnhancedPredictionMarket**: Core market functionality with on-chain data
+- **DecentralizedOracle**: Automated text analysis and resolution
+- **TestMarketWithPayouts**: Testing infrastructure for payout verification
 
-### Text Analysis Engine
+### Fee Distribution (Fully Decentralized)
+Platform Fee: 7% of market volume
+- **Genesis NFT Holders**: 20% → 1.4% of volume
+- **Oracles**: 28.6% → 2% of volume
+- **Node Operators**: 14.3% → 1% of volume
+- **Market Creators**: 14.3% → 1% of volume
+- **Builder Pool**: 28.6% → 2% of volume
+- **Bittensor AI Pool**: 14.3% → 1% of volume
 
-**Advanced Levenshtein Processing:**
-- **X.com Compatibility**: Preserves punctuation, spacing, and capitalization
-- **Control Character Removal**: Strips non-displayable characters only  
-- **Unicode Support**: Full international character set compatibility
-- **Real-time Calculation**: Sub-second similarity scoring for large texts
+### Technology Stack
+- **Blockchain**: BASE (Coinbase L2) exclusively
+- **Smart Contracts**: Solidity 0.8.19+
+- **Backend**: Flask + Web3.py + Celery
+- **Frontend**: Web3.js + MetaMask integration
+- **Oracle**: X.com integration with screenshot proofs
+- **Database**: PostgreSQL (legacy, read-only)
+- **Cache**: Redis for real-time data
 
-### BASE Blockchain Integration
+## 🔧 Development Commands
 
-**Smart Contract Features:**
-- **BASE L2 Network**: Ultra-low cost transactions on Coinbase's Layer 2
-- **Web3 Provider**: Direct integration with BASE RPC endpoints
-- **Transaction Monitoring**: Real-time confirmation tracking via Basescan
-- **Gas Optimization**: Minimal gas usage with efficient contract design
-
-### Human User API Endpoints
-
-**Administrative APIs:**
-- `/api/actors` - Public figure management and approval workflow  
-- `/api/markets` - Prediction market creation and monitoring
-- `/api/submissions` - Query submissions and betting activity
-- `/api/oracle` - Oracle submission and consensus validation
-- `/api/network` - Node status, health metrics, and synchronization
-
-**Key Features:**
-- Role-based access control for administrative functions
-- Real-time WebSocket updates for live market data
-- Comprehensive validation and error handling
-- Rate limiting to prevent abuse and ensure fair access
-
-### Distributed Network Architecture
-
-**Clockchain** operates as a Byzantine fault-tolerant network with the following components:
-
-#### Time Management & Synchronization
-- **Pacific Time Standard**: All predictions and resolutions use America/Los_Angeles timezone
-- **Distributed Time Consensus**: Network-wide synchronization prevents temporal manipulation
-- **Immutable Time Ledger**: Synthetic Time Entries create permanent chronological record
-- **Oracle Time Enforcement**: Strict prohibition of oracle submissions before market expiration
-
-#### Consensus Mechanisms
-- **Node Voting**: Democratic approval system for new nodes and actors
-- **Oracle Validation**: Multi-node verification of speech submissions  
-- **Byzantine Fault Tolerance**: Network continues operation with up to 33% compromised nodes
-- **Signature Verification**: RSA cryptographic authentication for all network communications
-
-#### Market Resolution Pipeline
-
-1. **Market Expiration**: Automatic status transition when end_time passes
-2. **Oracle Window Opens**: Authorized oracles can submit actual speech text
-3. **Network Validation**: Nodes vote on oracle submission accuracy
-4. **Consensus Achievement**: Required percentage of nodes must agree
-5. **Text Analysis**: Levenshtein distance calculation for all submissions
-6. **Winner Selection**: Lowest distance submission wins the market
-7. **Payout Processing**: Stakes redistributed proportionally minus platform fees
-8. **Ledger Recording**: Final resolution permanently recorded in time ledger
-
-#### Advanced Security Features
-
-**Multi-Layer Validation:**
-- Blockchain transaction confirmation before submission acceptance
-- Cryptographic signature verification using wallet private keys  
-- Duplicate transaction prevention across entire network history
-- Rate limiting prevents spam attacks and ensures network stability
-
-**Temporal Attack Prevention:**
-- Time synchronization prevents premature oracle submissions
-- Immutable ledger prevents retroactive market manipulation
-- Network consensus required for any status changes
-- Automatic monitoring detects timing inconsistencies
-
-### Performance & Scalability
-
-**High-Performance Design:**
-- **Async Processing**: Celery background tasks handle compute-intensive operations
-- **Distributed Caching**: Redis cluster manages real-time data across nodes
-- **Database Optimization**: PostgreSQL with connection pooling and read replicas
-- **Load Balancing**: Horizontal scaling support with session persistence
-
-**Resource Management:**
-- **Memory Optimization**: Efficient text processing for large prediction volumes
-- **Network Bandwidth**: Compressed inter-node communication protocols  
-- **Storage Efficiency**: Optimized database schemas with proper indexing
-- **CPU Utilization**: Multi-threaded consensus processing and validation
-
-### Security
-
-- All node communications are signed with RSA key pairs
-- Blockchain transactions are validated before acceptance
-- Input sanitization prevents injection attacks
-- Rate limiting protects against spam submissions
-
-## Deployment
-
-### Production Setup
-
-1. Use a production WSGI server (Gunicorn recommended)
-2. Configure PostgreSQL with connection pooling
-3. Set up Redis cluster for high availability
-4. Use Nginx as reverse proxy with SSL termination
-5. Enable monitoring with application metrics
-
-### Docker Deployment
-
+### Smart Contract Development
 ```bash
-docker-compose up -d
+# Compile contracts
+npx hardhat compile
+
+# Run tests
+npx hardhat test
+
+# Deploy to testnet
+npx hardhat run scripts/deploy-improved-payouts.js --network baseSepolia
+
+# Verify on Basescan
+npx hardhat verify --network baseSepolia <CONTRACT_ADDRESS>
 ```
 
-This starts all services with proper networking and volumes.
+### Backend Services
+```bash
+# Start Flask application
+python main.py
+# or
+gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
 
-### Scaling Considerations
+# Start Celery worker
+celery -A app.celery worker --loglevel=info
 
-- Web servers can be horizontally scaled behind load balancer
-- Celery workers scale based on queue depth
-- Database requires read replicas for high traffic
-- Redis cluster handles distributed caching
+# Start monitoring service
+python -m services.monitoring
+```
 
-## Troubleshooting
+## 📁 Project Structure
 
-### Common Issues
+```
+├── contracts/              # Smart contracts
+│   ├── src/
+│   │   ├── GenesisNFT.sol          # On-chain SVG NFT art
+│   │   ├── ImprovedDistributedPayoutManager.sol
+│   │   └── TestMarketWithPayouts.sol
+│   └── artifacts/          # Compiled contracts
+├── scripts/                # Deployment & testing
+│   ├── deploy-genesis-phase1.js
+│   ├── deploy-improved-payouts.js
+│   ├── mint-genesis.js
+│   └── test-payouts-and-show-balance.js
+├── deployments/            # Deployment records
+│   ├── genesis-phase1-testnet.json
+│   └── improved-genesis-testnet.json
+├── services/               # Backend services
+│   ├── blockchain_base.py
+│   ├── oracle.py
+│   └── monitoring.py
+├── routes/                 # API endpoints
+├── static/                 # Frontend assets
+│   └── js/
+│       ├── wallet.js
+│       └── market-blockchain.js
+├── templates/              # HTML templates
+└── docs/                   # Documentation
+```
 
-1. **"Error checking for updates"**: Ensure Redis is running and accessible
-2. **Database connection errors**: Verify PostgreSQL credentials and network access
-3. **Blockchain validation failures**: Check RPC endpoints and API keys
-4. **Consensus failures**: Ensure sufficient active nodes in network
+## 🌟 Key Features
 
-### Logs
+### For Genesis NFT Holders
+- Earn 1.4% of all platform volume (7X improvement from initial design)
+- Transparent on-chain payouts via ImprovedDistributedPayoutManager
+- Unique on-chain generated SVG art (no external dependencies)
+- Future governance rights over protocol changes
 
-- Application logs: Check console output or configured log files
-- Celery logs: Monitor worker and beat process outputs
-- Database logs: PostgreSQL logs for query performance
-- Network logs: Inter-node communication in debug mode
+### For Market Participants
+- Create linguistic prediction markets for any X.com user
+- Bet on exact phrases with specific time windows
+- Automated resolution via Levenshtein distance
+- Instant payouts on winning predictions
 
-## Contributing
+### For Node Operators
+- Earn 1% of platform volume
+- Participate in consensus mechanisms
+- Validate oracle submissions
+- Secure the network
 
-Please read CONTRIBUTING.md for development guidelines and ENGINEERING.md for technical architecture details.
+## 📈 Verified Transactions
 
-## License
+Recent mainnet-ready transactions on BASE Sepolia:
+- [Market Resolution with Payout](https://sepolia.basescan.org/tx/0x7ed4c83ec8a90159fee06e916ce74db5267e1e4f4be496a60505664e75c51330)
+- [Genesis NFT Payout Distribution](https://sepolia.basescan.org/tx/0xdd9fba256c354062cc44a30104ee296af804e4bd4c634f752ef56100727311b9)
 
-[Your License Here]
+## 🔐 Security Features
 
-## Support
+- All smart contracts tested on BASE Sepolia
+- Immutable Genesis NFT supply (100 maximum)
+- No admin functions in payout contracts (fully decentralized)
+- Time-locked minting window (24 hours for Genesis NFTs)
+- Automated payout distribution (no manual intervention)
 
-- Documentation: [docs.clockchain.network]
-- Issues: [github.com/your-org/clockchain-node/issues]
-- Discord: [discord.gg/clockchain]
+## 📚 Documentation
+
+Core documentation in `/docs/`:
+- [Engineering Architecture](docs/ENGINEERING.md) - Technical implementation details
+- [Governance Model](docs/GOVERNANCE.md) - Decentralized governance structure
+- [Platform Logic Analysis](docs/LOGIC.md) - Economic model and fee distribution
+- [MetaMask Setup Guide](docs/METAMASK_SETUP.md) - Wallet configuration
+- [Minting Guide](docs/MINTING_GUIDE.md) - How to mint Genesis NFTs
+- [View Your NFTs](docs/VIEW_YOUR_NFTS.md) - Check your Genesis NFT collection
+
+## 🚀 Roadmap
+
+### ✅ Phase 1: Genesis NFT System (Complete - January 2025)
+- Deployed Genesis NFT contract with 100 fixed supply
+- Implemented 7X improved payout system (1.4% of volume)
+- On-chain SVG art generation
+- Verified on BASE Sepolia with real transactions
+
+### 🔄 Phase 2: Mainnet Launch (In Progress)
+- Deploy to BASE mainnet
+- Open Genesis NFT minting window
+- Launch initial prediction markets
+- Activate oracle network
+
+### 📅 Phase 3: Platform Expansion (Q2 2025)
+- DAO governance implementation
+- Advanced market types (conditional, range)
+- Mobile applications
+- Cross-chain bridges
+
+### 🔮 Phase 4: AI Integration (Q3 2025)
+- Bittensor subnet integration
+- AI-powered prediction models
+- TAO token rewards
+- Neural network validation
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Submit a PR with tests
+4. Update documentation
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🔗 Important Links
+
+- **BASE Sepolia Faucet**: https://www.coinbase.com/faucets/base-ethereum-goerli-faucet
+- **Basescan Explorer**: https://sepolia.basescan.org
+- **Contract Deployments**: See `/deployments/` directory
+- **Support**: Open an issue on GitHub
+
+---
+
+**Built with ❤️ for the future of decentralized prediction markets**
+
+*Current Testnet Status: 60 Genesis NFTs minted, ImprovedDistributedPayoutManager deployed and tested*
