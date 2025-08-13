@@ -73,6 +73,28 @@ createWeb3Modal({
 | BASE Mainnet | https://mainnet.base.org | Production |
 | BASE Sepolia | https://sepolia.base.org | Testing |
 | Alchemy BASE | https://base-mainnet.g.alchemy.com/v2/[KEY] | Enhanced APIs |
+
+### 1.4 Testing Infrastructure
+
+```javascript
+// scripts/test-chain-only.js
+const testChainOnly = async () => {
+    // 1. Deploy test contracts
+    await deployTestContracts();
+    
+    // 2. Create test markets on-chain
+    await createTestMarkets();
+    
+    // 3. Test wallet interactions
+    await testWalletConnections();
+    
+    // 4. Verify chain queries
+    await verifyChainQueries();
+    
+    // 5. Test gas optimization
+    await testGasUsage();
+};
+```
 | QuickNode | https://[endpoint].base.quiknode.pro/[KEY] | High performance |
 
 ## Phase 2: Platform Architecture (OpenSea Model)
