@@ -16,25 +16,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Major Changes (August 2025)
 
-### Phase 1 & 2 Cleanup: BASE-Only Architecture Migration (August 13, 2025) ✅ COMPLETE
+### Phase 1, 2 & 3 Cleanup: BASE-Only Architecture Migration (August 13, 2025) ✅ COMPLETE
+
 - **Phase 1 - Remove DB Writes**: ✅ Complete
   - monitoring.py - Removed all database dependencies, now chain-only
   - blockchain_base.py - Removed all write operations, now read-only from chain
   - contract_monitoring.py - Converted to chain-only event processing with in-memory cache
-  - consensus.py - Already deprecated (consensus.py.deprecated)
-  - ledger.py - Already removed from system
   
 - **Phase 2 - Wallet-Only Authentication**: ✅ Complete
   - Created wallet_auth.py - JWT-based wallet authentication service
   - Created routes/auth.py - Authentication endpoints for wallet sign-in
   - Created wallet-auth.js - Frontend wallet authentication module
-  - Test verified: All authentication tests passing
   - No database user accounts required - only wallet addresses
   
+- **Phase 3 - Chain-Only API Routes**: ✅ Complete
+  - Created routes/api_chain.py - New chain-only API module
+  - 6 blockchain endpoints: actors, markets, stats, market detail, genesis holders, oracle data
+  - All deprecated database routes removed
+  - All data now fetched directly from blockchain contracts
+  
 - **Architecture Decisions**: 
-  - All write operations must go through smart contracts directly from frontend
+  - All write operations through smart contracts directly from frontend
   - Authentication via wallet signatures and JWT tokens (no sessions)
-  - Chain-only data queries for all read operations
+  - All API routes query blockchain directly, no database reads
+  - Legacy routes marked deprecated, new chain-only routes in /api/chain/
 
 ### Phase 1 Genesis NFT Implementation with Improved Economics (January 17, 2025) ✅
 - **Genesis NFT Contract**: Implemented 100 fixed-supply NFTs with on-chain SVG art

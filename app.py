@@ -53,6 +53,7 @@ def create_app():
     from routes.api import api_bp
     from routes.admin import admin_bp
     from routes.auth import auth_bp  # Phase 2: Wallet-only authentication
+    from routes.api_chain import api_chain_bp  # Phase 3: Chain-only API routes
 
     from routes.test_transactions import test_transactions_bp
     from routes.clockchain import clockchain_bp
@@ -68,6 +69,7 @@ def create_app():
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(auth_bp)  # Phase 2: Register auth routes
+    app.register_blueprint(api_chain_bp, url_prefix='/api/chain')  # Phase 3: Chain-only routes
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(base_api_bp, url_prefix='/api/base')
     app.register_blueprint(admin_bp, url_prefix='/admin')
