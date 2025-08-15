@@ -47,7 +47,8 @@ class MarketDetailBlockchain {
         let attempts = 0;
         
         while (attempts < maxAttempts) {
-            if (window.clockchainWallet && window.marketBlockchain?.initialized) {
+            // Check if Web3 is loaded
+            if (typeof Web3 !== 'undefined' && window.clockchainWallet && window.marketBlockchain?.initialized) {
                 return;
             }
             await new Promise(resolve => setTimeout(resolve, 100));

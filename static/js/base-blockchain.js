@@ -72,8 +72,7 @@ class BaseBlockchain {
             // Phase 7: Direct blockchain execution
             if (result.success && result.transaction) {
                 // Use Web3 to interact with the contract directly
-                if (typeof window.ethereum !== 'undefined') {
-                    const Web3 = window.Web3 || (await import('https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js')).default;
+                if (typeof window.ethereum !== 'undefined' && typeof Web3 !== 'undefined') {
                     const web3 = new Web3(window.ethereum);
                     
                     // Contract ABI for createMarket function

@@ -29,7 +29,12 @@ class MarketBlockchain {
                 return;
             }
             
-            // Initialize Web3
+            // Initialize Web3 - check if it's loaded first
+            if (typeof Web3 === 'undefined') {
+                console.error('Web3 library not loaded. Please ensure Web3.js is included.');
+                return;
+            }
+            
             if (typeof window.ethereum !== 'undefined') {
                 this.web3 = new Web3(window.ethereum);
             } else {

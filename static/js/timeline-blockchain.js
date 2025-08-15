@@ -27,6 +27,12 @@ class TimelineBlockchain {
     }
     
     async updateTimeline() {
+        // Check if Web3 is loaded
+        if (typeof Web3 === 'undefined') {
+            console.log('Waiting for Web3 to load...');
+            return;
+        }
+        
         if (this.isUpdating || !window.marketBlockchain?.initialized) {
             return;
         }

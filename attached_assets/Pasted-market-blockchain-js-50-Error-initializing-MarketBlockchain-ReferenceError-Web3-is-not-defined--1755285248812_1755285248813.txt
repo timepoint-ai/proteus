@@ -1,0 +1,25 @@
+market-blockchain.js:50 Error initializing MarketBlockchain: ReferenceError: Web3 is not defined
+    at MarketBlockchain.init (market-blockchain.js:34:33)
+    at new MarketBlockchain (market-blockchain.js:21:14)
+    at HTMLDocument.<anonymous> (market-blockchain.js:273:24)
+init @ market-blockchain.js:50Understand this error
+/admin/api/updates:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+dashboard.js:237 Error checking for updates: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ dashboard.js:237Understand this error
+/admin/api/updates:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+dashboard.js:237 Error checking for updates: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ dashboard.js:237Understand this error
+/admin/api/ledger-summary:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+/admin/api/updates:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+/admin/api/stats:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+dashboard.js:237 Error checking for updates: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ dashboard.js:237Understand this error
+/admin/api/network-health:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+base-blockchain.js:131 Error creating market: TypeError: Web3 is not a constructor
+    at BaseBlockchain.createPredictionMarket (base-blockchain.js:77:34)
+    at async MarketCreator.createMarket (market-create.js:200:13)
+createPredictionMarket @ base-blockchain.js:131Understand this error
+dashboard.js:229  GET https://cf1c9d89-296a-46f9-bce6-3c2090e82753-00-3k1sinkfqs6p5.worf.replit.dev/admin/api/updates 404 (Not Found)
+checkForUpdates @ dashboard.js:229
+(anonymous) @ dashboard.js:49Understand this error
+dashboard.js:237 Error checking for updates: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
