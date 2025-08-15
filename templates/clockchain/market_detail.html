@@ -156,11 +156,27 @@
                 </div>
                 <div class="card-body">
                     {% if market.status == 'active' %}
-                        <button class="btn btn-primary w-100 mb-2" onclick="alert('Place bet functionality requires Web3 integration')">
+                        <button id="placeBetBtn" class="btn btn-primary w-100 mb-2">
                             <i class="fas fa-coins"></i> Place Bet
                         </button>
+                        <div id="betForm" class="d-none">
+                            <div class="mb-3">
+                                <label for="betAmount" class="form-label">Bet Amount (ETH)</label>
+                                <input type="number" class="form-control" id="betAmount" step="0.001" min="0.001" value="0.001">
+                            </div>
+                            <div class="mb-3">
+                                <label for="predictedText" class="form-label">Your Prediction</label>
+                                <textarea class="form-control" id="predictedText" rows="3" placeholder="Enter your predicted text"></textarea>
+                            </div>
+                            <button id="confirmBetBtn" class="btn btn-success w-100">
+                                <i class="fas fa-check"></i> Confirm Bet
+                            </button>
+                            <button id="cancelBetBtn" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
                         {% if market.oracle_eligible %}
-                        <button class="btn btn-warning w-100" onclick="alert('Submit oracle data requires Web3 integration')">
+                        <button id="submitOracleBtn" class="btn btn-warning w-100">
                             <i class="fas fa-eye"></i> Submit Oracle Data
                         </button>
                         {% endif %}
@@ -213,24 +229,102 @@ document.addEventListener('DOMContentLoaded', function() {
     window.isMarketDetailPage = true;
     
     // Initialize Web3 connection button handlers
-    const placeBetBtn = document.querySelector('.btn-primary[onclick*="Place bet"]');
+    const placeBetBtn = document.getElementById('placeBetBtn');
+    const betForm = document.getElementById('betForm');
+    const confirmBetBtn = document.getElementById('confirmBetBtn');
+    const cancelBetBtn = document.getElementById('cancelBetBtn');
+    const submitOracleBtn = document.getElementById('submitOracleBtn');
+    
     if (placeBetBtn) {
-        placeBetBtn.onclick = function() {
+        placeBetBtn.onclick = async function() {
+            // Check if wallet is connected
             if (window.ethereum) {
-                alert('Connect your wallet to place a bet. This feature will be available once markets are deployed on BASE Sepolia.');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        // Wallet is connected, show bet form
+                        placeBetBtn.classList.add('d-none');
+                        betForm.classList.remove('d-none');
+                    } else {
+                        // Wallet not connected, request connection
+                        const newAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        if (newAccounts.length > 0) {
+                            placeBetBtn.classList.add('d-none');
+                            betForm.classList.remove('d-none');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error connecting wallet:', error);
+                    alert('Failed to connect wallet. Please try again.');
+                }
             } else {
                 alert('Please install MetaMask to interact with the blockchain.');
             }
         };
     }
     
-    const oracleBtn = document.querySelector('.btn-warning[onclick*="Submit oracle"]');
-    if (oracleBtn) {
-        oracleBtn.onclick = function() {
+    if (confirmBetBtn) {
+        confirmBetBtn.onclick = async function() {
+            const betAmount = document.getElementById('betAmount').value;
+            const predictedText = document.getElementById('predictedText').value;
+            
+            if (!predictedText.trim()) {
+                alert('Please enter your predicted text');
+                return;
+            }
+            
+            try {
+                // Get connected account
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length === 0) {
+                    alert('Please connect your wallet first');
+                    return;
+                }
+                
+                // Contract address for EnhancedPredictionMarket
+                const contractAddress = '0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C';
+                
+                // For now, show confirmation since contracts need to be deployed with proper functions
+                alert(`Ready to place bet:\n\nMarket: #${marketId}\nAmount: ${betAmount} ETH\nPrediction: "${predictedText}"\n\nNote: Smart contract functions for betting are being deployed on BASE Sepolia.`);
+                
+                // Reset form
+                betForm.classList.add('d-none');
+                placeBetBtn.classList.remove('d-none');
+                document.getElementById('predictedText').value = '';
+                
+            } catch (error) {
+                console.error('Error placing bet:', error);
+                alert('Failed to place bet. Please try again.');
+            }
+        };
+    }
+    
+    if (cancelBetBtn) {
+        cancelBetBtn.onclick = function() {
+            betForm.classList.add('d-none');
+            placeBetBtn.classList.remove('d-none');
+            document.getElementById('predictedText').value = '';
+        };
+    }
+    
+    if (submitOracleBtn) {
+        submitOracleBtn.onclick = async function() {
             if (window.ethereum) {
-                alert('Connect your wallet to submit oracle data. This feature will be available once markets are deployed on BASE Sepolia.');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        alert(`Oracle submission for market #${marketId} will be available once oracle functions are deployed on BASE Sepolia.`);
+                    } else {
+                        // Request wallet connection
+                        await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        alert('Wallet connected. Oracle submission will be available once deployed.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to connect wallet for oracle submission.');
+                }
             } else {
-                alert('Please install MetaMask to interact with the blockchain.');
+                alert('Please install MetaMask to submit oracle data.');
             }
         };
     }
