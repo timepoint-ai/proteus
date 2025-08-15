@@ -50,11 +50,11 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="text-muted small">Predicted Text</label>
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-quote-left"></i> 
-                            {{ market.predicted_text }}
-                            <i class="fas fa-quote-right"></i>
+                        <label class="text-muted small">Market Topic</label>
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-question-circle"></i> 
+                            What will {{ market.actor }} say during this time period?
+                            <br><small class="text-muted mt-2 d-block">Initial submission: "{{ market.predicted_text }}"</small>
                         </div>
                     </div>
                     
@@ -71,22 +71,38 @@
                 </div>
             </div>
             
-            <!-- Submissions/Bets -->
+            <!-- Submissions/Predictions -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-list"></i> Submissions & Bets
+                        <i class="fas fa-list"></i> Competing Predictions
                     </h5>
                 </div>
                 <div class="card-body">
-                    {% if market.submissions %}
-                        <div class="list-group">
+                    <!-- Always show initial submission -->
+                    <div class="list-group">
+                        <div class="list-group-item bg-warning bg-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="fas fa-crown text-warning"></i> Initial Submission</strong>
+                                    <div class="text-info">"{{ market.predicted_text }}"</div>
+                                    <small class="text-muted">Created by: {{ market.creator }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold">0.001 ETH</div>
+                                    <div class="text-muted small">Initial Stake</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if market.submissions %}
                             {% for submission in market.submissions %}
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>{{ submission.creator }}</strong>
-                                        <div class="text-muted small">{{ submission.predicted_text }}</div>
+                                        <strong>Submission #{{ loop.index + 1 }}</strong>
+                                        <div class="text-info">"{{ submission.predicted_text }}"</div>
+                                        <small class="text-muted">By: {{ submission.creator }}</small>
                                     </div>
                                     <div class="text-end">
                                         <div class="fw-bold">{{ submission.stake }} ETH</div>
@@ -95,13 +111,12 @@
                                 </div>
                             </div>
                             {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="fas fa-inbox fa-2x mb-2"></i>
-                            <p>No submissions yet for this market</p>
-                        </div>
-                    {% endif %}
+                        {% else %}
+                            <div class="text-center py-3 text-muted">
+                                <small><i class="fas fa-info-circle"></i> No competing predictions yet. Be the first to challenge!</small>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -310,99 +325,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!bettingContract) return;
         
         try {
-            // For now, use the initial market submission from the template
             const submissionsList = document.getElementById('submissionsList');
             
-            // Check if there's an initial submission from market creation
-            const marketText = "{{ market.question|default('') }}";
-            if (marketText && marketText !== "No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.") {
-                // Market has an initial submission
-                submissionsList.innerHTML = `
-                    <div class="list-group-item submission-item" data-id="0">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Initial Submission</h6>
-                                <p class="mb-1">"${marketText}"</p>
-                                <small class="text-muted">
-                                    By: Creator {{ market.creator|default('0x0000...0000')|truncate(10) }}
-                                    | Initial Stake: 0.001 ETH
-                                </small>
-                            </div>
-                            <button class="btn btn-sm btn-primary select-submission" data-id="0">
-                                Select
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                // Add click handler for selection button
-                document.querySelectorAll('.select-submission').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        selectedSubmissionId = parseInt(this.dataset.id);
-                        document.querySelectorAll('.submission-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        this.closest('.submission-item').classList.add('active');
-                        // Visual feedback
-                        this.textContent = 'Selected ✓';
-                        this.classList.remove('btn-primary');
-                        this.classList.add('btn-success');
-                    });
-                });
-            } else {
-                // Try to load from blockchain
-                const submissions = await bettingContract.getMarketSubmissions(marketId);
-                
-                if (submissions.length === 0) {
-                    submissionsList.innerHTML = '<div class="alert alert-warning">No submissions yet. Be the first to create a prediction!</div>';
-                } else {
-                    submissionsList.innerHTML = submissions.map((sub, index) => `
-                        <div class="list-group-item submission-item" data-id="${index}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Submission #${index + 1}</h6>
-                                    <p class="mb-1">"${sub.predictedText}"</p>
-                                    <small class="text-muted">
-                                        By: ${sub.submitter.slice(0, 6)}...${sub.submitter.slice(-4)}
-                                        | Stake: ${bettingContract.web3.utils.fromWei(sub.totalStake, 'ether')} ETH
-                                    </small>
-                                </div>
-                                <button class="btn btn-sm btn-primary select-submission" data-id="${index}">
-                                    Select
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                    
-                    // Add click handlers
-                    document.querySelectorAll('.select-submission').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            selectedSubmissionId = parseInt(this.dataset.id);
-                            document.querySelectorAll('.submission-item').forEach(item => {
-                                item.classList.remove('active');
-                            });
-                            this.closest('.submission-item').classList.add('active');
-                            this.textContent = 'Selected ✓';
-                            this.classList.remove('btn-primary');
-                            this.classList.add('btn-success');
-                        });
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Failed to load submissions:', error);
-            // Fallback to show the initial submission
-            const submissionsList = document.getElementById('submissionsList');
-            submissionsList.innerHTML = `
-                <div class="alert alert-info">
-                    <strong>Initial Market Submission Available</strong><br>
-                    Click "Select" to bet on the creator's prediction.
-                </div>
-                <div class="list-group-item submission-item" data-id="0">
+            // Always show the initial submission (the market creator's predicted text)
+            const initialPredictedText = "{{ market.predicted_text|default('') }}";
+            
+            // Create the initial submission entry
+            let submissionsHTML = `
+                <div class="list-group-item submission-item bg-warning bg-opacity-10" data-id="0">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1">Creator's Prediction</h6>
-                            <p class="mb-1">"{{ market.question }}"</p>
+                            <h6 class="mb-1"><i class="fas fa-crown text-warning"></i> Initial Prediction</h6>
+                            <p class="mb-1 text-info">"${initialPredictedText}"</p>
+                            <small class="text-muted">
+                                By: Market Creator {{ market.creator|default('0x0000...0000')|truncate(10) }}
+                                | Initial Stake: 0.001 ETH
+                            </small>
                         </div>
                         <button class="btn btn-sm btn-primary select-submission" data-id="0">
                             Select to Bet
@@ -411,12 +349,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
-            document.querySelector('.select-submission').addEventListener('click', function() {
-                selectedSubmissionId = 0;
-                this.textContent = 'Selected ✓';
-                this.classList.remove('btn-primary');
-                this.classList.add('btn-success');
+            // Try to load additional submissions from blockchain
+            try {
+                const submissions = await bettingContract.getMarketSubmissions(marketId);
+                
+                // Add any additional submissions (after the initial one)
+                if (submissions && submissions.length > 0) {
+                    submissions.forEach((sub, index) => {
+                        submissionsHTML += `
+                            <div class="list-group-item submission-item" data-id="${index + 1}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">Competing Submission #${index + 1}</h6>
+                                        <p class="mb-1 text-info">"${sub.predictedText}"</p>
+                                        <small class="text-muted">
+                                            By: ${sub.submitter.slice(0, 6)}...${sub.submitter.slice(-4)}
+                                            | Stake: ${bettingContract.web3.utils.fromWei(sub.totalStake, 'ether')} ETH
+                                        </small>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary select-submission" data-id="${index + 1}">
+                                        Select to Bet
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching additional submissions:', error);
+            }
+            
+            // Set the HTML with initial submission and any additional ones
+            submissionsList.innerHTML = submissionsHTML;
+            
+            // Add click handlers for all selection buttons
+            document.querySelectorAll('.select-submission').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectedSubmissionId = parseInt(this.dataset.id);
+                    // Remove active class from all items
+                    document.querySelectorAll('.submission-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    // Reset all buttons
+                    document.querySelectorAll('.select-submission').forEach(b => {
+                        b.textContent = 'Select to Bet';
+                        b.classList.remove('btn-success');
+                        b.classList.add('btn-primary');
+                    });
+                    // Set this item as active
+                    this.closest('.submission-item').classList.add('active');
+                    this.textContent = 'Selected ✓';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-success');
+                });
             });
+            
+        } catch (error) {
+            console.error('Failed to load submissions:', error);
+            // Error loading submissions, but initial submission still shown
         }
     }
     
