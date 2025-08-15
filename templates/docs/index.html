@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - Clockchain{% endblock %}
+
+{% block content %}
+<style>
+    .docs-index {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .docs-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--bs-primary);
+    }
+    
+    .docs-header h1 {
+        color: var(--bs-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .docs-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .doc-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .doc-card:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: var(--bs-primary);
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .doc-card h3 {
+        color: var(--bs-info);
+        margin-bottom: 0.5rem;
+    }
+    
+    .doc-card p {
+        color: var(--bs-secondary);
+        margin: 0;
+    }
+    
+    .quick-links {
+        background: rgba(0,100,255,0.1);
+        border: 1px solid var(--bs-primary);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-links h4 {
+        color: var(--bs-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .quick-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .quick-links li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .quick-links a {
+        color: var(--bs-info);
+        text-decoration: none;
+    }
+    
+    .quick-links a:hover {
+        color: var(--bs-primary);
+        text-decoration: underline;
+    }
+</style>
+
+<div class="docs-index">
+    <div class="docs-header">
+        <h1><i class="fas fa-book"></i> Clockchain Documentation</h1>
+        <p class="lead">Learn how to interact with prediction markets on BASE Sepolia</p>
+    </div>
+    
+    <div class="quick-links">
+        <h4><i class="fas fa-rocket"></i> Quick Links</h4>
+        <ul>
+            <li>
+                <a href="https://sepolia.basescan.org/address/0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> View Contract on BASE Sepolia
+                </a>
+            </li>
+            <li>
+                <a href="/clockchain/timeline">
+                    <i class="fas fa-chart-line"></i> View Live Markets
+                </a>
+            </li>
+            <li>
+                <a href="https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet" target="_blank">
+                    <i class="fas fa-faucet"></i> Get Free Test ETH
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="docs-list">
+        {% if docs %}
+            {% for doc in docs %}
+            <a href="/docs/{{ doc.file }}" class="doc-card">
+                <h3><i class="fas fa-file-alt"></i> {{ doc.name }}</h3>
+                <p>View complete guide for interacting with blockchain markets</p>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="doc-card">
+                <h3>Chain Submission Guide</h3>
+                <p>Complete guide for placing bets and creating predictions on BASE Sepolia</p>
+                <a href="/docs/CHAIN_SUBMISSION_GUIDE.md" class="btn btn-primary mt-3">
+                    <i class="fas fa-book-open"></i> View Guide
+                </a>
+            </div>
+        {% endif %}
+        
+        <div class="doc-card">
+            <h3><i class="fas fa-code"></i> Smart Contract Reference</h3>
+            <p>
+                <strong>Contract:</strong> EnhancedPredictionMarket<br>
+                <strong>Address:</strong> <code>0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C</code><br>
+                <strong>Network:</strong> BASE Sepolia (Chain ID: 84532)
+            </p>
+        </div>
+    </div>
+    
+    <div class="text-center mt-5">
+        <small class="text-muted">
+            Need help? Join our community or view the contract directly on Etherscan
+        </small>
+    </div>
+</div>
+{% endblock %}

@@ -73,6 +73,19 @@ class BettingContract {
             throw new Error('MetaMask is not installed');
         }
         
+        // Check if Web3 is already available, if not load it
+        if (typeof Web3 === 'undefined') {
+            // Load Web3 from CDN
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js';
+            document.head.appendChild(script);
+            
+            // Wait for Web3 to load
+            await new Promise((resolve) => {
+                script.onload = resolve;
+            });
+        }
+        
         // Initialize Web3
         this.web3 = new Web3(window.ethereum);
         

@@ -70,9 +70,11 @@ def create_app():
     from routes.base_api import base_api_bp
     from routes.oracle_manual import oracle_manual_bp
     from routes.node_api import node_api_bp
+    from routes.docs import docs_bp
     
     app.register_blueprint(marketing_bp)
     app.register_blueprint(auth_bp)  # Phase 2: Register auth routes
+    app.register_blueprint(docs_bp)
     app.register_blueprint(api_chain_bp, url_prefix='/api/chain')  # Phase 3: Chain-only routes
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(base_api_bp, url_prefix='/api/base')
