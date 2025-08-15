@@ -23,6 +23,12 @@ class MarketBlockchain {
     
     async init() {
         try {
+            // Skip initialization on market detail page
+            if (window.isMarketDetailPage) {
+                console.log('Skipping MarketBlockchain init on market detail page');
+                return;
+            }
+            
             // Initialize Web3
             if (typeof window.ethereum !== 'undefined') {
                 this.web3 = new Web3(window.ethereum);

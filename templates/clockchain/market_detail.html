@@ -201,4 +201,39 @@
     background: rgba(255,255,255,0.05);
 }
 </style>
+
+<script>
+// Initialize market detail page
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize market detail functionality on this page
+    const marketId = "{{ market.id }}";
+    console.log('Market Detail Page loaded for market:', marketId);
+    
+    // Prevent other scripts from running on this page
+    window.isMarketDetailPage = true;
+    
+    // Initialize Web3 connection button handlers
+    const placeBetBtn = document.querySelector('.btn-primary[onclick*="Place bet"]');
+    if (placeBetBtn) {
+        placeBetBtn.onclick = function() {
+            if (window.ethereum) {
+                alert('Connect your wallet to place a bet. This feature will be available once markets are deployed on BASE Sepolia.');
+            } else {
+                alert('Please install MetaMask to interact with the blockchain.');
+            }
+        };
+    }
+    
+    const oracleBtn = document.querySelector('.btn-warning[onclick*="Submit oracle"]');
+    if (oracleBtn) {
+        oracleBtn.onclick = function() {
+            if (window.ethereum) {
+                alert('Connect your wallet to submit oracle data. This feature will be available once markets are deployed on BASE Sepolia.');
+            } else {
+                alert('Please install MetaMask to interact with the blockchain.');
+            }
+        };
+    }
+});
+</script>
 {% endblock %}

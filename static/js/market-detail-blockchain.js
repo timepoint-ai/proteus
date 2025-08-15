@@ -14,6 +14,11 @@ class MarketDetailBlockchain {
     
     async init() {
         try {
+            // Only initialize on market detail page
+            if (!window.isMarketDetailPage) {
+                return;
+            }
+            
             // Wait for wallet and blockchain to be ready
             await this.waitForDependencies();
             
@@ -30,7 +35,10 @@ class MarketDetailBlockchain {
             
         } catch (error) {
             console.error('Error initializing market detail:', error);
-            this.showError('Failed to load market data from blockchain');
+            // Don't show error if dependencies not ready yet
+            if (error.message !== 'Dependencies not loaded') {
+                this.showError('Failed to load market data from blockchain');
+            }
         }
     }
     
