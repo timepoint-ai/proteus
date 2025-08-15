@@ -1,0 +1,166 @@
+ers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 None
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber, Response: {'jsonrpc': '2.0', 'result': '0x1c6090b', 'id': 120}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 121}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 122}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 123}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 46
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 124}
+INFO:services.monitoring:Monitoring metrics saved: gas_price=0.001000055 gwei, oracle_failures=0, xcom_rate_limit=100, screenshot_storage=0.0MB
+DEBUG:services.monitoring:System health score: 1.00
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 45
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 25}
+DEBUG:services.monitoring:Current gas price: 0.001000055 gwei
+DEBUG:services.contract_monitoring:Running contract monitoring cycle
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_blockNumber
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 None
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber, Response: {'jsonrpc': '2.0', 'result': '0x1c6091a', 'id': 125}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 126}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 127}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 128}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 46
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 129}
+INFO:services.monitoring:Monitoring metrics saved: gas_price=0.001000055 gwei, oracle_failures=0, xcom_rate_limit=100, screenshot_storage=0.0MB
+DEBUG:services.monitoring:System health score: 1.00
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 45
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 26}
+DEBUG:services.monitoring:Current gas price: 0.001000055 gwei
+DEBUG:services.contract_monitoring:Running contract monitoring cycle
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_blockNumber
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 None
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber, Response: {'jsonrpc': '2.0', 'result': '0x1c60929', 'id': 130}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 131}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 132}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 133}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 46
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 134}
+INFO:services.monitoring:Monitoring metrics saved: gas_price=0.001000055 gwei, oracle_failures=0, xcom_rate_limit=100, screenshot_storage=0.0MB
+DEBUG:services.monitoring:System health score: 1.00
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 45
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 27}
+DEBUG:services.monitoring:Current gas price: 0.001000055 gwei
+DEBUG:services.contract_monitoring:Running contract monitoring cycle
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_blockNumber
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 None
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber, Response: {'jsonrpc': '2.0', 'result': '0x1c60938', 'id': 135}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 136}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 137}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 138}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 46
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 139}
+INFO:services.monitoring:Monitoring metrics saved: gas_price=0.001000055 gwei, oracle_failures=0, xcom_rate_limit=100, screenshot_storage=0.0MB
+DEBUG:services.monitoring:System health score: 1.00
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 45
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 28}
+DEBUG:services.monitoring:Current gas price: 0.001000055 gwei
+DEBUG:services.contract_monitoring:Running contract monitoring cycle
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_blockNumber
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 None
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_blockNumber, Response: {'jsonrpc': '2.0', 'result': '0x1c60948', 'id': 140}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 141}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 142}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_getLogs
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_getLogs
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 39
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_getLogs, Response: {'jsonrpc': '2.0', 'result': [], 'id': 143}
+DEBUG:web3.manager.RequestManager:Making request. Method: eth_gasPrice
+DEBUG:web3.providers.HTTPProvider:Making request HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice
+DEBUG:urllib3.connectionpool:https://sepolia.base.org:443 "POST / HTTP/1.1" 200 46
+DEBUG:web3.providers.HTTPProvider:Getting response HTTP. URI: https://sepolia.base.org, Method: eth_gasPrice, Response: {'jsonrpc': '2.0', 'result': '0xf4277', 'id': 144}
+INFO:services.monitoring:Monitoring metrics saved: gas_price=0.001000055 gwei, oracle_failures=0, xcom_rate_limit=100, screenshot_storage=0.0MB
+DEBUG:services.monitoring:System health score: 1.00
+ERROR:routes.admin:Error getting API stats: name 'NodeOperator' is not defined
+ERROR:routes.admin:Error getting network health: name 'consensus_service' is not defined
+ERROR:routes.admin:Error getting ledger summary: name 'ledger_service' is not defined

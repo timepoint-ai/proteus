@@ -338,66 +338,66 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const submissionsList = document.getElementById('submissionsList');
+            let submissionsHTML = '';
             
-            // Always show the initial submission (the market creator's predicted text)
-            const initialPredictedText = "{{ market.predicted_text|default('') }}";
-            
-            // Create the initial submission entry
-            let submissionsHTML = `
-                <div class="list-group-item submission-item bg-warning bg-opacity-10" data-id="0">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1"><i class="fas fa-crown text-warning"></i> Initial Prediction</h6>
-                            <p class="mb-1 text-info">"${initialPredictedText}"</p>
-                            <small class="text-muted">
-                                By: Market Creator {{ market.creator|default('0x0000...0000')|truncate(10) }}
-                                | Initial Stake: 0.001 ETH
-                            </small>
-                        </div>
-                        <button class="btn btn-sm btn-primary select-submission" data-id="0">
-                            Select to Bet
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            // Try to load additional submissions from blockchain
+            // Try to load submissions from blockchain
             try {
                 const submissions = await bettingContract.getMarketSubmissions(marketId);
                 
-                // Add any additional submissions (after the initial one)
+                // Check if there are any submissions
                 if (submissions && submissions.length > 0) {
+                    // Submissions exist - show them
                     submissions.forEach((sub, index) => {
+                        const isFirst = index === 0;
                         submissionsHTML += `
-                            <div class="list-group-item submission-item" data-id="${index + 1}">
+                            <div class="list-group-item submission-item ${isFirst ? 'bg-warning bg-opacity-10' : ''}" data-submission-id="${sub.id || index}">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1">Competing Submission #${index + 1}</h6>
+                                        <h6 class="mb-1">
+                                            ${isFirst ? '<i class="fas fa-crown text-warning"></i> Initial' : 'Competing'} Submission #${index + 1}
+                                        </h6>
                                         <p class="mb-1 text-info">"${sub.predictedText}"</p>
                                         <small class="text-muted">
-                                            By: ${sub.submitter.slice(0, 6)}...${sub.submitter.slice(-4)}
-                                            | Stake: ${bettingContract.web3.utils.fromWei(sub.totalStake, 'ether')} ETH
+                                            By: ${sub.submitter ? sub.submitter.slice(0, 6) + '...' + sub.submitter.slice(-4) : 'Unknown'}
+                                            | Stake: ${sub.totalStake ? bettingContract.web3.utils.fromWei(sub.totalStake, 'ether') : '0'} ETH
                                         </small>
                                     </div>
-                                    <button class="btn btn-sm btn-primary select-submission" data-id="${index + 1}">
+                                    <button class="btn btn-sm btn-primary select-submission" data-submission-id="${sub.id || index}">
                                         Select to Bet
                                     </button>
                                 </div>
                             </div>
                         `;
                     });
+                    
+                    submissionsList.innerHTML = submissionsHTML;
+                } else {
+                    // No submissions yet - show message
+                    submissionsList.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i> <strong>No submissions yet!</strong><br>
+                            This market doesn't have any submissions on the blockchain yet.<br>
+                            Be the first to create a prediction using the "Create New Prediction" button.
+                        </div>
+                    `;
+                    return; // Exit early, no submissions to select
                 }
             } catch (error) {
-                console.error('Error fetching additional submissions:', error);
+                console.error('Error fetching submissions:', error);
+                submissionsList.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Error loading submissions</strong><br>
+                        Could not load submissions from the blockchain. The market may not exist yet.<br>
+                        <small class="text-muted">Error: ${error.message}</small>
+                    </div>
+                `;
+                return;
             }
-            
-            // Set the HTML with initial submission and any additional ones
-            submissionsList.innerHTML = submissionsHTML;
             
             // Add click handlers for all selection buttons
             document.querySelectorAll('.select-submission').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    selectedSubmissionId = parseInt(this.dataset.id);
+                    selectedSubmissionId = parseInt(this.dataset.submissionId);
                     // Remove active class from all items
                     document.querySelectorAll('.submission-item').forEach(item => {
                         item.classList.remove('active');
@@ -418,7 +418,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Failed to load submissions:', error);
-            // Error loading submissions, but initial submission still shown
+            // Show error message
+            const submissionsList = document.getElementById('submissionsList');
+            submissionsList.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Error loading submissions</strong><br>
+                    Could not load submissions from the blockchain. The market may not exist yet.<br>
+                    <small class="text-muted">Error: ${error.message}</small>
+                </div>
+            `;
         }
     }
     

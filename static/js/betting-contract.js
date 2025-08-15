@@ -164,15 +164,27 @@ class BettingContract {
         
         const amountWei = this.web3.utils.toWei(amountETH.toString(), 'ether');
         
-        // Estimate gas
+        // Determine submission type (first submission is "original", others are "competitor")
+        let submissionType = "competitor";
+        try {
+            const existingSubmissions = await this.getMarketSubmissions(marketId);
+            if (!existingSubmissions || existingSubmissions.length === 0) {
+                submissionType = "original";
+            }
+        } catch (e) {
+            // If error fetching, assume it's the first
+            submissionType = "original";
+        }
+        
+        // Use createSubmission method from the contract
         const gasEstimate = await this.contract.methods
-            .submitPrediction(marketId, predictedText)
+            .createSubmission(marketId, predictedText, submissionType)
             .estimateGas({ from: this.account, value: amountWei })
-            .catch(() => 100000); // Fallback gas limit
+            .catch(() => 150000); // Higher fallback for createSubmission
         
         // Send transaction
         const tx = await this.contract.methods
-            .submitPrediction(marketId, predictedText)
+            .createSubmission(marketId, predictedText, submissionType)
             .send({
                 from: this.account,
                 value: amountWei,
