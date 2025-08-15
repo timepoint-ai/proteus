@@ -170,6 +170,17 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    <!-- Gas Fee Warning -->
+                    <div class="alert alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Testnet Gas Fees</strong><br>
+                        <small>
+                            Gas fees on BASE Sepolia can be high. We've set default amounts to 0.0001 ETH to leave room for gas.<br>
+                            <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" class="text-info">
+                                Need more testnet ETH? Get it from the BASE Sepolia Faucet →
+                            </a>
+                        </small>
+                    </div>
+                    
                     {% if market.status == 'active' %}
                         <!-- Initial action buttons -->
                         <div id="actionButtons">
@@ -189,7 +200,8 @@
                             </div>
                             <div class="mb-3">
                                 <label for="existingBetAmount" class="form-label">Bet Amount (ETH)</label>
-                                <input type="number" class="form-control" id="existingBetAmount" step="0.001" min="0.001" value="0.001">
+                                <input type="number" class="form-control" id="existingBetAmount" step="0.0001" min="0.0001" value="0.0001">
+                                <small class="text-muted">Reduced amount to leave room for gas fees</small>
                             </div>
                             <button id="confirmExistingBet" class="btn btn-primary w-100">
                                 <i class="fas fa-check"></i> Place Bet
@@ -215,8 +227,8 @@
                             </div>
                             <div class="mb-3">
                                 <label for="newPredictionAmount" class="form-label">Initial Stake (ETH)</label>
-                                <input type="number" class="form-control" id="newPredictionAmount" step="0.001" min="0.001" value="0.001">
-                                <small class="text-muted">Minimum: 0.001 ETH. Higher stakes may attract more bettors.</small>
+                                <input type="number" class="form-control" id="newPredictionAmount" step="0.0001" min="0.0001" value="0.0001">
+                                <small class="text-muted">Minimum: 0.0001 ETH. Amount reduced to leave room for gas fees.</small>
                             </div>
                             <button id="confirmNewPrediction" class="btn btn-success w-100">
                                 <i class="fas fa-check"></i> Submit Prediction
