@@ -229,9 +229,12 @@
                         
                         {% if not timeline_segments %}
                         <div class="text-center py-5">
-                            <i class="fas fa-clock fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No submissions in selected time range</h5>
-                            <p class="text-muted">Try adjusting the time range to see more predictions</p>
+                            <i class="fas fa-link fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No markets found on BASE Sepolia blockchain</h5>
+                            <p class="text-muted">Create your first prediction market to get started</p>
+                            <a href="/clockchain/markets/create" class="btn btn-primary mt-3">
+                                <i class="fas fa-plus"></i> Create Market
+                            </a>
                         </div>
                         {% endif %}
                         

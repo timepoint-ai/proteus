@@ -75,36 +75,8 @@ def clockchain_view():
         except Exception as e:
             logger.error(f"Error fetching markets from blockchain: {e}")
             
-        # If no markets found, show a helpful message
-        if not timeline_segments:
-            test_message_segment = {
-                'id': '0',  # Use a numeric ID to avoid routing issues
-                'actor': {
-                    'id': None,
-                    'x_username': 'Clockchain',
-                    'display_name': 'Clockchain Network',
-                    'verified': True,
-                    'follower_count': 0,
-                    'is_test_account': True
-                },
-                'start_time': current_time - timedelta(hours=1),
-                'end_time': current_time + timedelta(hours=1),
-                'start_ms': int((current_time - timedelta(hours=1)).timestamp() * 1000),
-                'end_ms': int((current_time + timedelta(hours=1)).timestamp() * 1000),
-                'status': 'active',
-                'submission_count': 0,
-                'total_volume': '0',
-                'currency': 'BASE',
-                'predicted_text': 'No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.',
-                'creator_wallet': '0x0000000000...',
-                'initial_stake': '0',
-                'stake_count': 0,
-                'oracle_allowed': False,
-                'time_until_oracle': 0,
-                'submissions': [],
-                'competing_bets': []
-            }
-            timeline_segments.append(test_message_segment)
+        # If no markets found, just keep the list empty
+        # Phase 7: Only show real blockchain data, no placeholders
         
         # Blockchain stats (placeholder for now)
         active_market_count = 0
@@ -175,58 +147,40 @@ def create_market():
 def market_detail(market_id='blockchain-message'):
     """Display detailed view of a prediction market - Phase 7 Blockchain-Only"""
     try:
-        # For demo markets, show detailed information
-        if market_id == '0':
-            market_data = {
-                'id': 0,
-                'actor': '@Clockchain',
-                'predicted_text': 'No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.',
-                'time_range': '08/13 21:48 to 08/13 23:48',
-                'initial_stake': '0 BASE',
-                'total_volume': '0 BASE',
-                'status': 'active',
-                'bets_placed': 0,
-                'oracle_eligible': False,
-                'creator': '0x0000000000...',
-                'created_at': datetime.now(),
-                'submissions': []
-            }
-        else:
-            # Try to get market from blockchain if possible
-            market_data = {
-                'id': market_id,
-                'actor': 'Unknown Actor',
-                'predicted_text': 'Market data from blockchain',
-                'time_range': 'Time range from blockchain',
-                'initial_stake': '0.01 ETH',
-                'total_volume': '0.01 ETH',
-                'status': 'active',
-                'bets_placed': 1,
-                'oracle_eligible': False,
-                'creator': '0xCreator...',
-                'created_at': datetime.now(),
-                'submissions': []
-            }
-            
-            # Try to fetch from blockchain if contract is available
-            if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
-                try:
-                    contract = blockchain_service.contracts['EnhancedPredictionMarket']
-                    # Try to get market data
-                    market = contract.functions.markets(int(market_id)).call()
-                    if market and len(market) > 0:
-                        market_data['creator'] = market[0] if len(market) > 0 else '0x...'
-                        market_data['predicted_text'] = market[1] if len(market) > 1 else 'Unknown prediction'
-                        # Check if active (market[2] is the active status)
-                        if len(market) > 2 and market[2]:
-                            market_data['status'] = 'active'
-                        else:
-                            market_data['status'] = 'resolved'
-                except Exception as e:
-                    logger.debug(f"Could not fetch market {market_id} from blockchain: {e}")
+        # Phase 7: Only show real blockchain data
+        # Try to get market from blockchain
+        market_data = None
+        
+        # Try to fetch from blockchain if contract is available
+        if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
+            try:
+                contract = blockchain_service.contracts['EnhancedPredictionMarket']
+                # Try to get market data
+                market = contract.functions.markets(int(market_id)).call()
+                if market and len(market) > 0:
+                    market_data = {
+                        'id': market_id,
+                        'creator': market[0] if len(market) > 0 else 'Not found',
+                        'predicted_text': market[1] if len(market) > 1 else 'No prediction text',
+                        'actor': market[2] if len(market) > 2 else 'Unknown',
+                        'time_range': 'From blockchain',
+                        'initial_stake': '0 ETH',
+                        'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 else '0 ETH',
+                        'status': 'resolved' if len(market) > 5 and market[5] else 'active',
+                        'bets_placed': 0,
+                        'oracle_eligible': True,
+                        'created_at': datetime.now(),
+                        'submissions': []
+                    }
+            except Exception as e:
+                logger.debug(f"Could not fetch market {market_id} from blockchain: {e}")
+        
+        # If no data found, show error
+        if not market_data:
+            flash('Market not found on blockchain', 'error')
+            return redirect(url_for('clockchain.clockchain_view'))
         
         return render_template('clockchain/market_detail.html', market=market_data)
-                             
     except Exception as e:
         logger.error(f"Error loading market detail: {e}")
         flash('Error loading market details', 'error')

@@ -170,17 +170,8 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <!-- Check if this is a real market or placeholder -->
-                    {% if market.predicted_text == 'No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.' %}
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i> <strong>No Market on Blockchain</strong><br>
-                            This market doesn't exist on the blockchain yet. You need to create markets first.<br>
-                            <small class="text-muted mt-2 d-block">
-                                Run the deployment script to create test markets:<br>
-                                <code>node scripts/deploy-genesis-testnet.js</code>
-                            </small>
-                        </div>
-                    {% else %}
+                    <!-- Only show actions for real markets -->
+                    {% if market and market.id %}
                         <!-- Gas Fee Warning -->
                         <div class="alert alert-warning mb-3">
                             <i class="fas fa-exclamation-triangle"></i> <strong>Testnet Gas Fees</strong><br>
