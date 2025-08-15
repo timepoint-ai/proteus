@@ -26,111 +26,57 @@ if os.path.exists(deployment_file):
 
 @base_api_bp.route('/markets/create', methods=['POST'])
 def create_market():
-    """Create a new prediction market on BASE blockchain"""
+    """Create a new prediction market on BASE blockchain - Phase 7 Chain-Only"""
     try:
         data = request.get_json()
         
         # Validate required fields
         required_fields = ['question', 'actor_handle', 'duration_hours', 
-                          'initial_stake', 'creator_wallet', 'xcom_only']
+                          'initial_stake', 'creator_wallet']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
-                
-        # Get or create actor
-        actor = Actor.query.filter_by(name=data['actor_handle']).first()
-        if not actor:
-            # Create new actor
-            actor = Actor(
-                name=data['actor_handle'],
-                description=f"X.com handle: @{data['actor_handle']}",
-                status='approved'  # Auto-approve for BASE integration
-            )
-            db.session.add(actor)
-            db.session.flush()
-            
-        # Calculate timestamps
-        start_time = datetime.utcnow()
-        end_time = start_time + timedelta(hours=int(data['duration_hours']))
         
-        # Create market in database
-        market = PredictionMarket(
-            actor_id=actor.id,
-            start_time=start_time,
-            end_time=end_time,
-            oracle_wallets=json.dumps(data.get('oracle_wallets', [])),
-            xcom_only=data['xcom_only'],
-            twitter_handle=data['actor_handle'],  # Use the provided handle
-            status='active'
-        )
-        
-        db.session.add(market)
-        db.session.flush()  # Get ID without committing
-        
-        # Calculate fees
+        # Phase 7: Direct blockchain interaction only
+        # Return transaction parameters for frontend to execute
         initial_stake = Decimal(str(data['initial_stake']))
-        platform_fee = blockchain_service.calculate_platform_fee(initial_stake)
-        total_amount = initial_stake + platform_fee
+        duration_seconds = int(data['duration_hours']) * 3600
         
-        # Prepare blockchain transaction
-        if blockchain_service.contracts['PredictionMarket']:
-            # Use smart contract
-            tx_data = blockchain_service.create_market(
-                data['question'],
-                int(data['duration_hours']) * 3600,  # Convert to seconds
-                data['actor_handle'],  # Use the provided handle
-                data['xcom_only'],
-                initial_stake,
-                data['creator_wallet']
-            )
-            
-            response = {
-                'market_id': str(market.id),
-                'blockchain_tx': {
-                    'to': blockchain_service.contracts['PredictionMarket'].address,
-                    'value': str(total_amount),
-                    'platform_fee': str(platform_fee),
-                    'gas_estimate': tx_data['params']['gas'],
-                    'data': 'Contract call to createMarket'
+        # Prepare response with blockchain transaction details
+        response = {
+            'success': True,
+            'message': 'Transaction parameters prepared. Execute on blockchain.',
+            'transaction': {
+                'contract_address': os.environ.get('ENHANCED_PREDICTION_MARKET_ADDRESS', '0x6B67CB0dAAf78F63bd11195dF0FD9FFe4361B93C'),
+                'method': 'createMarket',
+                'params': {
+                    'question': data['question'],
+                    'actorUsername': data['actor_handle'].replace('@', ''),  # Remove @ if present
+                    'duration': duration_seconds,
+                    'oracleWallets': data.get('oracle_wallets', [data['creator_wallet'], '0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002']),
+                    'metadata': json.dumps({
+                        'created': datetime.utcnow().isoformat(),
+                        'creator': data['creator_wallet'],
+                        'predicted_text': data.get('predicted_text', '')
+                    })
                 },
-                'message': 'Market created in database. Send transaction to complete.'
-            }
-        else:
-            # Manual transaction (no contract deployed)
-            response = {
-                'market_id': str(market.id),
-                'manual_tx': {
-                    'platform_wallet': os.environ.get('PLATFORM_WALLET', '0x0000000000000000000000000000000000000000'),
-                    'amount': str(total_amount),
-                    'platform_fee': str(platform_fee),
-                    'initial_stake': str(initial_stake)
-                },
-                'message': 'Market created. Manual transaction required (no contract deployed).'
-            }
-            
-        # Create initial submission
-        predicted_text = data.get('predicted_text', '')
-        submission_type = 'null' if not predicted_text else 'original'
+                'value': '0',  # No ETH sent for market creation
+                'initial_stake_info': {
+                    'amount': str(initial_stake),
+                    'note': 'Create initial submission after market creation'
+                }
+            },
+            'instructions': [
+                '1. Execute createMarket transaction with provided parameters',
+                '2. Wait for confirmation and get market ID from event',
+                '3. Create initial submission with predicted text and stake'
+            ]
+        }
         
-        submission = Submission(
-            market_id=market.id,
-            creator_wallet=data['creator_wallet'],
-            predicted_text=predicted_text if predicted_text else None,
-            initial_stake_amount=initial_stake,
-            submission_type=submission_type,
-            base_tx_hash='0x' + '0' * 64  # Placeholder until actual transaction
-        )
-        
-        db.session.add(submission)
-        market.total_volume = initial_stake
-        
-        db.session.commit()
-        
-        return jsonify(response), 201
+        return jsonify(response), 200
         
     except Exception as e:
-        logger.error(f"Error creating market: {e}")
-        db.session.rollback()
+        logger.error(f"Error preparing market creation: {e}")
         return jsonify({'error': str(e)}), 500
         
 @base_api_bp.route('/markets/<market_id>/oracle/submit', methods=['POST'])

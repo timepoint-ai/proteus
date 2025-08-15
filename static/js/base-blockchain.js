@@ -69,35 +69,60 @@ class BaseBlockchain {
             
             const result = await response.json();
             
-            // If we have contract deployment info, send the transaction
-            if (result.blockchain_tx) {
-                const txParams = {
-                    from: this.wallet.address,
-                    to: result.blockchain_tx.to,
-                    value: '0x' + BigInt(result.blockchain_tx.value).toString(16),
-                    data: result.blockchain_tx.data || '0x',
-                    gas: result.blockchain_tx.gas_estimate
-                };
-                
-                // Send transaction
-                const txHash = await this.wallet.sendTransaction(txParams);
-                
-                // Show transaction pending
-                this.showTransactionPending(txHash);
-                
-                // Wait for confirmation
-                await this.waitForTransaction(txHash);
-                
-                this.hideLoading();
-                this.wallet.showSuccess('Market created successfully!');
-                
-                // Redirect to market detail page
-                window.location.href = `/clockchain/market/${result.market_id}`;
-                
+            // Phase 7: Direct blockchain execution
+            if (result.success && result.transaction) {
+                // Use Web3 to interact with the contract directly
+                if (typeof window.ethereum !== 'undefined') {
+                    const Web3 = window.Web3 || (await import('https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js')).default;
+                    const web3 = new Web3(window.ethereum);
+                    
+                    // Contract ABI for createMarket function
+                    const contractABI = [
+                        {
+                            "inputs": [
+                                {"internalType": "string", "name": "_question", "type": "string"},
+                                {"internalType": "string", "name": "_actorUsername", "type": "string"},
+                                {"internalType": "uint256", "name": "_duration", "type": "uint256"},
+                                {"internalType": "address[]", "name": "_oracleWallets", "type": "address[]"},
+                                {"internalType": "string", "name": "_metadata", "type": "string"}
+                            ],
+                            "name": "createMarket",
+                            "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                            "stateMutability": "payable",
+                            "type": "function"
+                        }
+                    ];
+                    
+                    // Create contract instance
+                    const contract = new web3.eth.Contract(contractABI, result.transaction.contract_address);
+                    
+                    // Execute createMarket transaction
+                    const tx = await contract.methods.createMarket(
+                        result.transaction.params.question,
+                        result.transaction.params.actorUsername,
+                        result.transaction.params.duration,
+                        result.transaction.params.oracleWallets,
+                        result.transaction.params.metadata
+                    ).send({
+                        from: this.wallet.address,
+                        value: result.transaction.value
+                    });
+                    
+                    // Get market ID from event
+                    const marketId = tx.events?.MarketCreated?.returnValues?.marketId || 0;
+                    
+                    this.hideLoading();
+                    this.wallet.showSuccess('Market created successfully!');
+                    
+                    // Redirect to market detail page
+                    window.location.href = `/clockchain/market/${marketId}`;
+                } else {
+                    throw new Error('Web3 provider not found. Please install MetaMask.');
+                }
             } else {
-                // Manual transaction required (no contract)
+                // Error in API response
                 this.hideLoading();
-                this.showManualTransactionRequired(result);
+                throw new Error(result.message || 'Failed to prepare market creation');
             }
             
         } catch (error) {
