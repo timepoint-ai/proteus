@@ -170,18 +170,29 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <!-- Gas Fee Warning -->
-                    <div class="alert alert-warning mb-3">
-                        <i class="fas fa-exclamation-triangle"></i> <strong>Testnet Gas Fees</strong><br>
-                        <small>
-                            Gas fees on BASE Sepolia can be high. We've set default amounts to 0.0001 ETH to leave room for gas.<br>
-                            <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" class="text-info">
-                                Need more testnet ETH? Get it from the BASE Sepolia Faucet →
-                            </a>
-                        </small>
-                    </div>
-                    
-                    {% if market.status == 'active' %}
+                    <!-- Check if this is a real market or placeholder -->
+                    {% if market.predicted_text == 'No markets on blockchain yet. Use scripts/deploy-genesis-testnet.js to create test markets.' %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>No Market on Blockchain</strong><br>
+                            This market doesn't exist on the blockchain yet. You need to create markets first.<br>
+                            <small class="text-muted mt-2 d-block">
+                                Run the deployment script to create test markets:<br>
+                                <code>node scripts/deploy-genesis-testnet.js</code>
+                            </small>
+                        </div>
+                    {% else %}
+                        <!-- Gas Fee Warning -->
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Testnet Gas Fees</strong><br>
+                            <small>
+                                Gas fees on BASE Sepolia can be high. We've set default amounts to 0.0001 ETH to leave room for gas.<br>
+                                <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" class="text-info">
+                                    Need more testnet ETH? Get it from the BASE Sepolia Faucet →
+                                </a>
+                            </small>
+                        </div>
+                        
+                        {% if market.status == 'active' %}
                         <!-- Initial action buttons -->
                         <div id="actionButtons">
                             <button id="betExistingBtn" class="btn btn-primary w-100 mb-2">
@@ -248,10 +259,11 @@
                             <i class="fas fa-eye"></i> Submit Oracle Data
                         </button>
                         {% endif %}
-                    {% else %}
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle"></i> This market has been resolved
-                        </div>
+                        {% else %}
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle"></i> This market has been resolved
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
