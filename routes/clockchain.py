@@ -35,11 +35,12 @@ def clockchain_view():
         try:
             # Check if we have the EnhancedPredictionMarket contract  
             if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
-                # Try to get all markets (up to 100 for now)
-                for market_id in range(0, 100):  # Try first 100 market IDs
+                # Limit to 10 markets to avoid excessive blockchain calls
+                for market_id in range(0, 10):  # Try first 10 market IDs
                     try:
-                        if blockchain_service.contracts:
-                            market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
+                        contract = blockchain_service.contracts.get('EnhancedPredictionMarket')
+                        if contract:
+                            market = contract.functions.markets(market_id).call()
                             
                             # Only process if we got valid market data
                             if market and len(market) > 5:
@@ -158,8 +159,8 @@ def market_detail(market_id='blockchain-message'):
         # Try to fetch from blockchain if contract is available
         if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
             try:
-                if blockchain_service.contracts:
-                    contract = blockchain_service.contracts['EnhancedPredictionMarket']
+                contract = blockchain_service.contracts.get('EnhancedPredictionMarket')
+                if contract:
                     # Try to get market data
                     market = contract.functions.markets(int(market_id)).call()
                     
@@ -224,11 +225,12 @@ def resolved_view():
         # Try to get resolved markets from blockchain
         try:
             if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
-                # Try to get all markets
-                for market_id in range(0, 100):  # Check first 100 market IDs
+                # Limit to 10 markets to avoid excessive blockchain calls
+                for market_id in range(0, 10):  # Check first 10 market IDs
                     try:
-                        if blockchain_service.contracts:
-                            market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
+                        contract = blockchain_service.contracts.get('EnhancedPredictionMarket')
+                        if contract:
+                            market = contract.functions.markets(market_id).call()
                             
                             # Only process resolved markets
                             if market and len(market) > 5 and market[5]:  # isResolved = true
@@ -282,11 +284,6 @@ def resolved_view():
                              displayed_count=len(resolved_segments),
                              view_type='resolved')
                              
-    except Exception as e:
-        logger.error(f"Error loading resolved view: {e}")
-        flash('Error loading resolved markets', 'error')
-        return redirect(url_for('clockchain.clockchain_view'))
-        
     except Exception as e:
         logger.error(f"Error loading resolved view: {e}")
         flash('Error loading resolved markets', 'error')

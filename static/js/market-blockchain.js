@@ -163,8 +163,8 @@ class MarketBlockchain {
         try {
             const markets = [];
             
-            // Try to fetch up to 100 markets
-            for (let i = 0; i < 100; i++) {
+            // Limit to 10 markets to avoid excessive blockchain calls
+            for (let i = 0; i < 10; i++) {
                 try {
                     const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
                     if (market && market.creator !== '0x0000000000000000000000000000000000000000') {
@@ -203,8 +203,8 @@ class MarketBlockchain {
         try {
             const markets = [];
             
-            // Try to fetch up to 100 markets and filter resolved ones
-            for (let i = 0; i < 100; i++) {
+            // Limit to 10 markets to avoid excessive blockchain calls
+            for (let i = 0; i < 10; i++) {
                 try {
                     const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
                     if (market && market.resolved) {
