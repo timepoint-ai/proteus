@@ -16,6 +16,14 @@ base_api_bp = Blueprint('base_api', __name__)
 
 # Initialize services
 blockchain_service = BaseBlockchainService()
+
+def _pad_oracle_wallets(oracle_wallets):
+    """Pad oracle wallet list to meet contract requirement of 3 minimum"""
+    padded = list(oracle_wallets)  # Create a copy
+    while len(padded) < 3:
+        # Add placeholder addresses to meet contract requirement
+        padded.append('0x' + '0' * 39 + str(len(padded) + 1))
+    return padded
 # oracle_service = XcomOracleService()  # Phase 7: Database-dependent
 # payout_service = BasePayoutService()  # Phase 7: Database-dependent
 
@@ -53,7 +61,7 @@ def create_market():
                     'question': data['question'],
                     'actorUsername': data['actor_handle'].replace('@', ''),  # Remove @ if present
                     'duration': duration_seconds,
-                    'oracleWallets': data.get('oracle_wallets', [data['creator_wallet'], '0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002']),
+                    'oracleWallets': _pad_oracle_wallets(data.get('oracle_wallets', [data['creator_wallet']])),
                     'metadata': json.dumps({
                         'created': datetime.utcnow().isoformat(),
                         'creator': data['creator_wallet'],

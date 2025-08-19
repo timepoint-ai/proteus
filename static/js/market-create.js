@@ -168,10 +168,17 @@ class MarketCreator {
     }
     
     async createMarket() {
-        // Validate oracle wallets
+        // Validate oracle wallets - minimum 1 required from user
         if (this.oracleWallets.length === 0) {
             alert('Please add at least one oracle wallet');
             return;
+        }
+        
+        // Pad oracle array to meet contract requirement of 3 minimum
+        let paddedOracleWallets = [...this.oracleWallets];
+        while (paddedOracleWallets.length < 3) {
+            // Add placeholder addresses to meet contract requirement
+            paddedOracleWallets.push('0x' + '0'.repeat(39) + (paddedOracleWallets.length + 1));
         }
         
         // Check wallet connection
@@ -187,7 +194,7 @@ class MarketCreator {
             predictedText: document.getElementById('predicted-text').value,
             durationHours: parseInt(document.getElementById('duration-hours').value),
             initialStake: document.getElementById('initial-stake').value,
-            oracleWallets: this.oracleWallets
+            oracleWallets: paddedOracleWallets  // Use padded array for contract
         };
         
         // Disable submit button
