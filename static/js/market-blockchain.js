@@ -12,7 +12,7 @@ class MarketBlockchain {
         
         // Contract addresses from deployment-base-sepolia.json
         this.contractAddresses = {
-            EnhancedPredictionMarket: '0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C',
+            EnhancedPredictionMarket: '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c',
             ActorRegistry: '0xC71CC19C5573C5E1E144829800cD0005D0eDB723',
             DecentralizedOracle: '0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1',
             PayoutManager: '0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871'

@@ -32,7 +32,7 @@ const CONTRACT_ABI = [
 ];
 
 // Contract address on BASE Sepolia
-const CONTRACT_ADDRESS = '0x6B67CB0dAAf78F63bd11195dF0FD9FFe4361B93C';
+const CONTRACT_ADDRESS = '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c';
 
 async function main() {
     console.log('🚀 Creating Test Market on BASE Sepolia...\n');

@@ -47,7 +47,7 @@ def create_market():
             'success': True,
             'message': 'Transaction parameters prepared. Execute on blockchain.',
             'transaction': {
-                'contract_address': os.environ.get('ENHANCED_PREDICTION_MARKET_ADDRESS', '0x6B67CB0dAAf78F63bd11195dF0FD9FFe4361B93C'),
+                'contract_address': os.environ.get('ENHANCED_PREDICTION_MARKET_ADDRESS', '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c'),
                 'method': 'createMarket',
                 'params': {
                     'question': data['question'],

@@ -29,7 +29,7 @@
       "description": "On-chain actor registry for X.com accounts"
     },
     "EnhancedPredictionMarket": {
-      "address": "0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C",
+      "address": "0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c",
       "deploymentBlock": 18765437,
       "description": "Enhanced prediction market with full on-chain functionality"
     },

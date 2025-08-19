@@ -10,7 +10,7 @@ class BettingContract {
         this.account = null;
         
         // EnhancedPredictionMarket contract address on BASE Sepolia
-        this.contractAddress = '0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C';
+        this.contractAddress = '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c';
         
         // Contract ABI (simplified for betting operations)
         this.contractABI = [
