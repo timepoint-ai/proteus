@@ -26,7 +26,7 @@
     <!-- Navigation Buttons -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="btn-group" role="group">
+            <div class="btn-group mb-2" role="group">
                 <a href="/clockchain" class="btn btn-{{ 'primary' if view_type == 'all' else 'outline-primary' }}">
                     <i class="fas fa-clock"></i> All Predictions
                 </a>
@@ -36,6 +36,22 @@
                 <a href="/clockchain/resolved" class="btn btn-{{ 'primary' if view_type == 'resolved' else 'outline-primary' }}">
                     <i class="fas fa-check-circle"></i> Resolved Submissions
                 </a>
+            </div>
+            
+            <!-- Time-based filtering buttons -->
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-secondary" onclick="filterByTimeRange('all')">
+                    <i class="fas fa-globe"></i> All Time
+                </button>
+                <button class="btn btn-outline-secondary" onclick="filterByTimeRange('today')">
+                    <i class="fas fa-calendar-day"></i> Today
+                </button>
+                <button class="btn btn-outline-secondary" onclick="filterByTimeRange('week')">
+                    <i class="fas fa-calendar-week"></i> This Week
+                </button>
+                <button class="btn btn-outline-secondary" onclick="filterByTimeRange('month')">
+                    <i class="fas fa-calendar-alt"></i> This Month
+                </button>
             </div>
         </div>
     </div>
@@ -319,6 +335,46 @@ function updateCurrentTime() {
         .catch(error => {
             console.error('Error updating time:', error);
         });
+}
+
+// Filter by time range
+function filterByTimeRange(range) {
+    const now = Date.now();
+    const segments = document.querySelectorAll('.timeline-segment');
+    
+    segments.forEach(segment => {
+        const startMs = parseInt(segment.dataset.startMs || '0');
+        const endMs = parseInt(segment.dataset.endMs || '0');
+        let show = true;
+        
+        switch(range) {
+            case 'all':
+                show = true;
+                break;
+                
+            case 'today':
+                const todayStart = new Date().setHours(0,0,0,0);
+                const todayEnd = new Date().setHours(23,59,59,999);
+                show = (startMs >= todayStart && startMs <= todayEnd) || 
+                       (endMs >= todayStart && endMs <= todayEnd);
+                break;
+                
+            case 'week':
+                const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+                show = startMs >= weekAgo || endMs >= weekAgo;
+                break;
+                
+            case 'month':
+                const monthAgo = now - (30 * 24 * 60 * 60 * 1000);
+                show = startMs >= monthAgo || endMs >= monthAgo;
+                break;
+                
+            default:
+                show = true;
+        }
+        
+        segment.style.display = show ? 'block' : 'none';
+    });
 }
 
 // Refresh timeline

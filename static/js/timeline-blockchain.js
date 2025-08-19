@@ -17,13 +17,22 @@ class TimelineBlockchain {
     }
     
     async startUpdates() {
-        // Initial update
-        await this.updateTimeline();
+        // Wait for Web3 to be loaded first
+        if (typeof Web3 === 'undefined') {
+            console.log('Waiting for Web3 to load before starting timeline updates...');
+            setTimeout(() => this.startUpdates(), 1000);
+            return;
+        }
         
-        // Update every 30 seconds
+        // Initial update after a delay to ensure page is loaded
+        setTimeout(() => {
+            this.updateTimeline();
+        }, 2000);
+        
+        // Update every 60 seconds (less frequent to avoid clearing data)
         this.updateInterval = setInterval(() => {
             this.updateTimeline();
-        }, 30000);
+        }, 60000);
     }
     
     async updateTimeline() {
@@ -40,10 +49,23 @@ class TimelineBlockchain {
         this.isUpdating = true;
         
         try {
-            // Get active markets from blockchain
-            const markets = await window.marketBlockchain.getActiveMarkets();
+            // Get ALL markets from blockchain (both active and resolved)
+            const allMarkets = await window.marketBlockchain.getAllMarkets();
             
-            // Update the timeline display
+            // Also try to get resolved markets separately
+            const resolvedMarkets = await window.marketBlockchain.getResolvedMarkets();
+            
+            // Combine and deduplicate markets
+            const marketMap = new Map();
+            [...allMarkets, ...resolvedMarkets].forEach(market => {
+                if (market && market.id) {
+                    marketMap.set(market.id, market);
+                }
+            });
+            
+            const markets = Array.from(marketMap.values());
+            
+            // Update the timeline display without clearing existing data
             this.renderMarkets(markets);
             
             // Update statistics
@@ -53,7 +75,7 @@ class TimelineBlockchain {
             
         } catch (error) {
             console.error('Error updating timeline:', error);
-            this.showError('Failed to update from blockchain');
+            // Don't show error for normal update failures
         } finally {
             this.isUpdating = false;
         }
@@ -63,15 +85,19 @@ class TimelineBlockchain {
         const container = document.querySelector('.timeline-container');
         if (!container) return;
         
-        // Clear existing content except the NOW marker
-        const nowMarker = container.querySelector('.bg-danger');
-        container.innerHTML = '';
+        // Check if this is initial load or update
+        const existingMarkets = container.querySelectorAll('.timeline-segment');
+        const existingIds = new Set();
+        existingMarkets.forEach(segment => {
+            existingIds.add(segment.dataset.marketId);
+        });
         
-        if (markets.length === 0) {
+        // Don't clear content, just update or add new markets
+        if (markets.length === 0 && existingIds.size === 0) {
             container.innerHTML = `
                 <div class="text-center py-5">
                     <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No active markets found on blockchain</p>
+                    <p class="text-muted">No markets found on blockchain yet</p>
                     <a href="/clockchain/create" class="btn btn-primary mt-3">
                         <i class="fas fa-plus"></i> Create First Market
                     </a>
@@ -80,34 +106,43 @@ class TimelineBlockchain {
             return;
         }
         
-        // Sort markets by end time
-        markets.sort((a, b) => a.endTime - b.endTime);
-        
-        // Current time for NOW marker placement
-        const currentTime = Date.now();
-        let nowMarkerPlaced = false;
-        
+        // Update or add markets without clearing existing ones
         markets.forEach(market => {
-            // Place NOW marker if appropriate
-            if (!nowMarkerPlaced && market.endTime > currentTime) {
-                container.appendChild(this.createNowMarker());
-                nowMarkerPlaced = true;
-            }
+            const existingSegment = container.querySelector(`[data-market-id="${market.id}"]`);
             
-            // Create market segment
-            const segment = this.createMarketSegment(market);
-            container.appendChild(segment);
+            if (existingSegment) {
+                // Update existing segment
+                this.updateMarketSegment(existingSegment, market);
+            } else {
+                // Add new segment
+                const segment = this.createMarketSegment(market);
+                
+                // Insert in correct position based on time
+                const segments = container.querySelectorAll('.timeline-segment');
+                let inserted = false;
+                
+                for (let i = 0; i < segments.length; i++) {
+                    const segmentTime = parseInt(segments[i].dataset.endMs || '0');
+                    if (market.endTime && market.endTime.getTime() < segmentTime) {
+                        segments[i].parentNode.insertBefore(segment, segments[i]);
+                        inserted = true;
+                        break;
+                    }
+                }
+                
+                if (!inserted) {
+                    container.appendChild(segment);
+                }
+            }
         });
         
-        // Add NOW marker at end if not placed
-        if (!nowMarkerPlaced) {
-            container.appendChild(this.createNowMarker());
-        }
+        // Update NOW marker position
+        this.updateNowMarker(container);
     }
     
     createNowMarker() {
         const marker = document.createElement('div');
-        marker.className = 'w-100 my-4';
+        marker.className = 'w-100 my-4 now-marker';
         marker.innerHTML = `
             <div class="d-flex align-items-center">
                 <div class="bg-danger" style="height: 2px; flex: 1;"></div>
@@ -116,6 +151,55 @@ class TimelineBlockchain {
             </div>
         `;
         return marker;
+    }
+    
+    updateNowMarker(container) {
+        // Remove existing NOW marker
+        const existingMarker = container.querySelector('.now-marker');
+        if (existingMarker) {
+            existingMarker.remove();
+        }
+        
+        // Add NOW marker in correct position
+        const currentTime = Date.now();
+        const segments = container.querySelectorAll('.timeline-segment');
+        let markerPlaced = false;
+        
+        for (let i = 0; i < segments.length; i++) {
+            const segmentEndMs = parseInt(segments[i].dataset.endMs || '0');
+            if (segmentEndMs > currentTime) {
+                segments[i].parentNode.insertBefore(this.createNowMarker(), segments[i]);
+                markerPlaced = true;
+                break;
+            }
+        }
+        
+        if (!markerPlaced && segments.length > 0) {
+            container.appendChild(this.createNowMarker());
+        }
+    }
+    
+    updateMarketSegment(segment, market) {
+        // Update segment data attributes
+        if (market.endTime) {
+            segment.dataset.endMs = market.endTime.getTime();
+        }
+        if (market.startTime) {
+            segment.dataset.startMs = market.startTime.getTime();
+        }
+        
+        // Update volume display if it exists
+        const volumeElement = segment.querySelector('.total-volume');
+        if (volumeElement && market.totalPot) {
+            volumeElement.textContent = market.totalPot + ' ETH';
+        }
+        
+        // Update status badge if changed
+        const statusBadge = segment.querySelector('.status-badge');
+        if (statusBadge && market.status) {
+            statusBadge.className = `badge status-badge bg-${market.status === 'resolved' ? 'success' : 'primary'}`;
+            statusBadge.textContent = market.status === 'resolved' ? 'Resolved' : 'Active';
+        }
     }
     
     createMarketSegment(market) {

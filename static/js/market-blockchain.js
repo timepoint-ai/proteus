@@ -155,6 +155,87 @@ class MarketBlockchain {
         }
     }
     
+    async getAllMarkets() {
+        if (!this.initialized) {
+            await this.waitForInitialization();
+        }
+        
+        try {
+            const markets = [];
+            
+            // Try to fetch up to 100 markets
+            for (let i = 0; i < 100; i++) {
+                try {
+                    const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
+                    if (market && market.creator !== '0x0000000000000000000000000000000000000000') {
+                        markets.push({
+                            id: i,
+                            creator: market.creator,
+                            actorId: market.actorId,
+                            startTime: new Date(market.startTime * 1000),
+                            endTime: new Date(market.endTime * 1000),
+                            totalPot: this.web3.utils.fromWei(market.totalPot || '0', 'ether'),
+                            isResolved: market.resolved,
+                            submissionCount: market.submissionCount || 0,
+                            status: market.resolved ? 'resolved' : 'active'
+                        });
+                    }
+                } catch (error) {
+                    // Market doesn't exist, stop trying
+                    if (error.message && error.message.includes('revert')) {
+                        break;
+                    }
+                }
+            }
+            
+            return markets;
+        } catch (error) {
+            console.error('Error fetching all markets:', error);
+            return [];
+        }
+    }
+    
+    async getResolvedMarkets() {
+        if (!this.initialized) {
+            await this.waitForInitialization();
+        }
+        
+        try {
+            const markets = [];
+            
+            // Try to fetch up to 100 markets and filter resolved ones
+            for (let i = 0; i < 100; i++) {
+                try {
+                    const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
+                    if (market && market.resolved) {
+                        markets.push({
+                            id: i,
+                            creator: market.creator,
+                            actorId: market.actorId,
+                            startTime: new Date(market.startTime * 1000),
+                            endTime: new Date(market.endTime * 1000),
+                            totalPot: this.web3.utils.fromWei(market.totalPot || '0', 'ether'),
+                            isResolved: true,
+                            submissionCount: market.submissionCount || 0,
+                            winningSubmission: market.winningSubmission,
+                            status: 'resolved'
+                        });
+                    }
+                } catch (error) {
+                    // Market doesn't exist, stop trying
+                    if (error.message && error.message.includes('revert')) {
+                        break;
+                    }
+                }
+            }
+            
+            return markets;
+        } catch (error) {
+            console.error('Error fetching resolved markets:', error);
+            return [];
+        }
+    }
+    
     async getMarketDetails(marketId) {
         if (!this.initialized) {
             await this.waitForInitialization();

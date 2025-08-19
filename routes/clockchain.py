@@ -35,8 +35,8 @@ def clockchain_view():
         try:
             # Check if we have the EnhancedPredictionMarket contract  
             if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
-                # Try to get some markets (we'll just try a few IDs)
-                for market_id in range(0, 5):  # Try first 5 market IDs
+                # Try to get all markets (up to 100 for now)
+                for market_id in range(0, 100):  # Try first 100 market IDs
                     try:
                         if blockchain_service.contracts:
                             market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
@@ -211,8 +211,80 @@ def submission_detail(submission_id):
 def resolved_view():
     """Display resolved prediction markets - Phase 7 Blockchain-Only"""
     try:
-        # Phase 7: Redirect to clockchain view with message
-        flash('Resolved markets are now available directly on the blockchain. Use Web3 interface to view.', 'info')
+        # Get current Pacific time
+        time_status = time_sync_service.get_time_health_status()
+        
+        # Calculate time range
+        current_time = datetime.utcnow()
+        current_time_ms = int(current_time.timestamp() * 1000)
+        
+        # Initialize timeline segments for resolved markets
+        resolved_segments = []
+        
+        # Try to get resolved markets from blockchain
+        try:
+            if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
+                # Try to get all markets
+                for market_id in range(0, 100):  # Check first 100 market IDs
+                    try:
+                        if blockchain_service.contracts:
+                            market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
+                            
+                            # Only process resolved markets
+                            if market and len(market) > 5 and market[5]:  # isResolved = true
+                                # Convert market data to timeline segment
+                                segment = {
+                                    'id': str(market_id),
+                                    'actor': {
+                                        'id': market_id,
+                                        'x_username': market[2] if len(market) > 2 and market[2] else 'Unknown',
+                                        'display_name': market[2] if len(market) > 2 and market[2] else 'Unknown Actor',
+                                        'verified': False,
+                                        'follower_count': 0,
+                                        'is_test_account': False
+                                    },
+                                    'start_time': datetime.fromtimestamp(market[3]) if len(market) > 3 else datetime.now(),
+                                    'end_time': datetime.fromtimestamp(market[4]) if len(market) > 4 else datetime.now(),
+                                    'start_ms': market[3] * 1000 if len(market) > 3 else 0,
+                                    'end_ms': market[4] * 1000 if len(market) > 4 else 0,
+                                    'status': 'resolved',
+                                    'submission_count': len(market[6]) if len(market) > 6 and market[6] else 0,
+                                    'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 and market[7] else '0',
+                                    'currency': 'ETH',
+                                    'predicted_text': market[1] if len(market) > 1 else '',
+                                    'creator_wallet': market[0][:10] + '...' if len(market) > 0 and market[0] else '0x...',
+                                    'initial_stake': '0.01',
+                                    'stake_count': 1,
+                                    'oracle_allowed': True,
+                                    'time_until_oracle': 0,
+                                    'submissions': [],
+                                    'competing_bets': []
+                                }
+                                resolved_segments.append(segment)
+                    except Exception as e:
+                        logger.debug(f"Error fetching market {market_id}: {e}")
+                        continue
+        except Exception as e:
+            logger.error(f"Error fetching resolved markets from blockchain: {e}")
+        
+        # Sort by end time (most recent first)
+        resolved_segments.sort(key=lambda x: x['end_ms'], reverse=True)
+        
+        return render_template('clockchain/timeline.html',
+                             time_status=time_status,
+                             timeline_segments=resolved_segments,
+                             current_page=1,
+                             has_more_pages=False,
+                             current_time_ms=current_time_ms,
+                             active_bet_count=0,
+                             total_bet_volume='0',
+                             total_count=len(resolved_segments),
+                             displayed_count=len(resolved_segments),
+                             view_type='resolved')
+                             
+    except Exception as e:
+        logger.error(f"Error loading resolved view: {e}")
+        flash('Error loading resolved markets', 'error')
         return redirect(url_for('clockchain.clockchain_view'))
         
     except Exception as e:
