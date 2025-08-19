@@ -207,6 +207,15 @@ class TimelineBlockchain {
         segment.className = 'timeline-segment mb-4';
         segment.dataset.marketId = market.id;
         
+        // Set data attributes for filtering
+        const startMs = market.startTime ? market.startTime.getTime() : 0;
+        const endMs = market.endTime ? market.endTime.getTime() : 0;
+        segment.dataset.start = startMs;
+        segment.dataset.end = endMs;
+        segment.dataset.startMs = startMs;
+        segment.dataset.endMs = endMs;
+        segment.dataset.betId = market.id;
+        
         const status = market.resolved ? 'resolved' : 
                       market.endTime > Date.now() ? 'active' : 'expired';
         

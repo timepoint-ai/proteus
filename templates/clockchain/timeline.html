@@ -53,6 +53,14 @@
                     <i class="fas fa-calendar-alt"></i> This Month
                 </button>
             </div>
+            
+            <!-- Toggle for hiding invalid expiration dates -->
+            <div class="form-check form-switch d-inline-block ms-3">
+                <input class="form-check-input" type="checkbox" id="hideInvalidDates" onchange="toggleInvalidDates()">
+                <label class="form-check-label" for="hideInvalidDates">
+                    Hide Invalid Dates
+                </label>
+            </div>
         </div>
     </div>
 
@@ -337,44 +345,91 @@ function updateCurrentTime() {
         });
 }
 
-// Filter by time range
-function filterByTimeRange(range) {
-    const now = Date.now();
+// Track current filter state
+let currentTimeFilter = 'all';
+let hideInvalidDatesActive = false;
+
+// Toggle for hiding entries with invalid expiration dates
+function toggleInvalidDates() {
+    const checkbox = document.getElementById('hideInvalidDates');
+    hideInvalidDatesActive = checkbox.checked;
+    applyFilters();
+}
+
+// Check if a timeline segment has valid dates
+function hasValidDates(segment) {
+    const startMs = parseInt(segment.dataset.startMs || '0');
+    const endMs = parseInt(segment.dataset.endMs || '0');
+    const start = segment.dataset.start || '0';
+    const end = segment.dataset.end || '0';
+    
+    // Invalid if:
+    // 1. Start and end are the same
+    // 2. Either is zero or very small (unix epoch)
+    // 3. Start is after end
+    // 4. Dates are before year 2020 (likely default/invalid)
+    const year2020 = new Date('2020-01-01').getTime();
+    
+    if (startMs === endMs) return false;
+    if (startMs === 0 || endMs === 0) return false;
+    if (startMs < year2020 || endMs < year2020) return false;
+    if (startMs > endMs) return false;
+    
+    return true;
+}
+
+// Apply all active filters
+function applyFilters() {
     const segments = document.querySelectorAll('.timeline-segment');
     
     segments.forEach(segment => {
-        const startMs = parseInt(segment.dataset.startMs || '0');
-        const endMs = parseInt(segment.dataset.endMs || '0');
         let show = true;
         
-        switch(range) {
-            case 'all':
-                show = true;
-                break;
-                
-            case 'today':
-                const todayStart = new Date().setHours(0,0,0,0);
-                const todayEnd = new Date().setHours(23,59,59,999);
-                show = (startMs >= todayStart && startMs <= todayEnd) || 
-                       (endMs >= todayStart && endMs <= todayEnd);
-                break;
-                
-            case 'week':
-                const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
-                show = startMs >= weekAgo || endMs >= weekAgo;
-                break;
-                
-            case 'month':
-                const monthAgo = now - (30 * 24 * 60 * 60 * 1000);
-                show = startMs >= monthAgo || endMs >= monthAgo;
-                break;
-                
-            default:
-                show = true;
+        // Apply time range filter
+        show = checkTimeRangeFilter(segment, currentTimeFilter);
+        
+        // Apply invalid dates filter if active
+        if (show && hideInvalidDatesActive) {
+            show = hasValidDates(segment);
         }
         
         segment.style.display = show ? 'block' : 'none';
     });
+}
+
+// Check if segment matches time range filter
+function checkTimeRangeFilter(segment, range) {
+    const now = Date.now();
+    const startMs = parseInt(segment.dataset.startMs || '0');
+    const endMs = parseInt(segment.dataset.endMs || '0');
+    
+    switch(range) {
+        case 'all':
+            return true;
+            
+        case 'today':
+            const todayStart = new Date().setHours(0,0,0,0);
+            const todayEnd = new Date().setHours(23,59,59,999);
+            return (startMs >= todayStart && startMs <= todayEnd) || 
+                   (endMs >= todayStart && endMs <= todayEnd);
+            
+        case 'week':
+            const weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+            return startMs >= weekAgo || endMs >= weekAgo;
+            
+        case 'month':
+            const monthAgo = now - (30 * 24 * 60 * 60 * 1000);
+            return startMs >= monthAgo || endMs >= monthAgo;
+            
+        default:
+            return true;
+    }
+}
+
+// Filter by time range
+function filterByTimeRange(range) {
+    currentTimeFilter = range;
+    applyFilters();
 }
 
 // Refresh timeline
