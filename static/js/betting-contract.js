@@ -182,13 +182,14 @@ class BettingContract {
             .estimateGas({ from: this.account, value: amountWei })
             .catch(() => 150000); // Higher fallback for createSubmission
         
-        // Send transaction
+        // Send transaction with BASE Sepolia gas settings
         const tx = await this.contract.methods
             .createSubmission(marketId, predictedText, submissionType)
             .send({
                 from: this.account,
                 value: amountWei,
-                gas: Math.floor(gasEstimate * 1.2) // Add 20% buffer
+                gas: Math.min(Math.floor(gasEstimate * 1.2), 300000), // Cap at 300k and add 20% buffer
+                gasPrice: '1000000000' // 1 gwei for BASE Sepolia
             });
         
         return tx;
@@ -203,13 +204,14 @@ class BettingContract {
             .estimateGas({ from: this.account, value: amountWei })
             .catch(() => 80000); // Fallback gas limit
         
-        // Send transaction
+        // Send transaction with BASE Sepolia gas settings
         const tx = await this.contract.methods
             .placeBet(marketId, submissionId)
             .send({
                 from: this.account,
                 value: amountWei,
-                gas: Math.floor(gasEstimate * 1.2) // Add 20% buffer
+                gas: Math.min(Math.floor(gasEstimate * 1.2), 200000), // Cap at 200k and add 20% buffer
+                gasPrice: '1000000000' // 1 gwei for BASE Sepolia
             });
         
         return tx;

@@ -95,7 +95,21 @@ class BaseBlockchain {
                     // Create contract instance
                     const contract = new web3.eth.Contract(contractABI, result.transaction.contract_address);
                     
-                    // Execute createMarket transaction
+                    // Execute createMarket transaction with proper gas settings for BASE Sepolia
+                    const gasEstimate = await contract.methods.createMarket(
+                        result.transaction.params.question,
+                        result.transaction.params.actorUsername,
+                        result.transaction.params.duration,
+                        result.transaction.params.oracleWallets,
+                        result.transaction.params.metadata
+                    ).estimateGas({
+                        from: this.wallet.address,
+                        value: result.transaction.value
+                    });
+                    
+                    // Add 20% buffer to gas estimate and cap at reasonable limit
+                    const gasLimit = Math.min(Math.floor(gasEstimate * 1.2), 500000);
+                    
                     const tx = await contract.methods.createMarket(
                         result.transaction.params.question,
                         result.transaction.params.actorUsername,
@@ -104,7 +118,9 @@ class BaseBlockchain {
                         result.transaction.params.metadata
                     ).send({
                         from: this.wallet.address,
-                        value: result.transaction.value
+                        value: result.transaction.value,
+                        gas: gasLimit,
+                        gasPrice: '1000000000' // 1 gwei for BASE Sepolia
                     });
                     
                     // Get market ID from event
