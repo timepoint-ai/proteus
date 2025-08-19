@@ -38,37 +38,40 @@ def clockchain_view():
                 # Try to get some markets (we'll just try a few IDs)
                 for market_id in range(0, 5):  # Try first 5 market IDs
                     try:
-                        market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
-                        
-                        # Convert market data to timeline segment
-                        segment = {
-                            'id': str(market_id),  # Use actual market ID
-                            'actor': {
-                                'id': market_id,
-                                'x_username': market[2] if market[2] else 'Unknown',  # actorName
-                                'display_name': market[2] if market[2] else 'Unknown Actor',
-                                'verified': False,
-                                'follower_count': 0,
-                                'is_test_account': False
-                            },
-                            'start_time': datetime.fromtimestamp(market[3]),  # startTime
-                            'end_time': datetime.fromtimestamp(market[4]),  # endTime
-                            'start_ms': market[3] * 1000,
-                            'end_ms': market[4] * 1000,
-                            'status': 'resolved' if market[5] else 'active',  # isResolved
-                            'submission_count': len(market[6]) if len(market) > 6 else 0,
-                            'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 else '0',
-                            'currency': 'ETH',
-                            'predicted_text': market[1],  # question
-                            'creator_wallet': market[0][:10] + '...',  # creator address shortened
-                            'initial_stake': '0.01',
-                            'stake_count': 1,
-                            'oracle_allowed': market[4] < int(current_time.timestamp()),
-                            'time_until_oracle': max(0, market[4] - int(current_time.timestamp())),
-                            'submissions': [],
-                            'competing_bets': []
-                        }
-                        timeline_segments.append(segment)
+                        if blockchain_service.contracts:
+                            market = blockchain_service.contracts['EnhancedPredictionMarket'].functions.markets(market_id).call()
+                            
+                            # Only process if we got valid market data
+                            if market and len(market) > 5:
+                                # Convert market data to timeline segment
+                                segment = {
+                                    'id': str(market_id),  # Use actual market ID
+                                    'actor': {
+                                        'id': market_id,
+                                        'x_username': market[2] if len(market) > 2 and market[2] else 'Unknown',  # actorName
+                                        'display_name': market[2] if len(market) > 2 and market[2] else 'Unknown Actor',
+                                        'verified': False,
+                                        'follower_count': 0,
+                                        'is_test_account': False
+                                    },
+                                    'start_time': datetime.fromtimestamp(market[3]) if len(market) > 3 else datetime.now(),  # startTime
+                                    'end_time': datetime.fromtimestamp(market[4]) if len(market) > 4 else datetime.now(),  # endTime
+                                    'start_ms': market[3] * 1000 if len(market) > 3 else 0,
+                                    'end_ms': market[4] * 1000 if len(market) > 4 else 0,
+                                    'status': 'resolved' if len(market) > 5 and market[5] else 'active',  # isResolved
+                                    'submission_count': len(market[6]) if len(market) > 6 and market[6] else 0,
+                                    'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 and market[7] else '0',
+                                    'currency': 'ETH',
+                                    'predicted_text': market[1] if len(market) > 1 else '',  # question
+                                    'creator_wallet': market[0][:10] + '...' if len(market) > 0 and market[0] else '0x...',  # creator address shortened
+                                    'initial_stake': '0.01',
+                                    'stake_count': 1,
+                                    'oracle_allowed': market[4] < int(current_time.timestamp()) if len(market) > 4 else False,
+                                    'time_until_oracle': max(0, market[4] - int(current_time.timestamp())) if len(market) > 4 else 0,
+                                    'submissions': [],
+                                    'competing_bets': []
+                                }
+                                timeline_segments.append(segment)
                     except Exception as e:
                         logger.debug(f"Error fetching market {market_id}: {e}")
                         continue
@@ -138,6 +141,7 @@ def get_clockchain_events():
         return jsonify({'error': 'Failed to get events'}), 500
 
 @clockchain_bp.route('/clockchain/markets/create')
+@clockchain_bp.route('/clockchain/create')
 def create_market():
     """Display market creation form"""
     return render_template('markets/create.html')
@@ -154,24 +158,26 @@ def market_detail(market_id='blockchain-message'):
         # Try to fetch from blockchain if contract is available
         if hasattr(blockchain_service, 'contracts') and blockchain_service.contracts.get('EnhancedPredictionMarket'):
             try:
-                contract = blockchain_service.contracts['EnhancedPredictionMarket']
-                # Try to get market data
-                market = contract.functions.markets(int(market_id)).call()
-                if market and len(market) > 0:
-                    market_data = {
-                        'id': market_id,
-                        'creator': market[0] if len(market) > 0 else 'Not found',
-                        'predicted_text': market[1] if len(market) > 1 else 'No prediction text',
-                        'actor': market[2] if len(market) > 2 else 'Unknown',
-                        'time_range': 'From blockchain',
-                        'initial_stake': '0 ETH',
-                        'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 else '0 ETH',
-                        'status': 'resolved' if len(market) > 5 and market[5] else 'active',
-                        'bets_placed': 0,
-                        'oracle_eligible': True,
-                        'created_at': datetime.now(),
-                        'submissions': []
-                    }
+                if blockchain_service.contracts:
+                    contract = blockchain_service.contracts['EnhancedPredictionMarket']
+                    # Try to get market data
+                    market = contract.functions.markets(int(market_id)).call()
+                    
+                    if market and len(market) > 0:
+                            market_data = {
+                            'id': market_id,
+                            'creator': market[0] if len(market) > 0 else 'Not found',
+                            'predicted_text': market[1] if len(market) > 1 else 'No prediction text',
+                            'actor': market[2] if len(market) > 2 else 'Unknown',
+                            'time_range': 'From blockchain',
+                            'initial_stake': '0 ETH',
+                            'total_volume': str(Web3.from_wei(market[7], 'ether')) if len(market) > 7 else '0 ETH',
+                            'status': 'resolved' if len(market) > 5 and market[5] else 'active',
+                            'bets_placed': 0,
+                            'oracle_eligible': True,
+                            'created_at': datetime.now(),
+                            'submissions': []
+                        }
             except Exception as e:
                 logger.debug(f"Could not fetch market {market_id} from blockchain: {e}")
         
