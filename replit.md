@@ -14,6 +14,21 @@ The project aims to create a robust and decentralized prediction market for ling
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Project Architecture
+
+### Coinbase Embedded Wallet Integration (January 28, 2025)
+- **Primary Authentication**: Email/SMS/OAuth via Coinbase Embedded Wallet
+- **Funding**: Coinbase Onramp (Apple Pay, bank transfer, Coinbase account)
+- **MetaMask**: Hidden by default, toggleable for advanced users only
+- **Currency**: USDC on BASE (displayed as USD to users)
+- **Goal**: Web2 UX with Web3 backend - users don't need to know they're using crypto
+
+### Key Architectural Decisions
+- **Fully On-Chain**: All betting and settlement on blockchain to bypass KYC
+- **No Seed Phrases**: TEE-secured wallets with email/SMS authentication
+- **Simplified UX**: Users see USD values, system handles USDC conversion
+- **Security Policies**: Transaction limits, 2FA for large amounts, contract whitelisting
+
 ## Recent Major Changes (January 28, 2025)
 
 ### Latest Optimizations & Improvements ✅
