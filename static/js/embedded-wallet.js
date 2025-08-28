@@ -119,7 +119,9 @@ class EmbeddedWallet {
                 // For testing, show OTP if provided
                 if (data.test_otp) {
                     console.log('Test OTP:', data.test_otp);
-                    this.showSuccess(`Test OTP: ${data.test_otp}`);
+                    // Show test OTP prominently in the UI
+                    document.getElementById('otpCode').value = data.test_otp;
+                    this.showSuccess(`TEST MODE: Auto-filled OTP: ${data.test_otp} (In production, this would be sent via email/SMS)`);
                 }
             } else {
                 this.showError(data.error || 'Failed to send OTP');
