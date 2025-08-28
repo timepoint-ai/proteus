@@ -14,7 +14,16 @@ The project aims to create a robust and decentralized prediction market for ling
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Major Changes (August 2025)
+## Recent Major Changes (January 28, 2025)
+
+### Latest Optimizations & Improvements ✅
+- **Oracle Requirements Simplified**: Reduced from 3 to 1 minimum at UI level
+  - Users now only need 1 oracle address (system auto-pads to 3 for contract)
+  - Automatic padding with placeholder addresses for backward compatibility
+- **Gas Fee Fix**: Resolved excessive fee estimation ($200+ → pennies)
+  - All transactions now use 1 gwei gas price on BASE Sepolia
+  - Capped gas limits: Market creation (500k), Submissions (300k), Bets (200k)
+  - 20% safety buffer on all transactions
 
 ### Phase 7 Final Production Cleanup Complete (August 13, 2025) ✅ FINAL
 - **Code Cleanup**: Removed models.py and cleaned 27+ files of database imports
@@ -28,9 +37,9 @@ Preferred communication style: Simple, everyday language.
 - **Status**: ALL 7 PHASES COMPLETE - System fully migrated to chain-only architecture
 - **Production Ready**: Yes - zero database dependencies, fully decentralized
 
-## Recent Major Changes (August 2025)
+### Previous Major Changes (August 2025)
 
-### Phase 1, 2, 3, 4 & 5 Cleanup: BASE-Only Architecture Migration (August 13, 2025) ✅ COMPLETE
+#### Phase 1-5: BASE-Only Architecture Migration (August 13, 2025) ✅ COMPLETE
 
 - **Phase 1 - Remove DB Writes**: ✅ Complete
   - monitoring.py - Removed all database dependencies, now chain-only

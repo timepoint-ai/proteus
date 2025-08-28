@@ -1,6 +1,17 @@
 # Clockchain - Fully Decentralized Linguistic Prediction Platform
 
-**Phase 7 Complete (August 2025)**: A fully decentralized, blockchain-only prediction market platform where users bet on the exact words public figures will say. Built exclusively on BASE blockchain with zero database dependencies, featuring advanced oracle systems, distributed governance, and production-grade performance optimizations.
+**Latest Updates (January 2025)**: A fully decentralized, blockchain-only prediction market platform where users bet on the exact words public figures will say. Built exclusively on BASE blockchain with zero database dependencies, featuring advanced oracle systems, distributed governance, and production-grade performance optimizations.
+
+## 🎯 Latest Changes (January 28, 2025)
+
+### Performance & UX Improvements
+- **Oracle Requirements**: Reduced from 3 to 1 minimum oracle requirement for better user experience
+  - Users now only need to provide 1 oracle address (system automatically pads to meet contract requirements)
+  - Smart contract compatibility maintained with automatic padding
+- **Gas Optimization**: Fixed excessive gas fee estimation issues on BASE Sepolia
+  - Transaction fees reduced from $200+ to just a few cents
+  - Implemented explicit gas limits (200k-500k) with 1 gwei gas price
+  - Added 20% safety buffer for all transactions
 
 ## 🎯 What is Clockchain?
 
@@ -65,6 +76,8 @@ npx hardhat run scripts/verify-final-status.js --network baseSepolia
 - **GenesisNFT**: 100 founder NFTs with on-chain SVG art generation
 - **ImprovedDistributedPayoutManager**: 1.4% volume distribution to Genesis holders
 - **EnhancedPredictionMarket**: Core market functionality with on-chain data
+  - Oracle requirement: 1 minimum (automatically padded to 3 for contract compatibility)
+  - Gas optimized: Capped at 500k gas with 1 gwei pricing
 - **DecentralizedOracle**: Automated text analysis and resolution
 - **TestMarketWithPayouts**: Testing infrastructure for payout verification
 

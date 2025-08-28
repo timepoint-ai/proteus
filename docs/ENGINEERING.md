@@ -4,6 +4,23 @@
 
 Clockchain is a fully decentralized linguistic prediction market platform built exclusively on BASE blockchain. The platform enables users to create markets predicting exact phrases public figures will say, with automated resolution through Levenshtein distance calculations and decentralized oracles.
 
+## Latest Technical Updates (January 28, 2025)
+
+### Gas Optimization Improvements
+- **Fixed Excessive Fee Estimation**: Reduced transaction costs from $200+ to pennies
+- **Explicit Gas Configuration**: All transactions now use 1 gwei gas price on BASE Sepolia
+- **Smart Gas Limits**: Capped at 200k-500k gas with 20% safety buffer
+- **Transaction Types Optimized**:
+  - Market Creation: Max 500k gas
+  - Submissions: Max 300k gas  
+  - Bets: Max 200k gas
+
+### Oracle System Enhancement
+- **User-Friendly Requirements**: Only 1 oracle required from user perspective
+- **Automatic Padding**: System automatically adds placeholder addresses to meet smart contract's 3-oracle minimum
+- **Seamless Integration**: UI accepts 1+ oracles, backend handles padding transparently
+- **Contract Compatibility**: Maintains backward compatibility with deployed contracts
+
 ## Genesis NFT System Architecture (Phase 1 Complete)
 
 ### Smart Contract Design
@@ -50,6 +67,9 @@ Total Platform Fee: 7% of volume
 
 #### Smart Contract Stack
 1. **EnhancedPredictionMarket**: Core market functionality with full on-chain data
+   - Contract Address: `0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c` (BASE Sepolia)
+   - Oracle Requirement: 3 minimum (UI accepts 1, system auto-pads)
+   - Gas Optimized: Transactions use 1 gwei with capped limits
 2. **DecentralizedOracle**: Text analysis and Levenshtein distance calculation
 3. **NodeRegistry**: Decentralized node operator management
 4. **ActorRegistry**: On-chain X.com actor validation
@@ -157,7 +177,8 @@ The platform maintains a PostgreSQL database for historical data and fast querie
 - Input validation and sanitization
 
 ### Oracle Security
-- Multiple oracle sources for validation
+- Flexible oracle requirements (1 minimum at UI level)
+- Automatic padding to meet smart contract requirements
 - Screenshot proof requirements
 - Consensus-based resolution
 - Slashing for false submissions
@@ -251,6 +272,9 @@ REPORT_GAS=true npx hardhat test
 ```bash
 # Deploy test contracts
 npx hardhat run scripts/test-e2e.js --network baseSepolia
+
+# Test with minimal oracles (1 oracle auto-padded to 3)
+npx hardhat run scripts/test-oracle-padding.js --network baseSepolia
 
 # Run integration suite
 pytest tests/integration/
