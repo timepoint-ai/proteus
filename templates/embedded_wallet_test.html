@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Wallet Test - Clockchain</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .test-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .wallet-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">🔐 Embedded Wallet Test Suite</h1>
+        <p class="text-center">Phase 1: Coinbase Embedded Wallet Integration</p>
+        
+        <!-- Wallet Status Card -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Wallet Status</h3>
+                <div class="wallet-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Status:</strong> <span id="walletStatus">Not Connected</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Address:</strong> <span id="walletAddress">-</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <strong>Balance:</strong> <span id="walletBalance">$0.00</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Auth Method:</strong> <span id="authMethod">-</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="connectWallet" class="btn btn-primary mt-3" onclick="embeddedWallet.showAuthModal()">
+                    Get Started
+                </button>
+                <button id="disconnectWallet" class="btn btn-danger mt-3" onclick="embeddedWallet.logout()" style="display: none;">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Test Controls</h3>
+                
+                <div class="mb-3">
+                    <h5>1. Authentication Test</h5>
+                    <button class="btn btn-sm btn-success" onclick="testAuthentication()">Test Auth Flow</button>
+                    <div id="authTestResult" class="test-result"></div>
+                </div>
+
+                <div class="mb-3">
+                    <h5>2. Wallet Info Test</h5>
+                    <button class="btn btn-sm btn-success" onclick="testWalletInfo()">Get Wallet Info</button>
+                    <div id="walletInfoResult" class="test-result"></div>
+                </div>
+
+                <div class="mb-3">
+                    <h5>3. Policy Test</h5>
+                    <button class="btn btn-sm btn-success" onclick="testPolicies()">Test Policies</button>
+                    <div id="policyTestResult" class="test-result"></div>
+                </div>
+
+                <div class="mb-3">
+                    <h5>4. USDC Balance Test</h5>
+                    <button class="btn btn-sm btn-success" onclick="testUSDCBalance()">Check USDC Balance</button>
+                    <div id="usdcTestResult" class="test-result"></div>
+                </div>
+
+                <div class="mb-3">
+                    <h5>5. Transaction Compliance Test</h5>
+                    <button class="btn btn-sm btn-success" onclick="testCompliance()">Test Compliance</button>
+                    <div id="complianceTestResult" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results Summary -->
+        <div class="card">
+            <div class="card-body">
+                <h3>Test Results Summary</h3>
+                <div id="testSummary" class="test-result">
+                    <p>No tests run yet. Click the test buttons above to begin.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Mode Toggle -->
+        <div class="text-center mt-4">
+            <a href="#" onclick="toggleAdvancedMode(); return false;" style="color: rgba(255,255,255,0.5); font-size: 12px;">
+                Toggle Advanced Mode (Show MetaMask)
+            </a>
+        </div>
+    </div>
+
+    <script src="/static/js/embedded-wallet.js"></script>
+    <script>
+        let testResults = [];
+
+        // Update UI when wallet connects
+        function updateWalletUI() {
+            if (embeddedWallet.isAuthenticated) {
+                document.getElementById('walletStatus').textContent = 'Connected';
+                document.getElementById('walletStatus').className = 'success';
+                document.getElementById('walletAddress').textContent = embeddedWallet.formatAddress(embeddedWallet.walletAddress);
+                document.getElementById('walletBalance').textContent = `$${embeddedWallet.balanceUSD.toFixed(2)}`;
+                document.getElementById('authMethod').textContent = embeddedWallet.authMethod;
+                document.getElementById('connectWallet').style.display = 'none';
+                document.getElementById('disconnectWallet').style.display = 'inline-block';
+            } else {
+                document.getElementById('walletStatus').textContent = 'Not Connected';
+                document.getElementById('walletStatus').className = 'error';
+                document.getElementById('walletAddress').textContent = '-';
+                document.getElementById('walletBalance').textContent = '$0.00';
+                document.getElementById('authMethod').textContent = '-';
+                document.getElementById('connectWallet').style.display = 'inline-block';
+                document.getElementById('disconnectWallet').style.display = 'none';
+            }
+        }
+
+        // Test authentication flow
+        async function testAuthentication() {
+            const resultDiv = document.getElementById('authTestResult');
+            
+            if (embeddedWallet.isAuthenticated) {
+                resultDiv.innerHTML = '<span class="success">✓ Already authenticated</span>';
+                addTestResult('Authentication', true, 'User already authenticated');
+                return;
+            }
+            
+            resultDiv.innerHTML = '<span class="error">Please click "Get Started" to test authentication</span>';
+        }
+
+        // Test wallet info retrieval
+        async function testWalletInfo() {
+            const resultDiv = document.getElementById('walletInfoResult');
+            
+            try {
+                const response = await fetch('/api/embedded/wallet-info');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✓ Wallet info retrieved</span>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    addTestResult('Wallet Info', true, 'Successfully retrieved wallet information');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ ${data.error || 'Failed to get wallet info'}</span>`;
+                    addTestResult('Wallet Info', false, data.error);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+                addTestResult('Wallet Info', false, error.message);
+            }
+        }
+
+        // Test policy configuration
+        async function testPolicies() {
+            const resultDiv = document.getElementById('policyTestResult');
+            
+            if (!embeddedWallet.isAuthenticated) {
+                resultDiv.innerHTML = '<span class="error">Please authenticate first</span>';
+                return;
+            }
+            
+            try {
+                // Test policy update
+                const response = await fetch('/api/embedded/update-policies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        policies: {
+                            daily_limit_usd: 500,
+                            require_2fa_above_usd: 250
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✓ Policies updated successfully</span>
+                        <pre>${JSON.stringify(data.policies, null, 2)}</pre>`;
+                    addTestResult('Policy Update', true, 'Policies configured successfully');
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Failed to update policies</span>`;
+                    addTestResult('Policy Update', false, 'Policy update failed');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+                addTestResult('Policy Update', false, error.message);
+            }
+        }
+
+        // Test USDC balance
+        async function testUSDCBalance() {
+            const resultDiv = document.getElementById('usdcTestResult');
+            
+            if (!embeddedWallet.isAuthenticated) {
+                resultDiv.innerHTML = '<span class="error">Please authenticate first</span>';
+                return;
+            }
+            
+            try {
+                // This would integrate with the USDC service
+                const balance = embeddedWallet.balanceUSD;
+                resultDiv.innerHTML = `<span class="success">✓ USDC Balance: $${balance.toFixed(2)}</span>
+                    <br><small>Mock balance for testing. Production will query actual USDC contract.</small>`;
+                addTestResult('USDC Balance', true, `Balance retrieved: $${balance.toFixed(2)}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+                addTestResult('USDC Balance', false, error.message);
+            }
+        }
+
+        // Test transaction compliance
+        async function testCompliance() {
+            const resultDiv = document.getElementById('complianceTestResult');
+            
+            if (!embeddedWallet.isAuthenticated) {
+                resultDiv.innerHTML = '<span class="error">Please authenticate first</span>';
+                return;
+            }
+            
+            try {
+                // Test transaction compliance check
+                const testTx = {
+                    to: '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c',  // Prediction market address
+                    value_usd: 100,
+                    data: '0x'
+                };
+                
+                const response = await fetch('/api/embedded/check-compliance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        transaction: testTx
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const compliance = data.compliance;
+                    resultDiv.innerHTML = `<span class="${compliance.allowed ? 'success' : 'error'}">
+                        ${compliance.allowed ? '✓' : '✗'} Transaction ${compliance.allowed ? 'approved' : 'blocked'}: ${compliance.reason}
+                        ${compliance.requires_2fa ? '<br>⚠️ 2FA Required' : ''}
+                    </span>`;
+                    addTestResult('Compliance Check', compliance.allowed, compliance.reason);
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Compliance check failed</span>`;
+                    addTestResult('Compliance Check', false, 'Check failed');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+                addTestResult('Compliance Check', false, error.message);
+            }
+        }
+
+        // Add test result to summary
+        function addTestResult(testName, success, details) {
+            testResults.push({
+                test: testName,
+                success: success,
+                details: details,
+                timestamp: new Date().toISOString()
+            });
+            
+            updateTestSummary();
+        }
+
+        // Update test summary
+        function updateTestSummary() {
+            const summaryDiv = document.getElementById('testSummary');
+            const totalTests = testResults.length;
+            const passedTests = testResults.filter(r => r.success).length;
+            
+            let html = `<h5>Results: ${passedTests}/${totalTests} Passed</h5><ul>`;
+            
+            testResults.forEach(result => {
+                const icon = result.success ? '✓' : '✗';
+                const className = result.success ? 'success' : 'error';
+                html += `<li><span class="${className}">${icon} ${result.test}</span>: ${result.details}</li>`;
+            });
+            
+            html += '</ul>';
+            summaryDiv.innerHTML = html;
+        }
+
+        // Toggle advanced mode
+        function toggleAdvancedMode() {
+            embeddedWallet.toggleAdvancedMode();
+        }
+
+        // Check wallet status on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateWalletUI();
+            }, 500);
+        });
+
+        // Update UI when wallet state changes
+        setInterval(updateWalletUI, 1000);
+    </script>
+</body>
+</html>
