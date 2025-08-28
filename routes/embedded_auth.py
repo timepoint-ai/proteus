@@ -5,6 +5,7 @@ Provides email/SMS login without seed phrases
 
 from flask import Blueprint, request, jsonify, session, render_template
 from services.embedded_wallet import EmbeddedWalletService
+from services.firebase_auth import firebase_auth
 import logging
 import os
 import secrets
@@ -30,27 +31,53 @@ def request_otp():
         if not identifier:
             return jsonify({'error': 'Identifier required'}), 400
         
-        # Generate 6-digit OTP
-        otp_code = str(secrets.randbelow(900000) + 100000)
-        
-        # Store OTP with expiry (5 minutes)
-        otp_storage[identifier] = {
-            'code': otp_code,
-            'expires': time.time() + 300,
-            'auth_method': auth_method
-        }
-        
-        # In production, send OTP via email/SMS
-        # For testing, log it
-        logger.info(f"OTP for {identifier}: {otp_code}")
-        
-        return jsonify({
-            'success': True,
-            'message': f'OTP sent to {identifier}',
-            'auth_method': auth_method,
-            # Remove in production - only for testing
-            'test_otp': otp_code if os.environ.get('ENV') != 'production' else None
-        })
+        # Use Firebase for email authentication
+        if '@' in identifier:
+            result = firebase_auth.send_email_verification(identifier)
+            
+            if result['success']:
+                # Store for verification (Firebase handles the actual OTP)
+                otp_storage[identifier] = {
+                    'expires': time.time() + 300,
+                    'auth_method': 'email',
+                    'firebase_uid': result.get('uid')
+                }
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Verification email sent to {identifier}',
+                    'auth_method': 'email',
+                    'test_otp': result.get('otp') if result.get('test_mode') else None
+                })
+            else:
+                return jsonify({
+                    'error': result.get('error', 'Failed to send email'),
+                    'success': False
+                }), 400
+        else:
+            # Phone number - use Firebase SMS (requires client-side implementation)
+            result = firebase_auth.send_sms_otp(identifier)
+            
+            if result['success']:
+                otp_storage[identifier] = {
+                    'code': result.get('otp', ''),
+                    'expires': time.time() + 300,
+                    'auth_method': 'sms'
+                }
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'SMS sent to {identifier}',
+                    'auth_method': 'sms',
+                    'test_otp': result.get('otp') if result.get('test_mode') else None,
+                    'info': result.get('info')
+                })
+            else:
+                return jsonify({
+                    'error': result.get('error', 'SMS requires client-side implementation'),
+                    'success': False,
+                    'info': 'Use Firebase JavaScript SDK for phone authentication'
+                }), 400
         
     except Exception as e:
         logger.error(f"OTP request failed: {str(e)}")
@@ -67,17 +94,29 @@ def verify_otp():
         if not identifier or not otp_code:
             return jsonify({'error': 'Identifier and OTP required'}), 400
         
-        # Verify OTP
-        stored_otp = otp_storage.get(identifier)
-        if not stored_otp:
-            return jsonify({'error': 'OTP not found or expired'}), 400
-        
-        if time.time() > stored_otp['expires']:
-            del otp_storage[identifier]
-            return jsonify({'error': 'OTP expired'}), 400
-        
-        if stored_otp['code'] != otp_code:
-            return jsonify({'error': 'Invalid OTP'}), 400
+        # Check if email or phone
+        if '@' in identifier:
+            # Verify with Firebase
+            result = firebase_auth.verify_email_otp(identifier, otp_code)
+            
+            if not result['success']:
+                return jsonify({'error': result.get('error', 'Invalid OTP')}), 400
+            
+            firebase_uid = result.get('uid')
+        else:
+            # For phone, check stored OTP (simplified for now)
+            stored_otp = otp_storage.get(identifier)
+            if not stored_otp:
+                return jsonify({'error': 'OTP not found or expired'}), 400
+            
+            if time.time() > stored_otp['expires']:
+                del otp_storage[identifier]
+                return jsonify({'error': 'OTP expired'}), 400
+            
+            if stored_otp.get('code') != otp_code:
+                return jsonify({'error': 'Invalid OTP'}), 400
+            
+            firebase_uid = f"phone_{identifier}"
         
         # Clear OTP after successful verification
         auth_method = stored_otp['auth_method']
