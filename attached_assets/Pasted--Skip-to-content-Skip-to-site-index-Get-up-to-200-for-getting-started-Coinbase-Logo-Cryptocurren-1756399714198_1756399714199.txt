@@ -1,0 +1,259 @@
+
+Skip to content
+Skip to site index
+Get up to $200 for getting started¹ →
+Coinbase Logo
+Cryptocurrencies
+Individuals
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Businesses
+
+
+
+
+
+
+
+
+Institutions
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Developers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Company
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Developer Platform
+Documentation
+Discover
+Pricing
+SLO
+Jobs
+
+Embedded Wallets
+Give your users the everything wallet
+Familiar onboarding with onramps, trading, security, and 4.1% USDC rewards built-in
+CDP Embedded Wallets Hero Image desktop
+Add custom wallets for your users in minutes
+
+Simple user onboarding
+No seed phrases, no passkeys, no popups. Let users onboard via email, SMS, or OAuth (Google, Apple).
+
+
+Create a whitelabeled UX
+Developers own the front-end experience end-to-end and can fully customize the experience
+
+切
+Self-custody by default
+Users control their own wallets without builders ever taking custody
+
+
+Integrated onchain functions
+Onramp, swap, balances, and 4.1% USDC rewards all built-in. No need to stitch together third-party tooling.
+
+Why devs choose CDP Embedded Wallets
+CDP Embedded Wallets - EOA Comp Table
+
+Add Embedded Wallets in under 2 minutes
+CDP Embedded Wallets integration demo
+
+What can you build?
+DeFi Platforms
+Build platforms offering seamless token swaps on EVM or Solana, and keep users engaged with built-in USDC rewards.
+
+CDP Embedded Wallets Use Cases - DeFi Platforms
+Creator Economies
+Power innovative creator-finance solutions like Insomnia Labs' CreatorFi, to offer creators easy access to stablecoin payments, monetization tools, and onchain experiences .
+
+CDP Embedded Wallts Use Cases - Creator Economies
+Gaming Platforms
+Embed wallets for in-game economies or NFT trading, complete with staking, styled entirely to match your brandinga
+
+CDP Embedded Wallets Use Cases - Gaming Platforms
+Comes with CDP Security Suite (CS2)
+Smart Policy Controls
+Enforce allowlists, denylists, transaction limits, and risk-based blocking. Support function-level policies to restrict signing to specific contract calls.
+
+CDP Embedded Wallets SC2 Section - Smart Policy Controls
+Built-in Compliance
+KYT screening blocks high-risk interactions, helping meet enterprise compliance standards.
+
+CDP Security Suite (CS2) Bento - Built-in Compliance
+Enclave Isolation
+Private keys remain in secure Coinbase infrastructure and are never exposed
+
+CDP Embedded Wallets SC2 Section - Enclave Isolation
+API Key Protection
+Advanced features like IP allowlisting, feature-based scoping, and key rotation protect you against API key compromise scenarios.
+
+CDP Embedded Wallets SC2 Section - API Key Protection
+Building onchain is hard. We make it easy.
+We're committed to helping builders create incredible products. That's why we've made it easy to access powerful APIs and SDKs from Coinbase to help solve developers' toughest problems.
+
+
+Search the docs
+
+Github
+View and download open source Coinbase code.
+
+Discord
+Get help with your project, meet other developers, and get access to the web3 community.
+
+Talk to an expert
+Get in touch with us to discuss your integration or if you have an idea on how you would like to work with us.
+No representation or warranty is made, express or implied, with respect to the future performance of any digital asset, financial instrument or other market or economic measure. Recipients should consult their advisors before making any investment decision. Coinbase, Inc. is not registered or licensed in any capacity with the U.S. Securities and Exchange Commission or the U.S. Commodity Futures Trading Commission.
+
+Coinbase logo
+© 2025 Coinbase
+Blog
+•
+X
+•
+Facebook
+
+
+Company
+About
+Careers
+Affiliates
+Blog
+Press
+Security
+Investors
+Vendors
+Legal & privacy
+Cookie policy
+Cookie preferences
+Do Not Share My Personal Information
+Digital Asset Disclosures
+Learn
+Explore
+Coinbase Bytes newsletter
+Crypto basics
+Tips & tutorials
+Crypto glossary
+Market updates
+What is Bitcoin?
+What is crypto?
+What is a blockchain?
+How to set up a crypto wallet
+How to send crypto
+Taxes
+Individuals
+Buy & sell
+Earn free crypto
+Base App
+Coinbase One
+Credit Card
+Debit Card
+Businesses
+Asset Listings
+Commerce
+Institutions
+Prime
+Staking
+Exchange
+International Exchange
+Derivatives Exchange
+Verified Pools
+Developers
+Developer Platform
+Base
+Server Wallets
+Embedded Wallets
+Base Accounts (Smart Wallets)
+Onramp & Offramp
+x402
+Trade API
+Paymaster
+OnchainKit
+Data API
+Verifications
+Node
+AgentKit
+Staking
+Faucet
+Exchange API
+International Exchange API
+Prime API
+Derivatives API
+Support
+Help center
+Contact us
+Create account
+ID verification
+Account information
+Payment methods
+Account access
+Supported crypto
+Status
+Asset prices
+Bitcoin price
+Ethereum price
+Solana price
+XRP price
+We use cookies and similar technologies on our websites to enhance and tailor your experience, analyze our traffic, and for security and marketing. You can choose not to allow some type of cookies by clicking Manage Settings. For more information see our Cookie Policy.
