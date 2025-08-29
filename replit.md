@@ -31,6 +31,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Major Changes (January 28, 2025)
 
+### Firebase Authentication Integration (January 28, 2025) ✅
+- **Firebase Auth Integrated**: Real email verification via Firebase
+  - Created `services/firebase_auth.py` for authentication service
+  - Updated routes to use Firebase for OTP delivery
+  - Configured Firebase REST API endpoints
+  - Created comprehensive `FIREBASE-SETUP-GUIDE.md` documentation
+- **Required Firebase Configuration**:
+  - Email/Password authentication enabled
+  - Passwordless email links configured
+  - Authorized domains added
+  - API key restrictions set
+- **Status**: Real emails now sent for authentication (not mock)
+
 ### Latest Optimizations & Improvements ✅
 - **Oracle Requirements Simplified**: Reduced from 3 to 1 minimum at UI level
   - Users now only need 1 oracle address (system auto-pads to 3 for contract)

@@ -1,23 +1,42 @@
 # Coinbase Embedded Wallet Integration Guide
 
-## Current Status: Mock Implementation
+## Current Status: Firebase Authentication Active ✅
 
-The current implementation is a **test/mock version** that simulates the Coinbase Embedded Wallet flow without actually connecting to Coinbase services.
+The current implementation uses **Firebase Authentication** for real email verification, integrated with Coinbase Embedded Wallet for secure wallet creation.
 
-### How to Test the Mock Implementation
+### How to Test the Implementation
 
 1. **Navigate to**: `/api/embedded/test`
 2. **Click "Get Started"**
-3. **Enter any email or phone number** (e.g., your.email@example.com)
+3. **Enter your email address** (e.g., your.email@example.com)
 4. **Click "Continue"**
-5. **The OTP code will be auto-filled** in the verification field
-6. **Click "Verify"** to create your test wallet
+5. **Check your email** for the verification link from Firebase
+6. **Enter the OTP code** (also shown in UI for testing)
+7. **Click "Verify"** to create your embedded wallet
 
-**Note**: No actual emails or SMS messages are sent. The OTP is generated locally and displayed in the UI for testing purposes.
+**Note**: Real verification emails are sent via Firebase. SMS requires client-side Firebase SDK implementation.
+
+## Authentication Configuration
+
+### Firebase Setup (ACTIVE ✅)
+
+Firebase handles the authentication layer. See [FIREBASE-SETUP-GUIDE.md](./FIREBASE-SETUP-GUIDE.md) for complete Firebase Console configuration.
+
+**Required Firebase Console Configuration:**
+1. Enable Email/Password authentication
+2. Enable passwordless email links
+3. Add your Replit domain to authorized domains
+4. Configure email templates
+5. Set API key restrictions
+
+**Optional Enhancements:**
+- Firebase Admin SDK for server-side user management
+- Phone authentication (requires client-side reCAPTCHA)
+- Custom email domain configuration
 
 ## Real Coinbase Integration Requirements
 
-To connect to actual Coinbase services and send real OTP codes via email/SMS, you need:
+To complete the embedded wallet integration with Coinbase:
 
 ### 1. Coinbase Developer Platform Account
 
