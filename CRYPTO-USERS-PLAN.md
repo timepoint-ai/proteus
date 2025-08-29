@@ -5,14 +5,40 @@
 This document outlines the integration of Coinbase's embedded wallet and onramp solutions to create a seamless, crypto-native prediction market platform where users don't need to understand blockchain technology. The platform will operate fully on-chain to bypass KYC requirements while providing a familiar web2 user experience.
 
 ### Implementation Status (January 28, 2025)
-✅ **COMPLETED**: Firebase Authentication integration for real email OTP  
-✅ **COMPLETED**: Embedded wallet service architecture  
-✅ **COMPLETED**: API credentials configured (Coinbase & Firebase)  
-⏳ **IN PROGRESS**: Frontend wallet creation after authentication  
-⏳ **IN PROGRESS**: USDC onramp integration  
-❌ **TODO**: Transaction signing with embedded wallet  
-❌ **TODO**: Apple Pay / bank transfer funding  
-❌ **TODO**: Production deployment and testing  
+
+#### ✅ Phase 1: Authentication Foundation (COMPLETED)
+- Firebase Authentication integration for real email OTP
+- Embedded wallet service architecture (`services/embedded_wallet.py`)
+- API credentials configured (Coinbase & Firebase)
+- Test interface at `/api/embedded/test`
+- Firebase setup documentation created
+
+#### 🚧 Phase 2: Frontend Wallet Migration (IN PROGRESS)
+**Current State**: Frontend uses MetaMask exclusively via `window.ethereum`
+**Target State**: Replace with Coinbase Embedded Wallet SDK
+
+**Files Requiring Updates:**
+- `static/js/wallet.js` - Main wallet connection logic
+- `static/js/wallet-auth.js` - Authentication flow
+- `static/js/betting-contract.js` - Smart contract interactions
+- `static/js/market-blockchain.js` - Market operations
+- `static/js/base-blockchain.js` - BASE network operations
+
+#### ⏳ Phase 3: Coinbase Onramp Integration (PLANNED)
+- Implement funding widget in UI
+- Support Apple Pay, bank transfer, Coinbase account
+- USDC direct purchase on BASE
+- Zero-fee strategy for USDC purchases
+
+#### ❌ Phase 4: Transaction Signing (TODO)
+- Replace MetaMask transaction prompts with embedded wallet
+- Implement policy-based transaction limits
+- Add 2FA for high-value transactions
+
+#### ❌ Phase 5: Production Deployment (TODO)
+- Remove MetaMask dependencies completely
+- Hide advanced mode toggle
+- Production testing and optimization  
 
 ---
 
@@ -32,44 +58,130 @@ This document outlines the integration of Coinbase's embedded wallet and onramp 
 
 ---
 
-## 🔐 Authentication Architecture
+## 📋 Implementation Phases
 
-### Coinbase Embedded Wallet Integration
+### Phase 2: Frontend Wallet Migration (Detailed)
 
-#### User Onboarding Flow
-```
-1. User visits site → "Get Started" button
-2. Enter email or phone number
-3. Receive OTP verification code
-4. Account created → Wallet automatically generated
-5. User sees balance in USD (actually USDC on BASE)
-```
-
-#### Technical Implementation
+#### Phase 2.1: Create Coinbase Wallet Adapter
+Create new file: `static/js/coinbase-wallet.js`
 ```javascript
-// Frontend: wallet-embedded.js
-const CoinbaseWallet = {
-  async createAccount(emailOrPhone) {
-    // Initialize embedded wallet SDK
-    const wallet = await CoinbaseEmbeddedWallet.init({
-      appId: process.env.COINBASE_APP_ID,
-      network: 'base',
-      features: {
-        onramp: true,
-        swap: true,
-        rewards: true  // 4.1% USDC rewards
-      }
-    });
-    
-    // Create user wallet
-    const account = await wallet.createAccount({
-      identifier: emailOrPhone,
-      authMethod: 'otp'  // or 'oauth' for Google/Apple
-    });
-    
-    return account.address;
+// Coinbase Embedded Wallet wrapper
+class CoinbaseEmbeddedWallet {
+  constructor() {
+    this.wallet = null;
+    this.address = null;
+    this.provider = null;
+    this.isConnected = false;
   }
-};
+  
+  async init() {
+    // Load Coinbase SDK
+    const { Wallet } = await import('@coinbase/waas-sdk-web');
+    
+    this.wallet = await Wallet.create({
+      projectId: window.COINBASE_PROJECT_ID,
+      enableHostedBackups: true,
+      prod: false  // Use true for mainnet
+    });
+    
+    // Create provider for Web3 compatibility
+    this.provider = this.wallet.getEthereumProvider();
+    
+    return this;
+  }
+  
+  async authenticate(email) {
+    // User already authenticated via Firebase
+    // Link wallet to authenticated user
+    const result = await fetch('/api/embedded/link-wallet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await result.json();
+    this.address = data.wallet_address;
+    this.isConnected = true;
+    
+    return this.address;
+  }
+  
+  // MetaMask-compatible methods
+  async request(args) {
+    return this.provider.request(args);
+  }
+  
+  async sendTransaction(tx) {
+    // Apply transaction policies
+    const policies = await this.getTransactionPolicies();
+    
+    if (tx.value > policies.daily_limit) {
+      throw new Error('Transaction exceeds daily limit');
+    }
+    
+    if (tx.value > policies.require_2fa_above) {
+      await this.request2FA();
+    }
+    
+    return this.provider.request({
+      method: 'eth_sendTransaction',
+      params: [tx]
+    });
+  }
+}
+```
+
+#### Phase 2.2: Update wallet.js to Support Both Wallets
+```javascript
+// static/js/wallet.js modifications
+class ClockchainWallet {
+  constructor() {
+    this.walletType = localStorage.getItem('wallet_type') || 'coinbase';
+    this.adapter = null;
+  }
+  
+  async connect() {
+    if (this.walletType === 'coinbase') {
+      // Use Coinbase Embedded Wallet
+      this.adapter = new CoinbaseEmbeddedWallet();
+      await this.adapter.init();
+      
+      // Get email from Firebase auth
+      const email = this.getCurrentUserEmail();
+      this.address = await this.adapter.authenticate(email);
+      
+    } else if (this.walletType === 'metamask') {
+      // Fallback to MetaMask (hidden feature)
+      if (!window.ethereum) {
+        throw new Error('MetaMask not installed');
+      }
+      this.adapter = window.ethereum;
+      const accounts = await this.adapter.request({ 
+        method: 'eth_requestAccounts' 
+      });
+      this.address = accounts[0];
+    }
+    
+    this.isConnected = true;
+    this.updateUI();
+  }
+}
+```
+
+#### Phase 2.3: Update Contract Interaction Files
+Files to update:
+- `betting-contract.js` - Replace `window.ethereum` with `clockchainWallet.adapter`
+- `market-blockchain.js` - Use wallet adapter for Web3 provider
+- `base-blockchain.js` - Update transaction methods
+
+Example update for betting-contract.js:
+```javascript
+// Before (MetaMask only)
+this.web3 = new Web3(window.ethereum);
+
+// After (Wallet agnostic)
+const wallet = window.clockchainWallet;
+this.web3 = new Web3(wallet.adapter.provider || wallet.adapter);
 ```
 
 #### Backend Integration
@@ -125,68 +237,336 @@ const WALLET_CONFIG = {
 
 ---
 
-## 💳 Funding Architecture
+### Phase 3: Coinbase Onramp Integration (Detailed)
 
-### Coinbase Onramp Integration
+#### Phase 3.1: Add Onramp SDK
+```html
+<!-- Add to templates/base.html -->
+<script src="https://pay.coinbase.com/sdk/v1/pay-sdk.js"></script>
+```
 
-#### Supported Payment Methods
-1. **Apple Pay** - Instant, no fees for USDC on BASE
-2. **Coinbase Account** - Direct transfer from Coinbase app
-3. **Bank Account** - ACH transfer (2-3 days)
-4. **Debit Card** - Instant funding with small fee
-
-#### Implementation Flow
+#### Phase 3.2: Create Funding Manager
+Create new file: `static/js/funding-manager.js`
 ```javascript
-// Frontend: onramp-integration.js
-const FundingManager = {
-  async showFundingOptions(userWallet) {
-    const fundCard = await CoinbaseOnramp.createFundCard({
-      wallet: userWallet,
-      defaultCurrency: 'USDC',
-      defaultNetwork: 'base',
-      defaultAmount: 100,  // $100 USD default
+class FundingManager {
+  constructor() {
+    this.onramp = null;
+    this.userWallet = null;
+  }
+  
+  async init(walletAddress) {
+    this.userWallet = walletAddress;
+    
+    // Initialize Coinbase Onramp
+    this.onramp = new window.CBPay({
+      appId: window.COINBASE_PROJECT_ID,
+      widget: 'buy',
+      network: 'base',
+      assets: ['USDC'],
       
       onSuccess: (transaction) => {
-        // Update UI with new balance
-        this.updateBalance(transaction.amount);
-        // Enable betting immediately
-        this.enableBetting();
+        this.handleFundingSuccess(transaction);
       },
       
-      onExit: () => {
-        // User cancelled funding
-        this.showAlternativeFunding();
+      onExit: (error) => {
+        if (error) {
+          console.error('Funding error:', error);
+          this.showError('Funding failed. Please try again.');
+        }
       }
     });
-    
-    fundCard.open();
-  },
-  
-  async createQuickBuyLink(amount) {
-    // Generate one-click buy link for specific amount
-    const buyLink = await CoinbaseOnramp.createBuyLink({
-      amount: amount,
-      asset: 'USDC',
-      network: 'base',
-      wallet: userWallet
-    });
-    
-    return buyLink;
   }
+  
+  async showFundingOptions(suggestedAmount = 100) {
+    // Configure onramp widget
+    const options = {
+      destinationWalletAddress: this.userWallet,
+      presetCryptoAmount: suggestedAmount,
+      defaultAsset: 'USDC',
+      defaultNetwork: 'base',
+      defaultPaymentMethod: 'APPLE_PAY', // or 'ACH_BANK_ACCOUNT'
+      
+      // Zero-fee configuration for USDC
+      handlingRequestedUrls: true,
+      preserveUserSession: true
+    };
+    
+    // Open funding widget
+    this.onramp.open(options);
+  }
+  
+  async createQuickBuyButtons() {
+    // Add quick buy buttons to UI
+    const amounts = [50, 100, 250, 500];
+    const container = document.getElementById('quick-buy-container');
+    
+    amounts.forEach(amount => {
+      const button = document.createElement('button');
+      button.textContent = `Buy $${amount} USDC`;
+      button.className = 'btn btn-primary quick-buy';
+      button.onclick = () => this.showFundingOptions(amount);
+      container.appendChild(button);
+    });
+  }
+  
+  handleFundingSuccess(transaction) {
+    // Update UI with new balance
+    const balanceElement = document.getElementById('wallet-balance');
+    if (balanceElement) {
+      // Fetch new balance from blockchain
+      this.updateBalance();
+    }
+    
+    // Show success message
+    this.showSuccess(`Successfully added ${transaction.amount} USDC to your wallet!`);
+    
+    // Enable betting features
+    this.enableBettingFeatures();
+  }
+  
+  async updateBalance() {
+    // Query USDC balance on BASE
+    const usdcContract = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on BASE
+    const balance = await window.clockchainWallet.getTokenBalance(usdcContract);
+    
+    // Display as USD (hide crypto complexity)
+    document.getElementById('wallet-balance').textContent = `$${balance}`;
+  }
+}
+```
+
+#### Phase 3.3: Integrate with Main UI
+Update main betting pages to include funding:
+```javascript
+// Add to market-detail.js or betting pages
+async function checkAndPromptFunding() {
+  const balance = await getUSDCBalance();
+  const requiredAmount = getRequiredBettingAmount();
+  
+  if (balance < requiredAmount) {
+    // Show funding prompt
+    const fundingModal = `
+      <div class="modal">
+        <h3>Add Funds to Bet</h3>
+        <p>You need $${requiredAmount} to place this bet.</p>
+        <p>Your current balance: $${balance}</p>
+        <button onclick="fundingManager.showFundingOptions(${requiredAmount - balance})">
+          Add Funds with Apple Pay
+        </button>
+      </div>
+    `;
+    showModal(fundingModal);
+  }
+}
+```
+
+### Phase 4: Transaction Signing & Security
+
+#### Phase 4.1: Implement Transaction Policies
+```javascript
+// static/js/transaction-policies.js
+class TransactionPolicyManager {
+  constructor() {
+    this.policies = {
+      daily_limit: 1000,      // $1000 USD daily
+      require_2fa_above: 500, // 2FA for >$500
+      max_gas_price: 50,      // 50 gwei max
+      allowed_contracts: [
+        '0x...', // PredictionMarket
+        '0x...', // GenesisNFT
+      ]
+    };
+  }
+  
+  async validateTransaction(tx) {
+    // Check daily spending
+    const dailySpent = await this.getDailySpending();
+    if (dailySpent + tx.value > this.policies.daily_limit) {
+      throw new Error('Daily spending limit exceeded');
+    }
+    
+    // Check contract whitelist
+    if (!this.policies.allowed_contracts.includes(tx.to)) {
+      const approved = await this.requestUserApproval(tx);
+      if (!approved) throw new Error('Transaction rejected');
+    }
+    
+    // Check gas price
+    if (tx.gasPrice > this.policies.max_gas_price) {
+      tx.gasPrice = this.policies.max_gas_price;
+    }
+    
+    return tx;
+  }
+  
+  async request2FA(transaction) {
+    // Show 2FA modal
+    const modal = new TwoFactorModal();
+    const code = await modal.getCode();
+    
+    // Verify with Firebase
+    const verified = await firebase.verify2FA(code);
+    if (!verified) throw new Error('2FA verification failed');
+    
+    return true;
+  }
+}
+```
+
+#### Phase 4.2: Replace MetaMask Transaction Prompts
+```javascript
+// Update all transaction sending code
+// Before: MetaMask popup
+const tx = await window.ethereum.request({
+  method: 'eth_sendTransaction',
+  params: [transaction]
+});
+
+// After: Embedded wallet with policies
+const policyManager = new TransactionPolicyManager();
+const validatedTx = await policyManager.validateTransaction(transaction);
+
+// Show custom confirmation UI
+const confirmed = await this.showTransactionConfirmation(validatedTx);
+if (!confirmed) throw new Error('Transaction cancelled');
+
+// Send via embedded wallet
+const tx = await window.clockchainWallet.sendTransaction(validatedTx);
+```
+
+### Phase 5: Production Deployment
+
+#### Phase 5.1: Remove MetaMask Dependencies
+```javascript
+// config/wallet-config.js
+const WALLET_CONFIG = {
+  // Remove MetaMask as default
+  primaryWallet: 'coinbase-embedded',
+  fallbackWallet: null,
+  
+  // Hide MetaMask option
+  showMetaMaskOption: false,
+  
+  // Production settings
+  requireEmailAuth: true,
+  require2FA: true,
+  enableTestMode: false
 };
 ```
 
-#### Zero-Fee USDC Strategy
-```python
-# services/funding_service.py
-class FundingService:
-    def get_funding_options(self, user_region):
-        """Provide region-specific funding options"""
-        options = {
-            'primary': {
-                'method': 'apple_pay',
-                'fees': 0,  # Zero fees for USDC on BASE
-                'speed': 'instant',
+#### Phase 5.2: Update UI Components
+- Remove "Connect MetaMask" buttons
+- Replace with "Sign In" (email/phone)
+- Update wallet status displays
+- Add USDC balance displays (show as USD)
+
+#### Phase 5.3: Production Testing Checklist
+- [ ] Email authentication flow works
+- [ ] Wallet creation after auth
+- [ ] Funding via Onramp
+- [ ] Transaction signing without popups
+- [ ] Policy enforcement (limits, 2FA)
+- [ ] Error handling and recovery
+- [ ] Mobile responsiveness
+
+---
+
+## 📅 Migration Timeline
+
+### Week 1-2: Foundation (COMPLETED ✅)
+- Firebase authentication setup
+- Backend wallet service
+- API credentials configuration
+
+### Week 3-4: Frontend Migration (CURRENT)
+- Create Coinbase wallet adapter
+- Update wallet.js for dual support
+- Test with existing features
+
+### Week 5-6: Onramp Integration
+- Add Coinbase Pay SDK
+- Implement funding manager
+- Create quick buy UI
+
+### Week 7-8: Security & Polish
+- Transaction policies
+- 2FA implementation
+- Remove MetaMask code
+
+### Week 9-10: Production Launch
+- Final testing
+- Gradual rollout
+- Monitor and optimize
+
+---
+
+## 🧪 Testing Strategy
+
+### Phase Testing Approach
+1. **Parallel Testing**: Keep MetaMask working during development
+2. **Feature Flags**: Use localStorage to toggle wallet types
+3. **Staged Rollout**: Test with internal users first
+4. **Monitoring**: Track success rates and errors
+
+### Critical Test Cases
+```javascript
+// Test suite for wallet migration
+describe('Coinbase Embedded Wallet', () => {
+  it('should authenticate with email', async () => {
+    const email = 'test@example.com';
+    const wallet = await authenticateWithEmail(email);
+    expect(wallet.address).toBeDefined();
+  });
+  
+  it('should fund wallet via Onramp', async () => {
+    const amount = 100; // $100 USDC
+    const result = await fundWallet(amount);
+    expect(result.success).toBe(true);
+  });
+  
+  it('should sign transactions without popups', async () => {
+    const tx = createTestTransaction();
+    const signed = await wallet.signTransaction(tx);
+    expect(signed).toBeDefined();
+  });
+});
+```
+
+---
+
+## 🎯 Success Metrics
+
+### User Experience Goals
+- **Authentication Time**: <30 seconds from landing to wallet
+- **Funding Success Rate**: >80% completion
+- **Transaction Success**: >95% success rate
+- **User Drop-off**: <10% at each step
+
+### Technical Goals
+- **Zero MetaMask Dependencies**: Complete removal
+- **API Response Time**: <200ms for wallet operations
+- **Error Rate**: <0.1% for critical paths
+- **Security**: Zero unauthorized transactions
+
+---
+
+## 📝 Implementation Notes
+
+### Current Blockers
+1. **Frontend Files**: All use `window.ethereum` directly
+2. **Web3 Integration**: Tightly coupled to MetaMask
+3. **User Flow**: Assumes MetaMask is installed
+
+### Solutions
+1. **Abstraction Layer**: Create wallet adapter pattern
+2. **Progressive Migration**: Support both wallets temporarily
+3. **Feature Detection**: Check capabilities, not wallet type
+
+### Next Immediate Steps
+1. Create `coinbase-wallet.js` adapter
+2. Update `wallet.js` to use adapter pattern
+3. Test with existing betting flow
+4. Add funding UI components
                 'limits': {'min': 10, 'max': 10000}
             },
             'secondary': {
