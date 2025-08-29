@@ -69,8 +69,17 @@ class BettingContract {
     }
     
     async init() {
-        if (typeof window.ethereum === 'undefined') {
-            throw new Error('MetaMask is not installed');
+        // Check if wallet is connected
+        if (!window.clockchainWallet || !window.clockchainWallet.isConnected) {
+            throw new Error('Please connect your wallet first');
+        }
+        
+        // Get wallet adapter (works with both MetaMask and Coinbase)
+        const wallet = window.clockchainWallet;
+        const provider = wallet.adapter || wallet.provider || window.ethereum;
+        
+        if (!provider) {
+            throw new Error('No wallet provider available');
         }
         
         // Check if Web3 is already available, if not load it
@@ -86,12 +95,17 @@ class BettingContract {
             });
         }
         
-        // Initialize Web3
-        this.web3 = new Web3(window.ethereum);
+        // Initialize Web3 with wallet adapter
+        this.web3 = new Web3(provider);
         
-        // Request account access
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        this.account = accounts[0];
+        // Get account from connected wallet
+        this.account = wallet.address;
+        
+        if (!this.account) {
+            // Try to get accounts through provider
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            this.account = accounts[0];
+        }
         
         // Initialize contract
         this.contract = new this.web3.eth.Contract(this.contractABI, this.contractAddress);
@@ -107,13 +121,17 @@ class BettingContract {
     
     async switchToBaseSepolia() {
         try {
-            await window.ethereum.request({
+            // Use wallet adapter if available
+            const wallet = window.clockchainWallet;
+            const provider = wallet?.adapter || wallet?.provider || window.ethereum;
+            
+            await provider.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: '0x14a34' }] // 84532 in hex
             });
         } catch (error) {
-            if (error.code === 4902) {
-                // Chain not added, add it
+            if (error.code === 4902 && window.ethereum) {
+                // Chain not added, add it (MetaMask only)
                 await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
                     params: [{

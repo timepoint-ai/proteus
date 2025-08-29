@@ -17,6 +17,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/wallet.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/coinbase-wallet.css') }}">
     
     {% block head %}{% endblock %}
 </head>
@@ -228,6 +229,7 @@
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     
     <!-- Web3 and Blockchain Integration -->
+    <script src="{{ url_for('static', filename='js/coinbase-wallet.js') }}"></script>
     <script src="{{ url_for('static', filename='js/wallet.js') }}"></script>
     <script src="{{ url_for('static', filename='js/base-blockchain.js') }}"></script>
     <script src="{{ url_for('static', filename='js/market-blockchain.js') }}"></script>

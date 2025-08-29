@@ -5,6 +5,9 @@
 
 class ClockchainWallet {
     constructor() {
+        // Wallet adapter pattern to support multiple wallet types
+        this.walletType = localStorage.getItem('wallet_type') || 'coinbase'; // Default to Coinbase
+        this.adapter = null;
         this.provider = null;
         this.signer = null;
         this.address = null;
@@ -40,7 +43,7 @@ class ClockchainWallet {
         // Initialize UI elements
         this.initializeUI();
         
-        // Check for existing connection
+        // Check for existing connection based on wallet type
         this.checkExistingConnection();
     }
     
@@ -66,7 +69,8 @@ class ClockchainWallet {
     }
     
     async checkExistingConnection() {
-        if (typeof window.ethereum !== 'undefined') {
+        // Check based on wallet type
+        if (this.walletType === 'metamask' && typeof window.ethereum !== 'undefined') {
             try {
                 const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                 if (accounts.length > 0) {
@@ -75,55 +79,35 @@ class ClockchainWallet {
             } catch (error) {
                 console.error('Error checking existing connection:', error);
             }
+        } else if (this.walletType === 'coinbase') {
+            // Check if user is authenticated with Firebase
+            try {
+                const response = await fetch('/api/embedded/auth/status');
+                const data = await response.json();
+                if (data.authenticated && data.wallet_address) {
+                    await this.connect();
+                }
+            } catch (error) {
+                console.error('Error checking Coinbase wallet connection:', error);
+            }
         }
     }
     
     async connect() {
-        if (typeof window.ethereum === 'undefined') {
-            this.showError('Please install MetaMask or another Web3 wallet to continue.');
-            return;
-        }
-        
         try {
-            // Request account access
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            
-            if (accounts.length === 0) {
-                throw new Error('No accounts found');
-            }
-            
-            this.address = accounts[0];
-            this.provider = window.ethereum;
-            this.isConnected = true;
-            
-            // Get current chain
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            this.chainId = chainId;
-            
-            // Switch to BASE Sepolia if not on correct network
-            if (chainId !== this.networks.baseSepolia.chainId) {
-                await this.switchToBaseSepolia();
+            if (this.walletType === 'coinbase') {
+                // Use Coinbase Embedded Wallet
+                await this.connectCoinbaseWallet();
+            } else if (this.walletType === 'metamask') {
+                // Use MetaMask (legacy support)
+                await this.connectMetaMask();
+            } else {
+                throw new Error('Unknown wallet type: ' + this.walletType);
             }
             
             // Update UI
             this.updateConnectionStatus();
             this.updateNetworkDisplay();
-            
-            // Listen for account changes
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    this.disconnect();
-                } else {
-                    this.address = accounts[0];
-                    this.updateConnectionStatus();
-                }
-            });
-            
-            // Listen for chain changes
-            window.ethereum.on('chainChanged', (chainId) => {
-                window.location.reload();
-            });
-            
             this.showSuccess('Wallet connected successfully!');
             
         } catch (error) {
@@ -132,15 +116,116 @@ class ClockchainWallet {
         }
     }
     
+    async connectCoinbaseWallet() {
+        // Load Coinbase adapter if not already loaded
+        if (!window.CoinbaseEmbeddedWallet) {
+            throw new Error('Coinbase Embedded Wallet not loaded. Please refresh the page.');
+        }
+        
+        // Create adapter instance
+        this.adapter = new window.CoinbaseEmbeddedWallet();
+        await this.adapter.init();
+        
+        // Get email from current auth session or prompt
+        const email = await this.getCurrentUserEmail();
+        if (!email) {
+            throw new Error('Please sign in with your email first');
+        }
+        
+        // Authenticate and get wallet address
+        this.address = await this.adapter.authenticate(email);
+        this.provider = this.adapter.provider;
+        this.isConnected = true;
+        this.chainId = this.networks.baseSepolia.chainId;
+        
+        // Listen for events
+        this.adapter.on('accountsChanged', (accounts) => {
+            if (accounts.length === 0) {
+                this.disconnect();
+            } else {
+                this.address = accounts[0];
+                this.updateConnectionStatus();
+            }
+        });
+        
+        this.adapter.on('chainChanged', (chainId) => {
+            this.chainId = chainId;
+            this.updateNetworkDisplay();
+        });
+    }
+    
+    async connectMetaMask() {
+        if (typeof window.ethereum === 'undefined') {
+            throw new Error('Please install MetaMask to use this option');
+        }
+        
+        // Request account access
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        
+        if (accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+        
+        this.address = accounts[0];
+        this.provider = window.ethereum;
+        this.adapter = window.ethereum; // For compatibility
+        this.isConnected = true;
+        
+        // Get current chain
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        this.chainId = chainId;
+        
+        // Switch to BASE Sepolia if not on correct network
+        if (chainId !== this.networks.baseSepolia.chainId) {
+            await this.switchToBaseSepolia();
+        }
+        
+        // Listen for account changes
+        window.ethereum.on('accountsChanged', (accounts) => {
+            if (accounts.length === 0) {
+                this.disconnect();
+            } else {
+                this.address = accounts[0];
+                this.updateConnectionStatus();
+            }
+        });
+        
+        // Listen for chain changes
+        window.ethereum.on('chainChanged', (chainId) => {
+            window.location.reload();
+        });
+    }
+    
+    async getCurrentUserEmail() {
+        try {
+            // Check Firebase auth status
+            const response = await fetch('/api/embedded/auth/status');
+            const data = await response.json();
+            
+            if (data.authenticated && data.email) {
+                return data.email;
+            }
+            
+            // Prompt for email if not authenticated
+            return prompt('Enter your email to connect wallet:');
+        } catch (error) {
+            console.error('Error getting user email:', error);
+            return null;
+        }
+    }
+    
     async switchToBaseSepolia() {
         try {
-            await window.ethereum.request({
+            // Use adapter if available, otherwise fallback to direct ethereum access
+            const provider = this.adapter || window.ethereum;
+            
+            await provider.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: this.networks.baseSepolia.chainId }],
             });
         } catch (switchError) {
-            // This error code indicates that the chain has not been added to MetaMask
-            if (switchError.code === 4902) {
+            // This error code indicates that the chain has not been added
+            if (switchError.code === 4902 && window.ethereum) {
                 try {
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
@@ -148,7 +233,6 @@ class ClockchainWallet {
                     });
                 } catch (addError) {
                     throw new Error('Failed to add BASE Sepolia network');
-                }
             } else {
                 throw switchError;
             }

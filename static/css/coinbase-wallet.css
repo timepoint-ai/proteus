@@ -1,0 +1,248 @@
+/**
+ * Coinbase Embedded Wallet Styles
+ */
+
+/* Transaction Confirmation Modal */
+.coinbase-tx-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coinbase-tx-modal .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.coinbase-tx-modal .modal-content {
+    position: relative;
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.coinbase-tx-modal h3 {
+    color: #fff;
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.coinbase-tx-modal .tx-details {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.coinbase-tx-modal .tx-details p {
+    color: #b8b8b8;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.coinbase-tx-modal .tx-details strong {
+    color: #fff;
+    font-weight: 500;
+    display: inline-block;
+    width: 80px;
+}
+
+.coinbase-tx-modal .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.coinbase-tx-modal button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.coinbase-tx-modal .btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.coinbase-tx-modal .btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.coinbase-tx-modal .btn-confirm {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
+
+.coinbase-tx-modal .btn-confirm:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Wallet Type Switcher */
+.wallet-type-switcher {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(30, 30, 46, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.wallet-type-switcher label {
+    color: #b8b8b8;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.wallet-type-switcher select {
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.wallet-type-switcher select:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Coinbase Wallet Status Badge */
+.wallet-status.coinbase-wallet {
+    background: linear-gradient(135deg, #0052ff 0%, #0033a0 100%);
+    border: 1px solid #0052ff;
+}
+
+.wallet-status.coinbase-wallet .wallet-type-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-left: 10px;
+}
+
+/* Email Authentication Modal */
+.email-auth-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10001;
+}
+
+.email-auth-modal h3 {
+    color: #fff;
+    margin: 0 0 20px 0;
+    font-size: 20px;
+}
+
+.email-auth-modal input {
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.email-auth-modal input:focus {
+    outline: none;
+    border-color: #0052ff;
+}
+
+.email-auth-modal button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #0052ff 0%, #0033a0 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.email-auth-modal button:hover {
+    background: linear-gradient(135deg, #0033a0 0%, #0052ff 100%);
+}
+
+/* Loading Spinner */
+.coinbase-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #0052ff;
+    border-radius: 50%;
+    animation: coinbase-spin 1s linear infinite;
+}
+
+@keyframes coinbase-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.coinbase-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10002;
+    animation: slideIn 0.3s ease-out;
+}
+
+.coinbase-message.success {
+    background: linear-gradient(135deg, #00c851 0%, #00a846 100%);
+    color: #fff;
+}
+
+.coinbase-message.error {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+    color: #fff;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
