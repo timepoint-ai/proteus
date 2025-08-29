@@ -4,14 +4,15 @@
 
 ## 🎯 Latest Changes (January 28, 2025)
 
-### Performance & UX Improvements
-- **Oracle Requirements**: Reduced from 3 to 1 minimum oracle requirement for better user experience
-  - Users now only need to provide 1 oracle address (system automatically pads to meet contract requirements)
-  - Smart contract compatibility maintained with automatic padding
-- **Gas Optimization**: Fixed excessive gas fee estimation issues on BASE Sepolia
-  - Transaction fees reduced from $200+ to just a few cents
-  - Implemented explicit gas limits (200k-500k) with 1 gwei gas price
-  - Added 20% safety buffer for all transactions
+### Coinbase Embedded Wallet Integration 
+- **Firebase Authentication**: Real email OTP verification now active
+  - Firebase Auth integrated for production-ready authentication
+  - Email verification links sent to users (not mock)
+  - TEE-secured wallet creation after authentication
+- **Performance & UX Improvements**
+  - Oracle requirements reduced from 3 to 1 minimum at UI level
+  - Gas fees optimized from $200+ to pennies (1 gwei on BASE Sepolia)
+  - Transaction limits: 500k gas for markets, 300k for submissions
 
 ## 🎯 What is Clockchain?
 
@@ -35,24 +36,33 @@ With 100 Genesis NFTs at $1M daily volume:
 ## 🚀 Quick Start
 
 ### Prerequisites
-- MetaMask or Coinbase Wallet
-- BASE Sepolia ETH for testing
+- Email address for authentication (Firebase)
+- BASE Sepolia ETH for testing transactions
 - Node.js 18+ and Python 3.10+
 
-### Installation
+### Test the Platform
+
+1. **Visit**: `/api/embedded/test` - Embedded wallet authentication interface
+2. **Enter email**: Receive real verification email via Firebase
+3. **Verify OTP**: Create TEE-secured wallet
+4. **Fund wallet**: Coming soon - Coinbase Onramp integration
+
+### Required Configuration
 
 ```bash
-# Clone repository
-git clone <repository>
+# Firebase Authentication (CONFIGURED ✅)
+FIREBASE_API_KEY=<your-key>
+FIREBASE_AUTH_DOMAIN=<your-domain>
+FIREBASE_PROJECT_ID=<your-project>
+FIREBASE_APP_ID=<your-app-id>
 
-# Install dependencies (auto-installed on Replit)
-npm install
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Add your DEPLOYER_PRIVATE_KEY and other secrets
+# Coinbase Embedded Wallet (CONFIGURED ✅)
+COINBASE_PROJECT_ID=<your-project-id>
+COINBASE_API_KEY_NAME=<your-key-name>
+COINBASE_API_KEY_PRIVATE_KEY=<your-private-key>
 ```
+
+See [FIREBASE-SETUP-GUIDE.md](./FIREBASE-SETUP-GUIDE.md) for Firebase Console configuration.
 
 ### Deploy Genesis NFTs
 
@@ -90,12 +100,12 @@ Platform Fee: 7% of market volume
 - **Builder Pool**: 28.6% → 2% of volume
 - **Bittensor AI Pool**: 14.3% → 1% of volume
 
-### Technology Stack (Fully Decentralized)
+### Technology Stack
 - **Blockchain**: BASE (Coinbase L2) exclusively - ALL data on-chain
 - **Smart Contracts**: Solidity 0.8.19+ with full event indexing
 - **Backend**: Flask + Web3.py (chain-only API routes)
-- **Frontend**: Web3.js + MetaMask/Coinbase Wallet integration
-- **Authentication**: Wallet-based JWT authentication only
+- **Frontend**: Web3.js + Coinbase Embedded Wallet
+- **Authentication**: Firebase Auth for email OTP + Wallet-based JWT
 - **Oracle**: Decentralized X.com integration with on-chain verification
 - **Performance**: Redis caching + RPC retry logic with exponential backoff
 - **Database**: REMOVED - All data now on blockchain
