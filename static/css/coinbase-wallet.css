@@ -144,12 +144,31 @@
     margin-left: 10px;
 }
 
+/* Email Authentication Modal Wrapper */
+.email-auth-modal-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.email-auth-modal-wrapper .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
 /* Email Authentication Modal */
 .email-auth-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
     border-radius: 12px;
     padding: 30px;
@@ -197,6 +216,111 @@
 
 .email-auth-modal button:hover {
     background: linear-gradient(135deg, #0033a0 0%, #0052ff 100%);
+}
+
+/* Auth Modal Additional Styles */
+.email-auth-modal .auth-description {
+    color: #b8b8b8;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.email-auth-modal .auth-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.email-auth-modal .auth-divider span {
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3e 100%);
+    padding: 0 15px;
+    color: #666;
+    font-size: 12px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+}
+
+.email-auth-modal .auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.email-auth-modal .auth-option-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #b8b8b8;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.email-auth-modal .auth-option-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.email-auth-modal .auth-link-btn {
+    background: none;
+    border: none;
+    color: #0052ff;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 5px;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.email-auth-modal .auth-link-btn:hover {
+    text-decoration: underline;
+}
+
+.email-auth-modal .close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.email-auth-modal .close-modal-btn:hover {
+    color: #fff;
+}
+
+/* Hide elements with d-none class */
+.d-none {
+    display: none !important;
+}
+
+/* Wallet Type Badge */
+.wallet-type-badge {
+    background: linear-gradient(135deg, #0052ff 0%, #0033a0 100%);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 /* Loading Spinner */

@@ -93,23 +93,24 @@
                 </ul>
                 
                 <ul class="navbar-nav ms-auto">
-                    <!-- Wallet Connection Widget -->
+                    <!-- Auth/Wallet Widget -->
                     <li class="nav-item me-3">
                         <div id="wallet-widget" class="d-flex align-items-center">
                             <button id="wallet-connect-btn" class="btn btn-primary btn-sm">
-                                <i class="fas fa-wallet me-2"></i>
-                                Connect Wallet
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Sign In
                             </button>
                             <div id="wallet-status" class="d-none align-items-center">
                                 <div class="me-3">
                                     <small class="text-muted">Balance:</small>
-                                    <span id="wallet-balance" class="text-white ms-1">0.00 ETH</span>
+                                    <span id="wallet-balance" class="text-white ms-1">$0.00</span>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
                                     <span id="wallet-address" class="text-white"></span>
-                                    <button id="wallet-disconnect-btn" class="btn btn-sm btn-outline-danger ms-2" title="Disconnect">
-                                        <i class="fas fa-power-off"></i>
+                                    <span class="wallet-type-badge ms-2">Coinbase</span>
+                                    <button id="wallet-disconnect-btn" class="btn btn-sm btn-outline-danger ms-2" title="Sign Out">
+                                        <i class="fas fa-sign-out-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -230,6 +231,7 @@
     
     <!-- Web3 and Blockchain Integration -->
     <script src="{{ url_for('static', filename='js/coinbase-wallet.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth-modal.js') }}"></script>
     <script src="{{ url_for('static', filename='js/wallet.js') }}"></script>
     <script src="{{ url_for('static', filename='js/base-blockchain.js') }}"></script>
     <script src="{{ url_for('static', filename='js/market-blockchain.js') }}"></script>

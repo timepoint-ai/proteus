@@ -96,8 +96,14 @@ class ClockchainWallet {
     async connect() {
         try {
             if (this.walletType === 'coinbase') {
-                // Use Coinbase Embedded Wallet
-                await this.connectCoinbaseWallet();
+                // Show email auth modal for Coinbase
+                if (window.authModal) {
+                    window.authModal.show();
+                    return; // Auth modal will handle the connection
+                } else {
+                    // Fallback to direct Coinbase connection
+                    await this.connectCoinbaseWallet();
+                }
             } else if (this.walletType === 'metamask') {
                 // Use MetaMask (legacy support)
                 await this.connectMetaMask();
@@ -233,6 +239,7 @@ class ClockchainWallet {
                     });
                 } catch (addError) {
                     throw new Error('Failed to add BASE Sepolia network');
+                }
             } else {
                 throw switchError;
             }

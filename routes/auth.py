@@ -1,20 +1,29 @@
 """
 Wallet authentication routes for BASE-only architecture
 Phase 2: Wallet-only authentication endpoints
+Now includes Coinbase Embedded Wallet email authentication
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import secrets
+import random
 from services.wallet_auth import wallet_auth_service
+from services.firebase_auth import FirebaseAuthService
 
 logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth', __name__)
 
+# Initialize Firebase Auth Service
+firebase_auth = FirebaseAuthService()
+
 # Store nonces temporarily (in production, use Redis with expiry)
 nonce_store = {}
+
+# Store OTP codes temporarily (in production, use Redis with expiry)
+otp_store = {}
 
 @auth_bp.route('/auth/nonce/<address>', methods=['GET'])
 def get_auth_nonce(address):
@@ -40,6 +49,111 @@ def get_auth_nonce(address):
     except Exception as e:
         logger.error(f"Error generating nonce: {e}")
         return jsonify({'error': 'Failed to generate nonce'}), 500
+
+@auth_bp.route('/api/embedded/auth/send-otp', methods=['POST'])
+def send_otp():
+    """Send OTP to email for Coinbase Embedded Wallet authentication"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+            
+        # Generate 6-digit OTP
+        otp = str(random.randint(100000, 999999))
+        
+        # Store OTP with expiry (5 minutes)
+        otp_store[email.lower()] = {
+            'otp': otp,
+            'timestamp': datetime.utcnow(),
+            'expires_at': datetime.utcnow() + timedelta(minutes=5)
+        }
+        
+        # Send OTP via Firebase
+        success = firebase_auth.send_otp_email(email, otp)
+        
+        if success:
+            logger.info(f"OTP sent to {email}")
+            return jsonify({'success': True, 'message': 'OTP sent successfully'})
+        else:
+            return jsonify({'error': 'Failed to send OTP'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error sending OTP: {e}")
+        return jsonify({'error': 'Failed to send OTP'}), 500
+
+@auth_bp.route('/api/embedded/auth/verify-otp', methods=['POST'])
+def verify_otp():
+    """Verify OTP and create authenticated session"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        otp = data.get('otp')
+        
+        if not all([email, otp]):
+            return jsonify({'error': 'Email and OTP are required'}), 400
+            
+        # Check if OTP exists and is valid
+        stored_otp = otp_store.get(email.lower())
+        
+        if not stored_otp:
+            return jsonify({'error': 'Invalid or expired OTP'}), 400
+            
+        # Check expiry
+        if datetime.utcnow() > stored_otp['expires_at']:
+            del otp_store[email.lower()]
+            return jsonify({'error': 'OTP has expired'}), 400
+            
+        # Verify OTP
+        if stored_otp['otp'] != otp:
+            return jsonify({'error': 'Invalid OTP'}), 400
+            
+        # Clean up used OTP
+        del otp_store[email.lower()]
+        
+        # Create authenticated session
+        session['authenticated'] = True
+        session['email'] = email
+        session['wallet_type'] = 'coinbase'
+        
+        # Generate a wallet address for the user (deterministic from email)
+        # In production, this would be the actual Coinbase wallet address
+        import hashlib
+        wallet_hash = hashlib.sha256(email.encode()).hexdigest()
+        wallet_address = '0x' + wallet_hash[:40]
+        
+        session['wallet_address'] = wallet_address
+        
+        return jsonify({
+            'success': True,
+            'email': email,
+            'wallet_address': wallet_address,
+            'message': 'Successfully authenticated'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error verifying OTP: {e}")
+        return jsonify({'error': 'Failed to verify OTP'}), 500
+
+@auth_bp.route('/api/embedded/auth/status', methods=['GET'])
+def auth_status():
+    """Check authentication status"""
+    try:
+        if session.get('authenticated'):
+            return jsonify({
+                'authenticated': True,
+                'email': session.get('email'),
+                'wallet_address': session.get('wallet_address'),
+                'wallet_type': session.get('wallet_type', 'coinbase')
+            })
+        else:
+            return jsonify({
+                'authenticated': False
+            })
+    except Exception as e:
+        logger.error(f"Error checking auth status: {e}")
+        return jsonify({'authenticated': False}), 500
 
 @auth_bp.route('/auth/verify', methods=['POST'])
 def verify_wallet():
@@ -135,9 +249,9 @@ def logout():
         logger.error(f"Error during logout: {e}")
         return jsonify({'error': 'Logout failed'}), 500
 
-@auth_bp.route('/auth/status', methods=['GET'])
-def auth_status():
-    """Check authentication status"""
+@auth_bp.route('/auth/jwt-status', methods=['GET'])
+def jwt_auth_status():
+    """Check JWT authentication status for MetaMask"""
     try:
         auth_header = request.headers.get('Authorization')
         
@@ -162,7 +276,7 @@ def auth_status():
             })
             
     except Exception as e:
-        logger.error(f"Error checking auth status: {e}")
+        logger.error(f"Error checking JWT auth status: {e}")
         return jsonify({
             'authenticated': False,
             'address': None
