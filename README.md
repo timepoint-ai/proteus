@@ -4,7 +4,7 @@
 
 ## 🎯 Latest Changes (January 28, 2025)
 
-### Coinbase Embedded Wallet Integration 
+### Coinbase Embedded Wallet Integration
 - **Firebase Authentication**: Real email OTP verification now active
   - Firebase Auth integrated for production-ready authentication
   - Email verification links sent to users (not mock)
@@ -13,6 +13,24 @@
   - Oracle requirements reduced from 3 to 1 minimum at UI level
   - Gas fees optimized from $200+ to pennies (1 gwei on BASE Sepolia)
   - Transaction limits: 500k gas for markets, 300k for submissions
+
+## 📋 Gap Closing Plan (November 2025)
+
+**Target Mainnet Launch: January 15, 2026**
+
+A comprehensive 12-week plan to close all gaps and deploy to BASE mainnet. See **[GAP_CLOSING_PLAN.md](./GAP_CLOSING_PLAN.md)** for the complete roadmap.
+
+**Key Milestones:**
+- ✅ **Current**: Testnet deployed, 60 Genesis NFTs minted
+- 🔄 **Week 1-2**: Frontend wallet migration (Coinbase + MetaMask)
+- 🔄 **Week 3-5**: Security audit & comprehensive testing
+- 🎯 **Week 6**: Deploy to BASE mainnet
+- 🎯 **Week 7**: Genesis NFT distribution (100 total)
+- 🎯 **Week 8-9**: Coinbase Onramp integration
+- 🎯 **Week 10-11**: Launch first markets with real users
+- 🎯 **Week 12**: Full production operation
+
+**[View Complete Plan →](./GAP_CLOSING_PLAN.md)**
 
 ## 🎯 What is Clockchain?
 
@@ -224,39 +242,61 @@ Recent mainnet-ready transactions on BASE Sepolia:
 
 ## 📚 Documentation
 
-Core documentation in `/docs/`:
+### Core Documentation
+- **[Gap Closing Plan](./GAP_CLOSING_PLAN.md)** - Complete roadmap to mainnet launch
 - [Engineering Architecture](docs/ENGINEERING.md) - Technical implementation details
 - [Governance Model](docs/GOVERNANCE.md) - Decentralized governance structure
 - [Platform Logic Analysis](docs/LOGIC.md) - Economic model and fee distribution
+
+### Setup Guides
+- [Firebase Setup Guide](./FIREBASE-SETUP-GUIDE.md) - Email authentication configuration
+- [Coinbase Integration Guide](./COINBASE-INTEGRATION-GUIDE.md) - Embedded wallet setup
 - [MetaMask Setup Guide](docs/METAMASK_SETUP.md) - Wallet configuration
 - [Minting Guide](docs/MINTING_GUIDE.md) - How to mint Genesis NFTs
 - [View Your NFTs](docs/VIEW_YOUR_NFTS.md) - Check your Genesis NFT collection
 
+### Additional Documentation
+- [API Documentation](docs/API_DOCUMENTATION.md) - API endpoints reference
+- [Bittensor Integration](docs/BITTENSOR_INTEGRATION.md) - AI agent integration
+- [Phase 7 Complete](docs/PHASE7_COMPLETE.md) - Migration completion status
+
+### Archived Plans
+Previous planning documents are available in `docs/archive/` for historical reference.
+
 ## 🚀 Roadmap
 
-### ✅ Phase 1: Genesis NFT System (Complete - January 2025)
-- Deployed Genesis NFT contract with 100 fixed supply
-- Implemented 7X improved payout system (1.4% of volume)
-- On-chain SVG art generation
-- Verified on BASE Sepolia with real transactions
+See **[GAP_CLOSING_PLAN.md](./GAP_CLOSING_PLAN.md)** for the detailed 12-week execution plan.
 
-### 🔄 Phase 2: Mainnet Launch (In Progress)
+### ✅ Completed
+- Genesis NFT System with 7X improved payouts (1.4% of volume)
+- Phase 7 blockchain migration (zero database dependencies)
+- Firebase authentication integration
+- Gas optimization (1 gwei on BASE)
+- 60 Genesis NFTs minted on testnet
+- Smart contracts deployed to BASE Sepolia
+
+### 🔄 In Progress (Weeks 1-2)
+- Frontend wallet migration (Coinbase Embedded Wallet + MetaMask)
+- Wallet abstraction layer implementation
+- Multi-wallet support in UI
+
+### 🎯 Next Steps (Weeks 3-6)
+- Comprehensive security audit (CertiK/OpenZeppelin)
+- Load and performance testing
 - Deploy to BASE mainnet
-- Open Genesis NFT minting window
-- Launch initial prediction markets
-- Activate oracle network
+- Genesis NFT distribution (40 remaining)
 
-### 📅 Phase 3: Platform Expansion (Q2 2025)
+### 📅 Post-Launch (Weeks 7-12)
+- Coinbase Onramp integration (Apple Pay, bank transfer)
+- First 10 markets with high-profile figures
+- User onboarding and growth
 - DAO governance implementation
+
+### 🔮 Future (2026+)
+- Bittensor AI subnet integration
 - Advanced market types (conditional, range)
 - Mobile applications
-- Cross-chain bridges
-
-### 🔮 Phase 4: AI Integration (Q3 2025)
-- Bittensor subnet integration
-- AI-powered prediction models
-- TAO token rewards
-- Neural network validation
+- Cross-chain deployment
 
 ## 🤝 Contributing
 

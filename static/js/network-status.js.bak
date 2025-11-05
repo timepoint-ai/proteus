@@ -112,10 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update when wallet connects/disconnects
         if (window.clockchainWallet && window.clockchainWallet.provider) {
-            window.clockchainWallet.provider.on('accountsChanged', () => {
+            window.ethereum.on('accountsChanged', () => {
                 networkStatus.updateStatus();
             });
-            window.clockchainWallet.provider.on('chainChanged', () => {
+            window.ethereum.on('chainChanged', () => {
                 networkStatus.updateStatus();
             });
         }

@@ -15,7 +15,7 @@ class WalletAuth {
      * Initialize Web3 and connect wallet
      */
     async initWeb3() {
-        if (window.clockchainWallet && window.clockchainWallet.provider) {
+        if (typeof window.clockchainWallet.provider !== 'undefined') {
             try {
                 // Request account access
                 await window.clockchainWallet.provider.request({ method: 'eth_requestAccounts' });

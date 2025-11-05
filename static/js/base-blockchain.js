@@ -71,9 +71,9 @@ class BaseBlockchain {
             
             // Phase 7: Direct blockchain execution
             if (result.success && result.transaction) {
-                // Use Web3 to interact with the contract directly
-                if (typeof window.ethereum !== 'undefined' && typeof Web3 !== 'undefined') {
-                    const web3 = new Web3(window.ethereum);
+                // Use Web3 to interact with the contract directly via wallet adapter
+                if (this.wallet.provider && typeof Web3 !== 'undefined') {
+                    const web3 = new Web3(this.wallet.provider);
                     
                     // Contract ABI for createMarket function
                     const contractABI = [
@@ -132,7 +132,7 @@ class BaseBlockchain {
                     // Redirect to market detail page
                     window.location.href = `/clockchain/market/${marketId}`;
                 } else {
-                    throw new Error('Web3 provider not found. Please install MetaMask.');
+                    throw new Error('Web3 provider not found. Please connect your wallet.');
                 }
             } else {
                 // Error in API response
@@ -250,14 +250,18 @@ class BaseBlockchain {
         const checkInterval = 3000; // 3 seconds
         const maxAttempts = 40; // 2 minutes max
         let attempts = 0;
-        
+
+        if (!this.wallet.provider) {
+            throw new Error('Wallet provider not available');
+        }
+
         while (attempts < maxAttempts) {
             try {
-                const receipt = await window.ethereum.request({
+                const receipt = await this.wallet.provider.request({
                     method: 'eth_getTransactionReceipt',
                     params: [txHash],
                 });
-                
+
                 if (receipt) {
                     if (receipt.status === '0x1') {
                         return receipt;
@@ -268,11 +272,11 @@ class BaseBlockchain {
             } catch (error) {
                 console.error('Error checking transaction:', error);
             }
-            
+
             await new Promise(resolve => setTimeout(resolve, checkInterval));
             attempts++;
         }
-        
+
         throw new Error('Transaction timeout');
     }
     

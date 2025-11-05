@@ -70,14 +70,19 @@ class ClockchainWallet {
     
     async checkExistingConnection() {
         // Check based on wallet type
-        if (this.walletType === 'metamask' && typeof window.ethereum !== 'undefined') {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    await this.connect();
+        if (this.walletType === 'metamask') {
+            // Check if MetaMask is available
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    // Set temporary provider to check accounts
+                    const metamaskProvider = window.ethereum;
+                    const accounts = await metamaskProvider.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await this.connect();
+                    }
+                } catch (error) {
+                    console.error('Error checking existing MetaMask connection:', error);
                 }
-            } catch (error) {
-                console.error('Error checking existing connection:', error);
             }
         } else if (this.walletType === 'coinbase') {
             // Check if user is authenticated with Firebase
@@ -164,30 +169,32 @@ class ClockchainWallet {
         if (typeof window.ethereum === 'undefined') {
             throw new Error('Please install MetaMask to use this option');
         }
-        
+
+        // Set provider and adapter to MetaMask
+        this.provider = window.ethereum;
+        this.adapter = window.ethereum; // For compatibility
+
         // Request account access
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        
+        const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
+
         if (accounts.length === 0) {
             throw new Error('No accounts found');
         }
-        
+
         this.address = accounts[0];
-        this.provider = window.ethereum;
-        this.adapter = window.ethereum; // For compatibility
         this.isConnected = true;
-        
+
         // Get current chain
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const chainId = await this.provider.request({ method: 'eth_chainId' });
         this.chainId = chainId;
-        
+
         // Switch to BASE Sepolia if not on correct network
         if (chainId !== this.networks.baseSepolia.chainId) {
             await this.switchToBaseSepolia();
         }
-        
-        // Listen for account changes
-        window.ethereum.on('accountsChanged', (accounts) => {
+
+        // Listen for account changes using this.provider
+        this.provider.on('accountsChanged', (accounts) => {
             if (accounts.length === 0) {
                 this.disconnect();
             } else {
@@ -195,9 +202,9 @@ class ClockchainWallet {
                 this.updateConnectionStatus();
             }
         });
-        
-        // Listen for chain changes
-        window.ethereum.on('chainChanged', (chainId) => {
+
+        // Listen for chain changes using this.provider
+        this.provider.on('chainChanged', (chainId) => {
             window.location.reload();
         });
     }
@@ -222,18 +229,21 @@ class ClockchainWallet {
     
     async switchToBaseSepolia() {
         try {
-            // Use adapter if available, otherwise fallback to direct ethereum access
-            const provider = this.adapter || window.ethereum;
-            
-            await provider.request({
+            // Use provider (already set during connection)
+            if (!this.provider) {
+                throw new Error('No wallet provider available');
+            }
+
+            await this.provider.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: this.networks.baseSepolia.chainId }],
             });
         } catch (switchError) {
             // This error code indicates that the chain has not been added
-            if (switchError.code === 4902 && window.ethereum) {
+            // Only MetaMask supports adding new chains
+            if (switchError.code === 4902 && this.walletType === 'metamask' && this.provider) {
                 try {
-                    await window.ethereum.request({
+                    await this.provider.request({
                         method: 'wallet_addEthereumChain',
                         params: [this.networks.baseSepolia],
                     });
@@ -267,17 +277,20 @@ class ClockchainWallet {
     }
     
     async updateBalance() {
-        if (!this.isConnected || !this.address) return;
-        
+        if (!this.isConnected || !this.address || !this.provider) return;
+
         try {
-            const balance = await window.ethereum.request({
+            const balance = await this.provider.request({
                 method: 'eth_getBalance',
                 params: [this.address, 'latest']
             });
-            
+
             // Convert from hex wei to ETH
             const ethBalance = parseInt(balance, 16) / 1e18;
-            document.getElementById('wallet-balance').textContent = ethBalance.toFixed(4) + ' ETH';
+            const balanceElement = document.getElementById('wallet-balance');
+            if (balanceElement) {
+                balanceElement.textContent = ethBalance.toFixed(4) + ' ETH';
+            }
         } catch (error) {
             console.error('Error fetching balance:', error);
         }
@@ -312,12 +325,12 @@ class ClockchainWallet {
     }
     
     async signMessage(message) {
-        if (!this.isConnected) {
+        if (!this.isConnected || !this.provider) {
             throw new Error('Wallet not connected');
         }
-        
+
         try {
-            const signature = await window.ethereum.request({
+            const signature = await this.provider.request({
                 method: 'personal_sign',
                 params: [message, this.address],
             });
@@ -328,12 +341,12 @@ class ClockchainWallet {
     }
     
     async sendTransaction(params) {
-        if (!this.isConnected) {
+        if (!this.isConnected || !this.provider) {
             throw new Error('Wallet not connected');
         }
-        
+
         try {
-            const txHash = await window.ethereum.request({
+            const txHash = await this.provider.request({
                 method: 'eth_sendTransaction',
                 params: [params],
             });
@@ -344,15 +357,20 @@ class ClockchainWallet {
     }
     
     async estimateGas(params) {
+        if (!this.provider) {
+            console.warn('No provider available for gas estimation');
+            return '0x30d40'; // Default gas limit (200k)
+        }
+
         try {
-            const gas = await window.ethereum.request({
+            const gas = await this.provider.request({
                 method: 'eth_estimateGas',
                 params: [params],
             });
             return gas;
         } catch (error) {
             console.error('Gas estimation failed:', error);
-            return '0x30d40'; // Default gas limit
+            return '0x30d40'; // Default gas limit (200k)
         }
     }
     

@@ -34,12 +34,14 @@ class MarketBlockchain {
                 console.error('Web3 library not loaded. Please ensure Web3.js is included.');
                 return;
             }
-            
-            if (typeof window.ethereum !== 'undefined') {
-                this.web3 = new Web3(window.ethereum);
+
+            // Use wallet provider if available, otherwise use read-only provider
+            if (window.clockchainWallet && window.clockchainWallet.provider) {
+                this.web3 = new Web3(window.clockchainWallet.provider);
             } else {
-                // Use read-only provider for BASE Sepolia
+                // Use read-only provider for BASE Sepolia (for querying without wallet)
                 this.web3 = new Web3('https://sepolia.base.org');
+                console.log('Using read-only RPC provider');
             }
             
             // Load contract ABIs
