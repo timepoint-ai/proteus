@@ -30,6 +30,7 @@ class BaseBlockchainService:
         # Contract addresses (to be loaded from deployment files)
         self.contracts = {
             'PredictionMarket': None,
+            'PredictionMarketV2': None,  # New V2 with resolution mechanism
             'ClockchainOracle': None,
             'NodeRegistry': None,
             'PayoutManager': None,
@@ -59,8 +60,8 @@ class BaseBlockchainService:
             # Load from Hardhat artifacts
             artifacts_dir = 'artifacts/contracts/src'
             contract_names = [
-                'PredictionMarket', 'ClockchainOracle', 'NodeRegistry', 'PayoutManager',
-                'ActorRegistry', 'EnhancedPredictionMarket', 'DecentralizedOracle',
+                'PredictionMarket', 'PredictionMarketV2', 'ClockchainOracle', 'NodeRegistry',
+                'PayoutManager', 'ActorRegistry', 'EnhancedPredictionMarket', 'DecentralizedOracle',
                 'AdvancedMarkets', 'SecurityAudit'
             ]
             for contract_name in contract_names:
@@ -172,7 +173,293 @@ class BaseBlockchainService:
             }
             
     # READ-ONLY BLOCKCHAIN METHODS (Phase 1B Implementation)
-    
+
+    # ====================================================================
+    # SIMPLE PREDICTION MARKET METHODS (PredictionMarket contract)
+    # ====================================================================
+    # These methods work with the simple PredictionMarket contract that
+    # has no governance requirements. Use these for testing.
+    # ====================================================================
+
+    def get_simple_market_count(self) -> int:
+        """Get total number of markets from simple PredictionMarket"""
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                logger.warning("PredictionMarket contract not loaded")
+                return 0
+            return contract.functions.marketCount().call()
+        except Exception as e:
+            logger.error(f"Error getting market count: {e}")
+            return 0
+
+    def get_simple_market(self, market_id: int) -> Optional[Dict[str, Any]]:
+        """Get market from simple PredictionMarket contract
+
+        Market struct layout:
+        0: string question
+        1: address creator
+        2: uint256 startTime
+        3: uint256 endTime
+        4: bool resolved
+        5: uint256 winningSubmissionId
+        6: uint256 totalVolume
+        7: string actorTwitterHandle
+        8: string targetTweetId
+        9: bool xcomOnly
+        10: uint256 platformFeeCollected
+        """
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                logger.error("PredictionMarket contract not loaded")
+                return None
+
+            market = contract.functions.markets(market_id).call()
+            return {
+                'id': market_id,
+                'question': market[0],
+                'creator': market[1],
+                'start_time': market[2],
+                'end_time': market[3],
+                'resolved': market[4],
+                'winning_submission_id': market[5],
+                'total_volume': Web3.from_wei(market[6], 'ether'),
+                'actor_twitter_handle': market[7],
+                'target_tweet_id': market[8],
+                'xcom_only': market[9],
+                'platform_fee_collected': Web3.from_wei(market[10], 'ether')
+            }
+        except Exception as e:
+            logger.error(f"Error getting simple market {market_id}: {e}")
+            return None
+
+    def get_simple_submission_count(self) -> int:
+        """Get total number of submissions from simple PredictionMarket"""
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                return 0
+            return contract.functions.submissionCount().call()
+        except Exception as e:
+            logger.error(f"Error getting submission count: {e}")
+            return 0
+
+    def get_simple_submission(self, submission_id: int) -> Optional[Dict[str, Any]]:
+        """Get submission from simple PredictionMarket contract
+
+        Submission struct layout:
+        0: uint256 marketId
+        1: address creator
+        2: string predictedText
+        3: uint256 stake
+        4: uint256 totalBets
+        5: uint256 levenshteinDistance
+        6: bool isWinner
+        7: string screenshotIpfsHash
+        8: bytes32 screenshotBase64Hash
+        """
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                logger.error("PredictionMarket contract not loaded")
+                return None
+
+            sub = contract.functions.submissions(submission_id).call()
+            return {
+                'id': submission_id,
+                'market_id': sub[0],
+                'creator': sub[1],
+                'predicted_text': sub[2],
+                'stake': Web3.from_wei(sub[3], 'ether'),
+                'total_bets': Web3.from_wei(sub[4], 'ether'),
+                'levenshtein_distance': sub[5],
+                'is_winner': sub[6],
+                'screenshot_ipfs_hash': sub[7]
+            }
+        except Exception as e:
+            logger.error(f"Error getting simple submission {submission_id}: {e}")
+            return None
+
+    def get_simple_market_submissions(self, market_id: int) -> List[int]:
+        """Get list of submission IDs for a market"""
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                return []
+            return contract.functions.getMarketSubmissions(market_id).call()
+        except Exception as e:
+            logger.error(f"Error getting market submissions: {e}")
+            return []
+
+    def get_simple_bet_count(self) -> int:
+        """Get total number of bets from simple PredictionMarket"""
+        try:
+            contract = self.contracts.get('PredictionMarket')
+            if not contract:
+                return 0
+            return contract.functions.betCount().call()
+        except Exception as e:
+            logger.error(f"Error getting bet count: {e}")
+            return 0
+
+    # ====================================================================
+    # PREDICTION MARKET V2 METHODS (with full resolution mechanism)
+    # ====================================================================
+    # PredictionMarketV2 includes:
+    # - On-chain Levenshtein distance for winner determination
+    # - resolveMarket() for determining winners
+    # - claimPayout() for winners
+    # - Pull-based fee collection
+    # ====================================================================
+
+    def get_v2_market_count(self) -> int:
+        """Get total number of markets from PredictionMarketV2"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                logger.warning("PredictionMarketV2 contract not loaded")
+                return 0
+            return contract.functions.marketCount().call()
+        except Exception as e:
+            logger.error(f"Error getting V2 market count: {e}")
+            return 0
+
+    def get_v2_market(self, market_id: int) -> Optional[Dict[str, Any]]:
+        """Get market from PredictionMarketV2 contract
+
+        Market struct layout (from getMarketDetails):
+        - actorHandle: string
+        - endTime: uint256
+        - totalPool: uint256
+        - resolved: bool
+        - winningSubmissionId: uint256
+        - creator: address
+        - submissionIds: uint256[]
+        """
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                logger.error("PredictionMarketV2 contract not loaded")
+                return None
+
+            # Use getMarketDetails for comprehensive data
+            result = contract.functions.getMarketDetails(market_id).call()
+            return {
+                'id': market_id,
+                'actor_handle': result[0],
+                'end_time': result[1],
+                'total_pool': Web3.from_wei(result[2], 'ether'),
+                'resolved': result[3],
+                'winning_submission_id': result[4],
+                'creator': result[5],
+                'submission_ids': list(result[6]),
+                # Computed fields for backward compatibility
+                'status': 'resolved' if result[3] else 'active'
+            }
+        except Exception as e:
+            logger.error(f"Error getting V2 market {market_id}: {e}")
+            return None
+
+    def get_v2_submission_count(self) -> int:
+        """Get total number of submissions from PredictionMarketV2"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                return 0
+            return contract.functions.submissionCount().call()
+        except Exception as e:
+            logger.error(f"Error getting V2 submission count: {e}")
+            return 0
+
+    def get_v2_submission(self, submission_id: int) -> Optional[Dict[str, Any]]:
+        """Get submission from PredictionMarketV2 contract
+
+        Submission struct layout (from getSubmissionDetails):
+        - marketId: uint256
+        - submitter: address
+        - predictedText: string
+        - amount: uint256
+        - claimed: bool
+        """
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                logger.error("PredictionMarketV2 contract not loaded")
+                return None
+
+            result = contract.functions.getSubmissionDetails(submission_id).call()
+            return {
+                'id': submission_id,
+                'market_id': result[0],
+                'submitter': result[1],
+                'predicted_text': result[2],
+                'amount': Web3.from_wei(result[3], 'ether'),
+                'claimed': result[4]
+            }
+        except Exception as e:
+            logger.error(f"Error getting V2 submission {submission_id}: {e}")
+            return None
+
+    def get_v2_market_submissions(self, market_id: int) -> List[int]:
+        """Get list of submission IDs for a V2 market"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                return []
+            return list(contract.functions.getMarketSubmissions(market_id).call())
+        except Exception as e:
+            logger.error(f"Error getting V2 market submissions: {e}")
+            return []
+
+    def get_v2_user_submissions(self, user_address: str) -> List[int]:
+        """Get list of submission IDs for a user from V2 contract"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                return []
+            return list(contract.functions.getUserSubmissions(
+                Web3.to_checksum_address(user_address)
+            ).call())
+        except Exception as e:
+            logger.error(f"Error getting V2 user submissions: {e}")
+            return []
+
+    def get_v2_pending_fees(self, address: str) -> Decimal:
+        """Get pending fees for an address from V2 contract"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                return Decimal(0)
+            fees_wei = contract.functions.pendingFees(
+                Web3.to_checksum_address(address)
+            ).call()
+            return Decimal(Web3.from_wei(fees_wei, 'ether'))
+        except Exception as e:
+            logger.error(f"Error getting V2 pending fees: {e}")
+            return Decimal(0)
+
+    def get_v2_constants(self) -> Dict[str, Any]:
+        """Get V2 contract constants"""
+        try:
+            contract = self.contracts.get('PredictionMarketV2')
+            if not contract:
+                return {}
+            return {
+                'platform_fee_bps': contract.functions.PLATFORM_FEE_BPS().call(),
+                'min_bet': Web3.from_wei(contract.functions.MIN_BET().call(), 'ether'),
+                'betting_cutoff': contract.functions.BETTING_CUTOFF().call(),
+                'min_submissions': contract.functions.MIN_SUBMISSIONS().call(),
+                'max_text_length': contract.functions.MAX_TEXT_LENGTH().call()
+            }
+        except Exception as e:
+            logger.error(f"Error getting V2 constants: {e}")
+            return {}
+
+    # ====================================================================
+    # ENHANCED PREDICTION MARKET METHODS (requires governance)
+    # ====================================================================
+
     def get_actor(self, actor_address: str) -> Optional[Dict[str, Any]]:
         """Get actor details from ActorRegistry contract"""
         try:

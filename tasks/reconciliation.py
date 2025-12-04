@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app import celery, db
 from services.ledger import LedgerService
 from services.time_sync import TimeSyncService
@@ -34,7 +34,7 @@ def reconcile_time_entries(self, start_time_ms=None, end_time_ms=None):
                 'status': 'success',
                 'start_time_ms': start_time_ms,
                 'end_time_ms': end_time_ms,
-                'reconciled_at': datetime.utcnow().isoformat()
+                'reconciled_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error("Reconciliation failed")
@@ -246,7 +246,7 @@ def update_network_metrics(self):
             logger.info("Network metrics updated successfully")
             return {
                 'status': 'success',
-                'updated_at': datetime.utcnow().isoformat()
+                'updated_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error("Failed to update network metrics")
@@ -300,7 +300,7 @@ def generate_reconciliation_report(self, start_time_ms, end_time_ms):
         # Generate report
         report = {
             'status': 'success',
-            'report_generated_at': datetime.utcnow().isoformat(),
+            'report_generated_at': datetime.now(timezone.utc).isoformat(),
             'time_range': {
                 'start_time_ms': start_time_ms,
                 'end_time_ms': end_time_ms,

@@ -5,6 +5,10 @@
 
 class ClockchainWallet {
     constructor() {
+        // Session storage key
+        this.SESSION_KEY = 'clockchain_wallet_session';
+        this.SESSION_EXPIRY_HOURS = 24;
+
         // Wallet adapter pattern to support multiple wallet types
         this.walletType = localStorage.getItem('wallet_type') || 'coinbase'; // Default to Coinbase
         this.adapter = null;
@@ -13,7 +17,7 @@ class ClockchainWallet {
         this.address = null;
         this.chainId = null;
         this.isConnected = false;
-        
+
         // BASE network configurations
         this.networks = {
             base: {
@@ -69,15 +73,23 @@ class ClockchainWallet {
     }
     
     async checkExistingConnection() {
-        // Check based on wallet type
+        // First, try to restore from saved session
+        const restored = await this.restoreSession();
+        if (restored) {
+            console.log('Wallet connection restored from session');
+            this.updateConnectionStatus();
+            this.updateNetworkDisplay();
+            return;
+        }
+
+        // Fallback: Check based on wallet type without session
         if (this.walletType === 'metamask') {
-            // Check if MetaMask is available
+            // Check if MetaMask is available and has authorized accounts
             if (typeof window.ethereum !== 'undefined') {
                 try {
-                    // Set temporary provider to check accounts
-                    const metamaskProvider = window.ethereum;
-                    const accounts = await metamaskProvider.request({ method: 'eth_accounts' });
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0) {
+                        // MetaMask still authorized, do full connect
                         await this.connect();
                     }
                 } catch (error) {
@@ -90,6 +102,7 @@ class ClockchainWallet {
                 const response = await fetch('/api/embedded/auth/status');
                 const data = await response.json();
                 if (data.authenticated && data.wallet_address) {
+                    // User is authenticated, do full connect
                     await this.connect();
                 }
             } catch (error) {
@@ -149,20 +162,11 @@ class ClockchainWallet {
         this.isConnected = true;
         this.chainId = this.networks.baseSepolia.chainId;
         
-        // Listen for events
-        this.adapter.on('accountsChanged', (accounts) => {
-            if (accounts.length === 0) {
-                this.disconnect();
-            } else {
-                this.address = accounts[0];
-                this.updateConnectionStatus();
-            }
-        });
-        
-        this.adapter.on('chainChanged', (chainId) => {
-            this.chainId = chainId;
-            this.updateNetworkDisplay();
-        });
+        // Save session after successful connection
+        this.saveSession();
+
+        // Attach event listeners
+        this.attachProviderListeners();
     }
     
     async connectMetaMask() {
@@ -191,22 +195,14 @@ class ClockchainWallet {
         // Switch to BASE Sepolia if not on correct network
         if (chainId !== this.networks.baseSepolia.chainId) {
             await this.switchToBaseSepolia();
+            this.chainId = this.networks.baseSepolia.chainId;
         }
 
-        // Listen for account changes using this.provider
-        this.provider.on('accountsChanged', (accounts) => {
-            if (accounts.length === 0) {
-                this.disconnect();
-            } else {
-                this.address = accounts[0];
-                this.updateConnectionStatus();
-            }
-        });
+        // Save session after successful connection
+        this.saveSession();
 
-        // Listen for chain changes using this.provider
-        this.provider.on('chainChanged', (chainId) => {
-            window.location.reload();
-        });
+        // Attach event listeners
+        this.attachProviderListeners();
     }
     
     async getCurrentUserEmail() {
@@ -297,14 +293,42 @@ class ClockchainWallet {
     }
     
     async disconnect() {
+        // Clear session
+        this.clearSession();
+
+        // Clear state
         this.provider = null;
         this.signer = null;
+        this.adapter = null;
         this.address = null;
         this.isConnected = false;
         this.chainId = null;
+
+        // Update UI
         this.updateConnectionStatus();
         this.updateNetworkDisplay();
         this.showSuccess('Wallet disconnected');
+    }
+
+    /**
+     * Explicit logout - clears all wallet data
+     */
+    async logout() {
+        try {
+            // Notify server if we have Coinbase wallet
+            if (this.walletType === 'coinbase') {
+                try {
+                    await fetch('/auth/logout', { method: 'POST' });
+                } catch (e) {
+                    console.error('Server logout failed:', e);
+                }
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+
+        // Disconnect wallet
+        await this.disconnect();
     }
     
     updateNetworkDisplay() {
@@ -391,11 +415,231 @@ class ClockchainWallet {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         document.body.appendChild(notification);
-        
+
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
             notification.remove();
         }, 5000);
+    }
+
+    // ================================================================
+    // SESSION PERSISTENCE METHODS
+    // ================================================================
+
+    /**
+     * Save wallet session to localStorage
+     */
+    saveSession() {
+        const session = {
+            walletType: this.walletType,
+            address: this.address,
+            chainId: this.chainId,
+            connectedAt: Date.now(),
+            expiresAt: Date.now() + (this.SESSION_EXPIRY_HOURS * 60 * 60 * 1000)
+        };
+        localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
+        localStorage.setItem('wallet_type', this.walletType);
+        console.log('Wallet session saved:', session);
+    }
+
+    /**
+     * Load wallet session from localStorage
+     * @returns {Object|null} Session object or null if invalid/expired
+     */
+    loadSession() {
+        try {
+            const sessionStr = localStorage.getItem(this.SESSION_KEY);
+            if (!sessionStr) return null;
+
+            const session = JSON.parse(sessionStr);
+
+            // Check if session is expired
+            if (session.expiresAt && Date.now() > session.expiresAt) {
+                console.log('Wallet session expired');
+                this.clearSession();
+                return null;
+            }
+
+            // Validate session has required fields
+            if (!session.walletType || !session.address) {
+                console.log('Invalid wallet session');
+                this.clearSession();
+                return null;
+            }
+
+            return session;
+        } catch (error) {
+            console.error('Error loading wallet session:', error);
+            this.clearSession();
+            return null;
+        }
+    }
+
+    /**
+     * Clear wallet session from localStorage
+     */
+    clearSession() {
+        localStorage.removeItem(this.SESSION_KEY);
+        localStorage.removeItem('wallet_type');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('wallet_address');
+        console.log('Wallet session cleared');
+    }
+
+    /**
+     * Check if a valid session exists
+     * @returns {boolean}
+     */
+    hasValidSession() {
+        return this.loadSession() !== null;
+    }
+
+    /**
+     * Restore wallet connection from saved session
+     * @returns {boolean} True if successfully restored
+     */
+    async restoreSession() {
+        const session = this.loadSession();
+        if (!session) {
+            return false;
+        }
+
+        console.log('Attempting to restore wallet session:', session);
+
+        try {
+            // Set wallet type from session
+            this.walletType = session.walletType;
+
+            if (this.walletType === 'metamask') {
+                // For MetaMask, verify the connection is still valid
+                if (typeof window.ethereum !== 'undefined') {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0 && accounts[0].toLowerCase() === session.address.toLowerCase()) {
+                        // Connection is still valid, restore state
+                        this.provider = window.ethereum;
+                        this.adapter = window.ethereum;
+                        this.address = accounts[0];
+                        this.chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                        this.isConnected = true;
+
+                        // Re-attach event listeners
+                        this.attachProviderListeners();
+
+                        console.log('MetaMask session restored successfully');
+                        return true;
+                    }
+                }
+            } else if (this.walletType === 'coinbase') {
+                // For Coinbase, check if user is still authenticated
+                const response = await fetch('/api/embedded/auth/status');
+                const data = await response.json();
+
+                if (data.authenticated && data.wallet_address &&
+                    data.wallet_address.toLowerCase() === session.address.toLowerCase()) {
+                    // Re-initialize Coinbase adapter
+                    if (window.CoinbaseEmbeddedWallet) {
+                        this.adapter = new window.CoinbaseEmbeddedWallet();
+                        await this.adapter.init();
+
+                        // Set state from session
+                        this.adapter.address = session.address;
+                        this.adapter.isConnected = true;
+                        this.provider = this.adapter.provider;
+                        this.address = session.address;
+                        this.chainId = session.chainId || this.networks.baseSepolia.chainId;
+                        this.isConnected = true;
+
+                        // Re-attach event listeners
+                        this.attachProviderListeners();
+
+                        console.log('Coinbase session restored successfully');
+                        return true;
+                    }
+                }
+            }
+
+            // Session could not be restored
+            console.log('Session restoration failed, clearing session');
+            this.clearSession();
+            return false;
+
+        } catch (error) {
+            console.error('Error restoring session:', error);
+            this.clearSession();
+            return false;
+        }
+    }
+
+    /**
+     * Attach event listeners to the provider
+     */
+    attachProviderListeners() {
+        if (!this.provider) return;
+
+        // Remove existing listeners first (if any)
+        try {
+            this.provider.removeListener('accountsChanged', this.handleAccountsChanged);
+            this.provider.removeListener('chainChanged', this.handleChainChanged);
+            this.provider.removeListener('disconnect', this.handleDisconnect);
+        } catch (e) {
+            // Ignore errors from removing non-existent listeners
+        }
+
+        // Bind handlers to preserve 'this' context
+        this.handleAccountsChanged = this.handleAccountsChanged.bind(this);
+        this.handleChainChanged = this.handleChainChanged.bind(this);
+        this.handleDisconnect = this.handleDisconnect.bind(this);
+
+        // Add listeners
+        this.provider.on('accountsChanged', this.handleAccountsChanged);
+        this.provider.on('chainChanged', this.handleChainChanged);
+
+        // Some providers emit 'disconnect' event
+        if (typeof this.provider.on === 'function') {
+            this.provider.on('disconnect', this.handleDisconnect);
+        }
+    }
+
+    /**
+     * Handle account changes
+     */
+    handleAccountsChanged(accounts) {
+        console.log('Accounts changed:', accounts);
+        if (accounts.length === 0) {
+            // User disconnected wallet
+            this.handleDisconnect();
+        } else if (accounts[0].toLowerCase() !== this.address?.toLowerCase()) {
+            // User switched accounts - update and save session
+            this.address = accounts[0];
+            this.saveSession();
+            this.updateConnectionStatus();
+        }
+    }
+
+    /**
+     * Handle chain changes
+     */
+    handleChainChanged(chainId) {
+        console.log('Chain changed:', chainId);
+        this.chainId = chainId;
+        this.saveSession();
+        // Reload page on chain change to reset state
+        window.location.reload();
+    }
+
+    /**
+     * Handle disconnect
+     */
+    handleDisconnect() {
+        console.log('Wallet disconnected');
+        this.clearSession();
+        this.provider = null;
+        this.adapter = null;
+        this.address = null;
+        this.isConnected = false;
+        this.chainId = null;
+        this.updateConnectionStatus();
+        this.updateNetworkDisplay();
     }
 }
 

@@ -189,3 +189,143 @@
     background: #00D9FF;
     animation: pulse 2s infinite;
 }
+
+/* ============================================
+   MOBILE RESPONSIVENESS
+   ============================================ */
+
+/* Mobile-first button sizes (min 44px touch target) */
+@media (max-width: 768px) {
+    /* Wallet connect button - larger touch target */
+    #wallet-connect-btn {
+        min-height: 44px;
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    /* Wallet status - stack vertically on mobile */
+    #wallet-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    #wallet-status > div {
+        width: 100%;
+    }
+
+    /* Truncate wallet address on mobile */
+    #wallet-address {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Disconnect button - larger touch target */
+    #wallet-disconnect-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px;
+    }
+
+    /* Network status - reposition on mobile */
+    .network-status {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+
+    /* Chain badge - smaller on mobile */
+    .chain-badge {
+        padding: 3px 8px;
+        font-size: 10px;
+    }
+
+    /* Market cards - full width on mobile */
+    .market-card {
+        margin-bottom: 15px;
+    }
+
+    /* Bet modal - larger buttons for touch */
+    .bet-modal .btn {
+        min-height: 48px;
+        padding: 12px 20px;
+    }
+
+    /* Gas price display - smaller font */
+    .gas-price-display {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+}
+
+/* Very small screens (< 480px) */
+@media (max-width: 480px) {
+    /* Stack wallet widget elements */
+    #wallet-widget {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    #wallet-connect-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Hide balance text, show icon only */
+    #wallet-status .text-muted {
+        display: none;
+    }
+
+    /* Smaller wallet address display */
+    #wallet-address {
+        max-width: 80px;
+        font-size: 12px;
+    }
+
+    /* Wallet type badge - even smaller */
+    .wallet-type-badge {
+        font-size: 9px;
+        padding: 1px 5px;
+    }
+
+    /* Network status - hide icon text on very small screens */
+    .network-status {
+        font-size: 11px;
+    }
+}
+
+/* Tablet adjustments (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #wallet-address {
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Touch-friendly form inputs */
+@media (pointer: coarse) {
+    /* Larger input fields for touch devices */
+    #market-create-form .form-control,
+    #market-create-form .form-select {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+
+    /* Larger submit buttons */
+    #market-create-form .btn {
+        min-height: 48px;
+        padding: 12px 24px;
+    }
+
+    /* Submission items - larger click areas */
+    .submission-item {
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+}

@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, db
 from models import Actor
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 
 # Sample actors with X.com usernames
@@ -48,7 +48,7 @@ def create_test_actors():
                     follower_count=random.randint(1000000, 100000000),
                     is_test_account=True,
                     status='active',
-                    last_sync=datetime.utcnow()
+                    last_sync=datetime.now(timezone.utc)
                 )
                 db.session.add(actor)
                 db.session.commit()  # Commit each actor individually

@@ -6,17 +6,36 @@ This guide shows you how to easily place bets or create competing predictions on
 
 ---
 
+## Important: Contract Selection
+
+There are two prediction market contracts available:
+
+| Contract | Address | Use Case |
+|----------|---------|----------|
+| **PredictionMarket (simple)** | `0x667121e8f22570F2c521454D93D6A87e44488d93` | Testing - no governance required |
+| EnhancedPredictionMarket | `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` | Full governance - requires active actors |
+
+> **Note:** EnhancedPredictionMarket currently has 0 active actors (governance not bootstrapped). Use PredictionMarket (simple) for testing.
+
+---
+
 ## Prerequisites
 
-1. **MetaMask Wallet** - [Install MetaMask](https://metamask.io/download/)
+1. **Wallet** - One of the following:
+   - [MetaMask](https://metamask.io/download/) browser extension
+   - [Coinbase Wallet](https://www.coinbase.com/wallet) browser extension
+   - Email sign-in (creates embedded wallet automatically)
 2. **BASE Sepolia ETH** - Get free test ETH from [BASE Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
 3. **Market Contract ID** - Find this on any market detail page (e.g., Market #0, Market #1, etc.)
+
+> **Session Persistence:** Your wallet connection is automatically saved. You won't need to reconnect on page reload.
 
 ---
 
 ## Contract Information
 
-**EnhancedPredictionMarket Contract:** `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C`
+**PredictionMarket (simple):** `0x667121e8f22570F2c521454D93D6A87e44488d93` (recommended for testing)
+**EnhancedPredictionMarket:** `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` (requires governance)
 **Network:** BASE Sepolia Testnet
 **Chain ID:** 84532
 
@@ -209,6 +228,6 @@ Result: Others can now bet on your submission vs existing ones
 
 ---
 
-*Last Updated: August 2025*
+*Last Updated: December 2024*
 *Network: BASE Sepolia Testnet*
-*Contract: EnhancedPredictionMarket v1.0*
+*Contracts: PredictionMarket (simple) + EnhancedPredictionMarket*

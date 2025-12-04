@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 # from sqlalchemy import func, desc  # Phase 7: SQLAlchemy removed
 # from models import (  # Phase 7: Models removed
@@ -436,7 +436,7 @@ def api_stats():
             'total_submissions': Submission.query.count(),
             'total_bets': Bet.query.count(),
             'total_transactions': Transaction.query.count(),
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
         return jsonify(stats)
     except Exception as e:

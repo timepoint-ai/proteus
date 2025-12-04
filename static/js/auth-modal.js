@@ -42,7 +42,7 @@ class AuthModal {
                 
                 <button class="auth-option-btn" id="use-metamask-btn">
                     <i class="fas fa-wallet"></i>
-                    Use MetaMask (Advanced)
+                    Use External Wallet (Advanced)
                 </button>
                 
                 <button class="close-modal-btn" aria-label="Close">
@@ -111,10 +111,10 @@ class AuthModal {
         
         try {
             // Send OTP to email via Firebase
-            const response = await fetch('/api/embedded/auth/send-otp', {
+            const response = await fetch('/api/embedded/request-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ identifier: email, auth_method: 'email' })
             });
             
             if (!response.ok) {
@@ -216,10 +216,10 @@ class AuthModal {
         
         try {
             // Verify OTP with Firebase
-            const response = await fetch('/api/embedded/auth/verify-otp', {
+            const response = await fetch('/api/embedded/verify-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, otp })
+                body: JSON.stringify({ identifier: email, otp_code: otp })
             });
             
             if (!response.ok) {

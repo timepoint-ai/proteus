@@ -5,7 +5,7 @@ from services.network import NetworkService
 # from app import db, redis_client  # Phase 7: Database removed
 from config import Config
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 import hashlib
@@ -28,7 +28,7 @@ class ReconciliationService:
             bet_result = ReconciliationService.reconcile_bets(node_id)
             
             # Update last reconciliation time
-            redis_client.set(f'node:{node_id}:last_reconcile', datetime.utcnow().isoformat())
+            redis_client.set(f'node:{node_id}:last_reconcile', datetime.now(timezone.utc).isoformat())
             
             result = {
                 'time_ledger': time_result,
@@ -128,7 +128,7 @@ class ReconciliationService:
                 Transaction.created_at.desc()
     # ).first()  # Phase 7: Database removed
             
-            since_time = latest_local.created_at if latest_local else datetime.utcnow() - timedelta(days=1)
+            since_time = latest_local.created_at if latest_local else datetime.now(timezone.utc) - timedelta(days=1)
             
             reconciled_transactions = 0
             conflicts = []

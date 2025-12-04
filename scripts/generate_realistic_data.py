@@ -15,7 +15,7 @@ from services.bet_resolution import MarketResolutionService
 from services.text_analysis import TextAnalysisService
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 import logging
@@ -107,7 +107,7 @@ def generate_realistic_data():
                         follower_count=random.randint(1000000, 100000000),
                         is_test_account=True,
                         status='active',
-                        last_sync=datetime.utcnow()
+                        last_sync=datetime.now(timezone.utc)
                     )
                     actors.append(actor)
                     db.session.add(actor)
@@ -124,7 +124,7 @@ def generate_realistic_data():
                     status='active',
                     public_key=f"pk_oracle_{i+1}_{uuid.uuid4().hex[:16]}",
                     node_address=generate_wallet_address(),
-                    last_seen=datetime.utcnow()
+                    last_seen=datetime.now(timezone.utc)
                 )
                 nodes.append(node)
                 db.session.add(node)
@@ -134,7 +134,7 @@ def generate_realistic_data():
             resolution_service = MarketResolutionService()
             text_service = TextAnalysisService()
             
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
             
             # 1. Create ACTIVE markets (3)
             logger.info("Creating active markets...")

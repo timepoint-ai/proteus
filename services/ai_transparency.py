@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
 import hashlib
@@ -95,7 +95,7 @@ class AITransparencyService:
                 # Verify the module data
                 verification_result = cls._verify_module(module_type, module_data)
                 module.is_verified = verification_result['verified']
-                module.verification_timestamp = datetime.utcnow()
+                module.verification_timestamp = datetime.now(timezone.utc)
                 module.verification_details = json.dumps(verification_result)
                 
     # db.session.add(module)  # Phase 7: Database removed
@@ -141,7 +141,7 @@ class AITransparencyService:
         verification_result = {
             'verified': False,
             'module_type': module_type,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'checks': {}
         }
         
@@ -203,7 +203,7 @@ class AITransparencyService:
             profile.audit_participation = True
         
         profile.transparency_level = max(profile.transparency_level, len(modules))
-        profile.updated_at = datetime.utcnow()
+        profile.updated_at = datetime.now(timezone.utc)
     
     @classmethod
     def get_agent_transparency_score(cls, agent_id: str) -> Dict:
@@ -274,7 +274,7 @@ class AITransparencyService:
     # integration.coldkey_address = bittensor_data.get('coldkey_address')  # Phase 7: Database removed
     # integration.yuma_score = bittensor_data.get('yuma_score')  # Phase 7: Database removed
     # integration.trust_score = bittensor_data.get('trust_score')  # Phase 7: Database removed
-            integration.last_sync = datetime.utcnow()
+            integration.last_sync = datetime.now(timezone.utc)
             
     # db.session.commit()  # Phase 7: Database removed
             

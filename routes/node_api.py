@@ -4,7 +4,7 @@ Node API endpoints for multi-node communication
 
 from flask import Blueprint, request, jsonify
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 # from models import db, NodeOperator  # Phase 7: Models removed
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def health_check():
     """Health check endpoint for nodes"""
     return jsonify({
         'status': 'healthy',
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'service': 'clockchain_node'
     })
 
@@ -110,7 +110,7 @@ def node_heartbeat():
             return jsonify({'error': 'Node not registered'}), 404
             
         # Update node metrics (in a real implementation, would store these)
-        node.last_seen = datetime.utcnow()
+        node.last_seen = datetime.now(timezone.utc)
         db.session.commit()
         
         return jsonify({

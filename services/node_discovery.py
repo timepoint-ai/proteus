@@ -9,7 +9,7 @@ import logging
 import socket
 import time
 from typing import List, Dict, Optional, Set
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import websockets
 from threading import Thread, Lock
 
@@ -316,7 +316,7 @@ class NodeDiscovery:
                 for peer_id in self.active_peers:
     # node = NodeOperator.query.filter_by(operator_id=peer_id).first()  # Phase 7: Database removed
                     if node:
-                        node.last_seen = datetime.utcnow()
+                        node.last_seen = datetime.now(timezone.utc)
                         node.status = 'active'
                     else:
                         # Create new node entry
@@ -330,7 +330,7 @@ class NodeDiscovery:
     # db.session.add(node)  # Phase 7: Database removed
                         
                 # Mark inactive nodes
-                inactive_threshold = datetime.utcnow() - timedelta(seconds=self.timeout_threshold)
+                inactive_threshold = datetime.now(timezone.utc) - timedelta(seconds=self.timeout_threshold)
     # NodeOperator.query.filter(  # Phase 7: Database removed
                     NodeOperator.last_seen < inactive_threshold,
                     NodeOperator.status == 'active'

@@ -214,7 +214,7 @@ class BlockchainTestDataCleaner:
             with open('blockchain_test_data.json', 'r') as f:
                 test_data = json.load(f)
             
-            test_data['cleaned_at'] = datetime.utcnow().isoformat()
+            test_data['cleaned_at'] = datetime.now(timezone.utc).isoformat()
             test_data['cleaned_actors'] = len(test_actors)
             test_data['cleaned_markets'] = len(test_markets)
             
@@ -229,5 +229,5 @@ def main():
 
 
 if __name__ == '__main__':
-    from datetime import datetime
+    from datetime import datetime, timezone
     main()

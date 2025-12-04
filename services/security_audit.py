@@ -6,7 +6,7 @@ Production readiness, security monitoring, and emergency controls
 import logging
 import json
 from typing import Optional, Dict, List, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from web3 import Web3
 from eth_account import Account
 from collections import defaultdict
@@ -102,7 +102,7 @@ class SecurityAuditService:
         """Detect suspicious activity patterns"""
         # Get recent activities
         recent = self.suspicious_activities[user_address]
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         # Check for rapid transactions
         recent_count = sum(
@@ -133,7 +133,7 @@ class SecurityAuditService:
     ):
         """Record suspicious activity"""
         activity = {
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'type': activity_type,
             'user': user_address,
             'details': details
@@ -143,7 +143,7 @@ class SecurityAuditService:
         self.alerts.append(activity)
         
         # Keep only recent activities (last 24 hours)
-        cutoff = datetime.utcnow() - timedelta(days=1)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=1)
         self.suspicious_activities[user_address] = [
             a for a in self.suspicious_activities[user_address]
             if a['timestamp'] > cutoff
@@ -182,7 +182,7 @@ class SecurityAuditService:
                 'success': True,
                 'tx_hash': tx_hash.hex(),
                 'reason': reason,
-                'activated_at': datetime.utcnow().isoformat()
+                'activated_at': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -253,7 +253,7 @@ class SecurityAuditService:
             suspicious = self.suspicious_activities.get(user_address, [])
             recent_suspicious = [
                 a for a in suspicious
-                if datetime.utcnow() - a['timestamp'] < timedelta(hours=24)
+                if datetime.now(timezone.utc) - a['timestamp'] < timedelta(hours=24)
             ]
             
             return {
@@ -295,7 +295,7 @@ class SecurityAuditService:
     def generate_security_report(self) -> Dict:
         """Generate comprehensive security report"""
         report = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'alerts': self.alerts[-100:],  # Last 100 alerts
             'metrics': self.security_metrics,
             'high_risk_users': [],

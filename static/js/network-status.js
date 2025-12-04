@@ -50,9 +50,9 @@ class NetworkStatus {
             
             // Get gas price (optional)
             try {
-                const gasPrice = await window.ethereum.request({ 
+                const gasPrice = await window.clockchainWallet.provider.request({
                     method: 'eth_gasPrice',
-                    params: [] 
+                    params: []
                 });
                 const gasPriceGwei = (parseInt(gasPrice, 16) / 1e9).toFixed(4);
                 this.showConnected(networkName, gasPriceGwei);

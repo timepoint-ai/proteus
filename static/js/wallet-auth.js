@@ -37,7 +37,7 @@ class WalletAuth {
                 throw new Error('Failed to connect wallet');
             }
         } else {
-            throw new Error('Please install MetaMask or another Web3 wallet');
+            throw new Error('No wallet connected. Please sign in first.');
         }
     }
 

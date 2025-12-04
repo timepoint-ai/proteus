@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, db
 from models import Actor
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -100,7 +100,7 @@ def create_test_actors():
                     existing_actor.verified = actor_data['verified']
                     existing_actor.follower_count = actor_data['follower_count']
                     existing_actor.is_test_account = actor_data['is_test_account']
-                    existing_actor.last_sync = datetime.utcnow()
+                    existing_actor.last_sync = datetime.now(timezone.utc)
                     existing_actor.status = 'active'
                     updated_count += 1
                     logger.info(f"Updated actor: @{actor_data['x_username']}")
@@ -114,7 +114,7 @@ def create_test_actors():
                         follower_count=actor_data['follower_count'],
                         is_test_account=actor_data['is_test_account'],
                         status='active',
-                        last_sync=datetime.utcnow()
+                        last_sync=datetime.now(timezone.utc)
                     )
                     db.session.add(new_actor)
                     created_count += 1

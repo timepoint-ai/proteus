@@ -8,6 +8,9 @@ import logging
 from datetime import datetime
 from web3 import Web3
 from services.blockchain_base import BaseBlockchainService
+from utils.api_errors import (
+    error_response, success_response, not_found, blockchain_error, ErrorCode
+)
 import json
 import os
 
@@ -280,10 +283,10 @@ def get_stats_chain():
             pass
         
         return jsonify(stats)
-        
+
     except Exception as e:
         logger.error(f"Error fetching stats from chain: {e}")
-        return jsonify({'error': str(e)}), 500
+        return blockchain_error(f'Failed to fetch platform stats: {str(e)}')
 
 @api_chain_bp.route('/market/<market_id>', methods=['GET'])
 def get_market_detail_chain(market_id):
@@ -291,7 +294,7 @@ def get_market_detail_chain(market_id):
     try:
         market_contract = blockchain_service.contracts.get('EnhancedPredictionMarket')
         if not market_contract:
-            return jsonify({'error': 'Market contract not found'}), 500
+            return error_response(ErrorCode.SERVICE_UNAVAILABLE, 'Market contract not available', 503)
         
         # Get market details
         market_info = market_contract.functions.getMarket(int(market_id)).call()
@@ -338,10 +341,10 @@ def get_market_detail_chain(market_id):
             },
             'source': 'blockchain'
         })
-        
+
     except Exception as e:
         logger.error(f"Error fetching market detail from chain: {e}")
-        return jsonify({'error': str(e)}), 500
+        return blockchain_error(f'Failed to fetch market details: {str(e)}')
 
 @api_chain_bp.route('/oracle/submissions/<market_id>', methods=['GET'])
 def get_oracle_submissions_chain(market_id):
@@ -349,7 +352,7 @@ def get_oracle_submissions_chain(market_id):
     try:
         oracle_contract = blockchain_service.contracts.get('DecentralizedOracle')
         if not oracle_contract:
-            return jsonify({'error': 'Oracle contract not found'}), 500
+            return error_response(ErrorCode.SERVICE_UNAVAILABLE, 'Oracle contract not available', 503)
         
         # Query OracleDataSubmitted events for this market
         filter = oracle_contract.events.OracleDataSubmitted.create_filter(
@@ -376,10 +379,10 @@ def get_oracle_submissions_chain(market_id):
             'total': len(submissions),
             'source': 'blockchain'
         })
-        
+
     except Exception as e:
         logger.error(f"Error fetching oracle submissions from chain: {e}")
-        return jsonify({'error': str(e)}), 500
+        return blockchain_error(f'Failed to fetch oracle submissions: {str(e)}')
 
 @api_chain_bp.route('/genesis/holders', methods=['GET'])
 def get_genesis_holders():

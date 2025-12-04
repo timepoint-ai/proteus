@@ -1,29 +1,160 @@
-# Clockchain API Documentation
+# API Documentation
 
-**Last Updated**: August 13, 2025 (Phase 7 Complete)
-
-## Overview
-
-The Clockchain API provides fully decentralized, blockchain-only access to all platform data. All endpoints query the blockchain directly with no database dependencies.
+REST API reference for Clockchain. All data is fetched from blockchain.
 
 ## Base URL
 
 ```
-https://clockchain.app/api/chain/
+/api/chain/
 ```
 
 ## Authentication
 
-All API endpoints use wallet-based JWT authentication:
+Wallet-based JWT authentication:
 
-1. Connect wallet (MetaMask/Coinbase Wallet)
+1. Connect wallet (MetaMask/Coinbase)
 2. Sign authentication message
 3. Receive JWT token
-4. Include token in Authorization header: `Bearer <token>`
+4. Include in header: `Authorization: Bearer <token>`
 
-## Chain-Only API Endpoints
+---
 
-### 1. Get All Actors
+## Authentication Endpoints
+
+### Get Nonce
+
+```http
+GET /auth/nonce/{address}
+```
+
+**Response:**
+```json
+{
+  "nonce": "abc123...",
+  "message": "Sign this message to authenticate with Clockchain: abc123..."
+}
+```
+
+### Verify Signature
+
+```http
+POST /auth/verify
+```
+
+**Body:**
+```json
+{
+  "address": "0x123...",
+  "signature": "0x456...",
+  "message": "Sign this message..."
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "eyJhbGc...",
+  "address": "0x123..."
+}
+```
+
+### Refresh Token
+
+```http
+POST /auth/refresh
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "token": "eyJhbGc..."
+}
+```
+
+### Logout
+
+```http
+POST /auth/logout
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+
+---
+
+## Embedded Wallet Endpoints
+
+### Request OTP
+
+```http
+POST /api/embedded/request-otp
+```
+
+**Body:**
+```json
+{
+  "identifier": "user@example.com",
+  "auth_method": "email"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+### Verify OTP
+
+```http
+POST /api/embedded/verify-otp
+```
+
+**Body:**
+```json
+{
+  "identifier": "user@example.com",
+  "otp_code": "123456"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "wallet_address": "0x789..."
+}
+```
+
+> **Test Mode:** When `FLASK_ENV=testing`, OTP code `123456` is accepted for any email.
+
+---
+
+## Health Endpoint
+
+```http
+GET /api/health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "service": "clockchain-node"
+}
+```
+
+---
+
+## Chain Endpoints
+
+> **Integration Tests:** All chain endpoints are covered by integration tests in `tests/integration/test_api_chain.py`
+
+### Get Actors
 
 ```http
 GET /api/chain/actors
@@ -46,16 +177,18 @@ GET /api/chain/actors
 }
 ```
 
-### 2. Get All Markets
+### Get Markets
 
 ```http
 GET /api/chain/markets
 ```
 
 **Query Parameters:**
-- `status` (optional): "active", "resolved", "all"
-- `actor_id` (optional): Filter by actor ID
-- `limit` (optional): Number of results (default: 100)
+| Param | Type | Description |
+|-------|------|-------------|
+| status | string | "active", "resolved", or "all" |
+| actor_id | int | Filter by actor |
+| limit | int | Max results (default: 100) |
 
 **Response:**
 ```json
@@ -77,7 +210,7 @@ GET /api/chain/markets
 }
 ```
 
-### 3. Get Market Details
+### Get Market Details
 
 ```http
 GET /api/chain/markets/<market_id>
@@ -105,8 +238,7 @@ GET /api/chain/markets/<market_id>
       {
         "submission_id": 1,
         "bettor": "0x456...",
-        "amount": "50000000000000000",
-        "timestamp": 1735600000
+        "amount": "50000000000000000"
       }
     ]
   },
@@ -114,7 +246,7 @@ GET /api/chain/markets/<market_id>
 }
 ```
 
-### 4. Get Platform Statistics
+### Get Platform Stats
 
 ```http
 GET /api/chain/stats
@@ -128,16 +260,14 @@ GET /api/chain/stats
     "active_markets": 45,
     "total_volume": "15000000000000000000000",
     "total_users": 1234,
-    "genesis_holders": 85,
-    "platform_fees_collected": "1050000000000000000000",
-    "gas_price": "0.001000062",
+    "genesis_holders": 60,
     "chain": "base-sepolia"
   },
   "source": "blockchain"
 }
 ```
 
-### 5. Get Genesis NFT Holders
+### Get Genesis NFT Data
 
 ```http
 GET /api/chain/genesis
@@ -148,22 +278,21 @@ GET /api/chain/genesis
 {
   "genesis": {
     "total_supply": 100,
+    "minted": 60,
     "holders": [
       {
         "address": "0x789...",
         "token_ids": [1, 5, 12],
-        "count": 3,
-        "earnings": "21000000000000000000"
+        "count": 3
       }
     ],
-    "total_distributed": "1050000000000000000000",
     "payout_percentage": 1.4
   },
   "source": "blockchain"
 }
 ```
 
-### 6. Get Oracle Data
+### Get Oracle Data
 
 ```http
 GET /api/chain/oracle/<market_id>
@@ -178,85 +307,289 @@ GET /api/chain/oracle/<market_id>
       {
         "oracle": "0xABC...",
         "actual_text": "Mars is definitely the future",
-        "screenshot_ipfs": "QmXYZ...",
-        "timestamp": 1735650000,
         "verified": true
       }
     ],
     "consensus_text": "Mars is definitely the future",
-    "consensus_reached": true,
-    "resolution_time": 1735651000
+    "consensus_reached": true
   },
   "source": "blockchain"
 }
 ```
 
-## Performance Features
+---
 
-### Caching
-All endpoints utilize Redis caching with TTL:
-- Actor data: 5 minutes
-- Market lists: 30 seconds
-- Statistics: 10 seconds
-- Genesis data: 1 minute
+## Admin Resolution Endpoints (V2)
 
-### RPC Retry Logic
-- Exponential backoff with jitter
-- Automatic failover between RPC endpoints
-- Maximum 3 retry attempts
+Endpoints for managing PredictionMarketV2 market resolution. Requires admin authentication.
 
-## Rate Limiting
-- Default: 100 requests per minute per wallet
-- Genesis holders: 500 requests per minute
-- No rate limit for contract interactions
+> **Dashboard:** Web UI available at `/clockchain/admin/resolution`
 
-## Error Responses
+### Get Resolution Stats
 
+```http
+GET /api/admin/resolution-stats
+```
+
+**Response:**
 ```json
 {
-  "error": "Description of error",
-  "code": "ERROR_CODE",
-  "details": "Additional information"
+  "total_markets": 10,
+  "resolved_markets": 5,
+  "pending_resolution": 3,
+  "active_markets": 2,
+  "total_pool": "15.5",
+  "pending_platform_fees": "0.75",
+  "owner_address": "0x21a85AD98641827BFd89F4d5bC2fEB72F98aaecA",
+  "owner_key_configured": true,
+  "xcom_api_configured": false
 }
 ```
 
-Common error codes:
-- `UNAUTHORIZED`: Invalid or missing JWT token
-- `BLOCKCHAIN_ERROR`: RPC connection issue
-- `CONTRACT_ERROR`: Smart contract interaction failed
-- `RATE_LIMITED`: Too many requests
+### Get Pending Markets
 
-## WebSocket Events
-
-Connect to receive real-time updates:
-
-```javascript
-const ws = new WebSocket('wss://clockchain.app/ws');
-
-// Subscribe to events
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  events: ['market_created', 'submission_added', 'market_resolved']
-}));
-
-// Receive updates
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Event:', data.type, data.payload);
-};
+```http
+GET /api/admin/pending-markets
 ```
 
-## Smart Contract Addresses
+**Response:**
+```json
+{
+  "pending_markets": [
+    {
+      "id": 1,
+      "actor_handle": "elonmusk",
+      "end_time": 1733270400,
+      "end_time_formatted": "2024-12-03 18:00",
+      "total_pool": "2.5",
+      "submission_count": 3,
+      "can_resolve": true
+    }
+  ]
+}
+```
+
+### Get Market Resolution Details
+
+```http
+GET /api/admin/market/<market_id>/details
+```
+
+**Response:**
+```json
+{
+  "market": {
+    "id": 1,
+    "actor_handle": "elonmusk",
+    "end_time": 1733270400,
+    "total_pool": "2.5",
+    "resolved": false,
+    "submissions": [
+      {
+        "id": 1,
+        "submitter": "0x123...",
+        "predicted_text": "Mars is the future!",
+        "amount": "1.0"
+      }
+    ],
+    "can_resolve": true
+  }
+}
+```
+
+### Resolve Market
+
+```http
+POST /api/admin/resolve-market/<market_id>
+```
+
+**Body:**
+```json
+{
+  "actual_text": "The actual tweet text that was posted",
+  "tweet_url": "https://x.com/user/status/123456789"
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "tx_hash": "0xabc123...",
+  "gas_used": 1500000,
+  "market_id": 1
+}
+```
+
+**Response (Error):**
+```json
+{
+  "success": false,
+  "error": "Market has not ended yet",
+  "market_id": 1
+}
+```
+
+### Auto-Resolve Market (Fetch Tweet)
+
+```http
+POST /api/admin/auto-resolve-market/<market_id>
+```
+
+**Body:**
+```json
+{
+  "tweet_url": "https://x.com/user/status/123456789"
+}
+```
+
+> **Note:** Requires `X_BEARER_TOKEN` environment variable for X.com API access.
+
+**Response:**
+```json
+{
+  "success": true,
+  "tx_hash": "0xabc123...",
+  "tweet_text": "The fetched tweet text",
+  "market_id": 1
+}
+```
+
+### Withdraw Platform Fees
+
+```http
+POST /api/admin/withdraw-fees
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "tx_hash": "0xdef456...",
+  "amount": "0.75"
+}
+```
+
+**Response (No Fees):**
+```json
+{
+  "success": false,
+  "error": "No fees to withdraw"
+}
+```
+
+---
+
+## Error Responses
+
+All API endpoints return standardized error responses:
+
+**Error Response Format:**
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human readable error message",
+    "details": {}
+  }
+}
+```
+
+**Success Response Format:**
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "Optional success message"
+}
+```
+
+### Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | 400 | Invalid input data or missing required fields |
+| `INVALID_REQUEST` | 400 | Malformed request |
+| `UNAUTHORIZED` | 401 | Invalid or missing authentication |
+| `INVALID_TOKEN` | 401 | JWT token is invalid |
+| `TOKEN_EXPIRED` | 401 | JWT token or OTP has expired |
+| `INVALID_SIGNATURE` | 401 | Wallet signature verification failed |
+| `FORBIDDEN` | 403 | Permission denied |
+| `NOT_FOUND` | 404 | Resource not found |
+| `RATE_LIMITED` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| `BLOCKCHAIN_ERROR` | 500 | RPC or chain interaction failed |
+| `CONTRACT_ERROR` | 500 | Smart contract call failed |
+| `WALLET_ERROR` | 500 | Wallet operation failed |
+| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+
+### Market-Specific Error Codes
+
+| Code | Description |
+|------|-------------|
+| `MARKET_NOT_FOUND` | Market does not exist |
+| `MARKET_ENDED` | Market has already ended |
+| `MARKET_NOT_ENDED` | Market has not ended yet |
+| `MARKET_RESOLVED` | Market is already resolved |
+| `INSUFFICIENT_FUNDS` | Not enough ETH for operation |
+
+### Example Error Response
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "actual_text is required (or provide tweet_url)",
+    "details": {
+      "field": "actual_text"
+    }
+  }
+}
+```
+
+---
+
+## Rate Limits
+
+| User Type | Limit |
+|-----------|-------|
+| Default | 100 req/min |
+| Genesis Holder | 500 req/min |
+
+---
+
+## Caching
+
+Responses are cached in Redis:
+
+| Data | TTL |
+|------|-----|
+| Actors | 5 min |
+| Markets | 30 sec |
+| Stats | 10 sec |
+| Genesis | 1 min |
+
+---
+
+## Contract Addresses
 
 ### BASE Sepolia (Testnet)
-- GenesisNFT: `0x...`
-- ImprovedDistributedPayoutManager: `0xE9eE183b76A8BDfDa8EA926b2f44137Aa65379B5`
-- EnhancedPredictionMarket: `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C`
-- DecentralizedOracle: `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1`
+
+| Contract | Address | Status |
+|----------|---------|--------|
+| **PredictionMarketV2** | `0x5174Da96BCA87c78591038DEe9DB1811288c9286` | **Recommended** |
+| PredictionMarket (V1) | `0x667121e8f22570F2c521454D93D6A87e44488d93` | Deprecated |
+| GenesisNFT | `0x1A5D4475881B93e876251303757E60E524286A24` | Active |
+| EnhancedPredictionMarket | `0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c` | Requires governance |
+| ActorRegistry | `0xC71CC19C5573C5E1E144829800cD0005D0eDB723` | Active |
+| NodeRegistry | `0xA69C842F335dfE1F69288a70054A34018282218d` | Active |
+| PayoutManager | `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871` | Active |
+| DecentralizedOracle | `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1` | Active |
+
+> **Note:** Use **PredictionMarketV2** for all new development. It has complete market lifecycle with on-chain resolution.
 
 ### BASE Mainnet
-- Coming soon...
 
-## Migration Notes
-
-**Phase 7 Complete**: All database dependencies have been removed. The API now queries blockchain directly for all data. Legacy database endpoints have been deprecated and removed.
+Not yet deployed.

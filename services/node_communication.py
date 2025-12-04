@@ -186,7 +186,7 @@ class NodeCommunicationService:
             
             node = NodeOperator.query.filter_by(operator_id=sender_id).first()
             if node:
-                node.last_seen = datetime.utcnow()
+                node.last_seen = datetime.now(timezone.utc)
                 db.session.commit()
                 
             # Send pong response
@@ -491,4 +491,4 @@ class NodeCommunicationService:
                 'error': str(e)
             }
 
-from datetime import datetime
+from datetime import datetime, timezone

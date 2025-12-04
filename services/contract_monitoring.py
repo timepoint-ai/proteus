@@ -1,7 +1,7 @@
 """Contract event monitoring service for BASE blockchain (Chain-only, no database)"""
 import logging
 from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from web3 import Web3
 from web3.exceptions import BlockNotFound
@@ -161,7 +161,7 @@ class ContractMonitoringService:
                 'block_number': event['blockNumber'],
                 'address': event['address'],
                 'args': dict(event['args']) if 'args' in event else {},
-                'timestamp': datetime.utcnow()
+                'timestamp': datetime.now(timezone.utc)
             }
             
             # Add to in-memory cache instead of database
@@ -222,7 +222,7 @@ class ContractMonitoringService:
                     'type': 'gas_spike',
                     'severity': 'high' if gas_price_gwei > 100 else 'medium',
                     'gas_price_gwei': float(gas_price_gwei),
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(timezone.utc).isoformat()
                 }
                 results['gas_spike_alerts'].append(alert)
                 logger.warning(f"Gas price spike detected: {gas_price_gwei} gwei")
@@ -234,7 +234,7 @@ class ContractMonitoringService:
         """Check for oracle consensus failures (chain-only)"""
         try:
             # Check recent events in cache for consensus failures
-            recent_time = datetime.utcnow() - timedelta(hours=1)
+            recent_time = datetime.now(timezone.utc) - timedelta(hours=1)
             
             # Look through cached events for recent consensus failures
             recent_failures = []
@@ -285,7 +285,7 @@ class ContractMonitoringService:
         logger.debug("Running contract monitoring cycle")
         
         results = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'events': self.process_events(),
             'statistics': self.get_event_statistics()
         }

@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 from decimal import Decimal, InvalidOperation
 import json
@@ -180,7 +180,7 @@ class ValidationUtils:
             
             # Check if not in the past (with 1 minute tolerance)
             if field_name in ['start_time', 'end_time']:
-                if parsed_datetime < datetime.utcnow() - timedelta(minutes=1):
+                if parsed_datetime < datetime.now(timezone.utc) - timedelta(minutes=1):
                     return {
                         'valid': False,
                         'error': f'{field_name} cannot be in the past'

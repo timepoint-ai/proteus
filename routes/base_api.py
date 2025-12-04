@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 from services.blockchain_base import BaseBlockchainService
@@ -63,7 +63,7 @@ def create_market():
                     'duration': duration_seconds,
                     'oracleWallets': _pad_oracle_wallets(data.get('oracle_wallets', [data['creator_wallet']])),
                     'metadata': json.dumps({
-                        'created': datetime.utcnow().isoformat(),
+                        'created': datetime.now(timezone.utc).isoformat(),
                         'creator': data['creator_wallet'],
                         'predicted_text': data.get('predicted_text', '')
                     })

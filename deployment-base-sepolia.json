@@ -1,52 +1,50 @@
 {
   "network": "BASE Sepolia",
   "chainId": 84532,
-  "timestamp": "2025-08-05T17:00:00Z",
+  "timestamp": "2024-12-03T00:00:00Z",
+  "activeMarketContract": "PredictionMarketV2",
   "contracts": {
+    "GenesisNFT": {
+      "address": "0x1A5D4475881B93e876251303757E60E524286A24",
+      "description": "Genesis NFT collection (60/100 minted, finalized)"
+    },
+    "PredictionMarketV2": {
+      "address": "0x5174Da96BCA87c78591038DEe9DB1811288c9286",
+      "description": "Full prediction market with resolution mechanism, on-chain Levenshtein - RECOMMENDED",
+      "verified": false,
+      "owner": "0x21a85AD98641827BFd89F4d5bC2fEB72F98aaecA",
+      "feeRecipient": "0x21a85AD98641827BFd89F4d5bC2fEB72F98aaecA"
+    },
     "PredictionMarket": {
-      "address": "0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad",
-      "deploymentBlock": 18765432,
-      "description": "Original prediction market contract"
-    },
-    "ClockchainOracle": {
-      "address": "0x9AA2aDbde623E019066cE604C81AE63E18d65Ec8",
-      "deploymentBlock": 18765433,
-      "description": "Original oracle contract for X.com verification"
-    },
-    "NodeRegistry": {
-      "address": "0xA69C842F335dfE1F69288a70054A34018282218d",
-      "deploymentBlock": 18765434,
-      "description": "Decentralized node registry"
-    },
-    "PayoutManager": {
-      "address": "0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871",
-      "deploymentBlock": 18765435,
-      "description": "Automated payout management"
-    },
-    "ActorRegistry": {
-      "address": "0xC71CC19C5573C5E1E144829800cD0005D0eDB723",
-      "deploymentBlock": 18765436,
-      "description": "On-chain actor registry for X.com accounts"
+      "address": "0x667121e8f22570F2c521454D93D6A87e44488d93",
+      "description": "Simple prediction market V1 (NO resolution mechanism - DEPRECATED)"
     },
     "EnhancedPredictionMarket": {
       "address": "0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c",
-      "deploymentBlock": 18765437,
-      "description": "Enhanced prediction market with full on-chain functionality"
+      "description": "Full governance prediction market (requires active actors - NOT USABLE)"
+    },
+    "ActorRegistry": {
+      "address": "0xC71CC19C5573C5E1E144829800cD0005D0eDB723",
+      "description": "On-chain actor registry (0 active actors)"
+    },
+    "NodeRegistry": {
+      "address": "0xA69C842F335dfE1F69288a70054A34018282218d",
+      "description": "Node operator staking (0 active nodes, requires 100 ETH stake)"
+    },
+    "PayoutManager": {
+      "address": "0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871",
+      "description": "Fee distribution to stakeholders"
     },
     "DecentralizedOracle": {
       "address": "0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1",
-      "deploymentBlock": 18765438,
-      "description": "Decentralized oracle with multi-node consensus"
-    },
-    "AdvancedMarkets": {
-      "address": "0x6143DfCEe9C4b38A37310058eCA9D2E509D5166B",
-      "deploymentBlock": 18765439,
-      "description": "Advanced market types and features"
-    },
-    "SecurityAudit": {
-      "address": "0x0539ad4a63E76130d76a21163960906Eb47c1a9a",
-      "deploymentBlock": 18765440,
-      "description": "Security audit and emergency controls"
+      "description": "Text validation and Levenshtein calculation"
     }
+  },
+  "notes": {
+    "v2Update": "PredictionMarketV2 deployed 2024-12-03 with full resolution mechanism",
+    "deprecation": "PredictionMarket (V1) had no resolution - winners could not be determined",
+    "governance": "EnhancedPredictionMarket requires NodeRegistry->ActorRegistry bootstrap before use",
+    "genesisNFT": "Minting finalized at 60/100 NFTs",
+    "verification": "Contract verification pending - needs BASESCAN_API_KEY"
   }
 }

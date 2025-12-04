@@ -6,7 +6,7 @@ Provides rate-limited endpoints for automated agents to create original or compe
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from flask import Blueprint, jsonify, request, render_template
 from flask_limiter import Limiter
@@ -58,7 +58,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'api_version': 'v1',
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'rate_limit': '10 per minute for submissions'
     })
 
@@ -68,7 +68,7 @@ def get_active_markets():
     """Get active prediction markets that accept submissions"""
     try:
         # Get only active markets that haven't ended yet
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         markets = PredictionMarket.query.filter(
             and_(
                 PredictionMarket.status == 'active',
@@ -166,7 +166,7 @@ def create_submission():
         if market.status != 'active':
             return jsonify({'error': f'Market is not active (status: {market.status})'}), 400
         
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         if current_time >= market.end_time:
             return jsonify({'error': 'Market has ended'}), 400
         
@@ -279,7 +279,7 @@ def create_submission():
             ai_profile.total_submissions = (ai_profile.total_submissions or 0) + 1
             ai_profile.total_staked = (ai_profile.total_staked or Decimal('0')) + stake_amount
         
-        submission.created_at = datetime.utcnow()
+        submission.created_at = datetime.now(timezone.utc)
         
         db.session.add(submission)
         db.session.flush()  # Flush to get the submission ID
@@ -319,7 +319,7 @@ def create_submission():
             'submission_type': submission.submission_type,
             'predicted_text': submission.predicted_text,
             'transaction_hash': submission.transaction_hash,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
         
         db.session.commit()

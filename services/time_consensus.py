@@ -25,10 +25,10 @@ class TimeConsensusService:
         """Get synchronized UTC time across nodes"""
         try:
             # For now, use system time but in production would use NTP
-            return datetime.utcnow()
+            return datetime.now(timezone.utc)
         except Exception as e:
             logger.error(f"Error getting synchronized time: {e}")
-            return datetime.utcnow()
+            return datetime.now(timezone.utc)
             
     def get_pacific_time(self) -> datetime:
         """Get current Pacific Time"""

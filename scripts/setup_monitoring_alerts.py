@@ -7,7 +7,7 @@ Sets up comprehensive monitoring for BASE mainnet deployment
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class MonitoringSetup:
         
         config = {
             "name": "Clockchain Production Monitoring",
-            "created": datetime.utcnow().isoformat(),
+            "created": datetime.now(timezone.utc).isoformat(),
             "network": "base-mainnet",
             "alerts": []
         }

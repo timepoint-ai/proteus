@@ -1,10 +1,25 @@
 import logging
-from datetime import datetime, timedelta
-from app import celery, db
-from services.consensus import ConsensusService
-from services.oracle import OracleService
-from services.node_communication import NodeCommunicationService
-from models import NodeOperator, Actor, OracleSubmission, Bet
+from datetime import datetime, timedelta, timezone
+from app import celery
+
+# Chain-only mode: db and models may not be available
+# Legacy V1 services are optional
+LEGACY_AVAILABLE = False
+try:
+    from models import NodeOperator, Actor, OracleSubmission, Bet
+    from services.consensus import ConsensusService
+    from services.oracle import OracleService
+    from services.node_communication import NodeCommunicationService
+    LEGACY_AVAILABLE = True
+except ImportError:
+    NodeOperator = None
+    Actor = None
+    OracleSubmission = None
+    Bet = None
+    ConsensusService = None
+    OracleService = None
+    NodeCommunicationService = None
+
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -30,7 +45,7 @@ def process_node_proposal(self, candidate_id, public_key, node_address, proposer
                 'status': 'success',
                 'candidate_id': candidate_id,
                 'proposer_id': proposer_id,
-                'processed_at': datetime.utcnow().isoformat()
+                'processed_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error(f"Failed to process node proposal: {candidate_id}")
@@ -71,7 +86,7 @@ def process_actor_proposal(self, actor_id, name, description, wallet_address, is
                 'actor_id': actor_id,
                 'name': name,
                 'proposer_id': proposer_id,
-                'processed_at': datetime.utcnow().isoformat()
+                'processed_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error(f"Failed to process actor proposal: {name}")
@@ -136,7 +151,7 @@ def auto_vote_on_node(self, candidate_id, voting_strategy='approve_known'):
                 'candidate_id': candidate_id,
                 'vote': vote,
                 'strategy': voting_strategy,
-                'voted_at': datetime.utcnow().isoformat()
+                'voted_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error(f"Failed to auto-vote on node: {candidate_id}")
@@ -201,7 +216,7 @@ def auto_vote_on_actor(self, actor_id, voting_strategy='approve_non_unknown'):
                 'actor_id': actor_id,
                 'vote': vote,
                 'strategy': voting_strategy,
-                'voted_at': datetime.utcnow().isoformat()
+                'voted_at': datetime.now(timezone.utc).isoformat()
             }
         else:
             logger.error(f"Failed to auto-vote on actor: {actor.name}")
@@ -234,7 +249,7 @@ def check_oracle_voting_timeouts(self):
         
         return {
             'status': 'success',
-            'checked_at': datetime.utcnow().isoformat()
+            'checked_at': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -278,7 +293,7 @@ def monitor_consensus_health(self):
             'status': 'success',
             'health': health,
             'issues': issues,
-            'checked_at': datetime.utcnow().isoformat()
+            'checked_at': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -314,7 +329,7 @@ def process_pending_consensus_items(self):
             'status': 'success',
             'pending_nodes': len(pending_nodes),
             'pending_actors': len(pending_actors),
-            'processed_at': datetime.utcnow().isoformat()
+            'processed_at': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -335,7 +350,7 @@ def resolve_expired_bets(self):
         # Find bets that have expired
         expired_bets = Bet.query.filter(
             Bet.status == 'active',
-            Bet.end_time < datetime.utcnow()
+            Bet.end_time < datetime.now(timezone.utc)
         ).all()
         
         resolved_count = 0
@@ -360,7 +375,7 @@ def resolve_expired_bets(self):
             'status': 'success',
             'total_expired': len(expired_bets),
             'resolved_count': resolved_count,
-            'resolved_at': datetime.utcnow().isoformat()
+            'resolved_at': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -392,7 +407,7 @@ def broadcast_consensus_update(self, update_type, data):
         return {
             'status': 'success',
             'update_type': update_type,
-            'broadcasted_at': datetime.utcnow().isoformat()
+            'broadcasted_at': datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -428,9 +443,189 @@ def setup_consensus_periodic_tasks(sender, **kwargs):
         name='process_pending_consensus_items'
     )
     
-    # Resolve expired bets every 10 minutes
+    # Resolve expired bets every 10 minutes (legacy V1)
     sender.add_periodic_task(
         600.0,
         resolve_expired_bets.s(),
         name='resolve_expired_bets'
     )
+
+    # Resolve V2 pending markets every 5 minutes
+    sender.add_periodic_task(
+        300.0,
+        resolve_v2_pending_markets.s(),
+        name='resolve_v2_pending_markets'
+    )
+
+
+# ====================================================================
+# V2 BLOCKCHAIN-BASED RESOLUTION TASKS
+# ====================================================================
+# These tasks work directly with PredictionMarketV2 on the blockchain
+# without requiring the legacy database models.
+# ====================================================================
+
+@celery.task(bind=True)
+def resolve_v2_pending_markets(self):
+    """
+    Check for V2 markets that are pending resolution and attempt auto-resolution.
+    This task requires:
+    - OWNER_PRIVATE_KEY env var for signing transactions
+    - X_BEARER_TOKEN env var for fetching tweets (optional, manual fallback)
+    """
+    import asyncio
+
+    try:
+        from services.v2_resolution import get_resolution_service
+
+        resolution_service = get_resolution_service()
+        stats = resolution_service.get_resolution_stats()
+
+        # Check if we have the required configuration
+        if not stats.get('owner_key_configured'):
+            logger.info("V2 resolution skipped - OWNER_PRIVATE_KEY not configured")
+            return {
+                'status': 'skipped',
+                'reason': 'owner_key_not_configured'
+            }
+
+        # Get pending markets
+        pending = resolution_service.get_pending_markets()
+
+        if not pending:
+            logger.debug("No V2 markets pending resolution")
+            return {
+                'status': 'success',
+                'pending_count': 0,
+                'resolved_count': 0
+            }
+
+        logger.info(f"Found {len(pending)} V2 markets pending resolution")
+
+        # Track resolution results
+        resolved_count = 0
+        failed_count = 0
+        skipped_count = 0
+
+        for market in pending:
+            market_id = market['id']
+            actor_handle = market['actor_handle']
+
+            # Skip if not enough submissions
+            if not market.get('can_resolve'):
+                logger.debug(f"Market {market_id} not resolvable (needs 2+ submissions)")
+                skipped_count += 1
+                continue
+
+            # Check if X.com API is configured
+            if not stats.get('xcom_api_configured'):
+                logger.warning(f"Market {market_id} needs manual resolution - X.com API not configured")
+                skipped_count += 1
+                continue
+
+            try:
+                # Attempt to fetch latest tweet from actor
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    tweet_data = loop.run_until_complete(
+                        resolution_service.fetch_actual_tweet(actor_handle)
+                    )
+                finally:
+                    loop.close()
+
+                if not tweet_data:
+                    logger.warning(f"Could not fetch tweet for @{actor_handle} (market {market_id})")
+                    skipped_count += 1
+                    continue
+
+                actual_text = tweet_data.get('text', '')
+                if not actual_text:
+                    logger.warning(f"Empty tweet text for @{actor_handle} (market {market_id})")
+                    skipped_count += 1
+                    continue
+
+                # Attempt resolution
+                result = resolution_service.resolve_market(market_id, actual_text)
+
+                if result['success']:
+                    resolved_count += 1
+                    logger.info(f"Auto-resolved market {market_id} for @{actor_handle}, tx: {result['tx_hash']}")
+                else:
+                    failed_count += 1
+                    logger.error(f"Failed to resolve market {market_id}: {result.get('error')}")
+
+            except Exception as e:
+                failed_count += 1
+                logger.error(f"Error auto-resolving market {market_id}: {e}")
+
+        logger.info(f"V2 resolution complete: {resolved_count} resolved, {failed_count} failed, {skipped_count} skipped")
+
+        return {
+            'status': 'success',
+            'pending_count': len(pending),
+            'resolved_count': resolved_count,
+            'failed_count': failed_count,
+            'skipped_count': skipped_count,
+            'resolved_at': datetime.now(timezone.utc).isoformat()
+        }
+
+    except ImportError as e:
+        logger.error(f"V2 resolution service not available: {e}")
+        return {
+            'status': 'error',
+            'error': 'V2 resolution service not available'
+        }
+    except Exception as e:
+        logger.error(f"Error in V2 resolution task: {e}")
+        return {
+            'status': 'error',
+            'error': str(e)
+        }
+
+
+@celery.task(bind=True)
+def check_v2_resolution_health(self):
+    """
+    Check health of V2 resolution system
+    """
+    try:
+        from services.v2_resolution import get_resolution_service
+
+        resolution_service = get_resolution_service()
+        stats = resolution_service.get_resolution_stats()
+
+        # Log health status
+        logger.info(f"V2 Resolution Health: {stats.get('total_markets', 0)} total, "
+                   f"{stats.get('pending_resolution', 0)} pending, "
+                   f"{stats.get('resolved_markets', 0)} resolved")
+
+        # Check for configuration issues
+        issues = []
+
+        if not stats.get('owner_key_configured'):
+            issues.append('OWNER_PRIVATE_KEY not configured')
+
+        if not stats.get('xcom_api_configured'):
+            issues.append('X.com API not configured (manual resolution only)')
+
+        if stats.get('pending_resolution', 0) > 10:
+            issues.append(f"High number of pending markets: {stats.get('pending_resolution')}")
+
+        if issues:
+            for issue in issues:
+                logger.warning(f"V2 Resolution Issue: {issue}")
+
+        return {
+            'status': 'success',
+            'stats': stats,
+            'issues': issues,
+            'checked_at': datetime.now(timezone.utc).isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error checking V2 resolution health: {e}")
+        return {
+            'status': 'error',
+            'error': str(e)
+        }

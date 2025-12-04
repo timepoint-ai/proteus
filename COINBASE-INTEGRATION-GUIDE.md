@@ -1,189 +1,100 @@
-# Coinbase Embedded Wallet Integration Guide
+# Coinbase Wallet Integration
 
-## Current Status: Firebase Authentication Active ✅
+Guide for integrating Coinbase Embedded Wallet with Clockchain.
 
-The current implementation uses **Firebase Authentication** for real email verification, integrated with Coinbase Embedded Wallet for secure wallet creation.
+## Overview
 
-### How to Test the Implementation
+Clockchain uses Coinbase Embedded Wallet for seamless Web3 onboarding:
+- Email/SMS authentication (no seed phrases)
+- TEE-secured wallet creation
+- Coinbase Onramp for easy funding
 
-1. **Navigate to**: `/api/embedded/test`
-2. **Click "Get Started"**
-3. **Enter your email address** (e.g., your.email@example.com)
-4. **Click "Continue"**
-5. **Check your email** for the verification link from Firebase
-6. **Enter the OTP code** (also shown in UI for testing)
-7. **Click "Verify"** to create your embedded wallet
+## Current Status
 
-**Note**: Real verification emails are sent via Firebase. SMS requires client-side Firebase SDK implementation.
+| Feature | Status |
+|---------|--------|
+| Firebase email OTP | Complete |
+| Wallet session persistence | Complete |
+| Multi-wallet support | Complete (MetaMask + Coinbase) |
+| Mobile responsive UI | Complete |
+| Coinbase SDK integration | In Progress |
+| Wallet recovery flow | Not started |
 
-## Authentication Configuration
+## Prerequisites
 
-### Firebase Setup (ACTIVE ✅)
+1. [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) account
+2. Firebase project with email auth enabled
 
-Firebase handles the authentication layer. See [FIREBASE-SETUP-GUIDE.md](./FIREBASE-SETUP-GUIDE.md) for complete Firebase Console configuration.
+## Setup
 
-**Required Firebase Console Configuration:**
-1. Enable Email/Password authentication
-2. Enable passwordless email links
-3. Add your Replit domain to authorized domains
-4. Configure email templates
-5. Set API key restrictions
+### 1. Get Coinbase Credentials
 
-**Optional Enhancements:**
-- Firebase Admin SDK for server-side user management
-- Phone authentication (requires client-side reCAPTCHA)
-- Custom email domain configuration
+1. Go to CDP Console > API Keys
+2. Create new API key with permissions:
+   - `wallet:create`
+   - `wallet:read`
+   - `wallet:transactions:send`
+3. Download JSON credentials
 
-## Real Coinbase Integration Requirements
-
-To complete the embedded wallet integration with Coinbase:
-
-### 1. Coinbase Developer Platform Account
-
-1. **Sign up** at [Coinbase Developer Platform (CDP)](https://portal.cdp.coinbase.com/)
-2. **Create a project** in the CDP console
-3. **Get your Project ID** from the dashboard
-
-### 2. API Credentials Setup
+### 2. Configure Environment
 
 ```bash
-# Required credentials (add to .env file)
-COINBASE_PROJECT_ID=your_project_id_here
+COINBASE_PROJECT_ID=your_project_id
 COINBASE_API_KEY_NAME=organizations/your-org/apiKeys/your-key
 COINBASE_API_KEY_PRIVATE_KEY=-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----
 ```
 
-#### How to Get Credentials:
-1. Go to **CDP Console → API Keys**
-2. Click **"New API key"**
-3. Select permissions:
-   - `wallet:create` - Create wallets
-   - `wallet:read` - Read wallet info
-   - `wallet:transactions:send` - Send transactions
-4. Download the JSON file containing your credentials
-5. Extract the `projectId`, `name`, and `privateKey`
-
-### 3. Install Real SDK Packages
+### 3. Install SDK
 
 ```bash
-# For production Coinbase integration
-npm install @coinbase/waas-sdk-web @coinbase/waas-sdk-viem
+npm install @coinbase/waas-sdk-web
 ```
 
-### 4. Update Backend Service
+## Authentication Flow
 
-Replace the mock `EmbeddedWalletService` with actual Coinbase SDK integration:
-
-```python
-# services/embedded_wallet.py - Production version
-from coinbase_sdk import CoinbaseClient
-
-class EmbeddedWalletService:
-    def __init__(self):
-        self.client = CoinbaseClient(
-            api_key_name=os.environ['COINBASE_API_KEY_NAME'],
-            api_key_private_key=os.environ['COINBASE_API_KEY_PRIVATE_KEY']
-        )
-        
-    def send_otp(self, identifier: str):
-        """Send real OTP via Coinbase"""
-        return self.client.auth.send_otp(
-            identifier=identifier,
-            channel='email' if '@' in identifier else 'sms'
-        )
+```
+User enters email
+    │
+    ▼
+Firebase sends OTP
+    │
+    ▼
+User verifies OTP
+    │
+    ▼
+Coinbase creates wallet (TEE-secured)
+    │
+    ▼
+JWT token issued
 ```
 
-### 5. Frontend SDK Integration
+## Testing
 
-```javascript
-// Initialize Coinbase SDK
-import { InitializeWaas } from '@coinbase/waas-sdk-web';
+Test the authentication flow:
 
-const waas = await InitializeWaas({
-    enableHostedBackups: true,
-    projectId: "YOUR_PROJECT_ID",
-    prod: false  // Set to true for mainnet
-});
-
-// Create wallet with email/SMS
-const wallet = await waas.create({
-    authMethod: 'email',
-    identifier: 'user@example.com',
-    passcode: '123456'  // OTP from email
-});
+```
+/api/embedded/test
 ```
 
-## Key Differences: Mock vs Production
+1. Enter email address
+2. Check email for verification code
+3. Enter code to create wallet
 
-| Feature | Mock (Current) | Production (Coinbase) |
-|---------|---------------|----------------------|
-| **OTP Delivery** | Auto-filled in UI | Sent via email/SMS |
-| **Wallet Creation** | Generates test address | Creates real wallet with MPC |
-| **Security** | Basic key derivation | TEE + secure enclaves |
-| **Backup** | Local only | Hosted by Coinbase |
-| **Network** | BASE Sepolia only | Multiple networks |
-| **USDC** | Mock balances | Real USDC tokens |
-| **Gas Fees** | Not required | Required for transactions |
+## Production Checklist
 
-## Production Deployment Checklist
+- [x] Firebase email authentication
+- [x] Session persistence (localStorage)
+- [x] Multi-wallet support
+- [x] Mobile responsive CSS
+- [ ] Coinbase Developer account created
+- [ ] API credentials configured
+- [ ] SDK installed
+- [ ] Domain allowlisted in CDP Console
+- [ ] Rate limiting enabled
+- [ ] Wallet recovery flow
 
-- [ ] **Coinbase Developer Account** created
-- [ ] **Project ID** obtained from CDP console  
-- [ ] **API credentials** configured in environment
-- [ ] **SDK packages** installed (`@coinbase/waas-sdk-web`)
-- [ ] **Email/SMS service** enabled in Coinbase settings
-- [ ] **Allowlist domains** configured for production URL
-- [ ] **Security policies** configured (transaction limits, 2FA)
-- [ ] **Remove test mode** flags and mock OTP display
-- [ ] **Test with real email/phone** numbers
-- [ ] **Implement error handling** for failed OTP delivery
-
-## Security Best Practices
-
-1. **Never expose API keys** in frontend code
-2. **Use environment variables** for all credentials
-3. **Enable IP allowlisting** in CDP console
-4. **Set transaction limits** via policy engine
-5. **Require 2FA** for large transactions
-6. **Implement rate limiting** on OTP requests
-7. **Use HTTPS only** in production
-8. **Monitor for suspicious activity**
-
-## Testing Flow Comparison
-
-### Mock Testing (Current)
-```
-User enters email → Mock OTP generated → Auto-filled → Test wallet created
-```
-
-### Production Flow (With Coinbase)
-```
-User enters email → Coinbase sends OTP → User enters code → Real wallet created with MPC
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **"OTP not sent"** - Check Coinbase API credentials and email/SMS settings
-2. **"Invalid project ID"** - Verify project ID matches CDP console
-3. **"Unauthorized"** - Check API key permissions and IP allowlist
-4. **"Network error"** - Ensure BASE RPC URL is accessible
-5. **"Wallet creation failed"** - Check Coinbase service status
-
-## Next Steps
-
-1. **For Testing**: Use the current mock implementation at `/api/embedded/test`
-2. **For Production**: 
-   - Sign up for Coinbase Developer Platform
-   - Get API credentials
-   - Update environment variables
-   - Install production SDK
-   - Replace mock service with real integration
-
-## Support Resources
+## Resources
 
 - [Coinbase Embedded Wallets Docs](https://docs.cloud.coinbase.com/embedded-wallets)
-- [SDK GitHub Repository](https://github.com/coinbase/waas-sdk-web)
 - [CDP Console](https://portal.cdp.coinbase.com/)
-- [API Reference](https://docs.cdp.coinbase.com/embedded-wallets/reference)
+- [Firebase Setup Guide](./FIREBASE-SETUP-GUIDE.md)

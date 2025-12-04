@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import json
 from services.blockchain_base import BaseBlockchainService
@@ -74,7 +74,7 @@ def health_check():
     try:
         return jsonify({
             'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'service': 'clockchain-node'
         })
     except Exception as e:
@@ -520,7 +520,7 @@ def cancel_bet(bet_id):
         # Create time entry
         ledger_service.create_time_entry('bet_cancelled', {
             'bet_id': str(bet.id),
-            'cancelled_at': datetime.utcnow().isoformat()
+            'cancelled_at': datetime.now(timezone.utc).isoformat()
         })
         
         return jsonify({'success': True, 'message': 'Bet cancelled successfully'})
@@ -676,7 +676,7 @@ def force_time_sync():
         # Broadcast time sync request
         node_comm_service.broadcast_message({
             'type': 'time_sync_request',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'requester': 'admin'
         })
         

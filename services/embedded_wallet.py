@@ -9,7 +9,7 @@ import time
 import hashlib
 import secrets
 from typing import Dict, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from web3 import Web3
 try:
     import jwt
@@ -75,7 +75,7 @@ class EmbeddedWalletService:
                 'address': account.address,
                 'identifier': identifier,
                 'auth_method': auth_method,
-                'created_at': datetime.utcnow().isoformat(),
+                'created_at': datetime.now(timezone.utc).isoformat(),
                 'policies': self.default_policies
             }
             
@@ -124,7 +124,7 @@ class EmbeddedWalletService:
             wallet_data = {
                 'address': account.address,
                 'identifier': identifier,
-                'authenticated_at': datetime.utcnow().isoformat()
+                'authenticated_at': datetime.now(timezone.utc).isoformat()
             }
             
             token = self._generate_jwt(wallet_data)
@@ -314,14 +314,14 @@ class EmbeddedWalletService:
         """Generate JWT token for wallet session"""
         payload = {
             **wallet_data,
-            'exp': (datetime.utcnow() + timedelta(hours=24)).isoformat(),
-            'iat': datetime.utcnow().isoformat()
+            'exp': (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat(),
+            'iat': datetime.now(timezone.utc).isoformat()
         }
         
         if jwt:
             # Use PyJWT if available
-            exp_timestamp = int((datetime.utcnow() + timedelta(hours=24)).timestamp())
-            iat_timestamp = int(datetime.utcnow().timestamp())
+            exp_timestamp = int((datetime.now(timezone.utc) + timedelta(hours=24)).timestamp())
+            iat_timestamp = int(datetime.now(timezone.utc).timestamp())
             payload['exp'] = exp_timestamp
             payload['iat'] = iat_timestamp
             return jwt.encode(payload, self.secret_key, algorithm='HS256')

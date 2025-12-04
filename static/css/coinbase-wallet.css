@@ -370,3 +370,128 @@
         opacity: 1;
     }
 }
+
+/* ============================================
+   MOBILE RESPONSIVENESS FOR COINBASE WALLET
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Transaction modal - full width on mobile */
+    .coinbase-tx-modal .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 20px;
+        margin: 10px;
+        border-radius: 8px;
+    }
+
+    .coinbase-tx-modal h3 {
+        font-size: 20px;
+    }
+
+    /* Modal buttons - touch-friendly size */
+    .coinbase-tx-modal button {
+        min-height: 48px;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .coinbase-tx-modal .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .coinbase-tx-modal .modal-actions button {
+        width: 100%;
+    }
+
+    /* Email auth modal - full width */
+    .email-auth-modal {
+        width: 95%;
+        max-width: none;
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .email-auth-modal h3 {
+        font-size: 18px;
+    }
+
+    /* Form inputs - larger for touch */
+    .email-auth-modal input {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 12px;
+    }
+
+    /* Buttons - touch-friendly */
+    .email-auth-modal button {
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .email-auth-modal .auth-option-btn {
+        min-height: 48px;
+        padding: 12px;
+    }
+
+    /* Wallet type switcher - reposition on mobile */
+    .wallet-type-switcher {
+        bottom: auto;
+        top: 70px;
+        right: 10px;
+        left: auto;
+        max-width: 150px;
+    }
+
+    /* Success/error messages - full width on mobile */
+    .coinbase-message {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+        text-align: center;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .coinbase-tx-modal .modal-content,
+    .email-auth-modal {
+        padding: 15px;
+    }
+
+    .coinbase-tx-modal .tx-details {
+        padding: 10px;
+    }
+
+    .coinbase-tx-modal .tx-details strong {
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    /* Close button - larger touch target */
+    .email-auth-modal .close-modal-btn {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 10px;
+        right: 10px;
+    }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+    /* Ensure all interactive elements meet 44px minimum */
+    .email-auth-modal .auth-link-btn {
+        min-height: 44px;
+        padding: 10px;
+    }
+
+    .coinbase-tx-modal button,
+    .email-auth-modal button,
+    .email-auth-modal .auth-option-btn {
+        min-height: 48px;
+    }
+}

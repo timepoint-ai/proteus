@@ -5,7 +5,7 @@ Chain-only monitoring implementation (Phase 1 Cleanup)
 
 import logging
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 import threading
@@ -183,7 +183,7 @@ class MonitoringService:
                         'critical'
                     )
                     
-            self.metrics['contract_events']['last_check'] = datetime.utcnow().isoformat()
+            self.metrics['contract_events']['last_check'] = datetime.now(timezone.utc).isoformat()
             
         except Exception as e:
             logger.error(f"Error processing contract monitoring results: {e}")
@@ -314,7 +314,7 @@ class MonitoringService:
                 except Exception as e:
                     logger.error(f"Error monitoring {contract_name} events: {e}")
                     
-            self.metrics['contract_events']['last_check'] = datetime.utcnow().isoformat()
+            self.metrics['contract_events']['last_check'] = datetime.now(timezone.utc).isoformat()
             
         except Exception as e:
             logger.error(f"Error monitoring contract events: {e}")
@@ -345,7 +345,7 @@ class MonitoringService:
             'type': alert_type,
             'message': message,
             'severity': severity,
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(timezone.utc),
             'acknowledged': False
         }
         self.alerts.append(alert)
@@ -421,7 +421,7 @@ class MonitoringService:
                 for alert in self.alerts[-10:]  # Last 10 alerts
             ],
             'health_score': self._calculate_health_score(),
-            'last_update': datetime.utcnow().isoformat()
+            'last_update': datetime.now(timezone.utc).isoformat()
         }
     
     def get_current_metrics(self) -> Dict[str, Any]:

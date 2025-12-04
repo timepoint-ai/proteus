@@ -3,7 +3,7 @@ import json
 import base64
 import hashlib
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Tuple
 # from app import db  # Phase 7: Database removed
 # from models import PredictionMarket, Submission, OracleSubmission, OracleVote, NodeOperator, Bet  # Phase 7: Models removed
@@ -46,7 +46,7 @@ class XcomOracleService:
                 return False
                 
             # CRITICAL: Check if market's end time has passed
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
             if current_time < market.end_time:
                 logger.error(f"Cannot submit oracle statement for market {market_id} before end time: {market.end_time}")
                 return False
@@ -90,12 +90,12 @@ class XcomOracleService:
             submission.tweet_id = tweet_id
             submission.tweet_verification = json.dumps({
                 'tweet_id': tweet_id,
-                'verified_at': datetime.utcnow().isoformat(),
+                'verified_at': datetime.now(timezone.utc).isoformat(),
                 'handle': market.twitter_handle
             })
             submission.screenshot_proof = screenshot_base64
             submission.screenshot_hash = screenshot_hash
-            submission.tweet_timestamp = datetime.utcnow()  # Would be fetched from X.com API
+            submission.tweet_timestamp = datetime.now(timezone.utc)  # Would be fetched from X.com API
             
     # db.session.add(submission)  # Phase 7: Database removed
             
@@ -112,7 +112,7 @@ class XcomOracleService:
                     'tweet_id': tweet_id,
                     'screenshot_hash': screenshot_hash,
                     'signature': signature,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(timezone.utc).isoformat()
                 }
             })
             
@@ -177,7 +177,7 @@ class XcomOracleService:
             else:
                 # Fallback to placeholder if screenshot fails
                 logger.warning(f"Could not capture screenshot for {tweet_url}, using placeholder")
-                placeholder_data = f"Screenshot placeholder for {tweet_url} at {datetime.utcnow().isoformat()}"
+                placeholder_data = f"Screenshot placeholder for {tweet_url} at {datetime.now(timezone.utc).isoformat()}"
                 return base64.b64encode(placeholder_data.encode()).decode()
             
         except Exception as e:
@@ -310,7 +310,7 @@ class XcomOracleService:
                 market.winning_submission_id = winning_submission.id
                 market.status = 'resolved'
                 market.resolution_text = actual_text
-                market.resolution_time = datetime.utcnow()
+                market.resolution_time = datetime.now(timezone.utc)
                 
                 # Update bet statuses
                 self._update_bet_statuses(market.id, winning_submission.id)
@@ -323,7 +323,7 @@ class XcomOracleService:
                         'winning_submission_id': str(winning_submission.id),
                         'resolution_text': actual_text,
                         'oracle_submission_id': str(oracle_submission.id),
-                        'timestamp': datetime.utcnow().isoformat()
+                        'timestamp': datetime.now(timezone.utc).isoformat()
                     }
                 })
                 

@@ -1,0 +1,750 @@
+'npx hardhat clean' running (wd: /Users/seanmcdonald/Documents/GitHub/clockchain-prediction-market)
+'npx hardhat clean --global' running (wd: /Users/seanmcdonald/Documents/GitHub/clockchain-prediction-market)
+Problem deserializing hardhat configuration, using defaults: Expecting value: line 1 column 2 (char 1)
+'npx hardhat compile --force' running (wd: /Users/seanmcdonald/Documents/GitHub/clockchain-prediction-market)
+
+DistributedPayoutManager.distributeFees(uint256) (contracts/src/DistributedPayoutManager.sol#124-182) sends eth to arbitrary user
+	Dangerous calls:
+	- builderRewardPool.deposit{value: builderReward}() (contracts/src/DistributedPayoutManager.sol#165)
+	- bittensorRewardPool.deposit{value: bittensorReward}() (contracts/src/DistributedPayoutManager.sol#170)
+ImprovedDistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#158-178) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = owner.call{value: rewardPerNFT}() (contracts/src/ImprovedDistributedPayoutManager.sol#169)
+SecurityAudit.emergencyWithdraw() (contracts/src/SecurityAudit.sol#117-125) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = emergencyWithdrawAddress.call{value: balance}() (contracts/src/SecurityAudit.sol#123)
+TestMarketWithPayouts.resolveMarket(uint256,string) (contracts/src/TestMarketWithPayouts.sol#68-96) sends eth to arbitrary user
+	Dangerous calls:
+	- (sent,None) = payoutManager.call{value: market.platformFee}() (contracts/src/TestMarketWithPayouts.sol#81)
+	- (sentToCreator,None) = market.creator.call{value: remaining}() (contracts/src/TestMarketWithPayouts.sol#93)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) has bitwise-xor operator ^ instead of the exponentiation operator **: 
+	 - inverse = (3 * denominator) ^ 2 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#257)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-exponentiation
+
+Base64._encode(bytes,string,bool) (node_modules/@openzeppelin/contracts/utils/Base64.sol#35-118) performs a multiplication on the result of a division:
+	- resultLength = 4 * ((data.length + 2) / 3) (node_modules/@openzeppelin/contracts/utils/Base64.sol#55)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse = (3 * denominator) ^ 2 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#257)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#261)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#262)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#263)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#264)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#265)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- denominator = denominator / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#242)
+	- inverse *= 2 - denominator * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#266)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) performs a multiplication on the result of a division:
+	- low = low / twos (node_modules/@openzeppelin/contracts/utils/math/Math.sol#245)
+	- result = low * inverse (node_modules/@openzeppelin/contracts/utils/math/Math.sol#272)
+Math.invMod(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#315-361) performs a multiplication on the result of a division:
+	- quotient = gcd / remainder (node_modules/@openzeppelin/contracts/utils/math/Math.sol#337)
+	- (gcd,remainder) = (remainder,gcd - remainder * quotient) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#339-346)
+BittensorRewardPool.distributeEpochRewards() (contracts/src/BittensorRewardPool.sol#193-243) performs a multiplication on the result of a division:
+	- epochRewardPool = totalPoolBalance / 10 (contracts/src/BittensorRewardPool.sol#196)
+	- reward = (epochRewardPool * agentScores[i_scope_0]) / totalScore (contracts/src/BittensorRewardPool.sol#219)
+BittensorRewardPool.distributeEpochRewards() (contracts/src/BittensorRewardPool.sol#193-243) performs a multiplication on the result of a division:
+	- reward = (epochRewardPool * agentScores[i_scope_0]) / totalScore (contracts/src/BittensorRewardPool.sol#219)
+	- reward = (reward * (100 + bonus)) / 100 (contracts/src/BittensorRewardPool.sol#224)
+BittensorRewardPool._calculateAgentScore(address) (contracts/src/BittensorRewardPool.sol#248-277) performs a multiplication on the result of a division:
+	- transparencyScore = (agent.transparencyBonus * 100) / MAX_TRANSPARENCY_BONUS (contracts/src/BittensorRewardPool.sol#264)
+	- weightedScore = (performanceScore * PERFORMANCE_WEIGHT + taoScore * TAO_STAKE_WEIGHT + yumaScore * YUMA_SCORE_WEIGHT + transparencyScore * TRANSPARENCY_WEIGHT) / 100 (contracts/src/BittensorRewardPool.sol#267-270)
+BittensorRewardPool._calculateAgentScore(address) (contracts/src/BittensorRewardPool.sol#248-277) performs a multiplication on the result of a division:
+	- weightedScore = (performanceScore * PERFORMANCE_WEIGHT + taoScore * TAO_STAKE_WEIGHT + yumaScore * YUMA_SCORE_WEIGHT + transparencyScore * TRANSPARENCY_WEIGHT) / 100 (contracts/src/BittensorRewardPool.sol#267-270)
+	- (weightedScore * multiplier) / 100 (contracts/src/BittensorRewardPool.sol#276)
+BuilderRewardPool.distributeWeeklyRewards() (contracts/src/BuilderRewardPool.sol#123-163) performs a multiplication on the result of a division:
+	- baseReward = totalPool / TOP_BUILDERS_COUNT (contracts/src/BuilderRewardPool.sol#139)
+	- reward = baseReward (contracts/src/BuilderRewardPool.sol#145)
+	- reward = (reward * 110) / 100 (contracts/src/BuilderRewardPool.sol#150)
+BuilderRewardPool.distributeWeeklyRewards() (contracts/src/BuilderRewardPool.sol#123-163) performs a multiplication on the result of a division:
+	- reward = (reward * 125) / 100 (contracts/src/BuilderRewardPool.sol#149)
+	- reward = (reward * 110) / 100 (contracts/src/BuilderRewardPool.sol#150)
+BuilderRewardPool.distributeWeeklyRewards() (contracts/src/BuilderRewardPool.sol#123-163) performs a multiplication on the result of a division:
+	- reward = (reward * 150) / 100 (contracts/src/BuilderRewardPool.sol#148)
+	- reward = (reward * 125) / 100 (contracts/src/BuilderRewardPool.sol#149)
+BuilderRewardPool.calculateBuilderScore(address) (contracts/src/BuilderRewardPool.sol#188-203) performs a multiplication on the result of a division:
+	- volumeScore = builder.volumeGenerated / 1000000000000000000 (contracts/src/BuilderRewardPool.sol#197)
+	- (volumeScore * 40 + marketScore * 30 + accuracyScore * 20 + voteScore * 10) / 100 (contracts/src/BuilderRewardPool.sol#202)
+DistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/DistributedPayoutManager.sol#188-226) performs a multiplication on the result of a division:
+	- rewardPerNFT = _totalReward / totalSupply (contracts/src/DistributedPayoutManager.sol#199)
+	- holderReward = rewardPerNFT * holderBalance (contracts/src/DistributedPayoutManager.sol#217)
+ImprovedDistributedPayoutManager.calculateGenesisEarnings(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#185-200) performs a multiplication on the result of a division:
+	- platformFee = (platformVolume * 7) / 100 (contracts/src/ImprovedDistributedPayoutManager.sol#190)
+	- totalGenesisReward = (platformFee * GENESIS_SHARE) / TOTAL_FEE (contracts/src/ImprovedDistributedPayoutManager.sol#193)
+ImprovedDistributedPayoutManager.calculateGenesisEarnings(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#185-200) performs a multiplication on the result of a division:
+	- totalGenesisReward = (platformFee * GENESIS_SHARE) / TOTAL_FEE (contracts/src/ImprovedDistributedPayoutManager.sol#193)
+	- holderShare = (totalGenesisReward * nftCount) / totalSupply (contracts/src/ImprovedDistributedPayoutManager.sol#197)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+
+ActorRegistry.executeProposal(bytes32) (contracts/src/ActorRegistry.sol#233-255) uses a dangerous strict equality:
+	- activeProposal[actorList[i]] == _proposalId (contracts/src/ActorRegistry.sol#245)
+EnhancedPredictionMarket._updateMarketStats(uint256,uint256,address) (contracts/src/EnhancedPredictionMarket.sol#421-449) uses a dangerous strict equality:
+	- bets[userBetIds[i]].marketId == _marketId (contracts/src/EnhancedPredictionMarket.sol#436)
+EnhancedPredictionMarket.createSubmission(uint256,string,string) (contracts/src/EnhancedPredictionMarket.sol#222-280) uses a dangerous strict equality:
+	- markets[_marketId].submissionCount == 0 (contracts/src/EnhancedPredictionMarket.sol#240)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Contract locking ether found:
+	Contract AdvancedMarkets (contracts/src/AdvancedMarkets.sol#12-237) has payable functions:
+	 - AdvancedMarkets.betOnOption(bytes32,bytes32) (contracts/src/AdvancedMarkets.sol#153-178)
+	But does not have a function to withdraw the ether
+Contract locking ether found:
+	Contract MockRewardPool (contracts/src/MockContracts.sol#49-51) has payable functions:
+	 - MockRewardPool.deposit() (contracts/src/MockContracts.sol#50)
+	But does not have a function to withdraw the ether
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#contracts-that-lock-ether
+
+Reentrancy in GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65):
+	External calls:
+	- _safeMint(to,tokenId) (contracts/src/GenesisNFT.sol#57)
+		- retval = IERC721Receiver(to).onERC721Received(operator,from,tokenId,data) (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#33-47)
+		- ERC721Utils.checkOnERC721Received(_msgSender(),address(0),to,tokenId,data) (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#289)
+	State variables written after the call(s):
+	- tokenId = _tokenIdCounter ++ (contracts/src/GenesisNFT.sol#56)
+	GenesisNFT._tokenIdCounter (contracts/src/GenesisNFT.sol#29) can be used in cross function reentrancies:
+	- GenesisNFT._finalizeMinting() (contracts/src/GenesisNFT.sol#84-87)
+	- GenesisNFT.constructor() (contracts/src/GenesisNFT.sol#38-41)
+	- GenesisNFT.finalizeMinting() (contracts/src/GenesisNFT.sol#71-79)
+	- GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65)
+	- GenesisNFT.remainingSupply() (contracts/src/GenesisNFT.sol#278-281)
+	- GenesisNFT.tokenURI(uint256) (contracts/src/GenesisNFT.sol#245-266)
+	- GenesisNFT.totalMinted() (contracts/src/GenesisNFT.sol#286-288)
+	- _finalizeMinting() (contracts/src/GenesisNFT.sol#63)
+		- mintingFinalized = true (contracts/src/GenesisNFT.sol#85)
+	GenesisNFT.mintingFinalized (contracts/src/GenesisNFT.sol#28) can be used in cross function reentrancies:
+	- GenesisNFT._finalizeMinting() (contracts/src/GenesisNFT.sol#84-87)
+	- GenesisNFT.finalizeMinting() (contracts/src/GenesisNFT.sol#71-79)
+	- GenesisNFT.isMintingActive() (contracts/src/GenesisNFT.sol#271-273)
+	- GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65)
+	- GenesisNFT.mintingFinalized (contracts/src/GenesisNFT.sol#28)
+	- GenesisNFT.remainingSupply() (contracts/src/GenesisNFT.sol#278-281)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+
+DecentralizedOracle._tryAutoResolve(bytes32).winningSubmissionId (contracts/src/DecentralizedOracle.sol#214) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+
+ActorRegistry.onlyActiveNode() (contracts/src/ActorRegistry.sol#66-71) ignores return value by (None,None,None,active,None,None,None,None,None) = nodeRegistry.nodes(msg.sender) (contracts/src/ActorRegistry.sol#68)
+DecentralizedOracle.submitOracleData(bytes32,bytes32,string,string,string) (contracts/src/DecentralizedOracle.sol#86-151) ignores return value by (None,None,endTime,resolved,None,None) = predictionMarket.getMarket(marketId) (contracts/src/DecentralizedOracle.sol#96)
+DistributedPayoutManager.distributeFees(uint256) (contracts/src/DistributedPayoutManager.sol#124-182) ignores return value by (creator,None,None,None,resolved,None,None,None,None,None,platformFeeCollected) = predictionMarket.markets(_marketId) (contracts/src/DistributedPayoutManager.sol#125-137)
+DistributedPayoutManager.calculateWinnerPayouts(uint256) (contracts/src/DistributedPayoutManager.sol#332-372) ignores return value by (None,None,None,None,resolved,winningSubmissionId,totalVolume,None,None,None,platformFeeCollected) = predictionMarket.markets(_marketId) (contracts/src/DistributedPayoutManager.sol#333-345)
+DistributedPayoutManager.calculateWinnerPayouts(uint256) (contracts/src/DistributedPayoutManager.sol#332-372) ignores return value by (None,None,None,stake,totalBets,None,None,None,None) = predictionMarket.submissions(submissionIds[i]) (contracts/src/DistributedPayoutManager.sol#357-358)
+PayoutManager.calculatePayouts(uint256) (contracts/src/PayoutManager.sol#64-121) ignores return value by (None,None,None,None,None,winningSubmissionId,totalVolume,None,None,None,platformFeeCollected) = predictionMarket.markets(_marketId) (contracts/src/PayoutManager.sol#68-80)
+PayoutManager.calculatePayouts(uint256) (contracts/src/PayoutManager.sol#64-121) ignores return value by (None,None,None,stake,totalBets,None,None,None,None) = predictionMarket.submissions(submissionIds[i]) (contracts/src/PayoutManager.sol#90-99)
+PayoutManager._calculateWinnerPayouts(uint256,uint256,uint256,uint256) (contracts/src/PayoutManager.sol#126-194) ignores return value by (bettor,submissionId,amount,None) = predictionMarket.bets(i) (contracts/src/PayoutManager.sol#138-143)
+PayoutManager._calculateWinnerPayouts(uint256,uint256,uint256,uint256) (contracts/src/PayoutManager.sol#126-194) ignores return value by (None,creator,None,stake,None,None,None,None,None) = predictionMarket.submissions(_winningSubmissionId) (contracts/src/PayoutManager.sol#168-177)
+PayoutManager.marketResolved(uint256) (contracts/src/PayoutManager.sol#50-54) ignores return value by (None,None,None,None,resolved,None,None,None,None,None,None) = predictionMarket.markets(_marketId) (contracts/src/PayoutManager.sol#51)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+BittensorRewardPool.updateEpochDuration(uint256) (contracts/src/BittensorRewardPool.sol#326-329) should emit an event for: 
+	- epochDuration = _duration (contracts/src/BittensorRewardPool.sol#328) 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-events-arithmetic
+
+TestMarketWithPayouts.constructor(address)._payoutManager (contracts/src/TestMarketWithPayouts.sol#28) lacks a zero-check on :
+		- payoutManager = _payoutManager (contracts/src/TestMarketWithPayouts.sol#29)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+ClockchainOracle._resolveMarket(uint256,uint256) (contracts/src/ClockchainOracle.sol#191-232) has external calls inside a loop: (marketId,creator,predictedText,stake,totalBets,levenshteinDistance,isWinner,screenshotIpfsHash,screenshotBase64Hash) = predictionMarket.submissions(submissionIds[i]) (contracts/src/ClockchainOracle.sol#200-210)
+	Calls stack containing the loop:
+		ClockchainOracle.voteOnSubmission(uint256,bool)
+DistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/DistributedPayoutManager.sol#188-226) has external calls inside a loop: holder = genesisNFT.ownerOf(tokenId) (contracts/src/DistributedPayoutManager.sol#203)
+	Calls stack containing the loop:
+		DistributedPayoutManager.distributeFees(uint256)
+DistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/DistributedPayoutManager.sol#188-226) has external calls inside a loop: holderBalance = genesisNFT.balanceOf(holder) (contracts/src/DistributedPayoutManager.sol#216)
+	Calls stack containing the loop:
+		DistributedPayoutManager.distributeFees(uint256)
+DistributedPayoutManager.calculateWinnerPayouts(uint256) (contracts/src/DistributedPayoutManager.sol#332-372) has external calls inside a loop: (None,None,None,stake,totalBets,None,None,None,None) = predictionMarket.submissions(submissionIds[i]) (contracts/src/DistributedPayoutManager.sol#357-358)
+ImprovedDistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#158-178) has external calls inside a loop: owner = genesisNFT.ownerOf(i) (contracts/src/ImprovedDistributedPayoutManager.sol#167-176)
+	Calls stack containing the loop:
+		ImprovedDistributedPayoutManager.distributeFees(uint256)
+ImprovedDistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#158-178) has external calls inside a loop: (success,None) = owner.call{value: rewardPerNFT}() (contracts/src/ImprovedDistributedPayoutManager.sol#169)
+	Calls stack containing the loop:
+		ImprovedDistributedPayoutManager.distributeFees(uint256)
+PayoutManager.calculatePayouts(uint256) (contracts/src/PayoutManager.sol#64-121) has external calls inside a loop: (None,None,None,stake,totalBets,None,None,None,None) = predictionMarket.submissions(submissionIds[i]) (contracts/src/PayoutManager.sol#90-99)
+PayoutManager._calculateWinnerPayouts(uint256,uint256,uint256,uint256) (contracts/src/PayoutManager.sol#126-194) has external calls inside a loop: (bettor,submissionId,amount,None) = predictionMarket.bets(i) (contracts/src/PayoutManager.sol#138-143)
+	Calls stack containing the loop:
+		PayoutManager.calculatePayouts(uint256)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+
+Reentrancy in GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65):
+	External calls:
+	- _safeMint(to,tokenId) (contracts/src/GenesisNFT.sol#57)
+		- retval = IERC721Receiver(to).onERC721Received(operator,from,tokenId,data) (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#33-47)
+		- ERC721Utils.checkOnERC721Received(_msgSender(),address(0),to,tokenId,data) (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#289)
+	Event emitted after the call(s):
+	- GenesisNFTMinted(to,tokenId) (contracts/src/GenesisNFT.sol#58)
+	- MintingFinalized(_tokenIdCounter - 1) (contracts/src/GenesisNFT.sol#86)
+		- _finalizeMinting() (contracts/src/GenesisNFT.sol#63)
+Reentrancy in TestMarketWithPayouts.resolveMarket(uint256,string) (contracts/src/TestMarketWithPayouts.sol#68-96):
+	External calls:
+	- (sent,None) = payoutManager.call{value: market.platformFee}() (contracts/src/TestMarketWithPayouts.sol#81)
+	- IDistributedPayoutManager(payoutManager).distributeFees(market.platformFee) (contracts/src/TestMarketWithPayouts.sol#85)
+	External calls sending eth:
+	- (sent,None) = payoutManager.call{value: market.platformFee}() (contracts/src/TestMarketWithPayouts.sol#81)
+	Event emitted after the call(s):
+	- PayoutDistributed(marketId,market.platformFee) (contracts/src/TestMarketWithPayouts.sol#87)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+
+ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool) (contracts/src/ActorRegistry.sol#88-142) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(activeProposal[_xUsername] == bytes32(0),Active proposal exists) (contracts/src/ActorRegistry.sol#99)
+	- newActor.approvalCount >= APPROVAL_THRESHOLD (contracts/src/ActorRegistry.sol#137)
+ActorRegistry.voteOnProposal(bytes32,bool) (contracts/src/ActorRegistry.sol#147-181) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp < proposal.deadline,Voting period ended) (contracts/src/ActorRegistry.sol#149)
+	- require(bool,string)(! proposal.executed,Proposal already executed) (contracts/src/ActorRegistry.sol#150)
+	- require(bool,string)(! proposal.hasVoted[msg.sender],Already voted) (contracts/src/ActorRegistry.sol#151)
+ActorRegistry.updateActor(string,string,string,string,bool,uint256) (contracts/src/ActorRegistry.sol#186-205) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= actors[_xUsername].lastSync + SYNC_COOLDOWN,Sync cooldown active) (contracts/src/ActorRegistry.sol#194)
+ActorRegistry.proposeDeactivation(string) (contracts/src/ActorRegistry.sol#210-228) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(activeProposal[_xUsername] == bytes32(0),Active proposal exists) (contracts/src/ActorRegistry.sol#211)
+ActorRegistry.executeProposal(bytes32) (contracts/src/ActorRegistry.sol#233-255) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= proposal.deadline,Voting period not ended) (contracts/src/ActorRegistry.sol#235)
+	- require(bool,string)(! proposal.executed,Already executed) (contracts/src/ActorRegistry.sol#236)
+	- activeProposal[actorList[i]] == _proposalId (contracts/src/ActorRegistry.sol#245)
+ActorRegistry.isActorActive(string) (contracts/src/ActorRegistry.sol#336-338) uses timestamp for comparisons
+	Dangerous comparisons:
+	- actorExists[_xUsername] && actors[_xUsername].active (contracts/src/ActorRegistry.sol#337)
+BittensorRewardPool.distributeEpochRewards() (contracts/src/BittensorRewardPool.sol#193-243) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= lastEpochTime + epochDuration,Epoch not complete) (contracts/src/BittensorRewardPool.sol#194)
+BuilderRewardPool.distributeWeeklyRewards() (contracts/src/BuilderRewardPool.sol#123-163) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(previousWeek > 0,No previous week) (contracts/src/BuilderRewardPool.sol#127)
+	- require(bool,string)(! weeklyRewards[previousWeek].finalized,Week already finalized) (contracts/src/BuilderRewardPool.sol#128)
+	- require(bool,string)(weeklyRewards[previousWeek].totalPool > 0,No rewards to distribute) (contracts/src/BuilderRewardPool.sol#129)
+BuilderRewardPool.claimReward(uint256) (contracts/src/BuilderRewardPool.sol#208-218) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(weeklyRewards[_weekNumber].finalized,Week not finalized) (contracts/src/BuilderRewardPool.sol#209)
+BuilderRewardPool._updateWeek() (contracts/src/BuilderRewardPool.sol#223-241) uses timestamp for comparisons
+	Dangerous comparisons:
+	- weeksPassed > currentWeek (contracts/src/BuilderRewardPool.sol#226)
+BuilderRewardPool.emergencyWithdraw() (contracts/src/BuilderRewardPool.sol#259-274) uses timestamp for comparisons
+	Dangerous comparisons:
+	- currentWeek > 12 (contracts/src/BuilderRewardPool.sol#261)
+ClockchainOracle.submitOracleData(uint256,string,string,string) (contracts/src/ClockchainOracle.sol#73-117) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= endTime,Market has not ended yet) (contracts/src/ClockchainOracle.sol#93)
+	- require(bool,string)(block.timestamp <= endTime + submissionWindow,Oracle submission window closed) (contracts/src/ClockchainOracle.sol#94)
+ClockchainOracle.voteOnSubmission(uint256,bool) (contracts/src/ClockchainOracle.sol#122-144) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(! submission.hasVoted[msg.sender],Already voted) (contracts/src/ClockchainOracle.sol#124)
+	- require(bool,string)(! submission.verified,Submission already verified) (contracts/src/ClockchainOracle.sol#125)
+DecentralizedOracle.submitOracleData(bytes32,bytes32,string,string,string) (contracts/src/DecentralizedOracle.sol#86-151) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp > endTime,Market not yet expired) (contracts/src/DecentralizedOracle.sol#98)
+EnhancedPredictionMarket.createSubmission(uint256,string,string) (contracts/src/EnhancedPredictionMarket.sol#222-280) uses timestamp for comparisons
+	Dangerous comparisons:
+	- markets[_marketId].submissionCount == 0 (contracts/src/EnhancedPredictionMarket.sol#240)
+EnhancedPredictionMarket.placeBet(uint256,bytes32) (contracts/src/EnhancedPredictionMarket.sol#285-347) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= markets[marketId].startTime,Market not started) (contracts/src/EnhancedPredictionMarket.sol#296)
+	- require(bool,string)(block.timestamp < markets[marketId].endTime,Market has ended) (contracts/src/EnhancedPredictionMarket.sol#297)
+	- require(bool,string)(! markets[marketId].resolved,Market already resolved) (contracts/src/EnhancedPredictionMarket.sol#298)
+EnhancedPredictionMarket.resolveMarket(uint256,uint256,uint256[]) (contracts/src/EnhancedPredictionMarket.sol#352-382) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(! markets[_marketId].resolved,Already resolved) (contracts/src/EnhancedPredictionMarket.sol#357)
+	- require(bool,string)(submissions[_winningSubmissionId].marketId == _marketId,Submission not in market) (contracts/src/EnhancedPredictionMarket.sol#359)
+EnhancedPredictionMarket.claimWinnings(uint256) (contracts/src/EnhancedPredictionMarket.sol#387-416) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(bet.bettor == msg.sender,Not your bet) (contracts/src/EnhancedPredictionMarket.sol#390)
+	- require(bool,string)(! bet.paid,Already claimed) (contracts/src/EnhancedPredictionMarket.sol#391)
+	- require(bool,string)(market.resolved,Market not resolved) (contracts/src/EnhancedPredictionMarket.sol#395)
+	- require(bool,string)(submissions[submissionId].isWinner,Not a winning bet) (contracts/src/EnhancedPredictionMarket.sol#398)
+EnhancedPredictionMarket._updateMarketStats(uint256,uint256,address) (contracts/src/EnhancedPredictionMarket.sol#421-449) uses timestamp for comparisons
+	Dangerous comparisons:
+	- _amount > stats.highestStake (contracts/src/EnhancedPredictionMarket.sol#429)
+	- bets[userBetIds[i]].marketId == _marketId (contracts/src/EnhancedPredictionMarket.sol#436)
+	- bettorVolume > stats.topBettorVolume (contracts/src/EnhancedPredictionMarket.sol#441)
+GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp <= mintingDeadline,Minting window has expired) (contracts/src/GenesisNFT.sol#50)
+GenesisNFT.finalizeMinting() (contracts/src/GenesisNFT.sol#71-79) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp > mintingDeadline || _tokenIdCounter > MAX_SUPPLY,Cannot finalize yet) (contracts/src/GenesisNFT.sol#73-76)
+GenesisNFT.isMintingActive() (contracts/src/GenesisNFT.sol#271-273) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! mintingFinalized && block.timestamp <= mintingDeadline (contracts/src/GenesisNFT.sol#272)
+NodeRegistry.castVote(uint256,bool) (contracts/src/NodeRegistry.sol#134-156) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp < vote.deadline,Voting period ended) (contracts/src/NodeRegistry.sol#136)
+	- require(bool,string)(! vote.hasVoted[msg.sender],Already voted) (contracts/src/NodeRegistry.sol#137)
+	- require(bool,string)(! vote.executed,Vote already executed) (contracts/src/NodeRegistry.sol#138)
+NodeRegistry.executeVote(uint256) (contracts/src/NodeRegistry.sol#161-167) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(block.timestamp >= vote.deadline,Voting period not ended) (contracts/src/NodeRegistry.sol#163)
+	- require(bool,string)(! vote.executed,Vote already executed) (contracts/src/NodeRegistry.sol#164)
+NodeRegistry.slashNode(address) (contracts/src/NodeRegistry.sol#187-200) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(node.stake >= SLASH_AMOUNT,Insufficient stake to slash) (contracts/src/NodeRegistry.sol#189)
+NodeRegistry.checkInactiveNodes() (contracts/src/NodeRegistry.sol#249-259) uses timestamp for comparisons
+	Dangerous comparisons:
+	- node.active && block.timestamp > node.lastActiveTime + INACTIVITY_PERIOD (contracts/src/NodeRegistry.sol#254-255)
+PredictionMarket.placeBet(uint256) (contracts/src/PredictionMarket.sol#159-188) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(! market.resolved,Market already resolved) (contracts/src/PredictionMarket.sol#166)
+	- require(bool,string)(block.timestamp < market.endTime,Market has ended) (contracts/src/PredictionMarket.sol#167)
+SecurityAudit.checkTransactionSecurity(address,uint256) (contracts/src/SecurityAudit.sol#49-88) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp / 86400 > lastActionTime[user] / 86400 (contracts/src/SecurityAudit.sol#64)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+ERC721Utils.checkOnERC721Received(address,address,address,uint256,bytes) (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#25-49) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#43-45)
+Base64._encode(bytes,string,bool) (node_modules/@openzeppelin/contracts/utils/Base64.sol#35-118) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Base64.sol#59-115)
+Panic.panic(uint256) (node_modules/@openzeppelin/contracts/utils/Panic.sol#50-56) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Panic.sol#51-55)
+Strings.toString(uint256) (node_modules/@openzeppelin/contracts/utils/Strings.sol#45-63) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#50-52)
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#55-57)
+Strings.toChecksumHexString(address) (node_modules/@openzeppelin/contracts/utils/Strings.sol#111-129) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#116-118)
+Strings.escapeJSON(string) (node_modules/@openzeppelin/contracts/utils/Strings.sol#446-476) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#470-473)
+Strings._unsafeReadBytesOffset(bytes,uint256) (node_modules/@openzeppelin/contracts/utils/Strings.sol#484-489) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/Strings.sol#486-488)
+Math.add512(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#25-30) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#26-29)
+Math.mul512(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#37-46) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#41-45)
+Math.tryMul(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#73-84) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#76-80)
+Math.tryDiv(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#89-97) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#92-95)
+Math.tryMod(uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#102-110) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#105-108)
+Math.mulDiv(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#204-275) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#227-234)
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#240-249)
+Math.tryModExp(uint256,uint256,uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#409-433) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#411-432)
+Math.tryModExp(bytes,bytes,bytes) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#449-471) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#461-470)
+Math.log2(uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#612-651) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/Math.sol#648-650)
+SafeCast.toUint(bool) (node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol#1157-1161) uses assembly
+	- INLINE ASM (node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol#1158-1160)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+
+6 different versions of Solidity are used:
+	- Version constraint ^0.8.20 is used by:
+		-^0.8.20 (node_modules/@openzeppelin/contracts/access/AccessControl.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/Base64.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/Context.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/Panic.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/Pausable.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#4)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol#5)
+		-^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol#4)
+		-^0.8.20 (contracts/src/ActorRegistry.sol#2)
+		-^0.8.20 (contracts/src/ClockchainOracle.sol#2)
+		-^0.8.20 (contracts/src/EnhancedPredictionMarket.sol#2)
+		-^0.8.20 (contracts/src/GenesisNFT.sol#2)
+		-^0.8.20 (contracts/src/NodeRegistry.sol#2)
+		-^0.8.20 (contracts/src/PayoutManager.sol#2)
+		-^0.8.20 (contracts/src/PredictionMarket.sol#2)
+	- Version constraint >=0.8.4 is used by:
+		->=0.8.4 (node_modules/@openzeppelin/contracts/access/IAccessControl.sol#4)
+		->=0.8.4 (node_modules/@openzeppelin/contracts/interfaces/draft-IERC6093.sol#3)
+	- Version constraint >=0.6.2 is used by:
+		->=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol#4)
+		->=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol#4)
+		->=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol#4)
+	- Version constraint >=0.5.0 is used by:
+		->=0.5.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol#4)
+	- Version constraint >=0.4.16 is used by:
+		->=0.4.16 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4)
+	- Version constraint ^0.8.19 is used by:
+		-^0.8.19 (contracts/src/AdvancedMarkets.sol#2)
+		-^0.8.19 (contracts/src/BittensorRewardPool.sol#2)
+		-^0.8.19 (contracts/src/BuilderRewardPool.sol#2)
+		-^0.8.19 (contracts/src/DecentralizedOracle.sol#2)
+		-^0.8.19 (contracts/src/DistributedPayoutManager.sol#2)
+		-^0.8.19 (contracts/src/ImprovedDistributedPayoutManager.sol#2)
+		-^0.8.19 (contracts/src/MockContracts.sol#3)
+		-^0.8.19 (contracts/src/SecurityAudit.sol#2)
+		-^0.8.19 (contracts/src/TestMarketWithPayouts.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+
+ActorRegistry._activateActor(string,bytes32) (contracts/src/ActorRegistry.sol#260-272) has costly operations inside a loop:
+	- actorCount ++ (contracts/src/ActorRegistry.sol#263)
+	Calls stack containing the loop:
+		ActorRegistry.voteOnProposal(bytes32,bool)
+ActorRegistry._deactivateActor(string) (contracts/src/ActorRegistry.sol#277-282) has costly operations inside a loop:
+	- actorCount -- (contracts/src/ActorRegistry.sol#279)
+	Calls stack containing the loop:
+		ActorRegistry.executeProposal(bytes32)
+GenesisNFT.mint(address,uint256) (contracts/src/GenesisNFT.sol#48-65) has costly operations inside a loop:
+	- tokenId = _tokenIdCounter ++ (contracts/src/GenesisNFT.sol#56)
+ERC721Enumerable._removeTokenFromAllTokensEnumeration(uint256) (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#135-153) has costly operations inside a loop:
+	- delete _allTokensIndex[tokenId] (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#151)
+	Calls stack containing the loop:
+		GenesisNFT.mint(address,uint256)
+		ERC721._safeMint(address,uint256)
+		ERC721._safeMint(address,uint256,bytes)
+		ERC721._mint(address,uint256)
+		ERC721Enumerable._update(address,uint256,address)
+ERC721Enumerable._removeTokenFromAllTokensEnumeration(uint256) (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#135-153) has costly operations inside a loop:
+	- _allTokens.pop() (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#152)
+	Calls stack containing the loop:
+		GenesisNFT.mint(address,uint256)
+		ERC721._safeMint(address,uint256)
+		ERC721._safeMint(address,uint256,bytes)
+		ERC721._mint(address,uint256)
+		ERC721Enumerable._update(address,uint256,address)
+ERC721Enumerable._removeTokenFromOwnerEnumeration(address,uint256) (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#108-128) has costly operations inside a loop:
+	- delete _ownedTokensIndex[tokenId] (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#126)
+	Calls stack containing the loop:
+		GenesisNFT.mint(address,uint256)
+		ERC721._safeMint(address,uint256)
+		ERC721._safeMint(address,uint256,bytes)
+		ERC721._mint(address,uint256)
+		ERC721Enumerable._update(address,uint256,address)
+NodeRegistry._deactivateNode(address) (contracts/src/NodeRegistry.sol#205-214) has costly operations inside a loop:
+	- activeNodeCount -- (contracts/src/NodeRegistry.sol#208)
+	Calls stack containing the loop:
+		NodeRegistry.checkInactiveNodes()
+NodeRegistry._deactivateNode(address) (contracts/src/NodeRegistry.sol#205-214) has costly operations inside a loop:
+	- totalStaked -= node.stake (contracts/src/NodeRegistry.sol#210)
+	Calls stack containing the loop:
+		NodeRegistry.checkInactiveNodes()
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#costly-operations-inside-a-loop
+
+Version constraint ^0.8.20 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- VerbatimInvalidDeduplication
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess.
+It is used by:
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/access/AccessControl.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/Base64.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/Context.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/Panic.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/Pausable.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/Math.sol#4)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol#5)
+	- ^0.8.20 (node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol#4)
+	- ^0.8.20 (contracts/src/ActorRegistry.sol#2)
+	- ^0.8.20 (contracts/src/ClockchainOracle.sol#2)
+	- ^0.8.20 (contracts/src/EnhancedPredictionMarket.sol#2)
+	- ^0.8.20 (contracts/src/GenesisNFT.sol#2)
+	- ^0.8.20 (contracts/src/NodeRegistry.sol#2)
+	- ^0.8.20 (contracts/src/PayoutManager.sol#2)
+	- ^0.8.20 (contracts/src/PredictionMarket.sol#2)
+Version constraint >=0.8.4 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- DataLocationChangeInInternalOverride
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- SignedImmutables.
+It is used by:
+	- >=0.8.4 (node_modules/@openzeppelin/contracts/access/IAccessControl.sol#4)
+	- >=0.8.4 (node_modules/@openzeppelin/contracts/interfaces/draft-IERC6093.sol#3)
+Version constraint >=0.6.2 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- MissingSideEffectsOnSelectorAccess
+	- AbiReencodingHeadOverflowWithStaticArrayCleanup
+	- DirtyBytesArrayToStorage
+	- NestedCalldataArrayAbiReencodingSizeValidation
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- MissingEscapingInFormatting
+	- ArraySliceDynamicallyEncodedBaseType
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow.
+It is used by:
+	- >=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol#4)
+	- >=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol#4)
+	- >=0.6.2 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol#4)
+Version constraint >=0.5.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- DirtyBytesArrayToStorage
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow
+	- privateCanBeOverridden
+	- SignedArrayStorageCopy
+	- ABIEncoderV2StorageArrayWithMultiSlotElement
+	- DynamicConstructorArgumentsClippedABIV2
+	- UninitializedFunctionPointerInConstructor
+	- IncorrectEventSignatureInLibraries
+	- ABIEncoderV2PackedStorage.
+It is used by:
+	- >=0.5.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol#4)
+Version constraint >=0.4.16 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- DirtyBytesArrayToStorage
+	- ABIDecodeTwoDimensionalArrayMemory
+	- KeccakCaching
+	- EmptyByteArrayCopy
+	- DynamicArrayCleanup
+	- ImplicitConstructorCallvalueCheck
+	- TupleAssignmentMultiStackSlotComponents
+	- MemoryArrayCreationOverflow
+	- privateCanBeOverridden
+	- SignedArrayStorageCopy
+	- ABIEncoderV2StorageArrayWithMultiSlotElement
+	- DynamicConstructorArgumentsClippedABIV2
+	- UninitializedFunctionPointerInConstructor_0.4.x
+	- IncorrectEventSignatureInLibraries_0.4.x
+	- ExpExponentCleanup
+	- NestedArrayFunctionCallDecoder
+	- ZeroFunctionSelector.
+It is used by:
+	- >=0.4.16 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4)
+Version constraint ^0.8.19 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)
+	- VerbatimInvalidDeduplication
+	- FullInlinerNonExpressionSplitArgumentEvaluationOrder
+	- MissingSideEffectsOnSelectorAccess.
+It is used by:
+	- ^0.8.19 (contracts/src/AdvancedMarkets.sol#2)
+	- ^0.8.19 (contracts/src/BittensorRewardPool.sol#2)
+	- ^0.8.19 (contracts/src/BuilderRewardPool.sol#2)
+	- ^0.8.19 (contracts/src/DecentralizedOracle.sol#2)
+	- ^0.8.19 (contracts/src/DistributedPayoutManager.sol#2)
+	- ^0.8.19 (contracts/src/ImprovedDistributedPayoutManager.sol#2)
+	- ^0.8.19 (contracts/src/MockContracts.sol#3)
+	- ^0.8.19 (contracts/src/SecurityAudit.sol#2)
+	- ^0.8.19 (contracts/src/TestMarketWithPayouts.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+
+Low level call in BittensorRewardPool.claimRewards() (contracts/src/BittensorRewardPool.sol#282-295):
+	- (success,None) = address(msg.sender).call{value: rewards}() (contracts/src/BittensorRewardPool.sol#291)
+Low level call in BittensorRewardPool.emergencyWithdraw() (contracts/src/BittensorRewardPool.sol#343-355):
+	- (success,None) = address(owner()).call{value: excess}() (contracts/src/BittensorRewardPool.sol#352)
+Low level call in BuilderRewardPool.claimReward(uint256) (contracts/src/BuilderRewardPool.sol#208-218):
+	- (success,None) = address(msg.sender).call{value: reward}() (contracts/src/BuilderRewardPool.sol#216)
+Low level call in BuilderRewardPool.emergencyWithdraw() (contracts/src/BuilderRewardPool.sol#259-274):
+	- (success,None) = address(owner()).call{value: amount}() (contracts/src/BuilderRewardPool.sol#271)
+Low level call in DistributedPayoutManager.claimRewards() (contracts/src/DistributedPayoutManager.sol#317-327):
+	- (success,None) = address(msg.sender).call{value: amount}() (contracts/src/DistributedPayoutManager.sol#323)
+Low level call in EnhancedPredictionMarket.claimWinnings(uint256) (contracts/src/EnhancedPredictionMarket.sol#387-416):
+	- (success,None) = address(msg.sender).call{value: payout}() (contracts/src/EnhancedPredictionMarket.sol#412)
+Low level call in EnhancedPredictionMarket.withdrawPlatformFees() (contracts/src/EnhancedPredictionMarket.sol#508-514):
+	- (success,None) = address(owner()).call{value: balance}() (contracts/src/EnhancedPredictionMarket.sol#512)
+Low level call in ImprovedDistributedPayoutManager._distributeToGenesisHolders(uint256,uint256) (contracts/src/ImprovedDistributedPayoutManager.sol#158-178):
+	- (success,None) = owner.call{value: rewardPerNFT}() (contracts/src/ImprovedDistributedPayoutManager.sol#169)
+Low level call in SecurityAudit.emergencyWithdraw() (contracts/src/SecurityAudit.sol#117-125):
+	- (success,None) = emergencyWithdrawAddress.call{value: balance}() (contracts/src/SecurityAudit.sol#123)
+Low level call in TestMarketWithPayouts.resolveMarket(uint256,string) (contracts/src/TestMarketWithPayouts.sol#68-96):
+	- (sent,None) = payoutManager.call{value: market.platformFee}() (contracts/src/TestMarketWithPayouts.sol#81)
+	- (sentToCreator,None) = market.creator.call{value: remaining}() (contracts/src/TestMarketWithPayouts.sol#93)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+BittensorRewardPool (contracts/src/BittensorRewardPool.sol#12-364) should inherit from IBuilderRewardPool (contracts/src/DistributedPayoutManager.sol#39-41)
+BuilderRewardPool (contracts/src/BuilderRewardPool.sol#12-284) should inherit from IBuilderRewardPool (contracts/src/DistributedPayoutManager.sol#39-41)
+DistributedPayoutManager (contracts/src/DistributedPayoutManager.sol#57-403) should inherit from IDistributedPayoutManager (contracts/src/TestMarketWithPayouts.sol#4-6)
+GenesisNFT (contracts/src/GenesisNFT.sol#19-290) should inherit from IGenesisNFT (contracts/src/ImprovedDistributedPayoutManager.sol#47-50)
+ImprovedDistributedPayoutManager (contracts/src/ImprovedDistributedPayoutManager.sol#57-225) should inherit from IDistributedPayoutManager (contracts/src/TestMarketWithPayouts.sol#4-6)
+MockRewardPool (contracts/src/MockContracts.sol#49-51) should inherit from IBuilderRewardPool (contracts/src/DistributedPayoutManager.sol#39-41)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._xUsername (contracts/src/ActorRegistry.sol#89) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._displayName (contracts/src/ActorRegistry.sol#90) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._bio (contracts/src/ActorRegistry.sol#91) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._profileImageUrl (contracts/src/ActorRegistry.sol#92) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._verified (contracts/src/ActorRegistry.sol#93) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._followerCount (contracts/src/ActorRegistry.sol#94) is not in mixedCase
+Parameter ActorRegistry.proposeActor(string,string,string,string,bool,uint256,bool)._isTestAccount (contracts/src/ActorRegistry.sol#95) is not in mixedCase
+Parameter ActorRegistry.voteOnProposal(bytes32,bool)._proposalId (contracts/src/ActorRegistry.sol#147) is not in mixedCase
+Parameter ActorRegistry.voteOnProposal(bytes32,bool)._support (contracts/src/ActorRegistry.sol#147) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._xUsername (contracts/src/ActorRegistry.sol#187) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._displayName (contracts/src/ActorRegistry.sol#188) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._bio (contracts/src/ActorRegistry.sol#189) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._profileImageUrl (contracts/src/ActorRegistry.sol#190) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._verified (contracts/src/ActorRegistry.sol#191) is not in mixedCase
+Parameter ActorRegistry.updateActor(string,string,string,string,bool,uint256)._followerCount (contracts/src/ActorRegistry.sol#192) is not in mixedCase
+Parameter ActorRegistry.proposeDeactivation(string)._xUsername (contracts/src/ActorRegistry.sol#210) is not in mixedCase
+Parameter ActorRegistry.executeProposal(bytes32)._proposalId (contracts/src/ActorRegistry.sol#233) is not in mixedCase
+Parameter ActorRegistry.getActor(string)._xUsername (contracts/src/ActorRegistry.sol#287) is not in mixedCase
+Parameter ActorRegistry.isActorActive(string)._xUsername (contracts/src/ActorRegistry.sol#336) is not in mixedCase
+Parameter ActorRegistry.getActorApprovers(string)._xUsername (contracts/src/ActorRegistry.sol#343) is not in mixedCase
+Parameter BittensorRewardPool.registerAIAgent(string,string,uint256)._hotkey (contracts/src/BittensorRewardPool.sol#87) is not in mixedCase
+Parameter BittensorRewardPool.registerAIAgent(string,string,uint256)._coldkey (contracts/src/BittensorRewardPool.sol#88) is not in mixedCase
+Parameter BittensorRewardPool.registerAIAgent(string,string,uint256)._subnet (contracts/src/BittensorRewardPool.sol#89) is not in mixedCase
+Parameter BittensorRewardPool.verifyAgent(address,uint256,uint256)._agent (contracts/src/BittensorRewardPool.sol#111) is not in mixedCase
+Parameter BittensorRewardPool.verifyAgent(address,uint256,uint256)._taoStaked (contracts/src/BittensorRewardPool.sol#111) is not in mixedCase
+Parameter BittensorRewardPool.verifyAgent(address,uint256,uint256)._yumaScore (contracts/src/BittensorRewardPool.sol#111) is not in mixedCase
+Parameter BittensorRewardPool.updateTransparencyBonus(address,bool,bool,bool,bool)._agent (contracts/src/BittensorRewardPool.sol#129) is not in mixedCase
+Parameter BittensorRewardPool.updateTransparencyBonus(address,bool,bool,bool,bool)._openSourced (contracts/src/BittensorRewardPool.sol#130) is not in mixedCase
+Parameter BittensorRewardPool.updateTransparencyBonus(address,bool,bool,bool,bool)._architecturePublished (contracts/src/BittensorRewardPool.sol#131) is not in mixedCase
+Parameter BittensorRewardPool.updateTransparencyBonus(address,bool,bool,bool,bool)._reasoningExplained (contracts/src/BittensorRewardPool.sol#132) is not in mixedCase
+Parameter BittensorRewardPool.updateTransparencyBonus(address,bool,bool,bool,bool)._dataSourcesRevealed (contracts/src/BittensorRewardPool.sol#133) is not in mixedCase
+Parameter BittensorRewardPool.recordPrediction(address,uint256,uint256,bool,uint256)._agent (contracts/src/BittensorRewardPool.sol#153) is not in mixedCase
+Parameter BittensorRewardPool.recordPrediction(address,uint256,uint256,bool,uint256)._marketId (contracts/src/BittensorRewardPool.sol#154) is not in mixedCase
+Parameter BittensorRewardPool.recordPrediction(address,uint256,uint256,bool,uint256)._submissionId (contracts/src/BittensorRewardPool.sol#155) is not in mixedCase
+Parameter BittensorRewardPool.recordPrediction(address,uint256,uint256,bool,uint256)._wasCorrect (contracts/src/BittensorRewardPool.sol#156) is not in mixedCase
+Parameter BittensorRewardPool.recordPrediction(address,uint256,uint256,bool,uint256)._levenshteinDistance (contracts/src/BittensorRewardPool.sol#157) is not in mixedCase
+Parameter BittensorRewardPool.getAgentStats(address)._agent (contracts/src/BittensorRewardPool.sol#300) is not in mixedCase
+Parameter BittensorRewardPool.updateEpochDuration(uint256)._duration (contracts/src/BittensorRewardPool.sol#326) is not in mixedCase
+Parameter BittensorRewardPool.updateSubnetMultiplier(uint256,uint256)._subnet (contracts/src/BittensorRewardPool.sol#334) is not in mixedCase
+Parameter BittensorRewardPool.updateSubnetMultiplier(uint256,uint256)._multiplier (contracts/src/BittensorRewardPool.sol#334) is not in mixedCase
+Parameter BuilderRewardPool.recordContribution(address,uint256,uint256)._builder (contracts/src/BuilderRewardPool.sol#86) is not in mixedCase
+Parameter BuilderRewardPool.recordContribution(address,uint256,uint256)._marketsCreated (contracts/src/BuilderRewardPool.sol#87) is not in mixedCase
+Parameter BuilderRewardPool.recordContribution(address,uint256,uint256)._volumeGenerated (contracts/src/BuilderRewardPool.sol#88) is not in mixedCase
+Parameter BuilderRewardPool.updateAccuracyScore(address,uint256)._builder (contracts/src/BuilderRewardPool.sol#107) is not in mixedCase
+Parameter BuilderRewardPool.updateAccuracyScore(address,uint256)._score (contracts/src/BuilderRewardPool.sol#107) is not in mixedCase
+Parameter BuilderRewardPool.voteForBuilder(address)._builder (contracts/src/BuilderRewardPool.sol#115) is not in mixedCase
+Parameter BuilderRewardPool.calculateBuilderScore(address)._builder (contracts/src/BuilderRewardPool.sol#188) is not in mixedCase
+Parameter BuilderRewardPool.claimReward(uint256)._weekNumber (contracts/src/BuilderRewardPool.sol#208) is not in mixedCase
+Parameter ClockchainOracle.submitOracleData(uint256,string,string,string)._marketId (contracts/src/ClockchainOracle.sol#74) is not in mixedCase
+Parameter ClockchainOracle.submitOracleData(uint256,string,string,string)._actualText (contracts/src/ClockchainOracle.sol#75) is not in mixedCase
+Parameter ClockchainOracle.submitOracleData(uint256,string,string,string)._tweetId (contracts/src/ClockchainOracle.sol#76) is not in mixedCase
+Parameter ClockchainOracle.submitOracleData(uint256,string,string,string)._screenshotBase64 (contracts/src/ClockchainOracle.sol#77) is not in mixedCase
+Parameter ClockchainOracle.voteOnSubmission(uint256,bool)._submissionId (contracts/src/ClockchainOracle.sol#122) is not in mixedCase
+Parameter ClockchainOracle.voteOnSubmission(uint256,bool)._support (contracts/src/ClockchainOracle.sol#122) is not in mixedCase
+Parameter ClockchainOracle.calculateLevenshteinDistance(string,string)._s1 (contracts/src/ClockchainOracle.sol#150) is not in mixedCase
+Parameter ClockchainOracle.calculateLevenshteinDistance(string,string)._s2 (contracts/src/ClockchainOracle.sol#151) is not in mixedCase
+Parameter ClockchainOracle.getMarketOracleSubmissions(uint256)._marketId (contracts/src/ClockchainOracle.sol#237) is not in mixedCase
+Parameter ClockchainOracle.addOracle(address)._oracle (contracts/src/ClockchainOracle.sol#244) is not in mixedCase
+Parameter ClockchainOracle.removeOracle(address)._oracle (contracts/src/ClockchainOracle.sol#252) is not in mixedCase
+Parameter ClockchainOracle.updateConsensusParameters(uint256,uint256,uint256)._minimumOracles (contracts/src/ClockchainOracle.sol#260) is not in mixedCase
+Parameter ClockchainOracle.updateConsensusParameters(uint256,uint256,uint256)._consensusThreshold (contracts/src/ClockchainOracle.sol#261) is not in mixedCase
+Parameter ClockchainOracle.updateConsensusParameters(uint256,uint256,uint256)._submissionWindow (contracts/src/ClockchainOracle.sol#262) is not in mixedCase
+Parameter DistributedPayoutManager.distributeFees(uint256)._marketId (contracts/src/DistributedPayoutManager.sol#124) is not in mixedCase
+Parameter DistributedPayoutManager.registerOracleContribution(uint256,address,uint256)._marketId (contracts/src/DistributedPayoutManager.sol#277) is not in mixedCase
+Parameter DistributedPayoutManager.registerOracleContribution(uint256,address,uint256)._oracle (contracts/src/DistributedPayoutManager.sol#278) is not in mixedCase
+Parameter DistributedPayoutManager.registerOracleContribution(uint256,address,uint256)._contribution (contracts/src/DistributedPayoutManager.sol#279) is not in mixedCase
+Parameter DistributedPayoutManager.registerNode(address)._node (contracts/src/DistributedPayoutManager.sol#300) is not in mixedCase
+Parameter DistributedPayoutManager.calculateWinnerPayouts(uint256)._marketId (contracts/src/DistributedPayoutManager.sol#332) is not in mixedCase
+Parameter DistributedPayoutManager.updateBuilderRewardPool(address)._newPool (contracts/src/DistributedPayoutManager.sol#377) is not in mixedCase
+Parameter DistributedPayoutManager.updateBittensorRewardPool(address)._newPool (contracts/src/DistributedPayoutManager.sol#385) is not in mixedCase
+Parameter DistributedPayoutManager.updateGenesisNFT(address)._newNFT (contracts/src/DistributedPayoutManager.sol#393) is not in mixedCase
+Parameter EnhancedPredictionMarket.createMarket(string,string,uint256,address[],string)._question (contracts/src/EnhancedPredictionMarket.sol#172) is not in mixedCase
+Parameter EnhancedPredictionMarket.createMarket(string,string,uint256,address[],string)._actorUsername (contracts/src/EnhancedPredictionMarket.sol#173) is not in mixedCase
+Parameter EnhancedPredictionMarket.createMarket(string,string,uint256,address[],string)._duration (contracts/src/EnhancedPredictionMarket.sol#174) is not in mixedCase
+Parameter EnhancedPredictionMarket.createMarket(string,string,uint256,address[],string)._oracleWallets (contracts/src/EnhancedPredictionMarket.sol#175) is not in mixedCase
+Parameter EnhancedPredictionMarket.createMarket(string,string,uint256,address[],string)._metadata (contracts/src/EnhancedPredictionMarket.sol#176) is not in mixedCase
+Parameter EnhancedPredictionMarket.createSubmission(uint256,string,string)._marketId (contracts/src/EnhancedPredictionMarket.sol#223) is not in mixedCase
+Parameter EnhancedPredictionMarket.createSubmission(uint256,string,string)._predictedText (contracts/src/EnhancedPredictionMarket.sol#224) is not in mixedCase
+Parameter EnhancedPredictionMarket.createSubmission(uint256,string,string)._submissionType (contracts/src/EnhancedPredictionMarket.sol#225) is not in mixedCase
+Parameter EnhancedPredictionMarket.placeBet(uint256,bytes32)._submissionId (contracts/src/EnhancedPredictionMarket.sol#286) is not in mixedCase
+Parameter EnhancedPredictionMarket.placeBet(uint256,bytes32)._transactionHash (contracts/src/EnhancedPredictionMarket.sol#287) is not in mixedCase
+Parameter EnhancedPredictionMarket.resolveMarket(uint256,uint256,uint256[])._marketId (contracts/src/EnhancedPredictionMarket.sol#353) is not in mixedCase
+Parameter EnhancedPredictionMarket.resolveMarket(uint256,uint256,uint256[])._winningSubmissionId (contracts/src/EnhancedPredictionMarket.sol#354) is not in mixedCase
+Parameter EnhancedPredictionMarket.resolveMarket(uint256,uint256,uint256[])._levenshteinDistances (contracts/src/EnhancedPredictionMarket.sol#355) is not in mixedCase
+Parameter EnhancedPredictionMarket.claimWinnings(uint256)._betId (contracts/src/EnhancedPredictionMarket.sol#387) is not in mixedCase
+Parameter EnhancedPredictionMarket.getMarketDetails(uint256)._marketId (contracts/src/EnhancedPredictionMarket.sol#454) is not in mixedCase
+Parameter EnhancedPredictionMarket.getSubmissionDetails(uint256)._submissionId (contracts/src/EnhancedPredictionMarket.sol#469) is not in mixedCase
+Parameter EnhancedPredictionMarket.getUserActivity(address)._user (contracts/src/EnhancedPredictionMarket.sol#482) is not in mixedCase
+Parameter EnhancedPredictionMarket.getActorMarkets(string)._actorUsername (contracts/src/EnhancedPredictionMarket.sol#501) is not in mixedCase
+Parameter NodeRegistry.registerNode(string)._endpoint (contracts/src/NodeRegistry.sol#77) is not in mixedCase
+Parameter NodeRegistry.updateEndpoint(string)._endpoint (contracts/src/NodeRegistry.sol#108) is not in mixedCase
+Parameter NodeRegistry.castVote(uint256,bool)._voteId (contracts/src/NodeRegistry.sol#134) is not in mixedCase
+Parameter NodeRegistry.castVote(uint256,bool)._support (contracts/src/NodeRegistry.sol#134) is not in mixedCase
+Parameter NodeRegistry.executeVote(uint256)._voteId (contracts/src/NodeRegistry.sol#161) is not in mixedCase
+Parameter NodeRegistry.slashNode(address)._operator (contracts/src/NodeRegistry.sol#187) is not in mixedCase
+Parameter NodeRegistry.getNodeDetails(address)._operator (contracts/src/NodeRegistry.sol#280) is not in mixedCase
+Parameter PayoutManager.calculatePayouts(uint256)._marketId (contracts/src/PayoutManager.sol#64) is not in mixedCase
+Parameter PayoutManager.claimPayout(uint256)._marketId (contracts/src/PayoutManager.sol#199) is not in mixedCase
+Parameter PayoutManager.getUserMarketPayout(address,uint256)._user (contracts/src/PayoutManager.sol#243) is not in mixedCase
+Parameter PayoutManager.getUserMarketPayout(address,uint256)._marketId (contracts/src/PayoutManager.sol#243) is not in mixedCase
+Parameter PayoutManager.getUserUnclaimedPayouts(address)._user (contracts/src/PayoutManager.sol#250) is not in mixedCase
+Parameter PredictionMarket.createMarket(string,uint256,string,bool)._question (contracts/src/PredictionMarket.sol#90) is not in mixedCase
+Parameter PredictionMarket.createMarket(string,uint256,string,bool)._duration (contracts/src/PredictionMarket.sol#91) is not in mixedCase
+Parameter PredictionMarket.createMarket(string,uint256,string,bool)._actorTwitterHandle (contracts/src/PredictionMarket.sol#92) is not in mixedCase
+Parameter PredictionMarket.createMarket(string,uint256,string,bool)._xcomOnly (contracts/src/PredictionMarket.sol#93) is not in mixedCase
+Parameter PredictionMarket.createSubmission(uint256,string,string)._marketId (contracts/src/PredictionMarket.sol#123) is not in mixedCase
+Parameter PredictionMarket.createSubmission(uint256,string,string)._predictedText (contracts/src/PredictionMarket.sol#124) is not in mixedCase
+Parameter PredictionMarket.createSubmission(uint256,string,string)._screenshotIpfsHash (contracts/src/PredictionMarket.sol#125) is not in mixedCase
+Parameter PredictionMarket.placeBet(uint256)._submissionId (contracts/src/PredictionMarket.sol#159) is not in mixedCase
+Parameter PredictionMarket.getMarketSubmissions(uint256)._marketId (contracts/src/PredictionMarket.sol#193) is not in mixedCase
+Parameter PredictionMarket.getUserSubmissions(address)._user (contracts/src/PredictionMarket.sol#200) is not in mixedCase
+Parameter PredictionMarket.getUserBets(address)._user (contracts/src/PredictionMarket.sol#207) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+
+Reentrancy in PayoutManager.claimPayout(uint256) (contracts/src/PayoutManager.sol#199-213):
+	External calls:
+	- address(msg.sender).transfer(amount) (contracts/src/PayoutManager.sol#210)
+	Event emitted after the call(s):
+	- PayoutClaimed(msg.sender,amount,_marketId) (contracts/src/PayoutManager.sol#212)
+Reentrancy in PayoutManager.emergencyWithdraw() (contracts/src/PayoutManager.sol#281-288):
+	External calls:
+	- address(owner()).transfer(balance) (contracts/src/PayoutManager.sol#285)
+	Event emitted after the call(s):
+	- EmergencyWithdrawal(owner(),balance) (contracts/src/PayoutManager.sol#287)
+Reentrancy in NodeRegistry.withdraw() (contracts/src/NodeRegistry.sol#236-244):
+	External calls:
+	- address(msg.sender).transfer(amount) (contracts/src/NodeRegistry.sol#241)
+	Event emitted after the call(s):
+	- StakeWithdrawn(msg.sender,amount) (contracts/src/NodeRegistry.sol#243)
+Reentrancy in PayoutManager.withdrawPlatformFees() (contracts/src/PayoutManager.sol#268-276):
+	External calls:
+	- address(owner()).transfer(amount) (contracts/src/PayoutManager.sol#273)
+	Event emitted after the call(s):
+	- PlatformFeeWithdrawn(owner(),amount) (contracts/src/PayoutManager.sol#275)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+
+Math.log2(uint256) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#612-651) uses literals with too many digits:
+	- r = r | byte(uint256,uint256)(x >> r,0x0000010102020202030303030303030300000000000000000000000000000000) (node_modules/@openzeppelin/contracts/utils/math/Math.sol#649)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
+
+Loop condition i < activeNodes.length (contracts/src/DistributedPayoutManager.sol#266) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < activeNodes.length (contracts/src/DistributedPayoutManager.sol#303) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < registeredAgents.length (contracts/src/BittensorRewardPool.sol#203) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i_scope_0 < registeredAgents.length (contracts/src/BittensorRewardPool.sol#216) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < nodeList.length (contracts/src/NodeRegistry.sol#223) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < nodeList.length (contracts/src/NodeRegistry.sol#250) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < registeredAgents.length (contracts/src/BittensorRewardPool.sol#346) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < nodeList.length (contracts/src/NodeRegistry.sol#268) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < actorList.length (contracts/src/ActorRegistry.sol#244) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i < actorList.length (contracts/src/ActorRegistry.sol#315) should use cached array length instead of referencing `length` member of the storage array.
+ Loop condition i_scope_0 < actorList.length (contracts/src/ActorRegistry.sol#323) should use cached array length instead of referencing `length` member of the storage array.
+ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cache-array-length
+
+ActorRegistry.proposalCount (contracts/src/ActorRegistry.sol#56) should be constant 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant
+
+ActorRegistry.nodeRegistry (contracts/src/ActorRegistry.sol#17) should be immutable 
+AdvancedMarkets.predictionMarket (contracts/src/AdvancedMarkets.sol#15) should be immutable 
+BuilderRewardPool.contractStartTime (contracts/src/BuilderRewardPool.sol#48) should be immutable 
+ClockchainOracle.predictionMarket (contracts/src/ClockchainOracle.sol#16) should be immutable 
+DecentralizedOracle.nodeRegistry (contracts/src/DecentralizedOracle.sol#45) should be immutable 
+DecentralizedOracle.predictionMarket (contracts/src/DecentralizedOracle.sol#44) should be immutable 
+DistributedPayoutManager.predictionMarket (contracts/src/DistributedPayoutManager.sol#67) should be immutable 
+EnhancedPredictionMarket.actorRegistry (contracts/src/EnhancedPredictionMarket.sol#14) should be immutable 
+GenesisNFT.mintingDeadline (contracts/src/GenesisNFT.sol#27) should be immutable 
+ImprovedDistributedPayoutManager.bittensorRewardPool (contracts/src/ImprovedDistributedPayoutManager.sol#70) should be immutable 
+ImprovedDistributedPayoutManager.builderRewardPool (contracts/src/ImprovedDistributedPayoutManager.sol#69) should be immutable 
+ImprovedDistributedPayoutManager.genesisNFT (contracts/src/ImprovedDistributedPayoutManager.sol#71) should be immutable 
+ImprovedDistributedPayoutManager.predictionMarket (contracts/src/ImprovedDistributedPayoutManager.sol#68) should be immutable 
+PayoutManager.oracle (contracts/src/PayoutManager.sol#15) should be immutable 
+PayoutManager.predictionMarket (contracts/src/PayoutManager.sol#14) should be immutable 
+SecurityAudit.emergencyWithdrawAddress (contracts/src/SecurityAudit.sol#29) should be immutable 
+TestMarketWithPayouts.payoutManager (contracts/src/TestMarketWithPayouts.sol#21) should be immutable 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable
+. analyzed (52 contracts with 100 detectors), 277 result(s) found

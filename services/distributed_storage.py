@@ -8,7 +8,7 @@ import json
 import hashlib
 import asyncio
 from typing import Optional, Dict, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import base64
 
 logger = logging.getLogger(__name__)
@@ -141,7 +141,7 @@ class DistributedStorageService:
                 return {
                     'market_id': 'mock_market',
                     'ipfs_hash': ipfs_hash,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(timezone.utc).isoformat()
                 }
                 
             # Get from IPFS
@@ -156,7 +156,7 @@ class DistributedStorageService:
         """Store oracle validation proof in IPFS"""
         try:
             # Add metadata
-            proof_data['timestamp'] = datetime.utcnow().isoformat()
+            proof_data['timestamp'] = datetime.now(timezone.utc).isoformat()
             proof_data['submission_id'] = submission_id
             
             if not self.client:
@@ -186,7 +186,7 @@ class DistributedStorageService:
     def store_analytics_report(self, report_type: str, report_data: Dict) -> str:
         """Store analytics report in IPFS"""
         try:
-            report_id = f"{report_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+            report_id = f"{report_type}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
             
             if not self.client:
                 # Mock IPFS hash

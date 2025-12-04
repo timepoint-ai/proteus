@@ -1,6 +1,6 @@
 import logging
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 # from app import db  # Phase 7: Database removed
 # from models import PredictionMarket, Submission, OracleSubmission, OracleVote, NodeOperator, Bet  # Phase 7: Models removed
@@ -32,7 +32,7 @@ class OracleService:
                 return False
                 
             # CRITICAL: Check if market's end time has passed
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
             if current_time < market.end_time:
                 logger.error(f"Cannot submit oracle statement for market {market_id} before end time: {market.end_time}")
                 return False
@@ -78,7 +78,7 @@ class OracleService:
                 'oracle_wallet': oracle_wallet,
                 'submitted_text': submitted_text,
                 'signature': signature,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(timezone.utc).isoformat()
             })
             
     # db.session.commit()  # Phase 7: Database removed
@@ -231,7 +231,7 @@ class OracleService:
         try:
             # Update market with resolution text
             market.resolution_text = oracle_text
-            market.resolution_time = datetime.utcnow()
+            market.resolution_time = datetime.now(timezone.utc)
             
             # If oracle_text is None (null oracle), no submission wins
             if oracle_text is None:

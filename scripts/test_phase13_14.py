@@ -7,7 +7,7 @@ import asyncio
 import json
 import logging
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from web3 import Web3
 from eth_account import Account
 
@@ -94,7 +94,7 @@ class Phase13_14Tester:
                 'market_id': market_id,
                 'type': 'multi_choice',
                 'options': options,
-                'created_at': datetime.utcnow().isoformat()
+                'created_at': datetime.now(timezone.utc).isoformat()
             }
             
             ipfs_hash = storage.store_market_data(market_id, test_data)

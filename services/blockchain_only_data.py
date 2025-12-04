@@ -6,7 +6,7 @@ Eliminates PostgreSQL dependencies - blockchain as single source of truth
 import logging
 import json
 from typing import Optional, Dict, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 from web3 import Web3
 from eth_account import Account
 import asyncio
@@ -175,7 +175,7 @@ class BlockchainOnlyDataService:
     def get_active_markets(self) -> List[Dict]:
         """Get all active markets from blockchain"""
         active_markets = []
-        current_time = int(datetime.utcnow().timestamp())
+        current_time = int(datetime.now(timezone.utc).timestamp())
         
         for market_id, market in self.cache['markets'].items():
             if (market['start_time'] <= current_time <= market['end_time'] and 
@@ -187,7 +187,7 @@ class BlockchainOnlyDataService:
     def get_expired_markets(self) -> List[Dict]:
         """Get all expired but unresolved markets"""
         expired_markets = []
-        current_time = int(datetime.utcnow().timestamp())
+        current_time = int(datetime.now(timezone.utc).timestamp())
         
         for market_id, market in self.cache['markets'].items():
             if market['end_time'] < current_time and not market['resolved']:

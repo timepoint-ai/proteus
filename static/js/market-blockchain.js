@@ -1,6 +1,7 @@
 /**
  * Market Blockchain Integration for Clockchain
  * Handles direct blockchain queries for market data
+ * Uses PredictionMarketV2 contract with full resolution mechanism
  */
 
 class MarketBlockchain {
@@ -9,18 +10,19 @@ class MarketBlockchain {
         this.abis = {};
         this.web3 = null;
         this.initialized = false;
-        
+
         // Contract addresses from deployment-base-sepolia.json
+        // Using PredictionMarketV2 - full resolution mechanism
         this.contractAddresses = {
-            EnhancedPredictionMarket: '0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c',
-            ActorRegistry: '0xC71CC19C5573C5E1E144829800cD0005D0eDB723',
+            PredictionMarketV2: '0x5174Da96BCA87c78591038DEe9DB1811288c9286',
+            GenesisNFT: '0x1A5D4475881B93e876251303757E60E524286A24',
             DecentralizedOracle: '0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1',
             PayoutManager: '0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871'
         };
-        
+
         this.init();
     }
-    
+
     async init() {
         try {
             // Skip initialization on market detail page
@@ -28,7 +30,7 @@ class MarketBlockchain {
                 console.log('Skipping MarketBlockchain init on market detail page');
                 return;
             }
-            
+
             // Initialize Web3 - check if it's loaded first
             if (typeof Web3 === 'undefined') {
                 console.error('Web3 library not loaded. Please ensure Web3.js is included.');
@@ -43,32 +45,35 @@ class MarketBlockchain {
                 this.web3 = new Web3('https://sepolia.base.org');
                 console.log('Using read-only RPC provider');
             }
-            
+
             // Load contract ABIs
             await this.loadABIs();
-            
+
             // Initialize contracts
             this.initializeContracts();
-            
+
             this.initialized = true;
-            console.log('MarketBlockchain initialized successfully');
-            
+            console.log('MarketBlockchain initialized successfully with PredictionMarketV2');
+
         } catch (error) {
             console.error('Error initializing MarketBlockchain:', error);
         }
     }
-    
+
     async loadABIs() {
         try {
-            // Load EnhancedPredictionMarket ABI
-            const response = await fetch('/api/contract-abi/EnhancedPredictionMarket');
+            // Try to load from API endpoint
+            const response = await fetch('/api/contract-abi/PredictionMarketV2');
             if (response.ok) {
-                this.abis.EnhancedPredictionMarket = await response.json();
+                this.abis.PredictionMarketV2 = await response.json();
             }
         } catch (error) {
-            console.error('Error loading ABIs:', error);
-            // Fallback to minimal ABI
-            this.abis.EnhancedPredictionMarket = [
+            console.error('Error loading ABIs from API:', error);
+        }
+
+        // Fallback to minimal ABI for PredictionMarketV2
+        if (!this.abis.PredictionMarketV2) {
+            this.abis.PredictionMarketV2 = [
                 {
                     "inputs": [],
                     "name": "marketCount",
@@ -77,108 +82,162 @@ class MarketBlockchain {
                     "type": "function"
                 },
                 {
-                    "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                    "name": "markets",
+                    "inputs": [],
+                    "name": "submissionCount",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "uint256", "name": "_marketId", "type": "uint256"}],
+                    "name": "getMarketDetails",
                     "outputs": [
-                        {"internalType": "uint256", "name": "actorId", "type": "uint256"},
-                        {"internalType": "uint256", "name": "startTime", "type": "uint256"},
+                        {"internalType": "string", "name": "actorHandle", "type": "string"},
                         {"internalType": "uint256", "name": "endTime", "type": "uint256"},
-                        {"internalType": "uint256", "name": "submissionCount", "type": "uint256"},
+                        {"internalType": "uint256", "name": "totalPool", "type": "uint256"},
                         {"internalType": "bool", "name": "resolved", "type": "bool"},
-                        {"internalType": "uint256", "name": "totalPot", "type": "uint256"}
+                        {"internalType": "uint256", "name": "winningSubmissionId", "type": "uint256"},
+                        {"internalType": "address", "name": "creator", "type": "address"},
+                        {"internalType": "uint256[]", "name": "submissionIds", "type": "uint256[]"}
                     ],
                     "stateMutability": "view",
                     "type": "function"
                 },
                 {
-                    "inputs": [
-                        {"internalType": "uint256", "name": "", "type": "uint256"},
-                        {"internalType": "uint256", "name": "", "type": "uint256"}
-                    ],
-                    "name": "submissions",
+                    "inputs": [{"internalType": "uint256", "name": "_submissionId", "type": "uint256"}],
+                    "name": "getSubmissionDetails",
                     "outputs": [
+                        {"internalType": "uint256", "name": "marketId", "type": "uint256"},
                         {"internalType": "address", "name": "submitter", "type": "address"},
                         {"internalType": "string", "name": "predictedText", "type": "string"},
-                        {"internalType": "uint256", "name": "submissionFee", "type": "uint256"},
-                        {"internalType": "uint256", "name": "betAmount", "type": "uint256"},
-                        {"internalType": "uint256", "name": "totalBetsOnThis", "type": "uint256"},
-                        {"internalType": "bool", "name": "isWinner", "type": "bool"}
+                        {"internalType": "uint256", "name": "amount", "type": "uint256"},
+                        {"internalType": "bool", "name": "claimed", "type": "bool"}
                     ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "uint256", "name": "marketId", "type": "uint256"}],
+                    "name": "getMarketSubmissions",
+                    "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "MIN_BET",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "BETTING_CUTOFF",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "owner",
+                    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
                     "stateMutability": "view",
                     "type": "function"
                 }
             ];
         }
     }
-    
+
     initializeContracts() {
-        // Initialize contract instances
-        this.contracts.EnhancedPredictionMarket = new this.web3.eth.Contract(
-            this.abis.EnhancedPredictionMarket,
-            this.contractAddresses.EnhancedPredictionMarket
+        // Initialize PredictionMarketV2 contract instance
+        this.contracts.PredictionMarketV2 = new this.web3.eth.Contract(
+            this.abis.PredictionMarketV2,
+            this.contractAddresses.PredictionMarketV2
         );
     }
-    
+
+    async getMarketCount() {
+        if (!this.initialized) {
+            await this.waitForInitialization();
+        }
+
+        try {
+            return await this.contracts.PredictionMarketV2.methods.marketCount().call();
+        } catch (error) {
+            console.error('Error getting market count:', error);
+            return 0;
+        }
+    }
+
     async getActiveMarkets() {
         if (!this.initialized) {
             await this.waitForInitialization();
         }
-        
+
         try {
             const currentTime = Math.floor(Date.now() / 1000);
-            const marketCount = await this.contracts.EnhancedPredictionMarket.methods.marketCount().call();
+            const marketCount = await this.contracts.PredictionMarketV2.methods.marketCount().call();
             const markets = [];
-            
-            // Get last 50 markets (or less if fewer exist)
-            const startIndex = Math.max(0, marketCount - 50);
-            
-            for (let i = startIndex; i < marketCount; i++) {
-                const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
-                
-                // Check if market is active (not resolved and end time is in future)
-                if (!market.resolved && market.endTime > currentTime) {
-                    markets.push({
-                        id: i,
-                        actorId: market.actorId,
-                        startTime: new Date(market.startTime * 1000),
-                        endTime: new Date(market.endTime * 1000),
-                        submissionCount: market.submissionCount,
-                        totalPot: this.web3.utils.fromWei(market.totalPot, 'ether'),
-                        status: 'active'
-                    });
+
+            // Get last 20 markets (or less if fewer exist)
+            const startIndex = Math.max(0, parseInt(marketCount) - 20);
+
+            for (let i = startIndex; i < parseInt(marketCount); i++) {
+                try {
+                    const market = await this.contracts.PredictionMarketV2.methods.getMarketDetails(i).call();
+
+                    // Check if market is active (not resolved and end time is in future)
+                    if (!market.resolved && parseInt(market.endTime) > currentTime) {
+                        markets.push({
+                            id: i,
+                            actorHandle: market.actorHandle,
+                            creator: market.creator,
+                            endTime: new Date(parseInt(market.endTime) * 1000),
+                            submissionCount: market.submissionIds.length,
+                            totalPool: this.web3.utils.fromWei(market.totalPool, 'ether'),
+                            resolved: false,
+                            status: 'active'
+                        });
+                    }
+                } catch (e) {
+                    console.debug(`Market ${i} not found or invalid`);
                 }
             }
-            
+
             return markets.reverse(); // Show newest first
-            
+
         } catch (error) {
             console.error('Error fetching active markets:', error);
             return [];
         }
     }
-    
+
     async getAllMarkets() {
         if (!this.initialized) {
             await this.waitForInitialization();
         }
-        
+
         try {
+            const marketCount = await this.contracts.PredictionMarketV2.methods.marketCount().call();
             const markets = [];
-            
-            // Limit to 10 markets to avoid excessive blockchain calls
-            for (let i = 0; i < 10; i++) {
+
+            // Limit to 20 markets to avoid excessive blockchain calls
+            const limit = Math.min(parseInt(marketCount), 20);
+
+            for (let i = 0; i < limit; i++) {
                 try {
-                    const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
+                    const market = await this.contracts.PredictionMarketV2.methods.getMarketDetails(i).call();
+
                     if (market && market.creator !== '0x0000000000000000000000000000000000000000') {
                         markets.push({
                             id: i,
+                            actorHandle: market.actorHandle,
                             creator: market.creator,
-                            actorId: market.actorId,
-                            startTime: new Date(market.startTime * 1000),
-                            endTime: new Date(market.endTime * 1000),
-                            totalPot: this.web3.utils.fromWei(market.totalPot || '0', 'ether'),
-                            isResolved: market.resolved,
-                            submissionCount: market.submissionCount || 0,
+                            endTime: new Date(parseInt(market.endTime) * 1000),
+                            totalPool: this.web3.utils.fromWei(market.totalPool || '0', 'ether'),
+                            resolved: market.resolved,
+                            winningSubmissionId: parseInt(market.winningSubmissionId),
+                            submissionCount: market.submissionIds.length,
                             status: market.resolved ? 'resolved' : 'active'
                         });
                     }
@@ -189,37 +248,40 @@ class MarketBlockchain {
                     }
                 }
             }
-            
+
             return markets;
         } catch (error) {
             console.error('Error fetching all markets:', error);
             return [];
         }
     }
-    
+
     async getResolvedMarkets() {
         if (!this.initialized) {
             await this.waitForInitialization();
         }
-        
+
         try {
+            const marketCount = await this.contracts.PredictionMarketV2.methods.marketCount().call();
             const markets = [];
-            
-            // Limit to 10 markets to avoid excessive blockchain calls
-            for (let i = 0; i < 10; i++) {
+
+            // Limit to 20 markets to avoid excessive blockchain calls
+            const limit = Math.min(parseInt(marketCount), 20);
+
+            for (let i = 0; i < limit; i++) {
                 try {
-                    const market = await this.contracts.EnhancedPredictionMarket.methods.markets(i).call();
+                    const market = await this.contracts.PredictionMarketV2.methods.getMarketDetails(i).call();
+
                     if (market && market.resolved) {
                         markets.push({
                             id: i,
+                            actorHandle: market.actorHandle,
                             creator: market.creator,
-                            actorId: market.actorId,
-                            startTime: new Date(market.startTime * 1000),
-                            endTime: new Date(market.endTime * 1000),
-                            totalPot: this.web3.utils.fromWei(market.totalPot || '0', 'ether'),
-                            isResolved: true,
-                            submissionCount: market.submissionCount || 0,
-                            winningSubmission: market.winningSubmission,
+                            endTime: new Date(parseInt(market.endTime) * 1000),
+                            totalPool: this.web3.utils.fromWei(market.totalPool || '0', 'ether'),
+                            resolved: true,
+                            winningSubmissionId: parseInt(market.winningSubmissionId),
+                            submissionCount: market.submissionIds.length,
                             status: 'resolved'
                         });
                     }
@@ -230,79 +292,105 @@ class MarketBlockchain {
                     }
                 }
             }
-            
+
             return markets;
         } catch (error) {
             console.error('Error fetching resolved markets:', error);
             return [];
         }
     }
-    
+
     async getMarketDetails(marketId) {
         if (!this.initialized) {
             await this.waitForInitialization();
         }
-        
+
         try {
-            const market = await this.contracts.EnhancedPredictionMarket.methods.markets(marketId).call();
+            const market = await this.contracts.PredictionMarketV2.methods.getMarketDetails(marketId).call();
             const submissions = [];
-            
+
             // Get all submissions for this market
-            for (let i = 0; i < market.submissionCount; i++) {
-                const submission = await this.contracts.EnhancedPredictionMarket.methods
-                    .submissions(marketId, i).call();
-                    
-                submissions.push({
-                    id: i,
-                    submitter: submission.submitter,
-                    predictedText: submission.predictedText,
-                    submissionFee: this.web3.utils.fromWei(submission.submissionFee, 'ether'),
-                    betAmount: this.web3.utils.fromWei(submission.betAmount, 'ether'),
-                    totalBetsOnThis: this.web3.utils.fromWei(submission.totalBetsOnThis, 'ether'),
-                    isWinner: submission.isWinner
-                });
+            for (const subId of market.submissionIds) {
+                try {
+                    const submission = await this.contracts.PredictionMarketV2.methods.getSubmissionDetails(subId).call();
+
+                    submissions.push({
+                        id: parseInt(subId),
+                        marketId: parseInt(submission.marketId),
+                        submitter: submission.submitter,
+                        predictedText: submission.predictedText,
+                        amount: this.web3.utils.fromWei(submission.amount, 'ether'),
+                        claimed: submission.claimed,
+                        isWinner: market.resolved && parseInt(market.winningSubmissionId) === parseInt(subId)
+                    });
+                } catch (e) {
+                    console.debug(`Submission ${subId} not found`);
+                }
             }
-            
+
             return {
                 id: marketId,
-                actorId: market.actorId,
-                startTime: new Date(market.startTime * 1000),
-                endTime: new Date(market.endTime * 1000),
-                submissionCount: market.submissionCount,
+                actorHandle: market.actorHandle,
+                creator: market.creator,
+                endTime: new Date(parseInt(market.endTime) * 1000),
+                submissionCount: submissions.length,
                 resolved: market.resolved,
-                totalPot: this.web3.utils.fromWei(market.totalPot, 'ether'),
+                winningSubmissionId: parseInt(market.winningSubmissionId),
+                totalPool: this.web3.utils.fromWei(market.totalPool, 'ether'),
                 submissions: submissions
             };
-            
+
         } catch (error) {
             console.error('Error fetching market details:', error);
             return null;
         }
     }
-    
+
+    async getSubmission(submissionId) {
+        if (!this.initialized) {
+            await this.waitForInitialization();
+        }
+
+        try {
+            const submission = await this.contracts.PredictionMarketV2.methods.getSubmissionDetails(submissionId).call();
+
+            return {
+                id: submissionId,
+                marketId: parseInt(submission.marketId),
+                submitter: submission.submitter,
+                predictedText: submission.predictedText,
+                amount: this.web3.utils.fromWei(submission.amount, 'ether'),
+                claimed: submission.claimed
+            };
+        } catch (error) {
+            console.error('Error fetching submission:', error);
+            return null;
+        }
+    }
+
     async subscribeToMarketEvents(callback) {
         if (!this.initialized) {
             await this.waitForInitialization();
         }
-        
+
         try {
             // Subscribe to MarketCreated events
-            this.contracts.EnhancedPredictionMarket.events.MarketCreated({
+            this.contracts.PredictionMarketV2.events.MarketCreated({
                 fromBlock: 'latest'
             })
             .on('data', event => {
                 callback({
                     type: 'MarketCreated',
                     marketId: event.returnValues.marketId,
-                    actorId: event.returnValues.actorId,
                     creator: event.returnValues.creator,
-                    endTime: new Date(event.returnValues.endTime * 1000)
+                    actorHandle: event.returnValues.actorHandle,
+                    endTime: new Date(parseInt(event.returnValues.endTime) * 1000)
                 });
             })
             .on('error', console.error);
-            
+
             // Subscribe to SubmissionCreated events
-            this.contracts.EnhancedPredictionMarket.events.SubmissionCreated({
+            this.contracts.PredictionMarketV2.events.SubmissionCreated({
                 fromBlock: 'latest'
             })
             .on('data', event => {
@@ -315,43 +403,61 @@ class MarketBlockchain {
                 });
             })
             .on('error', console.error);
-            
-            // Subscribe to BetPlaced events
-            this.contracts.EnhancedPredictionMarket.events.BetPlaced({
+
+            // Subscribe to MarketResolved events
+            this.contracts.PredictionMarketV2.events.MarketResolved({
                 fromBlock: 'latest'
             })
             .on('data', event => {
                 callback({
-                    type: 'BetPlaced',
-                    betId: event.returnValues.betId,
+                    type: 'MarketResolved',
+                    marketId: event.returnValues.marketId,
+                    winningSubmissionId: event.returnValues.winningSubmissionId,
+                    actualText: event.returnValues.actualText
+                });
+            })
+            .on('error', console.error);
+
+            // Subscribe to PayoutClaimed events
+            this.contracts.PredictionMarketV2.events.PayoutClaimed({
+                fromBlock: 'latest'
+            })
+            .on('data', event => {
+                callback({
+                    type: 'PayoutClaimed',
                     submissionId: event.returnValues.submissionId,
-                    bettor: event.returnValues.bettor,
+                    claimer: event.returnValues.claimer,
                     amount: this.web3.utils.fromWei(event.returnValues.amount, 'ether')
                 });
             })
             .on('error', console.error);
-            
+
         } catch (error) {
             console.error('Error subscribing to events:', error);
         }
     }
-    
+
     async waitForInitialization() {
         const maxAttempts = 50; // 5 seconds
         let attempts = 0;
-        
+
         while (!this.initialized && attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
-        
+
         if (!this.initialized) {
             throw new Error('MarketBlockchain initialization timeout');
         }
     }
-    
+
     formatAddress(address) {
         return address.substring(0, 6) + '...' + address.substring(38);
+    }
+
+    // Helper to get contract address
+    getContractAddress() {
+        return this.contractAddresses.PredictionMarketV2;
     }
 }
 
@@ -359,7 +465,7 @@ class MarketBlockchain {
 let marketBlockchain;
 document.addEventListener('DOMContentLoaded', () => {
     marketBlockchain = new MarketBlockchain();
-    
+
     // Make it globally available
     window.marketBlockchain = marketBlockchain;
 });

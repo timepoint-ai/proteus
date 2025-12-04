@@ -4,12 +4,12 @@
 This guide documents the exact Firebase Console configuration required for email/SMS authentication with the Clockchain platform. Firebase handles the OTP delivery for passwordless authentication.
 
 ## Prerequisites
-✅ Firebase project created
-✅ Firebase credentials added to Replit Secrets:
-- `FIREBASE_API_KEY`
-- `FIREBASE_AUTH_DOMAIN`  
-- `FIREBASE_PROJECT_ID`
-- `FIREBASE_APP_ID`
+- Firebase project created
+- Firebase credentials added to environment variables:
+  - `FIREBASE_API_KEY`
+  - `FIREBASE_AUTH_DOMAIN`
+  - `FIREBASE_PROJECT_ID`
+  - `FIREBASE_APP_ID`
 
 ## Step 1: Enable Authentication Methods
 
@@ -62,17 +62,17 @@ This guide documents the exact Firebase Console configuration required for email
 
 ## Step 3: Set Authorized Domains
 
-### 3.1 Add Your Replit Domain
+### 3.1 Add Your Domain
 1. Go to **Authentication** → **Settings**
 2. Under **Authorized domains**, add:
-   - Your Replit domain: `[your-repl-name].repl.co`
-   - Production domain (if applicable): `yourdomain.com`
+   - Development: `localhost`
+   - Production: `yourdomain.com`
 3. Click **Add domain**
 
 ### 3.2 Configure Action URL
 1. In **Authentication** → **Settings**
 2. Under **Action URL**, set:
-   - Development: `https://[your-repl-name].repl.co/api/embedded/verify-email`
+   - Development: `http://localhost:5000/api/embedded/verify-email`
    - Production: `https://yourdomain.com/api/embedded/verify-email`
 
 ## Step 4: Security Rules
@@ -119,13 +119,16 @@ The service account enables:
 
 ## Step 7: Test Configuration
 
-### 7.1 Test Email Verification
-1. Visit: `https://[your-repl].repl.co/api/embedded/test`
-2. Enter test email: `test@example.com`
-3. Check for verification email
-4. Verify OTP code works
+### 7.1 Test Mode
+When `FLASK_ENV=testing`, the OTP verification accepts test code `123456` for any email. This allows testing without actual email delivery.
 
-### 7.2 Monitor Authentication
+### 7.2 Test Email Verification
+1. Visit: `http://localhost:5000/api/embedded/test`
+2. Enter test email: `test@example.com`
+3. In test mode, use OTP code: `123456`
+4. In production, check email for verification code
+
+### 7.3 Monitor Authentication
 1. Go to **Authentication** → **Users**
 2. Verify new users appear after testing
 3. Check **Usage** tab for email sends

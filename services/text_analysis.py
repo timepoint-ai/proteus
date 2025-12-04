@@ -124,7 +124,7 @@ class TextAnalysisService:
                 'unique_words1': list(unique_words1),
                 'unique_words2': list(unique_words2),
                 'word_overlap': word_overlap,
-                'analysis_timestamp': datetime.utcnow().isoformat()
+                'analysis_timestamp': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -133,7 +133,7 @@ class TextAnalysisService:
                 'error': str(e),
                 'original_text1': text1,
                 'original_text2': text2,
-                'analysis_timestamp': datetime.utcnow().isoformat()
+                'analysis_timestamp': datetime.now(timezone.utc).isoformat()
             }
             
     def validate_text_content(self, text: str) -> Dict[str, Any]:
@@ -260,4 +260,4 @@ class TextAnalysisService:
                 'original_length': len(text) if text else 0
             }
 
-from datetime import datetime
+from datetime import datetime, timezone

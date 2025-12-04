@@ -6,7 +6,7 @@ Handles multi-choice, conditional, and range prediction markets
 import logging
 import json
 from typing import Optional, Dict, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 from web3 import Web3
 from eth_account import Account
 
@@ -95,7 +95,7 @@ class AdvancedMarketsService:
                 'options': options,
                 'start_time': start_time,
                 'end_time': end_time,
-                'created_at': datetime.utcnow().isoformat(),
+                'created_at': datetime.now(timezone.utc).isoformat(),
                 'tx_hash': tx_hash.hex()
             }
             
@@ -154,7 +154,7 @@ class AdvancedMarketsService:
                 'depends_on': depends_on_market_id,
                 'condition': condition_description,
                 'end_time': end_time,
-                'created_at': datetime.utcnow().isoformat(),
+                'created_at': datetime.now(timezone.utc).isoformat(),
                 'tx_hash': tx_hash.hex()
             }
             
@@ -218,7 +218,7 @@ class AdvancedMarketsService:
                 'min_value': min_value,
                 'max_value': max_value,
                 'end_time': end_time,
-                'created_at': datetime.utcnow().isoformat(),
+                'created_at': datetime.now(timezone.utc).isoformat(),
                 'tx_hash': tx_hash.hex()
             }
             
@@ -331,7 +331,7 @@ class AdvancedMarketsService:
     def generate_analytics_report(self) -> Dict:
         """Generate analytics report for advanced markets"""
         analytics = {
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'multi_choice_markets': 0,
             'conditional_markets': 0,
             'range_markets': 0,

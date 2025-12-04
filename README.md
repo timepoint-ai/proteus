@@ -1,324 +1,138 @@
-# Clockchain - Fully Decentralized Linguistic Prediction Platform
+# Clockchain
 
-**Latest Updates (January 2025)**: A fully decentralized, blockchain-only prediction market platform where users bet on the exact words public figures will say. Built exclusively on BASE blockchain with zero database dependencies, featuring advanced oracle systems, distributed governance, and production-grade performance optimizations.
+A fully decentralized prediction market on BASE blockchain where users bet on exact phrases public figures will say.
 
-## 🎯 Latest Changes (January 28, 2025)
+## What It Does
 
-### Coinbase Embedded Wallet Integration
-- **Firebase Authentication**: Real email OTP verification now active
-  - Firebase Auth integrated for production-ready authentication
-  - Email verification links sent to users (not mock)
-  - TEE-secured wallet creation after authentication
-- **Performance & UX Improvements**
-  - Oracle requirements reduced from 3 to 1 minimum at UI level
-  - Gas fees optimized from $200+ to pennies (1 gwei on BASE Sepolia)
-  - Transaction limits: 500k gas for markets, 300k for submissions
+Users create markets predicting specific text a public figure will say on X.com (Twitter). Winners are determined by Levenshtein distance (text similarity) with automated oracle resolution. The entire system operates on-chain with zero database dependencies.
 
-## 📋 Gap Closing Plan (November 2025)
+## Current Status
 
-**Target Mainnet Launch: January 15, 2026**
+| Component | Status |
+|-----------|--------|
+| Smart Contracts | Deployed on BASE Sepolia |
+| Genesis NFTs | 60/100 minted (finalized) |
+| Architecture | Fully on-chain (no database) |
+| UI/Contract Integration | Complete (PredictionMarketV2) |
+| V2 Resolution | Complete (admin dashboard + Celery tasks) |
+| Wallet Integration | ~90% complete |
+| Session Persistence | Complete |
+| Mobile Responsiveness | CSS complete (device testing needed) |
+| Error Handling | Complete (standardized API responses) |
+| Tests | 180 passing (56 unit + 109 contract + 15 integration) |
+| CI/CD | GitHub Actions (automated testing) |
+| Security Analysis | Slither complete (1 bug fixed) |
+| External Audit | Pending |
+| Mainnet | Not deployed |
 
-A comprehensive 12-week plan to close all gaps and deploy to BASE mainnet. See **[GAP_CLOSING_PLAN.md](./GAP_CLOSING_PLAN.md)** for the complete roadmap.
+## Deployed Contracts (BASE Sepolia)
 
-**Key Milestones:**
-- ✅ **Current**: Testnet deployed, 60 Genesis NFTs minted
-- 🔄 **Week 1-2**: Frontend wallet migration (Coinbase + MetaMask)
-- 🔄 **Week 3-5**: Security audit & comprehensive testing
-- 🎯 **Week 6**: Deploy to BASE mainnet
-- 🎯 **Week 7**: Genesis NFT distribution (100 total)
-- 🎯 **Week 8-9**: Coinbase Onramp integration
-- 🎯 **Week 10-11**: Launch first markets with real users
-- 🎯 **Week 12**: Full production operation
+| Contract | Address | Status |
+|----------|---------|--------|
+| **PredictionMarketV2** | `0x5174Da96BCA87c78591038DEe9DB1811288c9286` | **Recommended** |
+| PredictionMarket (V1) | `0x667121e8f22570F2c521454D93D6A87e44488d93` | Deprecated |
+| GenesisNFT | `0x1A5D4475881B93e876251303757E60E524286A24` | Active |
+| EnhancedPredictionMarket | `0x6b67cb0daaf78f63bd11195df0fd9ffe4361b93c` | Requires governance |
+| ActorRegistry | `0xC71CC19C5573C5E1E144829800cD0005D0eDB723` | Active |
+| NodeRegistry | `0xA69C842F335dfE1F69288a70054A34018282218d` | Active |
+| PayoutManager | `0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871` | Active |
+| DecentralizedOracle | `0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1` | Active |
 
-**[View Complete Plan →](./GAP_CLOSING_PLAN.md)**
+> **Note**: Use **PredictionMarketV2** for all new development. It includes complete market lifecycle with on-chain Levenshtein distance winner determination. V1 is deprecated (lacks resolution mechanism).
 
-## 🎯 What is Clockchain?
+## Genesis NFT Economics
 
-Clockchain creates prediction markets for linguistic outputs - users predict specific phrases that public figures will say within defined time windows. Winners are determined by measuring the Levenshtein distance between predictions and actual speech, with automated resolution through decentralized oracles. The entire system operates directly on blockchain with no centralized components.
-
-## 💎 Genesis NFT System (Phase 1 Complete - January 2025)
-
-### Improved Economics (7X Payout Increase!)
-- **100 Genesis NFTs**: Fixed supply, on-chain minting window
-- **Revenue Share**: 1.4% of ALL platform volume (20% of the 7% platform fees)
+- **Total Supply**: 100 NFTs (fixed, immutable)
+- **Holder Revenue**: 1.4% of all platform volume (20% of 7% platform fee)
 - **Per NFT**: 0.014% of platform volume
-- **Deployment**: ImprovedDistributedPayoutManager at `0xE9eE183b76A8BDfDa8EA926b2f44137Aa65379B5`
-- **SVG Art**: Generated entirely on-chain in `contracts/src/GenesisNFT.sol` using the `generateSVG()` function
 
-### Revenue Projections
-With 100 Genesis NFTs at $1M daily volume:
-- Daily earnings: $14,000
-- Monthly income: $420,000
-- Annual income: $5,110,000
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Email address for authentication (Firebase)
-- BASE Sepolia ETH for testing transactions
-- Node.js 18+ and Python 3.10+
+- Node.js 18+
+- Python 3.10+
+- BASE Sepolia ETH ([faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet))
 
-### Test the Platform
-
-1. **Visit**: `/api/embedded/test` - Embedded wallet authentication interface
-2. **Enter email**: Receive real verification email via Firebase
-3. **Verify OTP**: Create TEE-secured wallet
-4. **Fund wallet**: Coming soon - Coinbase Onramp integration
-
-### Required Configuration
-
+### Run Locally
 ```bash
-# Firebase Authentication (CONFIGURED ✅)
-FIREBASE_API_KEY=<your-key>
-FIREBASE_AUTH_DOMAIN=<your-domain>
-FIREBASE_PROJECT_ID=<your-project>
-FIREBASE_APP_ID=<your-app-id>
+# Install dependencies
+npm install
 
-# Coinbase Embedded Wallet (CONFIGURED ✅)
-COINBASE_PROJECT_ID=<your-project-id>
-COINBASE_API_KEY_NAME=<your-key-name>
-COINBASE_API_KEY_PRIVATE_KEY=<your-private-key>
+# Set up Python virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[test]"
+
+# Run all tests
+make test-all
+
+# Or run separately
+make test-unit        # Python unit tests (56 tests)
+make test-contracts   # Solidity tests (109 tests)
+make test-integration # Integration tests (15 tests, requires server)
+
+# Start backend
+python main.py
 ```
 
-See [FIREBASE-SETUP-GUIDE.md](./FIREBASE-SETUP-GUIDE.md) for Firebase Console configuration.
-
-### Deploy Genesis NFTs
-
+### Deploy Contracts
 ```bash
 # Deploy to BASE Sepolia
 npx hardhat run scripts/deploy-genesis-phase1.js --network baseSepolia
-
-# Deploy improved payout system
-npx hardhat run scripts/deploy-improved-payouts.js --network baseSepolia
-
-# Mint Genesis NFTs
-npx hardhat run scripts/mint-genesis.js --network baseSepolia
-
-# Verify payouts
-npx hardhat run scripts/verify-final-status.js --network baseSepolia
-```
-
-## 📊 Platform Architecture
-
-### Smart Contract Stack (BASE Exclusive)
-- **GenesisNFT**: 100 founder NFTs with on-chain SVG art generation
-- **ImprovedDistributedPayoutManager**: 1.4% volume distribution to Genesis holders
-- **EnhancedPredictionMarket**: Core market functionality with on-chain data
-  - Oracle requirement: 1 minimum (automatically padded to 3 for contract compatibility)
-  - Gas optimized: Capped at 500k gas with 1 gwei pricing
-- **DecentralizedOracle**: Automated text analysis and resolution
-- **TestMarketWithPayouts**: Testing infrastructure for payout verification
-
-### Fee Distribution (Fully Decentralized)
-Platform Fee: 7% of market volume
-- **Genesis NFT Holders**: 20% → 1.4% of volume
-- **Oracles**: 28.6% → 2% of volume
-- **Node Operators**: 14.3% → 1% of volume
-- **Market Creators**: 14.3% → 1% of volume
-- **Builder Pool**: 28.6% → 2% of volume
-- **Bittensor AI Pool**: 14.3% → 1% of volume
-
-### Technology Stack
-- **Blockchain**: BASE (Coinbase L2) exclusively - ALL data on-chain
-- **Smart Contracts**: Solidity 0.8.19+ with full event indexing
-- **Backend**: Flask + Web3.py (chain-only API routes)
-- **Frontend**: Web3.js + Coinbase Embedded Wallet
-- **Authentication**: Firebase Auth for email OTP + Wallet-based JWT
-- **Oracle**: Decentralized X.com integration with on-chain verification
-- **Performance**: Redis caching + RPC retry logic with exponential backoff
-- **Database**: REMOVED - All data now on blockchain
-
-## 🔧 Development Commands
-
-### Smart Contract Development
-```bash
-# Compile contracts
-npx hardhat compile
-
-# Run tests
-npx hardhat test
-
-# Deploy to testnet
-npx hardhat run scripts/deploy-improved-payouts.js --network baseSepolia
 
 # Verify on Basescan
 npx hardhat verify --network baseSepolia <CONTRACT_ADDRESS>
 ```
 
-### Backend Services
-```bash
-# Start Flask application
-python main.py
-# or
-gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
-
-# Start Celery worker
-celery -A app.celery worker --loglevel=info
-
-# Start monitoring service
-python -m services.monitoring
-```
-
-## 🔄 Migration Status (Phase 7 Complete - August 2025)
-
-### All 7 Phases Completed ✅
-1. **Phase 1**: Database writes disabled, blockchain-first architecture
-2. **Phase 2**: Wallet-only authentication implemented
-3. **Phase 3**: Chain-only API routes created (/api/chain/*)
-4. **Phase 4**: Configuration cleaned, database configs removed
-5. **Phase 5**: Smart contract integration complete
-6. **Phase 6**: Frontend fully integrated with Web3
-7. **Phase 7**: Final cleanup - models.py removed, 27+ files cleaned
-
-### Key Achievements
-- **Zero Database Dependencies**: All data now on blockchain
-- **Performance Optimized**: Redis caching + RPC retry logic
-- **Production Ready**: Full error handling and monitoring
-- **Fully Decentralized**: No admin functions, distributed governance
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-├── contracts/              # Smart contracts
-│   ├── src/
-│   │   ├── GenesisNFT.sol          # On-chain SVG NFT art
-│   │   ├── ImprovedDistributedPayoutManager.sol
-│   │   └── TestMarketWithPayouts.sol
-│   └── artifacts/          # Compiled contracts
-├── scripts/                # Deployment & testing
-│   ├── deploy-genesis-phase1.js
-│   ├── deploy-improved-payouts.js
-│   ├── mint-genesis.js
-│   └── test-payouts-and-show-balance.js
-├── deployments/            # Deployment records
-│   ├── genesis-phase1-testnet.json
-│   └── improved-genesis-testnet.json
-├── services/               # Backend services
-│   ├── blockchain_base.py
-│   ├── oracle.py
-│   └── monitoring.py
-├── routes/                 # API endpoints
-├── static/                 # Frontend assets
-│   └── js/
-│       ├── wallet.js
-│       └── market-blockchain.js
-├── templates/              # HTML templates
-└── docs/                   # Documentation
+contracts/src/     # Solidity smart contracts
+contracts/test/    # Hardhat tests
+scripts/           # Deployment scripts
+services/          # Python backend services
+routes/            # Flask API endpoints
+static/js/         # Frontend JavaScript
+templates/         # HTML templates
+tests/             # Python tests (unit, integration, e2e)
+docs/              # Documentation
 ```
 
-## 🌟 Key Features
+## Technology Stack
 
-### For Genesis NFT Holders
-- Earn 1.4% of all platform volume (7X improvement from initial design)
-- Transparent on-chain payouts via ImprovedDistributedPayoutManager
-- Unique on-chain generated SVG art (no external dependencies)
-- Future governance rights over protocol changes
+- **Blockchain**: BASE (Coinbase L2)
+- **Contracts**: Solidity 0.8.20, OpenZeppelin, Hardhat
+- **Backend**: Flask, Web3.py, Celery, Redis
+- **Auth**: Firebase (email OTP) + Coinbase Embedded Wallet
 
-### For Market Participants
-- Create linguistic prediction markets for any X.com user
-- Bet on exact phrases with specific time windows
-- Automated resolution via Levenshtein distance
-- Instant payouts on winning predictions
+## Documentation
 
-### For Node Operators
-- Earn 1% of platform volume
-- Participate in consensus mechanisms
-- Validate oracle submissions
-- Secure the network
+- [Architecture](docs/ARCHITECTURE.md) - Technical design
+- [Setup Guide](docs/SETUP.md) - Development environment
+- [Contracts](docs/CONTRACTS.md) - Smart contract reference
+- [API](docs/API_DOCUMENTATION.md) - API endpoints
+- [Betting Guide](docs/CHAIN_SUBMISSION_GUIDE.md) - How to place bets and predictions
+- [Security Analysis](docs/SECURITY-ANALYSIS.md) - Slither audit results
+- [Roadmap](docs/ROADMAP.md) - Development phases
+- [Gap Analysis](docs/GAPS.md) - Remaining work for launch
 
-## 📈 Verified Transactions
+## Fee Distribution
 
-Recent mainnet-ready transactions on BASE Sepolia:
-- [Market Resolution with Payout](https://sepolia.basescan.org/tx/0x7ed4c83ec8a90159fee06e916ce74db5267e1e4f4be496a60505664e75c51330)
-- [Genesis NFT Payout Distribution](https://sepolia.basescan.org/tx/0xdd9fba256c354062cc44a30104ee296af804e4bd4c634f752ef56100727311b9)
+Platform fee: 7% of market volume
 
-## 🔐 Security Features
+| Recipient | Share |
+|-----------|-------|
+| Genesis NFT Holders | 20% (1.4% of volume) |
+| Oracles | 28.6% (2% of volume) |
+| Market Creators | 14.3% (1% of volume) |
+| Node Operators | 14.3% (1% of volume) |
+| Builder Pool | 28.6% (2% of volume) |
 
-- All smart contracts tested on BASE Sepolia
-- Immutable Genesis NFT supply (100 maximum)
-- No admin functions in payout contracts (fully decentralized)
-- Time-locked minting window (24 hours for Genesis NFTs)
-- Automated payout distribution (no manual intervention)
+## Links
 
-## 📚 Documentation
+- [BASE Sepolia Explorer](https://sepolia.basescan.org)
+- [BASE Faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet)
 
-### Core Documentation
-- **[Gap Closing Plan](./GAP_CLOSING_PLAN.md)** - Complete roadmap to mainnet launch
-- [Engineering Architecture](docs/ENGINEERING.md) - Technical implementation details
-- [Governance Model](docs/GOVERNANCE.md) - Decentralized governance structure
-- [Platform Logic Analysis](docs/LOGIC.md) - Economic model and fee distribution
+## License
 
-### Setup Guides
-- [Firebase Setup Guide](./FIREBASE-SETUP-GUIDE.md) - Email authentication configuration
-- [Coinbase Integration Guide](./COINBASE-INTEGRATION-GUIDE.md) - Embedded wallet setup
-- [MetaMask Setup Guide](docs/METAMASK_SETUP.md) - Wallet configuration
-- [Minting Guide](docs/MINTING_GUIDE.md) - How to mint Genesis NFTs
-- [View Your NFTs](docs/VIEW_YOUR_NFTS.md) - Check your Genesis NFT collection
-
-### Additional Documentation
-- [API Documentation](docs/API_DOCUMENTATION.md) - API endpoints reference
-- [Bittensor Integration](docs/BITTENSOR_INTEGRATION.md) - AI agent integration
-- [Phase 7 Complete](docs/PHASE7_COMPLETE.md) - Migration completion status
-
-### Archived Plans
-Previous planning documents are available in `docs/archive/` for historical reference.
-
-## 🚀 Roadmap
-
-See **[GAP_CLOSING_PLAN.md](./GAP_CLOSING_PLAN.md)** for the detailed 12-week execution plan.
-
-### ✅ Completed
-- Genesis NFT System with 7X improved payouts (1.4% of volume)
-- Phase 7 blockchain migration (zero database dependencies)
-- Firebase authentication integration
-- Gas optimization (1 gwei on BASE)
-- 60 Genesis NFTs minted on testnet
-- Smart contracts deployed to BASE Sepolia
-
-### 🔄 In Progress (Weeks 1-2)
-- Frontend wallet migration (Coinbase Embedded Wallet + MetaMask)
-- Wallet abstraction layer implementation
-- Multi-wallet support in UI
-
-### 🎯 Next Steps (Weeks 3-6)
-- Comprehensive security audit (CertiK/OpenZeppelin)
-- Load and performance testing
-- Deploy to BASE mainnet
-- Genesis NFT distribution (40 remaining)
-
-### 📅 Post-Launch (Weeks 7-12)
-- Coinbase Onramp integration (Apple Pay, bank transfer)
-- First 10 markets with high-profile figures
-- User onboarding and growth
-- DAO governance implementation
-
-### 🔮 Future (2026+)
-- Bittensor AI subnet integration
-- Advanced market types (conditional, range)
-- Mobile applications
-- Cross-chain deployment
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a PR with tests
-4. Update documentation
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🔗 Important Links
-
-- **BASE Sepolia Faucet**: https://www.coinbase.com/faucets/base-ethereum-goerli-faucet
-- **Basescan Explorer**: https://sepolia.basescan.org
-- **Contract Deployments**: See `/deployments/` directory
-- **Support**: Open an issue on GitHub
-
----
-
-**Built with ❤️ for the future of decentralized prediction markets**
-
-*Current Testnet Status: 60 Genesis NFTs minted, ImprovedDistributedPayoutManager deployed and tested*
+MIT

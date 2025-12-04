@@ -8,7 +8,7 @@ import os
 import sys
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from web3 import Web3
 from eth_account import Account
@@ -165,8 +165,8 @@ class BlockchainTestDataGenerator:
             
             try:
                 # Create time window
-                start_time = int((datetime.utcnow() + timedelta(hours=1)).timestamp())
-                end_time = int((datetime.utcnow() + timedelta(hours=24)).timestamp())
+                start_time = int((datetime.now(timezone.utc) + timedelta(hours=1)).timestamp())
+                end_time = int((datetime.now(timezone.utc) + timedelta(hours=24)).timestamp())
                 
                 # Use test oracle wallets
                 oracle_wallets = self.test_wallets['oracle_wallets'][:3]
@@ -402,7 +402,7 @@ class BlockchainTestDataGenerator:
         
         # Save test data info
         test_data = {
-            'generated_at': datetime.utcnow().isoformat(),
+            'generated_at': datetime.now(timezone.utc).isoformat(),
             'chain_id': self.chain_id,
             'actors': actors,
             'markets': markets,

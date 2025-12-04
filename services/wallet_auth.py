@@ -8,7 +8,7 @@ from functools import wraps
 from flask import request, jsonify
 from web3 import Web3
 from eth_account.messages import encode_defunct
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 
 # Try to import jwt, but make it optional for phase 2 testing
@@ -74,14 +74,14 @@ class WalletAuthService:
             
     def generate_auth_message(self, address: str, nonce: str) -> str:
         """Generate a message for the user to sign"""
-        return f"Sign this message to authenticate with Clockchain.\n\nWallet: {address}\nNonce: {nonce}\nTimestamp: {datetime.utcnow().isoformat()}"
+        return f"Sign this message to authenticate with Clockchain.\n\nWallet: {address}\nNonce: {nonce}\nTimestamp: {datetime.now(timezone.utc).isoformat()}"
         
     def create_jwt_token(self, address: str) -> str:
         """Create a JWT token for the authenticated wallet"""
         payload = {
             'address': address.lower(),
-            'exp': datetime.utcnow() + timedelta(hours=self.token_expiry_hours),
-            'iat': datetime.utcnow()
+            'exp': datetime.now(timezone.utc) + timedelta(hours=self.token_expiry_hours),
+            'iat': datetime.now(timezone.utc)
         }
         return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
         

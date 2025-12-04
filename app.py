@@ -60,14 +60,12 @@ def create_app():
     from routes.api_chain import api_chain_bp  # Phase 3: Chain-only API routes
     from routes.embedded_auth import embedded_auth  # Coinbase Embedded Wallet authentication
 
-    from routes.test_transactions import test_transactions_bp
     from routes.clockchain import clockchain_bp
     from routes.ai_agent_api import ai_agent_api_bp, init_limiter
     from routes.marketing import marketing_bp
     from routes.actors import actors_bp
     from routes.clockchain_api import clockchain_api_bp
     from routes.oracles import oracles_bp
-    # from routes.generate_realistic_data import generate_data_bp  # Phase 7: Test route removed
     from routes.base_api import base_api_bp
     from routes.oracle_manual import oracle_manual_bp
     from routes.node_api import node_api_bp
@@ -82,23 +80,21 @@ def create_app():
     app.register_blueprint(base_api_bp, url_prefix='/api/base')
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    app.register_blueprint(test_transactions_bp, url_prefix='/test_transactions')
     app.register_blueprint(clockchain_bp)
     app.register_blueprint(ai_agent_api_bp, url_prefix='/ai_agent')
     app.register_blueprint(actors_bp)
     app.register_blueprint(clockchain_api_bp)
     app.register_blueprint(oracles_bp)
     app.register_blueprint(oracle_manual_bp)
-    # app.register_blueprint(generate_data_bp)  # Phase 7: Test route removed
     app.register_blueprint(node_api_bp)
-    
-    # Test Manager Routes (Protected)
-    from routes.test_manager import test_manager_bp
-    app.register_blueprint(test_manager_bp)
     
     # Initialize rate limiter
     init_limiter(app)
-    
+
+    # Register standardized error handlers
+    from routes.error_handlers import register_error_handlers
+    register_error_handlers(app)
+
     # Chain-only mode: All data stored on blockchain
     
     # Initialize chain-only services

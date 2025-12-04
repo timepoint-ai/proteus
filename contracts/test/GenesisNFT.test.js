@@ -250,14 +250,19 @@ describe("GenesisNFT", function () {
     });
 
     describe("Security", function () {
-        it("Should not have any owner-only functions", async function () {
-            // Verify the contract has no owner-related functions
-            // This is a conceptual test - in reality, we'd check the ABI
+        it("Should not have any admin/owner-only functions", async function () {
+            // Verify the contract has no admin functions (like Ownable pattern)
+            // Note: ownerOf() is a standard ERC721 function, not an admin function
             const contractABI = genesisNFT.interface.fragments;
-            const ownerFunctions = contractABI.filter(f => 
-                f.name && (f.name.includes('owner') || f.name.includes('Owner'))
+            const adminFunctions = contractABI.filter(f =>
+                f.name && (
+                    f.name === 'renounceOwnership' ||
+                    f.name === 'transferOwnership' ||
+                    f.name === 'setOwner' ||
+                    f.name === 'owner'  // Ownable.owner() getter
+                )
             );
-            expect(ownerFunctions.length).to.equal(0);
+            expect(adminFunctions.length).to.equal(0);
         });
 
         it("Should be truly immutable after finalization", async function () {

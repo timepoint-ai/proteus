@@ -5,7 +5,7 @@ import logging
 import requests
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import threading
 
 class NetworkService:
@@ -72,7 +72,7 @@ class NetworkService:
             # Update local heartbeat
     # node = NodeOperator.query.filter_by(operator_id=node_id).first()  # Phase 7: Database removed
             if node:
-                node.last_heartbeat = datetime.utcnow()
+                node.last_heartbeat = datetime.now(timezone.utc)
     # db.session.commit()  # Phase 7: Database removed
             
             # Send heartbeat to other nodes
@@ -108,7 +108,7 @@ class NetworkService:
                     'node_id': node.id,
                     'operator_id': node.operator_id,
                     'public_key': node.public_key,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(timezone.utc).isoformat()
                 }
             }
             
@@ -126,7 +126,7 @@ class NetworkService:
                 'type': message_type,
                 'data': message_data,
                 'sender': sender_node_id,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(timezone.utc).isoformat()
             }
             
             # Store in Redis for deduplication
@@ -245,7 +245,7 @@ class NetworkService:
                 Transaction.created_at.desc()
     # ).first()  # Phase 7: Database removed
             
-            since_time = latest_local.created_at if latest_local else datetime.utcnow() - timedelta(days=1)
+            since_time = latest_local.created_at if latest_local else datetime.now(timezone.utc) - timedelta(days=1)
             
             # Request transactions from other node
     # response = requests.get(  # Phase 7: Database removed
@@ -278,7 +278,7 @@ class NetworkService:
             # Check node health
             healthy_nodes = 0
             stale_nodes = 0
-            cutoff_time = datetime.utcnow() - timedelta(minutes=5)
+            cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=5)
             
             for node in all_nodes:
                 if node.last_heartbeat and node.last_heartbeat > cutoff_time:

@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, request, jsonify
 # from models import PredictionMarket, Actor, Submission, Bet  # Phase 7: Models removed
 # from app import db  # Phase 7: Database removed
-from datetime import datetime
+from datetime import datetime, timezone
 # from sqlalchemy import desc  # Phase 7: SQLAlchemy removed
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ def api_markets():
         page = request.args.get('page', 1, type=int)
         per_page = 10
         
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         
         # Get upcoming markets first (markets that haven't ended yet)
         upcoming_query = PredictionMarket.query.filter(
@@ -162,7 +162,7 @@ def api_active():
     try:
         page = request.args.get('page', 1, type=int)
         per_page = 10
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         
         query = PredictionMarket.query.filter_by(status='active').order_by(PredictionMarket.start_time)
         paginated = query.paginate(page=page, per_page=per_page, error_out=False)

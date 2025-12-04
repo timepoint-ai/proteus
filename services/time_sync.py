@@ -29,7 +29,7 @@ class TimeSyncService:
             
         except Exception as e:
             logger.error(f"Error getting Pacific time: {e}")
-            return datetime.utcnow()
+            return datetime.now(timezone.utc)
             
     def get_pacific_time_ms(self) -> int:
         """Get current Pacific time in milliseconds since epoch"""
@@ -39,7 +39,7 @@ class TimeSyncService:
             
         except Exception as e:
             logger.error(f"Error getting Pacific time in milliseconds: {e}")
-            return int(datetime.utcnow().timestamp() * 1000)
+            return int(datetime.now(timezone.utc).timestamp() * 1000)
             
     def ms_to_pacific_time(self, timestamp_ms: int) -> datetime:
         """Convert milliseconds timestamp to Pacific time"""
@@ -58,7 +58,7 @@ class TimeSyncService:
             
         except Exception as e:
             logger.error(f"Error converting milliseconds to Pacific time: {e}")
-            return datetime.utcnow()
+            return datetime.now(timezone.utc)
             
     def pacific_to_ms(self, pacific_time: datetime) -> int:
         """Convert Pacific time to milliseconds timestamp"""
@@ -75,7 +75,7 @@ class TimeSyncService:
             
         except Exception as e:
             logger.error(f"Error converting Pacific time to milliseconds: {e}")
-            return int(datetime.utcnow().timestamp() * 1000)
+            return int(datetime.now(timezone.utc).timestamp() * 1000)
             
     def is_time_in_range(self, check_time: datetime, start_time: datetime, end_time: datetime) -> bool:
         """Check if a time is within a given range"""
@@ -94,7 +94,7 @@ class TimeSyncService:
             
         except Exception as e:
             logger.error(f"Error formatting Pacific time: {e}")
-            return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+            return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
             
     def parse_pacific_time(self, time_string: str) -> Optional[datetime]:
         """Parse rigid Pacific time string"""
@@ -161,7 +161,7 @@ class TimeSyncService:
                 'time_since_epoch_ms': time_since_epoch,
                 'timezone': 'Pacific (No DST)',
                 'sync_status': 'healthy',
-                'last_sync': datetime.utcnow().isoformat()
+                'last_sync': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:

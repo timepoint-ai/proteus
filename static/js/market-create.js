@@ -1,20 +1,21 @@
 /**
- * Market Creation Interface for BASE Blockchain
+ * Market Creation Interface for PredictionMarketV2
  * Handles the UI and logic for creating new prediction markets
+ * V2: Simplified market creation (actorHandle + duration only, NOT payable)
  */
 
 class MarketCreator {
     constructor() {
         this.form = null;
-        this.oracleWallets = [];
+        this.bettingContract = null;
         this.initializeForm();
     }
-    
+
     initializeForm() {
         // Check if we're on a page with market creation form
         const formContainer = document.getElementById('market-create-form');
         if (!formContainer) return;
-        
+
         formContainer.innerHTML = `
             <div class="card bg-dark text-white">
                 <div class="card-header">
@@ -26,62 +27,44 @@ class MarketCreator {
                             <label for="actor-handle" class="form-label">X.com Handle</label>
                             <div class="input-group">
                                 <span class="input-group-text">@</span>
-                                <input type="text" class="form-control" id="actor-handle" required 
+                                <input type="text" class="form-control" id="actor-handle" required
                                        placeholder="elonmusk" pattern="[a-zA-Z0-9_]+">
                             </div>
-                            <div class="form-text">The X.com (Twitter) handle to track</div>
+                            <div class="form-text">The X.com (Twitter) handle to track for next post prediction</div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="market-question" class="form-label">Market Question</label>
-                            <input type="text" class="form-control" id="market-question" required
-                                   placeholder="Will Elon Musk tweet about BASE blockchain?">
-                            <div class="form-text">What are you predicting?</div>
+                            <label for="duration-hours" class="form-label">Duration (Hours)</label>
+                            <input type="number" class="form-control" id="duration-hours"
+                                   min="1" max="720" value="24" required>
+                            <div class="form-text">How long until market closes for submissions</div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="predicted-text" class="form-label">Predicted Text (Optional)</label>
-                            <textarea class="form-control" id="predicted-text" rows="3"
-                                      placeholder="BASE blockchain is the future"></textarea>
-                            <div class="form-text">Leave empty for a null submission</div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="duration-hours" class="form-label">Duration (Hours)</label>
-                                <input type="number" class="form-control" id="duration-hours" 
-                                       min="1" max="720" value="24" required>
-                                <div class="form-text">How long until market expires?</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="initial-stake" class="form-label">Initial Stake (ETH)</label>
-                                <input type="number" class="form-control" id="initial-stake" 
-                                       min="0.01" step="0.01" value="0.1" required>
-                                <div class="form-text">Your initial bet amount</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Oracle Wallets</label>
-                            <div id="oracle-wallets-list" class="mb-2"></div>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="oracle-wallet-input" 
-                                       placeholder="0x..." pattern="0x[a-fA-F0-9]{40}">
-                                <button type="button" class="btn btn-outline-primary" id="add-oracle-btn">
-                                    Add Oracle
-                                </button>
-                            </div>
-                            <div class="form-text">Add trusted oracle addresses (minimum 1)</div>
-                        </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            <strong>Platform Fee:</strong> 7% will be added to your stake
+
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Free to Create!</strong> Market creation costs only gas fees.
                             <br>
-                            <span id="total-amount-display">Total: 0.107 ETH</span>
+                            <small>Participants bet ETH when submitting predictions. 7% platform fee on payouts.</small>
                         </div>
-                        
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>How it works:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Create a market for any X.com handle</li>
+                                <li>Players submit predictions with ETH stakes</li>
+                                <li>After market ends, oracle resolves with actual tweet text</li>
+                                <li>Closest prediction (Levenshtein distance) wins the pool</li>
+                            </ul>
+                        </div>
+
+                        <div class="alert alert-secondary">
+                            <strong>Contract:</strong>
+                            <code id="contract-address">0x5174Da96BCA87c78591038DEe9DB1811288c9286</code>
+                            <br>
+                            <small>PredictionMarketV2 on BASE Sepolia</small>
+                        </div>
+
                         <button type="submit" class="btn btn-primary btn-lg w-100" id="submit-market-btn">
                             <i class="fas fa-rocket"></i> Create Market on BASE
                         </button>
@@ -89,123 +72,81 @@ class MarketCreator {
                 </div>
             </div>
         `;
-        
+
         this.form = document.getElementById('create-market-form');
         this.attachEventListeners();
     }
-    
+
     attachEventListeners() {
         // Form submission
         this.form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.createMarket();
         });
-        
-        // Add oracle button
-        document.getElementById('add-oracle-btn').addEventListener('click', () => {
-            this.addOracle();
-        });
-        
-        // Oracle input enter key
-        document.getElementById('oracle-wallet-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.addOracle();
-            }
-        });
-        
-        // Update total amount display
-        document.getElementById('initial-stake').addEventListener('input', (e) => {
-            this.updateTotalAmount();
-        });
-        
-        // Initial total update
-        this.updateTotalAmount();
     }
-    
-    addOracle() {
-        const input = document.getElementById('oracle-wallet-input');
-        const wallet = input.value.trim();
-        
-        if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
-            alert('Please enter a valid wallet address');
-            return;
-        }
-        
-        if (this.oracleWallets.includes(wallet)) {
-            alert('This oracle is already added');
-            return;
-        }
-        
-        this.oracleWallets.push(wallet);
-        input.value = '';
-        this.renderOracleList();
-    }
-    
-    renderOracleList() {
-        const container = document.getElementById('oracle-wallets-list');
-        container.innerHTML = this.oracleWallets.map((wallet, index) => `
-            <div class="badge bg-secondary me-2 mb-2">
-                ${wallet.substring(0, 6)}...${wallet.substring(38)}
-                <button type="button" class="btn-close btn-close-white ms-2" 
-                        onclick="marketCreator.removeOracle(${index})"></button>
-            </div>
-        `).join('');
-    }
-    
-    removeOracle(index) {
-        this.oracleWallets.splice(index, 1);
-        this.renderOracleList();
-    }
-    
-    updateTotalAmount() {
-        const stake = parseFloat(document.getElementById('initial-stake').value) || 0;
-        const fee = stake * 0.07;
-        const total = stake + fee;
-        
-        document.getElementById('total-amount-display').textContent = 
-            `Total: ${total.toFixed(4)} ETH (includes ${fee.toFixed(4)} ETH platform fee)`;
-    }
-    
+
     async createMarket() {
-        // Validate oracle wallets - minimum 1 required from user
-        if (this.oracleWallets.length === 0) {
-            alert('Please add at least one oracle wallet');
-            return;
-        }
-        
-        // Pad oracle array to meet contract requirement of 3 minimum
-        let paddedOracleWallets = [...this.oracleWallets];
-        while (paddedOracleWallets.length < 3) {
-            // Add placeholder addresses to meet contract requirement
-            paddedOracleWallets.push('0x' + '0'.repeat(39) + (paddedOracleWallets.length + 1));
-        }
-        
         // Check wallet connection
-        if (!clockchainWallet || !clockchainWallet.isConnected) {
+        if (!window.clockchainWallet || !window.clockchainWallet.isConnected) {
             alert('Please connect your wallet first');
             return;
         }
-        
+
         // Gather form data
-        const marketData = {
-            actorHandle: document.getElementById('actor-handle').value,
-            question: document.getElementById('market-question').value,
-            predictedText: document.getElementById('predicted-text').value,
-            durationHours: parseInt(document.getElementById('duration-hours').value),
-            initialStake: document.getElementById('initial-stake').value,
-            oracleWallets: paddedOracleWallets  // Use padded array for contract
-        };
-        
+        const actorHandle = document.getElementById('actor-handle').value.trim();
+        const durationHours = parseInt(document.getElementById('duration-hours').value);
+
+        // Validate
+        if (!actorHandle) {
+            alert('Please enter an X.com handle');
+            return;
+        }
+
+        if (!durationHours || durationHours < 1 || durationHours > 720) {
+            alert('Please enter a valid duration (1-720 hours)');
+            return;
+        }
+
+        // Clean handle (remove @ if present)
+        const cleanHandle = actorHandle.replace(/^@/, '');
+
         // Disable submit button
         const submitBtn = document.getElementById('submit-market-btn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Market...';
-        
+
         try {
-            // Call blockchain integration
-            await baseBlockchain.createPredictionMarket(marketData);
+            // Initialize betting contract if not already done
+            if (!this.bettingContract) {
+                this.bettingContract = new BettingContract();
+                await this.bettingContract.init();
+            }
+
+            // Create market on blockchain (V2: NOT payable, just gas)
+            const tx = await this.bettingContract.createMarket(cleanHandle, durationHours);
+
+            console.log('Market created successfully:', tx);
+
+            // Extract market ID from event logs if available
+            let marketId = null;
+            if (tx.events && tx.events.MarketCreated) {
+                marketId = tx.events.MarketCreated.returnValues.marketId;
+            }
+
+            // Show success message
+            const successMsg = marketId
+                ? `Market #${marketId} created successfully!\n\nTransaction: ${tx.transactionHash}\n\nView on Basescan: https://sepolia.basescan.org/tx/${tx.transactionHash}`
+                : `Market created successfully!\n\nTransaction: ${tx.transactionHash}\n\nView on Basescan: https://sepolia.basescan.org/tx/${tx.transactionHash}`;
+
+            alert(successMsg);
+
+            // Redirect to clockchain view
+            window.location.href = '/clockchain';
+
         } catch (error) {
+            console.error('Error creating market:', error);
+            alert(`Error creating market: ${error.message}`);
+
             // Re-enable button on error
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Create Market on BASE';

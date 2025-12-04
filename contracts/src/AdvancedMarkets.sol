@@ -39,6 +39,12 @@ contract AdvancedMarkets is AccessControl, ReentrancyGuard {
     mapping(bytes32 => AdvancedMarket) public advancedMarkets;
     mapping(address => uint256) public userReputation;
     mapping(bytes32 => bool) public marketExists;
+
+    // Resolution tracking
+    mapping(bytes32 => bool) public marketResolved;
+    mapping(bytes32 => bytes32) public winningOption;
+    mapping(bytes32 => uint256) public marketTotalStake;
+    mapping(bytes32 => mapping(address => bool)) public hasClaimed;
     
     // Events
     event AdvancedMarketCreated(
@@ -70,7 +76,24 @@ contract AdvancedMarkets is AccessControl, ReentrancyGuard {
         uint256 oldReputation,
         uint256 newReputation
     );
-    
+
+    event MarketResolved(
+        bytes32 indexed marketId,
+        bytes32 indexed winningOptionId,
+        uint256 totalStake
+    );
+
+    event WinningsClaimed(
+        bytes32 indexed marketId,
+        address indexed user,
+        uint256 amount
+    );
+
+    event EmergencyWithdrawal(
+        address indexed admin,
+        uint256 amount
+    );
+
     constructor(address _predictionMarket) {
         predictionMarket = EnhancedPredictionMarket(_predictionMarket);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -155,9 +178,12 @@ contract AdvancedMarkets is AccessControl, ReentrancyGuard {
         bytes32 optionId
     ) external payable nonReentrant {
         require(marketExists[marketId], "Market does not exist");
+        require(!marketResolved[marketId], "Market already resolved");
+        require(msg.value > 0, "Must send ETH to bet");
+
         AdvancedMarket storage market = advancedMarkets[marketId];
         require(market.marketType == MarketType.MULTI_CHOICE, "Not a multi-choice market");
-        
+
         // Verify option exists
         bool validOption = false;
         for (uint i = 0; i < market.options.length; i++) {
@@ -167,11 +193,12 @@ contract AdvancedMarkets is AccessControl, ReentrancyGuard {
             }
         }
         require(validOption, "Invalid option");
-        
+
         // Record bet
         market.optionStakes[optionId] += msg.value;
         market.userOptionBets[msg.sender][optionId] += msg.value;
-        
+        marketTotalStake[marketId] += msg.value;
+
         // Update user reputation based on participation
         userReputation[msg.sender] += 1;
         emit ReputationUpdated(msg.sender, userReputation[msg.sender] - 1, userReputation[msg.sender]);
@@ -232,5 +259,105 @@ contract AdvancedMarkets is AccessControl, ReentrancyGuard {
         bytes32 optionId
     ) external view returns (uint256) {
         return advancedMarkets[marketId].optionStakes[optionId];
+    }
+
+    /**
+     * @notice Resolve a multi-choice market by selecting the winning option
+     * @param marketId The market to resolve
+     * @param winningOptionId The option that won
+     */
+    function resolveMultiChoiceMarket(
+        bytes32 marketId,
+        bytes32 winningOptionId
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(marketExists[marketId], "Market does not exist");
+        require(!marketResolved[marketId], "Market already resolved");
+
+        AdvancedMarket storage market = advancedMarkets[marketId];
+        require(market.marketType == MarketType.MULTI_CHOICE, "Not a multi-choice market");
+
+        // Verify winning option exists
+        bool validOption = false;
+        for (uint i = 0; i < market.options.length; i++) {
+            if (market.options[i] == winningOptionId) {
+                validOption = true;
+                break;
+            }
+        }
+        require(validOption, "Invalid winning option");
+
+        marketResolved[marketId] = true;
+        winningOption[marketId] = winningOptionId;
+
+        emit MarketResolved(marketId, winningOptionId, marketTotalStake[marketId]);
+    }
+
+    /**
+     * @notice Claim winnings from a resolved multi-choice market
+     * @param marketId The resolved market to claim from
+     */
+    function claimMultiChoiceWinnings(bytes32 marketId) external nonReentrant {
+        require(marketExists[marketId], "Market does not exist");
+        require(marketResolved[marketId], "Market not yet resolved");
+        require(!hasClaimed[marketId][msg.sender], "Already claimed");
+
+        AdvancedMarket storage market = advancedMarkets[marketId];
+        bytes32 winner = winningOption[marketId];
+
+        uint256 userBet = market.userOptionBets[msg.sender][winner];
+        require(userBet > 0, "No winning bet");
+
+        uint256 winningPoolStake = market.optionStakes[winner];
+        require(winningPoolStake > 0, "No stakes on winning option");
+
+        // Calculate payout: user's share of total pot based on their share of winning pool
+        uint256 totalPot = marketTotalStake[marketId];
+        uint256 payout = (userBet * totalPot) / winningPoolStake;
+
+        hasClaimed[marketId][msg.sender] = true;
+
+        (bool success, ) = payable(msg.sender).call{value: payout}("");
+        require(success, "Transfer failed");
+
+        emit WinningsClaimed(marketId, msg.sender, payout);
+    }
+
+    /**
+     * @notice Get user's potential payout for a resolved market
+     * @param marketId The market ID
+     * @param user The user address
+     */
+    function getPotentialPayout(
+        bytes32 marketId,
+        address user
+    ) external view returns (uint256) {
+        if (!marketResolved[marketId]) return 0;
+        if (hasClaimed[marketId][user]) return 0;
+
+        AdvancedMarket storage market = advancedMarkets[marketId];
+        bytes32 winner = winningOption[marketId];
+
+        uint256 userBet = market.userOptionBets[user][winner];
+        if (userBet == 0) return 0;
+
+        uint256 winningPoolStake = market.optionStakes[winner];
+        if (winningPoolStake == 0) return 0;
+
+        uint256 totalPot = marketTotalStake[marketId];
+        return (userBet * totalPot) / winningPoolStake;
+    }
+
+    /**
+     * @notice Emergency withdrawal for admin - only for unresolved markets with no activity
+     * @dev Use with caution - only for recovery of stuck funds
+     */
+    function emergencyWithdraw() external onlyRole(DEFAULT_ADMIN_ROLE) nonReentrant {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No balance to withdraw");
+
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
+        require(success, "Transfer failed");
+
+        emit EmergencyWithdrawal(msg.sender, balance);
     }
 }

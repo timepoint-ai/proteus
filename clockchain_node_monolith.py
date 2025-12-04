@@ -12,7 +12,7 @@ import logging
 import requests
 import threading
 import websocket
-from datetime import datetime
+from datetime import datetime, timezone
 from eth_account import Account
 from web3 import Web3
 from dotenv import load_dotenv
@@ -242,7 +242,7 @@ class ClockchainNode:
         
     def send_heartbeat(self):
         """Send heartbeat to network"""
-        self.health_metrics['last_heartbeat'] = datetime.utcnow().isoformat()
+        self.health_metrics['last_heartbeat'] = datetime.now(timezone.utc).isoformat()
         
         heartbeat_data = {
             'type': 'heartbeat',

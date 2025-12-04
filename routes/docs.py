@@ -5,6 +5,9 @@ Documentation routes for viewing guides and documentation
 from flask import Blueprint, render_template, send_file, abort, Response
 import os
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 docs_bp = Blueprint('docs', __name__, url_prefix='/docs')
 
@@ -73,7 +76,8 @@ def index():
     docs_dir = 'docs'
     if not os.path.exists(docs_dir):
         os.makedirs(docs_dir)
-    
+        logger.info(f"Created docs directory: {docs_dir}")
+
     docs = []
     for filename in os.listdir(docs_dir):
         if filename.endswith('.md'):
@@ -81,7 +85,8 @@ def index():
                 'name': filename.replace('.md', '').replace('_', ' ').title(),
                 'file': filename
             })
-    
+
+    logger.debug(f"Serving docs index with {len(docs)} documents")
     return render_template('docs/index.html', docs=docs)
 
 @docs_bp.route('/<path:filename>')
@@ -90,11 +95,14 @@ def view_doc(filename):
     # Ensure the file has .md extension
     if not filename.endswith('.md'):
         filename += '.md'
-    
+
     filepath = os.path.join('docs', filename)
-    
+
     if not os.path.exists(filepath):
+        logger.warning(f"Documentation file not found: {filepath}")
         abort(404)
+
+    logger.debug(f"Serving documentation: {filename}")
     
     # Read markdown content
     with open(filepath, 'r') as f:

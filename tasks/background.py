@@ -9,7 +9,7 @@ from services.blockchain import BlockchainService
 from services.time_consensus import TimeConsensusService
 from config import Config
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Background task definitions for Celery
 
@@ -78,7 +78,7 @@ def process_pending_transactions(self):
                     
                     if is_valid:
                         tx.status = 'confirmed'
-                        tx.confirmed_at = datetime.utcnow()
+                        tx.confirmed_at = datetime.now(timezone.utc)
                         
                         # Get transaction details
                         details = BlockchainService.get_transaction_details(
@@ -102,7 +102,7 @@ def process_pending_transactions(self):
                         
                     else:
                         # Check if transaction is old enough to mark as failed
-                        if tx.created_at < datetime.utcnow() - timedelta(hours=24):
+                        if tx.created_at < datetime.now(timezone.utc) - timedelta(hours=24):
                             tx.status = 'failed'
                             logging.warning(f"Transaction marked as failed: {tx.tx_hash}")
                     
@@ -213,14 +213,14 @@ def cleanup_old_data(self):
             time_entries_cleaned = TimeLedgerService.cleanup_old_entries(days_to_keep=30)
             
             # Clean up old failed transactions
-            cutoff_date = datetime.utcnow() - timedelta(days=7)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=7)
             failed_txs_cleaned = Transaction.query.filter(
                 Transaction.status == 'failed',
                 Transaction.created_at < cutoff_date
             ).delete()
             
             # Clean up old resolved bets (keep for 90 days)
-            bet_cutoff_date = datetime.utcnow() - timedelta(days=90)
+            bet_cutoff_date = datetime.now(timezone.utc) - timedelta(days=90)
             old_bets_cleaned = Bet.query.filter(
                 Bet.status == 'resolved',
                 Bet.resolution_time < bet_cutoff_date
@@ -253,7 +253,7 @@ def monitor_network_health(self):
             
             # Check for unhealthy nodes
             unhealthy_nodes = []
-            cutoff_time = datetime.utcnow() - timedelta(minutes=10)
+            cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=10)
             
             nodes = NodeOperator.query.filter_by(status='active').all()
             
