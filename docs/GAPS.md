@@ -71,7 +71,7 @@ No external security audit has been performed. Slither analysis complete but not
 **Current state:**
 - Slither static analysis complete (277 findings triaged)
 - 1 real bug found and fixed (AdvancedMarkets locked-ether)
-- 150 tests passing
+- 180 tests passing
 - **No external auditor engaged**
 
 **Audit Scope (MVP):**
@@ -399,7 +399,7 @@ No production monitoring in place.
 Some services lack unit test coverage.
 
 **Current state:**
-- 26 Python unit tests
+- 56 Python unit tests
 - Some services not tested:
   - `services/celery_tasks.py`
   - `services/redis_cache.py`
@@ -483,7 +483,7 @@ No accessibility audit performed.
 | Structured Logging | P2 | 1-2 days | No | Not started |
 | Rate Limiting | P2 | 1 day | No | **COMPLETE** (Flask-Limiter) |
 | Monitoring | P2 | 2-3 days | Mainnet | Partial |
-| Test Coverage | P2 | 3-5 days | No | 150 tests passing |
+| Test Coverage | P2 | 3-5 days | No | 180 tests passing |
 | Documentation | P3 | 1-2 days | No | **COMPLETE** |
 | Performance | P3 | Ongoing | No | Not started |
 | Accessibility | P3 | 2-3 days | No | Not started |
@@ -529,7 +529,7 @@ Estimated mainnet: ~7 weeks from today
 **Testnet Status:**
 - **PredictionMarketV2 deployed** at `0x5174Da96BCA87c78591038DEe9DB1811288c9286` with full resolution
 - V2 Resolution service complete with admin dashboard and Celery auto-resolution
-- 150 tests passing (109 Hardhat + 26 Python unit + 15 integration)
+- 180 tests passing (109 Hardhat + 56 Python unit + 15 integration)
 - Standardized API error handling complete (`utils/api_errors.py`)
 - Wallet session persistence complete
 - PBKDF2 wallet shim works for testnet (not mainnet)
