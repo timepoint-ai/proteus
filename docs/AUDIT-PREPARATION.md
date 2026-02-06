@@ -1,16 +1,18 @@
 # Security Audit Preparation
 
+**v0 Alpha** -- This document is pre-prepared for a future audit engagement. No auditor has been engaged yet.
+
 **Prepared for:** External Security Auditors
-**Last Updated:** December 2024
+**Last Updated:** February 2026
 **Contact:** [Project maintainer contact]
 
 ---
 
 ## Executive Summary
 
-Clockchain is a prediction market protocol where users stake ETH on predictions about social media posts. The protocol uses an **owner-based resolution model** (centralized MVP) with plans to upgrade to decentralized oracle consensus post-launch.
+Clockchain is a v0 alpha prediction market protocol where users stake ETH on predicting the exact text of social media posts. Winner determination uses **on-chain Levenshtein distance** -- a continuous scoring metric, not binary yes/no. The protocol currently uses an **owner-based resolution model** (centralized prototype) with a designed upgrade path to decentralized oracle consensus.
 
-**Audit Focus:** The MVP contracts that will handle real user funds on BASE mainnet.
+**Audit Focus:** The MVP contracts that would handle real user funds on BASE mainnet. No audit has been engaged yet -- this document is prepared for when that happens.
 
 ---
 
@@ -311,9 +313,9 @@ See `docs/SECURITY-ANALYSIS.md` for full Slither report.
 | Test Suite | Tests | Status |
 |------------|-------|--------|
 | Hardhat (Contracts) | 109 | Passing |
-| Python Unit Tests | 26 | Passing |
+| Python Unit Tests | 56 | Passing |
 | Integration Tests | 15 | Passing |
-| **Total** | **150** | **All Passing** |
+| **Total** | **180** | **All Passing** |
 
 ### Test Categories
 
@@ -434,4 +436,4 @@ BASE Mainnet
 
 ---
 
-*Document prepared for security audit engagement. Updated December 2024.*
+*Document prepared for future security audit engagement. Updated February 2026. No auditor engaged yet.*

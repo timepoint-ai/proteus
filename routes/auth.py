@@ -5,29 +5,27 @@ Now includes Coinbase Embedded Wallet email authentication
 """
 
 from flask import Blueprint, request, jsonify, session
-import logging
 from datetime import datetime, timedelta, timezone
 import secrets
 import random
 from services.wallet_auth import wallet_auth_service
 from services.firebase_auth import FirebaseAuthService
+from services.auth_store import get_auth_store
 from utils.api_errors import (
     error_response, success_response, validation_error, unauthorized,
     internal_error, ErrorCode
 )
+from utils.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 auth_bp = Blueprint('auth', __name__)
 
 # Initialize Firebase Auth Service
 firebase_auth = FirebaseAuthService()
 
-# Store nonces temporarily (in production, use Redis with expiry)
-nonce_store = {}
-
-# Store OTP codes temporarily (in production, use Redis with expiry)
-otp_store = {}
+# Redis-backed auth store (replaces in-memory nonce_store / otp_store)
+auth_store = get_auth_store()
 
 @auth_bp.route('/auth/nonce/<address>', methods=['GET'])
 def get_auth_nonce(address):
@@ -35,21 +33,18 @@ def get_auth_nonce(address):
     try:
         # Generate a secure random nonce
         nonce = secrets.token_hex(16)
-        
-        # Store nonce with timestamp (cleanup old nonces periodically)
-        nonce_store[address.lower()] = {
-            'nonce': nonce,
-            'timestamp': datetime.now(timezone.utc)
-        }
-        
+
+        # Store nonce in Redis with TTL
+        auth_store.store_nonce(address, nonce)
+
         # Generate the message to sign
         message = wallet_auth_service.generate_auth_message(address, nonce)
-        
+
         return jsonify({
             'nonce': nonce,
             'message': message
         })
-        
+
     except Exception as e:
         logger.error(f"Error generating nonce: {e}")
         return internal_error('Failed to generate nonce')
@@ -64,21 +59,27 @@ def send_otp():
         if not email:
             return validation_error('Email is required', 'email')
 
+        # Check rate limit
+        rate_check = auth_store.check_otp_rate_limit(email)
+        if not rate_check['allowed']:
+            logger.warning("OTP rate limit exceeded", email=email)
+            return error_response(
+                ErrorCode.RATE_LIMITED,
+                'Too many OTP requests. Please try again later.',
+                429
+            )
+
         # Generate 6-digit OTP
         otp = str(random.randint(100000, 999999))
 
-        # Store OTP with expiry (5 minutes)
-        otp_store[email.lower()] = {
-            'otp': otp,
-            'timestamp': datetime.now(timezone.utc),
-            'expires_at': datetime.now(timezone.utc) + timedelta(minutes=5)
-        }
+        # Store OTP in Redis with TTL
+        auth_store.store_otp(email, otp)
 
         # Send OTP via Firebase
         success = firebase_auth.send_otp_email(email, otp)
 
         if success:
-            logger.info(f"OTP sent to {email}")
+            logger.info("OTP sent", email=email)
             return success_response(message='OTP sent successfully')
         else:
             return internal_error('Failed to send OTP')
@@ -98,23 +99,30 @@ def verify_otp():
         if not all([email, otp]):
             return validation_error('Email and OTP are required')
 
-        # Check if OTP exists and is valid
-        stored_otp = otp_store.get(email.lower())
+        # Check brute-force lockout
+        attempts_check = auth_store.check_verify_attempts(email)
+        if not attempts_check['allowed']:
+            logger.warning("OTP verify locked out", email=email, attempts=attempts_check['attempts'])
+            return error_response(
+                ErrorCode.RATE_LIMITED,
+                'Too many failed attempts. Please try again later.',
+                429
+            )
+
+        # Get stored OTP from Redis
+        stored_otp = auth_store.get_otp(email)
 
         if not stored_otp:
             return error_response(ErrorCode.TOKEN_EXPIRED, 'Invalid or expired OTP', 400)
 
-        # Check expiry
-        if datetime.now(timezone.utc) > stored_otp['expires_at']:
-            del otp_store[email.lower()]
-            return error_response(ErrorCode.TOKEN_EXPIRED, 'OTP has expired', 400)
-
         # Verify OTP
-        if stored_otp['otp'] != otp:
+        if stored_otp != otp:
+            auth_store.record_failed_attempt(email)
             return error_response(ErrorCode.INVALID_TOKEN, 'Invalid OTP', 400)
 
-        # Clean up used OTP
-        del otp_store[email.lower()]
+        # Clean up used OTP and clear failed attempts
+        auth_store.delete_otp(email)
+        auth_store.clear_verify_attempts(email)
 
         # Create authenticated session
         session['authenticated'] = True
@@ -175,9 +183,8 @@ def verify_wallet():
         result = wallet_auth_service.authenticate_wallet(address, signature, message)
 
         if result['success']:
-            # Clean up the used nonce
-            if address.lower() in nonce_store:
-                del nonce_store[address.lower()]
+            # Clean up the used nonce from Redis
+            auth_store.delete_nonce(address)
 
             return success_response({
                 'token': result['token'],
@@ -248,16 +255,16 @@ def jwt_auth_status():
     """Check JWT authentication status for MetaMask"""
     try:
         auth_header = request.headers.get('Authorization')
-        
+
         if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({
                 'authenticated': False,
                 'address': None
             })
-            
+
         token = auth_header.split(' ')[1]
         payload = wallet_auth_service.verify_jwt_token(token)
-        
+
         if payload:
             return jsonify({
                 'authenticated': True,
@@ -268,7 +275,7 @@ def jwt_auth_status():
                 'authenticated': False,
                 'address': None
             })
-            
+
     except Exception as e:
         logger.error(f"Error checking JWT auth status: {e}")
         return jsonify({

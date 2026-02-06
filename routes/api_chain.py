@@ -4,17 +4,17 @@ All data fetched directly from blockchain, no database dependencies
 """
 
 from flask import Blueprint, request, jsonify
-import logging
 from datetime import datetime
 from web3 import Web3
 from services.blockchain_base import BaseBlockchainService
 from utils.api_errors import (
     error_response, success_response, not_found, blockchain_error, ErrorCode
 )
+from utils.logging_config import get_logger
 import json
 import os
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 api_chain_bp = Blueprint('api_chain', __name__)
 

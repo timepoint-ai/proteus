@@ -33,7 +33,18 @@ class EmbeddedWalletService:
     def __init__(self):
         self.secret_key = os.environ.get('JWT_SECRET_KEY', secrets.token_urlsafe(32))
         self.w3 = Web3(Web3.HTTPProvider(os.environ.get('BASE_RPC_URL', 'https://sepolia.base.org')))
-        
+
+        # PRODUCTION SAFETY: Warn if PBKDF2 shim is active on mainnet
+        network = os.environ.get('NETWORK', 'testnet')
+        cdp_key = os.environ.get('COINBASE_CDP_API_KEY')
+        if network == 'mainnet' and not cdp_key:
+            logger.critical(
+                "SECURITY WARNING: EmbeddedWalletService is using PBKDF2 key derivation shim. "
+                "This is NOT production-safe. Set COINBASE_CDP_API_KEY for real CDP integration "
+                "before deploying to mainnet."
+            )
+        self._is_production_safe = bool(cdp_key)
+
         # Policy configuration
         self.default_policies = {
             'daily_limit_usd': 1000,
@@ -303,9 +314,23 @@ class EmbeddedWalletService:
     
     def _generate_seed(self, identifier: str) -> bytes:
         """
-        Generate deterministic seed from identifier
-        In production, this would use TEE-secured key derivation
+        Generate deterministic seed from identifier.
+
+        WARNING: This PBKDF2 shim is for testnet ONLY. For mainnet, replace with
+        Coinbase CDP wallet creation via the Server Signer API:
+        https://docs.cdp.coinbase.com/wallet-api/docs/wallets
+
+        Upgrade path:
+        1. Obtain Coinbase CDP API credentials
+        2. Replace this method with CDP WalletService.create_wallet()
+        3. Store wallet IDs (not seeds) in secure storage
+        4. Use CDP Server Signer for transaction signing
         """
+        if self._is_production_safe:
+            raise RuntimeError(
+                "PBKDF2 seed generation should not be called when CDP is configured. "
+                "Use CDP wallet creation instead."
+            )
         master_secret = os.environ.get('MASTER_WALLET_SECRET', 'default-secret-change-in-production')
         combined = f"{master_secret}:{identifier}"
         return hashlib.pbkdf2_hmac('sha256', combined.encode(), b'clockchain', 100000)

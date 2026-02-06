@@ -14,9 +14,25 @@ class ChainConfig:
     
     # ============== BLOCKCHAIN CONFIGURATION ==============
     # BASE Network settings
+    # Production RPC (Alchemy/QuickNode) preferred, public RPC as fallback
     BASE_RPC_URL = os.environ.get('BASE_RPC_URL', 'https://sepolia.base.org')
     BASE_MAINNET_RPC_URL = os.environ.get('BASE_MAINNET_RPC_URL', 'https://mainnet.base.org')
     NETWORK = os.environ.get('NETWORK', 'testnet')  # 'testnet' or 'mainnet'
+
+    # Production RPC providers (set these for mainnet deployment)
+    ALCHEMY_API_KEY = os.environ.get('ALCHEMY_API_KEY')
+    QUICKNODE_ENDPOINT = os.environ.get('QUICKNODE_ENDPOINT')
+
+    @property
+    def PRODUCTION_RPC_URL(self):
+        """Get production RPC URL, preferring Alchemy > QuickNode > public."""
+        if self.ALCHEMY_API_KEY:
+            if self.NETWORK == 'mainnet':
+                return f'https://base-mainnet.g.alchemy.com/v2/{self.ALCHEMY_API_KEY}'
+            return f'https://base-sepolia.g.alchemy.com/v2/{self.ALCHEMY_API_KEY}'
+        if self.QUICKNODE_ENDPOINT:
+            return self.QUICKNODE_ENDPOINT
+        return self.ACTIVE_RPC_URL
     
     # Chain IDs
     BASE_MAINNET_CHAIN_ID = 8453
@@ -39,6 +55,15 @@ class ChainConfig:
     # Keep Redis for caching chain data and reducing RPC calls
     REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
     REDIS_CACHE_TTL = int(os.environ.get('REDIS_CACHE_TTL', '300'))  # 5 minutes cache
+
+    # ============== AUTH STORE CONFIGURATION ==============
+    # TTLs for Redis-backed auth stores (in seconds)
+    NONCE_TTL = int(os.environ.get('NONCE_TTL', '300'))  # 5 minutes
+    OTP_TTL = int(os.environ.get('OTP_TTL', '300'))  # 5 minutes
+    OTP_MAX_SEND_PER_WINDOW = int(os.environ.get('OTP_MAX_SEND_PER_WINDOW', '3'))  # Max OTP sends per window
+    OTP_SEND_WINDOW = int(os.environ.get('OTP_SEND_WINDOW', '900'))  # 15 minute window
+    OTP_MAX_VERIFY_ATTEMPTS = int(os.environ.get('OTP_MAX_VERIFY_ATTEMPTS', '5'))  # Max wrong attempts
+    OTP_VERIFY_LOCKOUT = int(os.environ.get('OTP_VERIFY_LOCKOUT', '900'))  # 15 min lockout
     
     # ============== CELERY TASK QUEUE ==============
     # Keep Celery for background blockchain monitoring

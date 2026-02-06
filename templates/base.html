@@ -22,15 +22,18 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <!-- Skip to main content link for keyboard users -->
+    <a href="#main-content" class="visually-hidden-focusable skip-link">Skip to main content</a>
+
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
                 <i class="fas fa-cube me-2"></i>
                 Clockchain Node
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
@@ -96,8 +99,8 @@
                     <!-- Auth/Wallet Widget -->
                     <li class="nav-item me-3">
                         <div id="wallet-widget" class="d-flex align-items-center">
-                            <button id="wallet-connect-btn" class="btn btn-primary btn-sm">
-                                <i class="fas fa-sign-in-alt me-2"></i>
+                            <button id="wallet-connect-btn" class="btn btn-primary btn-sm" aria-label="Sign in to your wallet">
+                                <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>
                                 Sign In
                             </button>
                             <div id="wallet-status" class="d-none align-items-center">
@@ -109,8 +112,8 @@
                                     <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
                                     <span id="wallet-address" class="text-white"></span>
                                     <span class="wallet-type-badge ms-2">Coinbase</span>
-                                    <button id="wallet-disconnect-btn" class="btn btn-sm btn-outline-danger ms-2" title="Sign Out">
-                                        <i class="fas fa-sign-out-alt"></i>
+                                    <button id="wallet-disconnect-btn" class="btn btn-sm btn-outline-danger ms-2" title="Sign Out" aria-label="Sign out of wallet">
+                                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </div>
@@ -126,8 +129,8 @@
                     </li>
                     
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="actionsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cogs me-1"></i>
+                        <a class="nav-link dropdown-toggle" href="#" id="actionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-cogs me-1" aria-hidden="true"></i>
                             Actions
                         </a>
                         <ul class="dropdown-menu">
@@ -188,7 +191,7 @@
                 {% for category, message in messages %}
                     <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close alert"></button>
                     </div>
                 {% endfor %}
             </div>
@@ -196,7 +199,7 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="container my-4">
+    <main id="main-content" class="container my-4" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 

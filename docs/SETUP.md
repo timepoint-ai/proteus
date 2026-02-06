@@ -1,6 +1,6 @@
 # Setup Guide
 
-Complete setup for Clockchain development environment.
+**v0 Alpha** -- Development environment setup for the Clockchain prototype.
 
 ## Prerequisites
 
@@ -232,10 +232,10 @@ npx hardhat coverage
 
 | Suite | Tests | Status |
 |-------|-------|--------|
-| Python Unit | 26 | Passing |
+| Python Unit | 56 | Passing |
 | Smart Contracts | 109 | Passing |
 | Integration | 15 | Passing (2 expected skips) |
-| **Total** | **150** | **All passing** |
+| **Total** | **180** | **All passing** |
 
 ### Running Integration Tests
 

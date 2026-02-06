@@ -1,5 +1,4 @@
 import os
-import logging
 from flask import Flask
 from werkzeug.middleware.proxy_fix import ProxyFix
 from celery import Celery
@@ -7,8 +6,10 @@ import redis
 
 # Phase 7: All SQLAlchemy imports removed - chain-only mode
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+# Configure structured logging (must be done before any other imports that use logging)
+from utils.logging_config import configure_structlog, get_logger
+
+configure_structlog()
 
 # Phase 7: Database classes removed - chain-only mode
 
@@ -30,7 +31,7 @@ redis_client = redis.Redis(
 )
 
 def create_app():
-    logger = logging.getLogger(__name__)
+    logger = get_logger(__name__)
     app = Flask(__name__)
     # Chain-only mode: No sessions needed with JWT auth
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
@@ -94,6 +95,10 @@ def create_app():
     # Register standardized error handlers
     from routes.error_handlers import register_error_handlers
     register_error_handlers(app)
+
+    # Initialize request context middleware for structured logging
+    from utils.request_context import init_request_context
+    init_request_context(app)
 
     # Chain-only mode: All data stored on blockchain
     

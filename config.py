@@ -1,21 +1,19 @@
 import os
 from datetime import timedelta
 
-# ⚠️  DEPRECATED: This config file is being phased out
-# Use config_chain.py for chain-only configuration
 
 class Config:
-    # ===== PHASE 4 CLEANUP: Database configs removed =====
-    # The following database configurations have been removed:
-    # - SQLALCHEMY_DATABASE_URI (no database)
-    # - SQLALCHEMY_ENGINE_OPTIONS (no database)
-    # - SQLALCHEMY_TRACK_MODIFICATIONS (no database)
-    # - SECRET_KEY (no Flask sessions)
-    
-    # Keep minimal config for backward compatibility during transition
-    # These will be removed in final cleanup
-    
-    # Celery configuration (kept for background blockchain monitoring)
+    """Application configuration for Clockchain prediction market.
+
+    Contains settings for:
+    - Celery (background task processing)
+    - Node operator identity
+    - BASE blockchain (RPC, chain IDs)
+    - Platform settings (fees, thresholds)
+    - Oracle configuration
+    """
+
+    # Celery configuration (background blockchain monitoring)
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL') or 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND') or 'redis://localhost:6379/0'
     

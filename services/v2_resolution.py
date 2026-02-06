@@ -4,7 +4,6 @@ Bridges X.com API with the V2 smart contract's resolveMarket() function
 """
 
 import os
-import logging
 import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
@@ -14,8 +13,9 @@ from eth_account import Account
 
 from services.blockchain_base import BaseBlockchainService
 from services.xcom_api_service import XComAPIService
+from utils.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class V2ResolutionService:

@@ -1,193 +1,185 @@
 # Architecture
 
-Technical architecture of the Clockchain prediction market platform.
+**v0 Alpha** -- This documents the prototype architecture. Everything below the smart contract layer is scaffolding.
+
+## Core Primitive
+
+The novel piece is on-chain Levenshtein distance as a scoring function for prediction markets. Everything else (Flask backend, wallet auth, admin dashboard) exists to make that primitive testable on BASE Sepolia.
+
+```
+                    The thing that matters
+                    ──────────────────────
+                    PredictionMarketV2.sol
+                    - createSubmission(marketId, predictedText) payable
+                    - resolveMarket(marketId, actualText) onlyOwner
+                    - levenshteinDistance(a, b) pure → uint256
+                    - claimPayout(submissionId)
+
+                    Prototype scaffolding
+                    ─────────────────────
+                    Flask + Web3.py backend
+                    Vanilla JS frontend
+                    Firebase email OTP
+                    Redis caching
+                    Celery workers
+```
 
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend                              │
-│  (Web3.js, Coinbase Wallet SDK, Firebase Auth)              │
-└─────────────────────┬───────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                      Frontend                            │
+│  (Web3.js, Coinbase Wallet SDK, Firebase Auth)           │
+│  Status: Functional prototype, not production-ready      │
+└─────────────────────┬───────────────────────────────────┘
                       │
-┌─────────────────────▼───────────────────────────────────────┐
-│                     Flask Backend                            │
-│  (API Routes, Wallet Auth, Redis Cache)                     │
-└─────────────────────┬───────────────────────────────────────┘
+┌─────────────────────▼───────────────────────────────────┐
+│                   Flask Backend                           │
+│  (API Routes, Wallet Auth, Redis Cache)                  │
+│  Status: Testnet scaffolding                             │
+└─────────────────────┬───────────────────────────────────┘
                       │
-┌─────────────────────▼───────────────────────────────────────┐
-│                   BASE Blockchain                            │
-│  (Smart Contracts, All Data Storage)                        │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────▼───────────────────────────────────┐
+│                 BASE Blockchain                           │
+│  (Smart Contracts, All Data Storage)                     │
+│  Status: Deployed on Sepolia, contracts work             │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ## Smart Contract Stack
 
 | Contract | Purpose | Status |
 |----------|---------|--------|
-| **PredictionMarketV2** | Full market lifecycle with Levenshtein resolution | **Active - Recommended** |
-| PredictionMarket (V1) | Simple market (no resolution mechanism) | Deprecated |
+| **PredictionMarketV2** | Full market lifecycle with Levenshtein resolution | **Active** |
 | GenesisNFT | 100 founder NFTs with on-chain SVG art | 60 minted, finalized |
-| PayoutManager | Fee distribution to all stakeholders | Deployed |
-| EnhancedPredictionMarket | Full governance market logic | Requires active actors |
-| DecentralizedOracle | Text validation and Levenshtein calculation | Deployed |
-| ActorRegistry | X.com actor registration (3 approvals needed) | 0 active actors |
-| NodeRegistry | Node operator staking (100 ETH required) | 0 active nodes |
+| PayoutManager | Fee distribution to stakeholders | Deployed |
+| DecentralizedOracle | Text validation and Levenshtein calculation | Deployed (future use) |
+| ActorRegistry | X.com actor registration (governance) | Deployed (future use) |
+| NodeRegistry | Node operator staking | Deployed (future use) |
+| PredictionMarket (V1) | Simple market, no resolution | **Deprecated** |
+| EnhancedPredictionMarket | Full governance market logic | Future (requires active nodes) |
 
-> **Note:** **PredictionMarketV2** is the recommended contract with complete market lifecycle: create -> submit -> resolve -> claim. V1 is deprecated (lacks resolution).
-
-## Governance Model
-
-EnhancedPredictionMarket implements decentralized governance:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     NodeRegistry                             │
-│  - 100 ETH stake required to register                        │
-│  - 24-hour voting period for activation                      │
-│  - 51% quorum from existing nodes                            │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ (active nodes can propose actors)
-┌─────────────────────▼───────────────────────────────────────┐
-│                    ActorRegistry                             │
-│  - Propose X.com usernames                                   │
-│  - 3 active node approvals required                          │
-│  - 24-hour voting period                                     │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ (active actors enable market creation)
-┌─────────────────────▼───────────────────────────────────────┐
-│               EnhancedPredictionMarket                       │
-│  - Create markets for active actors only                     │
-│  - Full on-chain submission/bet tracking                     │
-│  - Oracle-based resolution                                   │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Current Testnet State:**
-- No active nodes (100 ETH stake prohibitive for testnet)
-- No active actors (requires node approvals)
-- Use `PredictionMarketV2` for all new development
+**PredictionMarketV2** is the only contract that matters right now. Everything else is either supporting infrastructure or planned for a future decentralization upgrade.
 
 ## Data Flow
 
 ```
-Market Creation
+Market Creation (actor handle, description, end time)
     │
     ▼
-User Submissions (predicted text + stake)
+User Submissions (predicted text + ETH stake)
     │
     ▼
-Secondary Bets (bet on existing submissions)
+Market Ends (time-based)
     │
     ▼
 Oracle Resolution (fetch actual text from X.com)
     │
     ▼
-Levenshtein Distance Calculation
+On-chain Levenshtein Distance (O(m*n) string comparison)
     │
     ▼
-Winner Determination (closest match wins)
+Winner = lowest edit distance (first submitter wins ties)
     │
     ▼
-Payout Distribution (automatic, on-chain)
+Payout: winner gets 93% of pool, 7% platform fee
 ```
 
-## Backend Services
+## Resolution Model (Centralized MVP)
+
+Currently: single EOA calls `resolveMarket(marketId, actualText)`. This is the biggest centralization risk and the most important thing to fix before any real deployment.
+
+**Planned upgrade path:**
+1. Commit-reveal oracle consensus (multiple oracles submit, majority wins)
+2. Slashing for dishonest oracles
+3. Screenshot proof required (IPFS-pinned)
+
+## Backend Services (Prototype)
 
 ```
 services/
 ├── blockchain_base.py      # Web3 contract interactions
-├── v2_resolution.py        # PredictionMarketV2 resolution service
+├── v2_resolution.py        # Market resolution service (owner-based)
+├── auth_store.py           # Redis-backed nonce/OTP storage
 ├── oracle.py               # X.com API + Playwright screenshots
-├── consensus.py            # Node voting (66% threshold)
-├── text_analysis.py        # Levenshtein distance
-├── cache_manager.py        # Redis caching
-├── rpc_retry.py            # RPC failover logic
+├── text_analysis.py        # Levenshtein distance (Python side)
+├── cache_manager.py        # Redis caching for RPC responses
 ├── firebase_auth.py        # Email OTP authentication
-├── embedded_wallet.py      # Coinbase wallet service
-├── celery_tasks.py         # Background task processing
-└── monitoring.py           # Health checks and alerts
+├── embedded_wallet.py      # Coinbase wallet shim (PBKDF2, NOT production-safe)
+└── monitoring.py           # Health checks
 
 utils/
 ├── api_errors.py           # Standardized error responses
-└── decorators.py           # Route decorators
+├── logging_config.py       # Structured logging (structlog)
+└── request_context.py      # Request ID middleware
 ```
 
 ## API Routes
 
-All data is fetched from blockchain. No database.
+All data is fetched from blockchain. Zero database.
 
 ```
 routes/
 ├── api_chain.py            # /api/chain/* - blockchain queries
+├── auth.py                 # /auth/* - JWT wallet auth + OTP (Redis-backed)
 ├── clockchain.py           # /clockchain/* - market operations + admin resolution
-├── embedded_auth.py        # /api/embedded/* - wallet auth
-├── auth.py                 # /auth/* - JWT wallet authentication
-├── error_handlers.py       # Standardized error handling (400, 401, 403, 404, 500)
-└── oracles.py              # Oracle submission endpoints
+├── embedded_auth.py        # /api/embedded/* - Coinbase wallet auth
+├── admin.py                # /admin/* - resolution dashboard
+├── error_handlers.py       # Standardized error handling
+└── ...                     # Other route modules (marketing, docs, oracles, etc.)
 ```
 
-## Performance Optimizations
+## Gas Considerations
 
-### Gas Optimization
-- Fixed gas price: 1 gwei on BASE
-- Gas limits: 500k (markets), 300k (submissions), 200k (bets)
-- 20% safety buffer on all transactions
+Levenshtein distance is the expensive operation:
 
-### Caching (Redis)
+| String Length | Approximate Gas |
+|---------------|-----------------|
+| 50 chars each | ~400,000 |
+| 100 chars each | ~1,500,000 |
+| 280 chars each | ~9,000,000 |
+
+Capped at 280 characters (tweet length) to prevent block gas limit DoS.
+
+## Caching (Redis)
+
 | Data | TTL |
 |------|-----|
 | Actors | 5 min |
 | Markets | 30 sec |
 | Stats | 10 sec |
-| Genesis data | 1 min |
+| Auth nonces | 5 min |
+| OTP codes | 5 min |
 | Gas price | 5 sec |
 
-### RPC Resilience
-- Exponential backoff with jitter
-- Multiple endpoint failover (Alchemy, QuickNode, public)
-- Max 3 retry attempts
-
-## Security
+## Security Posture (Honest Assessment)
 
 ### Smart Contracts
-- Reentrancy guards on all payment functions
-- No upgradeable proxies (immutable)
-- No admin functions post-deployment
-- Time-locked minting (24-hour window)
+- Reentrancy guards on all payment functions (OpenZeppelin)
+- No upgradeable proxies (immutable deployments)
+- Slither static analysis complete (1 real bug found and fixed)
+- **No external audit** -- this is the biggest gap
 
 ### Backend
-- JWT-based wallet authentication
-- Rate limiting (100 req/min default)
-- CORS restricted to approved domains
+- JWT wallet authentication
+- Redis-backed nonce/OTP storage with TTL expiry
+- OTP rate limiting (3 per 15 min) and brute-force protection (5 attempts)
+- Rate limiting (Flask-Limiter)
+- **Embedded wallet uses PBKDF2 shim** -- testnet only, not production-safe
 
-### Oracle
-- 3 oracle minimum for consensus
-- Screenshot proof required
-- Slashing for false submissions
-
-## Testing Infrastructure
-
-| Suite | Tests | Status |
-|-------|-------|--------|
-| Python Unit | 26 | Passing |
-| Smart Contracts | 109 | Passing |
-| Integration | 15 | Passing (2 expected skips) |
-| **Total** | **150** | **All passing** |
-
-Integration tests cover:
-- Chain API endpoints (actors, markets, stats)
-- Wallet authentication flow (nonce, verify, refresh, logout)
-- Embedded wallet OTP flow
+### Known Centralization Risks
+- Single EOA resolves markets (owner-based resolution)
+- No multisig on contract owner key
+- Backend is a single Flask instance
 
 ## Network Configuration
 
-### BASE Sepolia (Testnet)
+### BASE Sepolia (Testnet) -- Current
 - Chain ID: 84532
 - RPC: https://sepolia.base.org
 - Explorer: https://sepolia.basescan.org
 
-### BASE Mainnet (Future)
+### BASE Mainnet -- Not deployed, blocked on audit + prerequisites
 - Chain ID: 8453
-- RPC: https://mainnet.base.org
+- RPC: Requires Alchemy/QuickNode (config supports both)
 - Explorer: https://basescan.org

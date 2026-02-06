@@ -6,61 +6,81 @@ class AuthModal {
     constructor() {
         this.modal = null;
         this.isAuthenticating = false;
+        this.previouslyFocused = null;
     }
-    
+
     show() {
+        // Store previously focused element for focus restoration
+        this.previouslyFocused = document.activeElement;
+
         // Create modal HTML
         this.modal = document.createElement('div');
         this.modal.className = 'email-auth-modal-wrapper';
         this.modal.innerHTML = `
             <div class="modal-backdrop"></div>
-            <div class="email-auth-modal">
-                <h3>Sign In to Clockchain</h3>
-                <p class="auth-description">Enter your email to securely access your wallet</p>
-                
+            <div class="email-auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" aria-describedby="auth-modal-desc">
+                <h3 id="auth-modal-title">Sign In to Clockchain</h3>
+                <p id="auth-modal-desc" class="auth-description">Enter your email to securely access your wallet</p>
+
+                <!-- Live region for status announcements -->
+                <div id="auth-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
                 <form id="email-auth-form">
-                    <input 
-                        type="email" 
-                        id="auth-email" 
-                        placeholder="Enter your email address" 
+                    <label for="auth-email" class="sr-only">Email address</label>
+                    <input
+                        type="email"
+                        id="auth-email"
+                        placeholder="Enter your email address"
                         required
                         autocomplete="email"
+                        aria-required="true"
+                        aria-describedby="auth-modal-desc"
                     />
-                    
-                    <button type="submit" id="auth-submit-btn">
+
+                    <button type="submit" id="auth-submit-btn" aria-describedby="auth-status">
                         <span class="btn-text">Continue with Email</span>
-                        <span class="btn-loading d-none">
+                        <span class="btn-loading d-none" aria-hidden="true">
                             <span class="coinbase-loading"></span>
                             Signing in...
                         </span>
                     </button>
                 </form>
-                
-                <div class="auth-divider">
+
+                <div class="auth-divider" aria-hidden="true">
                     <span>or</span>
                 </div>
-                
+
                 <button class="auth-option-btn" id="use-metamask-btn">
-                    <i class="fas fa-wallet"></i>
+                    <i class="fas fa-wallet" aria-hidden="true"></i>
                     Use External Wallet (Advanced)
                 </button>
-                
-                <button class="close-modal-btn" aria-label="Close">
-                    <i class="fas fa-times"></i>
+
+                <button class="close-modal-btn" aria-label="Close sign in dialog">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(this.modal);
-        
+
         // Add event listeners
         this.setupEventListeners();
-        
+
         // Focus email input
         setTimeout(() => {
             const emailInput = document.getElementById('auth-email');
             if (emailInput) emailInput.focus();
         }, 100);
+    }
+
+    /**
+     * Announce a message to screen readers
+     */
+    announceStatus(message) {
+        const statusRegion = document.getElementById('auth-status');
+        if (statusRegion) {
+            statusRegion.textContent = message;
+        }
     }
     
     setupEventListeners() {
@@ -137,41 +157,51 @@ class AuthModal {
     showOTPInput(email) {
         const modal = this.modal.querySelector('.email-auth-modal');
         modal.innerHTML = `
-            <h3>Verify Your Email</h3>
-            <p class="auth-description">We sent a verification code to<br><strong>${email}</strong></p>
-            
-            <form id="otp-verify-form">
-                <input 
-                    type="text" 
-                    id="otp-code" 
-                    placeholder="Enter 6-digit code" 
+            <h3 id="otp-modal-title">Verify Your Email</h3>
+            <p id="otp-modal-desc" class="auth-description">We sent a verification code to<br><strong>${email}</strong></p>
+
+            <!-- Live region for status announcements -->
+            <div id="auth-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+            <form id="otp-verify-form" aria-labelledby="otp-modal-title">
+                <label for="otp-code" class="sr-only">6-digit verification code</label>
+                <input
+                    type="text"
+                    id="otp-code"
+                    placeholder="Enter 6-digit code"
                     maxlength="6"
                     pattern="[0-9]{6}"
                     required
                     autocomplete="one-time-code"
+                    aria-required="true"
+                    aria-describedby="otp-modal-desc"
+                    inputmode="numeric"
                 />
-                
-                <button type="submit" id="verify-otp-btn">
+
+                <button type="submit" id="verify-otp-btn" aria-describedby="auth-status">
                     <span class="btn-text">Verify & Connect</span>
-                    <span class="btn-loading d-none">
+                    <span class="btn-loading d-none" aria-hidden="true">
                         <span class="coinbase-loading"></span>
                         Verifying...
                     </span>
                 </button>
             </form>
-            
+
             <button class="auth-link-btn" id="resend-code-btn">
                 Resend verification code
             </button>
-            
+
             <button class="auth-link-btn" id="change-email-btn">
                 Use different email
             </button>
-            
-            <button class="close-modal-btn" aria-label="Close">
-                <i class="fas fa-times"></i>
+
+            <button class="close-modal-btn" aria-label="Close verification dialog">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         `;
+
+        // Announce for screen readers
+        this.announceStatus(`Verification code sent to ${email}. Please enter the 6-digit code.`);
         
         // Setup OTP form listeners
         const otpForm = document.getElementById('otp-verify-form');
@@ -276,44 +306,59 @@ class AuthModal {
     showLoading(show, buttonId = 'auth-submit-btn') {
         const btn = document.getElementById(buttonId);
         if (!btn) return;
-        
+
         const textSpan = btn.querySelector('.btn-text');
         const loadingSpan = btn.querySelector('.btn-loading');
-        
+
         if (show) {
             textSpan?.classList.add('d-none');
             loadingSpan?.classList.remove('d-none');
+            loadingSpan?.setAttribute('aria-hidden', 'false');
             btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
+            this.announceStatus('Loading, please wait...');
         } else {
             textSpan?.classList.remove('d-none');
             loadingSpan?.classList.add('d-none');
+            loadingSpan?.setAttribute('aria-hidden', 'true');
             btn.disabled = false;
+            btn.setAttribute('aria-busy', 'false');
         }
     }
-    
+
     showError(message) {
         // Remove existing error
         const existing = document.querySelector('.coinbase-message');
         if (existing) existing.remove();
-        
+
         const errorDiv = document.createElement('div');
         errorDiv.className = 'coinbase-message error';
+        errorDiv.setAttribute('role', 'alert');
+        errorDiv.setAttribute('aria-live', 'assertive');
         errorDiv.textContent = message;
         document.body.appendChild(errorDiv);
-        
+
+        // Also announce via live region
+        this.announceStatus(`Error: ${message}`);
+
         setTimeout(() => errorDiv.remove(), 5000);
     }
-    
+
     showSuccess(message) {
         // Remove existing message
         const existing = document.querySelector('.coinbase-message');
         if (existing) existing.remove();
-        
+
         const successDiv = document.createElement('div');
         successDiv.className = 'coinbase-message success';
+        successDiv.setAttribute('role', 'status');
+        successDiv.setAttribute('aria-live', 'polite');
         successDiv.textContent = message;
         document.body.appendChild(successDiv);
-        
+
+        // Also announce via live region
+        this.announceStatus(message);
+
         setTimeout(() => successDiv.remove(), 5000);
     }
     
@@ -322,10 +367,16 @@ class AuthModal {
             this.modal.remove();
             this.modal = null;
         }
-        
+
         // Remove ESC listener
         if (this.handleEscKey) {
             document.removeEventListener('keydown', this.handleEscKey);
+        }
+
+        // Restore focus to previously focused element
+        if (this.previouslyFocused && typeof this.previouslyFocused.focus === 'function') {
+            this.previouslyFocused.focus();
+            this.previouslyFocused = null;
         }
     }
 }

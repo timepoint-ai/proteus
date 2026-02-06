@@ -1,6 +1,8 @@
 # Security Analysis Report
 
-**Date:** December 2024 (Last Updated: December 3, 2024)
+**v0 Alpha** -- Static analysis only. No external audit has been performed.
+
+**Date:** December 2024 (Last Updated: February 2026)
 **Tool:** Slither v0.11.3
 **Contracts Analyzed:** 52
 **Total Findings:** 277
