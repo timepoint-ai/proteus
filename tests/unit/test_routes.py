@@ -54,8 +54,10 @@ class TestChainApiActorsRoute:
     @pytest.mark.unit
     def test_actors_returns_empty_list_when_no_contract(self, client):
         """GET /api/chain/actors returns empty list when contract unavailable."""
-        with patch('routes.api_chain.blockchain_service') as mock_service:
-            mock_service.contracts.get.return_value = None
+        with patch.object(
+            __import__('routes.api_chain', fromlist=['blockchain_service']).blockchain_service,
+            'contracts', {'ActorRegistry': None, 'EnhancedPredictionMarket': None, 'GenesisNFT': None}
+        ):
             response = client.get('/api/chain/actors')
             data = response.get_json()
             assert data['actors'] == []
@@ -85,8 +87,10 @@ class TestChainApiMarketsRoute:
     @pytest.mark.unit
     def test_markets_returns_empty_when_no_contract(self, client):
         """GET /api/chain/markets returns empty when contract unavailable."""
-        with patch('routes.api_chain.blockchain_service') as mock_service:
-            mock_service.contracts.get.return_value = None
+        with patch.object(
+            __import__('routes.api_chain', fromlist=['blockchain_service']).blockchain_service,
+            'contracts', {'ActorRegistry': None, 'EnhancedPredictionMarket': None, 'GenesisNFT': None}
+        ):
             response = client.get('/api/chain/markets')
             data = response.get_json()
             assert data['markets'] == []

@@ -13,7 +13,7 @@ Validate that on-chain Levenshtein distance works as a prediction market scoring
 - [x] PredictionMarketV2 deployed on BASE Sepolia
 - [x] Full market lifecycle: create -> submit -> resolve -> claim
 - [x] On-chain Levenshtein distance for winner determination
-- [x] 250+ tests passing (109 contract, 125 unit, 15 integration)
+- [x] 259+ tests passing (109 contract, 135 unit, 15 integration)
 - [x] Genesis NFT (60/100 minted, finalized)
 - [x] Flask backend with wallet auth (MetaMask JWT + email OTP)
 - [x] Admin resolution dashboard
@@ -27,6 +27,17 @@ Validate that on-chain Levenshtein distance works as a prediction market scoring
 - PBKDF2 embedded wallet shim (not real CDP)
 - Single EOA for resolution (centralized)
 - No multisig, no audit, no production infra
+
+---
+
+## Phase 0.5: Worked Examples (COMPLETE)
+
+Populate 6 worked examples demonstrating the full spectrum of prediction quality.
+
+- [x] README: 6 collapsible worked examples with verified Levenshtein distances
+- [x] Seed script (`scripts/seed_examples.py`): create example markets on BASE Sepolia
+- [x] Landing page: thesis example (AI vs AI, Satya Nadella) in "How It Works" section
+- [x] Fix 4 pre-existing unit test failures (135 unit tests now pass)
 
 ---
 

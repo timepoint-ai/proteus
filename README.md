@@ -4,6 +4,11 @@
 
 A prediction market protocol on BASE where users stake ETH on the exact text a public figure will post. Winners are determined by on-chain Levenshtein distance. This is a working prototype that demonstrates why text prediction markets are a fundamentally different -- and more durable -- market structure than binary yes/no contracts.
 
+tl;dr 
+
+Research project, not intended for commercial use, exploring how AIs can roleplay as public figures and bet on the *exact* words they will use on posts on X. "I bet 1 ETH that @elonmusk will post 'Mars by 2030' on X between Mar 1 2026 and Apr 1 2026." and then if the real post is "Moon base by 2030" the Levenshtein distance between the real text posted (or lack thereof) is calculated among all competitors and the closest to the exact character-by-character post within the time period wins. 
+
+
 ## The Thesis
 
 Binary prediction markets encode exactly one bit of information per contract. The outcome space is {0, 1}, and as AI systems approach superhuman forecasting along an exponential capability curve, the edge any participant can capture in a binary market collapses toward zero because the correct answer becomes trivially computable. Text prediction over an alphabet with strings up to length *n* has a combinatorially explosive outcome space, and Levenshtein distance induces a proper metric on that space, meaning payoffs aren't a binary cliff but a continuous gradient surface where every character of precision is rewarded. Information density per market scales as O(*n* log|alphabet|) versus O(1) for yes/no contracts, and the Levenshtein metric ensures the payoff function is Lipschitz-continuous with respect to prediction quality, so marginal improvements in language modeling *always* translate to marginal improvements in expected payout. As AI capabilities hit the steep part of the curve, binary markets become commoditized -- everyone's model says 87% yes and the spread vanishes -- but the text prediction space remains strategically rich because the distance between the 99th and 99.9th percentile language model still corresponds to dozens of edit operations, each worth money. This is a market structure where the approaching AI capability explosion doesn't destroy the game -- it deepens it.
@@ -14,13 +19,13 @@ Coinbase/Kalshi launched binary prediction markets to all 50 US states in Januar
 
 **This is a v0 alpha.** It was largely vibe-coded to validate the core idea: that on-chain Levenshtein distance creates a viable, AI-resistant prediction market primitive. The smart contracts work. The market lifecycle works. The math works. Everything else -- the Flask backend, the wallet auth, the admin dashboard -- is scaffolding around that proof of concept.
 
-**Do not deploy this to mainnet.** There is no security audit, no multisig, no production wallet integration. The embedded wallet service uses a PBKDF2 shim. The resolution mechanism is centralized (single EOA). These are known, accepted tradeoffs for a prototype.
+**Do not deploy this to mainnet.** There is no security audit, no multisig, no production wallet integration. The embedded wallet service uses a PBKDF2 shim. The resolution mechanism is centralized (single EOA). These are known, accepted tradeoffs for a prototype. This is not meant for commercial use, whatsoever. 
 
 ### What works (BASE Sepolia testnet)
 
 - Full market lifecycle: create -> submit predictions -> resolve -> claim payouts
 - On-chain Levenshtein distance for winner determination (PredictionMarketV2)
-- 250+ passing tests (109 contract, 125 unit, 15 integration)
+- 259+ passing tests (109 contract, 135 unit, 15 integration)
 - Genesis NFT (60/100 minted, finalized) with on-chain SVG art
 - JWT wallet auth (MetaMask) + email OTP (Coinbase Embedded Wallet shim)
 - Admin resolution dashboard, Redis caching, rate limiting, structured logging
@@ -38,22 +43,157 @@ Coinbase/Kalshi launched binary prediction markets to all 50 US states in Januar
 ## How It Works
 
 ```
-User predicts: "I think @elonmusk will tweet exactly: 'Mars by 2030'"
-          |
-          v
-    ETH staked on-chain (PredictionMarketV2)
-          |
-          v
-    Market ends, oracle fetches actual tweet text
-          |
-          v
-    On-chain Levenshtein distance: edit_distance(prediction, actual)
-          |
-          v
-    Closest prediction wins the pool (minus 7% platform fee)
+Market: "What will @elonmusk post?"
+             |
+             v
+    Competitors submit predictions + stake ETH
+    ┌────────────────────────────────────────────────────┐
+    │ AI (Claude):  "Starship flight 2 confirmed for     │
+    │               March. Humanity becomes               │
+    │               multiplanetary or dies trying."       │
+    │ Human fan:    "The future of humanity is Mars       │
+    │               and beyond"                           │
+    │ Random bot:   "a8j3kd9xmz pqlw7 MARS ufk2         │
+    │               rocket lol"                           │
+    └────────────────────────────────────────────────────┘
+             |
+             v
+    Market ends. Oracle submits actual text:
+    "Starship flight 2 is GO for March. Humanity
+     becomes multiplanetary or we die trying."
+             |
+             v
+    On-chain Levenshtein distance:
+      AI (Claude) → 12 edits   ← WINNER
+      Human fan   → 59 edits
+      Random bot  → 72 edits
+             |
+             v
+    AI (Claude) wins the pool (minus 7% platform fee)
 ```
 
-The scoring is continuous, not binary. A prediction of "Mars by 2030" vs actual "Mars by 2031" is a distance of 1. A prediction of "Moon by 2025" vs actual "Mars by 2031" is much larger. The closest match wins.
+The scoring is continuous, not binary. Every character of precision is rewarded. The closest match wins.
+
+## Worked Examples
+
+Six scenarios showing the full spectrum of prediction quality in a Levenshtein-scored market. Each demonstrates a different strategic insight.
+
+<details>
+<summary><strong>Example 1: AI Roleplay Wins (Elon Musk)</strong></summary>
+
+**Market**: What will `@elonmusk` post?
+
+**Actual text**: `Starship flight 2 is GO for March. Humanity becomes multiplanetary or we die trying.`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| AI Roleplay (Claude) | `Starship flight 2 confirmed for March. Humanity becomes multiplanetary or dies trying.` | **12** |
+| Human fan | `The future of humanity is Mars and beyond` | 59 |
+| AI (lazy prompt GPT) | `Elon will probably tweet about SpaceX rockets going to space soon` | 66 |
+| Bot (entropy) | `a8j3kd9xmz pqlw7 MARS ufk2 rocket lol` | 72 |
+
+**Winner**: AI Roleplay (Claude) at distance 12.
+
+**Lesson**: A well-prompted AI captures tone, structure, and vocabulary. The 47-edit gap between the AI roleplay and the human fan is monetizable -- that's the entire pool. The human got the theme right ("Mars") but theme doesn't pay; exact wording does.
+
+</details>
+
+<details>
+<summary><strong>Example 2: Human Insider Beats AI (Sam Altman)</strong></summary>
+
+**Market**: What will `@sama` post?
+
+**Actual text**: `we are now confident AGI is achievable with current techniques. announcement soon.`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| Ex-OpenAI engineer | `we are now confident AGI is achievable with current techniques. big announcement soon.` | **4** |
+| AI Roleplay (GPT) | `we now believe AGI is achievable with current techniques. announcement coming soon.` | 18 |
+| Human (cynical) | `Sam will say AGI is close again like he always does nothing new` | 59 |
+
+**Winner**: Ex-OpenAI engineer at distance 4.
+
+**Lesson**: Insider information beats AI. Someone who heard rehearsed phrasing gets within 4 edits. The AI roleplay is good (distance 18) but the insider's edge -- knowing the exact phrase "we are now confident" -- is worth 14 edits of advantage. Information asymmetry is priced continuously.
+
+</details>
+
+<details>
+<summary><strong>Example 3: Insider Leaks Exact Wording (Zuckerberg)</strong></summary>
+
+**Market**: What will `@zuck` post?
+
+**Actual text**: `Introducing Meta Ray-Ban with live AI translation. 12 languages. The future is on your face.`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| Meta intern | `Introducing Meta Ray-Ban with live AI translation in 12 languages. The future is on your face.` | **3** |
+| AI Roleplay | `Introducing Meta Ray-Ban AI glasses with real-time translation in 8 languages. The future is on your face.` | 25 |
+| Human (guessing) | `zuck will announce glasses or something idk` | 73 |
+| Spam bot | `BUY META NOW GLASSES MOONSHOT 1000X GUARANTEED` | 83 |
+
+**Winner**: Meta intern at distance 3.
+
+**Lesson**: Product launches have rehearsed copy. Seeing a draft deck = 22-edit advantage over the best AI. The AI gets the structure right ("Introducing Meta Ray-Ban... The future is on your face.") but misses the specific product name and number. Insider access to marketing materials is worth money in this market.
+
+</details>
+
+<details>
+<summary><strong>Example 4: Null Submission Wins (Jensen Huang Stays Silent)</strong></summary>
+
+**Market**: What will `@JensenHuang` post?
+
+**Actual text**: *(nothing posted)* -- resolved with `__NULL__`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| Null trader | `__NULL__` | **0** |
+| Human (guessing) | `Jensen will flex about Blackwell sales numbers` | 46 |
+| AI Roleplay | `NVIDIA Blackwell Ultra is sampling ahead of schedule. The next era of computing starts now.` | 90 |
+
+**Winner**: Null trader at distance 0 (exact match).
+
+**Lesson**: Binary markets can't express "person won't post." AI roleplay *always* generates text -- it can't predict silence. The `__NULL__` sentinel lets traders bet on inaction, and distance 0 means they take the entire pool. This is a market primitive that doesn't exist in yes/no contracts.
+
+</details>
+
+<details>
+<summary><strong>Example 5: AI vs AI Race -- THE THESIS EXAMPLE (Satya Nadella)</strong></summary>
+
+**Market**: What will `@sataborasu` post?
+
+**Actual text**: `Copilot is now generating 46% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| Claude roleplay | `Copilot is now generating 45% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.` | **1** |
+| GPT roleplay | `Copilot is now generating 43% of all new code at GitHub-connected enterprises. The AI transformation of software has just begun.` | 8 |
+| Human (vague) | `Microsoft AI is great and will change the world of coding forever` | 101 |
+
+**Winner**: Claude roleplay at distance 1 (single character: `5` → `6`).
+
+**Lesson**: This is the thesis example. Two frontier AI models, same public training corpus, same prompt. Claude gets within 1 edit. GPT gets within 8. The 7-edit gap between two frontier models is worth the entire pool. A binary market would split nothing -- both AIs "predicted correctly" in a yes/no framing. Levenshtein rewards marginal calibration. The game deepens as models improve.
+
+</details>
+
+<details>
+<summary><strong>Example 6: Bot Entropy Wastes Money (Tim Cook)</strong></summary>
+
+**Market**: What will `@tim_cook` post?
+
+**Actual text**: `Apple Intelligence is now available in 30 countries. Privacy and AI, together.`
+
+| Submitter | Prediction | Distance |
+|-----------|-----------|----------|
+| AI Roleplay | `Apple Intelligence is now available in 24 countries. We believe privacy and AI go hand in hand.` | **28** |
+| Human (thematic) | `Tim will say something about privacy and AI like always` | 53 |
+| Random bot | `x7g APPLE j2m PHONE kq9 BUY zw3 intelligence p5 cook` | 65 |
+| Degenerate bot | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` | 73 |
+
+**Winner**: AI Roleplay at distance 28.
+
+**Lesson**: Levenshtein distance is a natural anti-bot mechanism. Random strings have expected distance ≈ max(len(a), len(b)). Bots can't get lucky -- in a character-level outcome space, there's no shortcut. Even the degenerate "aaaa..." bot that tries to game string length scores worse than a thematic human guess. The metric itself is the spam filter.
+
+</details>
 
 ## Deployed Contracts (BASE Sepolia)
 
@@ -93,6 +233,7 @@ contracts/src/     # Solidity smart contracts (the core primitive)
 contracts/test/    # Hardhat tests
 services/          # Python backend services (prototype scaffolding)
 routes/            # Flask API endpoints
+scripts/           # Deployment, seeding, and utility scripts
 static/js/         # Frontend JavaScript
 templates/         # HTML templates
 tests/             # Python tests (unit, integration, load)

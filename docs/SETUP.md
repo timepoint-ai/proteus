@@ -232,10 +232,10 @@ npx hardhat coverage
 
 | Suite | Tests | Status |
 |-------|-------|--------|
-| Python Unit | 56 | Passing |
+| Python Unit | 135 | Passing |
 | Smart Contracts | 109 | Passing |
 | Integration | 15 | Passing (2 expected skips) |
-| **Total** | **180** | **All passing** |
+| **Total** | **259** | **All passing** |
 
 ### Running Integration Tests
 
@@ -271,6 +271,25 @@ Ensure Redis server is running:
 ```bash
 redis-cli ping
 ```
+
+## Seed Example Markets
+
+The `scripts/seed_examples.py` script creates 6 worked-example markets on BASE Sepolia that demonstrate the full spectrum of prediction quality.
+
+```bash
+# Preview what will be created (no transactions sent)
+python scripts/seed_examples.py --dry-run
+
+# Create markets + submissions (requires funded wallets)
+python scripts/seed_examples.py
+
+# Resolve markets after they end (requires OWNER_PRIVATE_KEY)
+python scripts/seed_examples.py --resolve
+```
+
+**Required env vars:** `OWNER_PRIVATE_KEY`, `TEST_WALLET_KEY_1` through `TEST_WALLET_KEY_4`, and optionally `BASE_SEPOLIA_RPC_URL`.
+
+See the README "Worked Examples" section for details on each example market.
 
 ## Production Deployment
 

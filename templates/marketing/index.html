@@ -418,75 +418,101 @@
         <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
             HOW <span class="gradient-text">CLOCKCHAIN</span> WORKS
         </h2>
-        
+
         <div class="row">
             <div class="col-lg-10 mx-auto">
+                <!-- Step 1: The Market -->
                 <div class="timeline-step">
-                    <h4>[01] CREATE PREDICTION</h4>
-                    <p style="color: #b8b8b8;">Choose a public figure and predict what they'll say within a specific time window</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> ACTOR: "Elon Musk"</code><br>
-                        <code style="color: var(--primary-color);">> PREDICTION: "Mars colonization by 2026"</code><br>
-                        <code style="color: #b8b8b8;">> TIME_WINDOW: [2025-01-01, 2026-12-31]</code>
-                    </div>
-                </div>
-                
-                <div class="timeline-step">
-                    <h4>[02] MARKET FORMATION</h4>
-                    <p style="color: #b8b8b8;">Other users create competing predictions and place stakes on their favorites</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> COMPETING_PREDICTIONS: [</code><br>
-                        <code style="color: #b8b8b8;">    "We're making life multiplanetary",</code><br>
-                        <code style="color: #b8b8b8;">    "Mars colony by 2030",</code><br>
-                        <code style="color: #b8b8b8;">    "Humans on Mars this decade"</code><br>
-                        <code style="color: var(--primary-color);">> ]</code>
-                    </div>
-                </div>
-                
-                <div class="timeline-step">
-                    <h4>[03] TIME WINDOW EXPIRES</h4>
-                    <p style="color: #b8b8b8;">Once the prediction window closes, oracle submissions become available</p>
+                    <h4>[01] THE MARKET</h4>
+                    <p style="color: #b8b8b8;">A market opens: <strong style="color: #fff;">What will @satyanadella post?</strong></p>
                     <div class="d-flex gap-2 flex-wrap">
-                        <div class="tech-badge">TEMPORAL LOCK</div>
-                        <div class="tech-badge">NO EARLY ORACLES</div>
-                        <div class="tech-badge">IMMUTABLE TIMELINE</div>
+                        <div class="tech-badge">ACTOR: SATYA NADELLA</div>
+                        <div class="tech-badge">DURATION: 1 HOUR</div>
+                        <div class="tech-badge">STAKE: 0.001 ETH</div>
                     </div>
                 </div>
-                
+
+                <!-- Step 2: Competing Predictions -->
                 <div class="timeline-step">
-                    <h4>[04] ORACLE VALIDATION</h4>
-                    <p style="color: #b8b8b8;">Network nodes submit verified sources of what was actually said</p>
+                    <h4>[02] THREE AI &amp; HUMAN PREDICTIONS COMPETE</h4>
+                    <p style="color: #b8b8b8;">Submitters stake ETH on their best guess of the exact text</p>
+
+                    <div class="example-card" style="border-left: 3px solid #00ff00; margin-bottom: 0.75rem;">
+                        <div style="margin-bottom: 0.25rem;">
+                            <span class="tech-badge" style="border-color: #00ff00; color: #00ff00; font-size: 0.65rem;">CLAUDE ROLEPLAY</span>
+                        </div>
+                        <code style="color: #cccccc;">Copilot is now generating <span style="color: #00ff00; font-weight: bold;">45</span>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.</code>
+                    </div>
+
+                    <div class="example-card" style="border-left: 3px solid #ffaa00; margin-bottom: 0.75rem;">
+                        <div style="margin-bottom: 0.25rem;">
+                            <span class="tech-badge" style="border-color: #ffaa00; color: #ffaa00; font-size: 0.65rem;">GPT ROLEPLAY</span>
+                        </div>
+                        <code style="color: #cccccc;">Copilot is now generating <span style="color: #ffaa00; font-weight: bold;">43</span>% of all new code at GitHub-connected enterprises. The AI transformation of software <span style="color: #ffaa00; font-weight: bold;">has just begun</span>.</code>
+                    </div>
+
+                    <div class="example-card" style="border-left: 3px solid #ff4444;">
+                        <div style="margin-bottom: 0.25rem;">
+                            <span class="tech-badge" style="border-color: #ff4444; color: #ff4444; font-size: 0.65rem;">HUMAN (VAGUE)</span>
+                        </div>
+                        <code style="color: #cccccc;">Microsoft AI is great and will change the world of coding forever</code>
+                    </div>
+                </div>
+
+                <!-- Step 3: The Actual Post -->
+                <div class="timeline-step">
+                    <h4>[03] THE ACTUAL POST</h4>
+                    <p style="color: #b8b8b8;">Market ends. Oracle submits the real text:</p>
+                    <div class="example-card" style="border: 1px solid var(--primary-color); background: rgba(0, 217, 255, 0.05);">
+                        <code style="color: var(--primary-color);">Copilot is now generating <strong>46</strong>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.</code>
+                    </div>
+                </div>
+
+                <!-- Step 4: Levenshtein Scoring -->
+                <div class="timeline-step">
+                    <h4>[04] ON-CHAIN LEVENSHTEIN DISTANCE</h4>
+                    <p style="color: #b8b8b8;">Smart contract computes edit distance for every submission</p>
                     <div class="example-card">
-                        <code style="color: var(--primary-color);">> SOURCE: "twitter.com/elonmusk/status/..."</code><br>
-                        <code style="color: var(--primary-color);">> ACTUAL_TEXT: "Making life multiplanetary is essential"</code><br>
-                        <code style="color: #b8b8b8;">> CONSENSUS_NODES: 15/20</code>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,217,255,0.1);">
+                            <span style="color: #00ff00;">Claude Roleplay</span>
+                            <span style="color: #00ff00; font-size: 1.5rem; font-weight: bold;">1 edit</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,217,255,0.1);">
+                            <span style="color: #ffaa00;">GPT Roleplay</span>
+                            <span style="color: #ffaa00; font-size: 1.5rem; font-weight: bold;">8 edits</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+                            <span style="color: #ff4444;">Human (vague)</span>
+                            <span style="color: #ff4444; font-size: 1.5rem; font-weight: bold;">101 edits</span>
+                        </div>
                     </div>
                 </div>
-                
+
+                <!-- Step 5: The Punchline -->
                 <div class="timeline-step">
-                    <h4>[05] LEVENSHTEIN ANALYSIS</h4>
-                    <p style="color: #b8b8b8;">Algorithm calculates text similarity between predictions and actual speech</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> DISTANCE_SCORES: {</code><br>
-                        <code style="color: #00ff00;">    "We're making life multiplanetary": 12,</code><br>
-                        <code style="color: #ffaa00;">    "Mars colony by 2030": 28,</code><br>
-                        <code style="color: #ff4444;">    "Humans on Mars this decade": 35</code><br>
-                        <code style="color: var(--primary-color);">> }</code>
+                    <h4>[05] WINNER TAKES THE POOL</h4>
+                    <p style="color: #b8b8b8; font-size: 1.1rem;">
+                        Claude wins with <strong style="color: #00ff00;">1 edit</strong> (the digit <code style="color: #00ff00;">5</code> &rarr; <code style="color: #00ff00;">6</code>).
+                        GPT had <strong style="color: #ffaa00;">8 edits</strong>. Same training data. Same prompt.
+                    </p>
+                    <div class="example-card" style="border: 1px solid var(--primary-color); text-align: center; padding: 2rem;">
+                        <p style="color: var(--primary-color); font-size: 1.25rem; font-weight: 400; margin: 0; letter-spacing: 0.5px;">
+                            The 7-edit gap between two frontier AI models<br/>is worth the <strong>entire pool</strong>.
+                        </p>
+                        <p style="color: #b8b8b8; margin-top: 1rem; margin-bottom: 0; font-size: 0.9rem;">
+                            A binary market would split nothing &mdash; both AIs "predicted correctly."<br/>
+                            Levenshtein rewards marginal calibration. The game deepens as models improve.
+                        </p>
                     </div>
-                </div>
-                
-                <div class="timeline-step">
-                    <h4>[06] AUTOMATIC RESOLUTION</h4>
-                    <p style="color: #b8b8b8;">Lowest Levenshtein distance wins. Smart contracts distribute rewards to winners</p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="tech-badge">WINNER 80%</div>
-                        <div class="tech-badge">PLATFORM 20%</div>
-                        <div class="tech-badge">INSTANT SETTLEMENT</div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <div class="tech-badge">CONTINUOUS SCORING</div>
+                        <div class="tech-badge">93% TO WINNER</div>
+                        <div class="tech-badge">7% PLATFORM FEE</div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="text-center mt-5">
             <a href="{{ url_for('clockchain.clockchain_view') }}" class="btn btn-primary btn-lg">
                 EXPLORE LIVE PREDICTIONS

@@ -169,7 +169,10 @@ def auth_status():
 def verify_wallet():
     """Verify wallet signature and issue JWT token"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return validation_error('Invalid or missing JSON body')
 
         # Extract required fields
         address = data.get('address')

@@ -32,6 +32,16 @@ deployment_file = 'deployment-sepolia.json' if os.environ.get('NETWORK') == 'tes
 if os.path.exists(deployment_file):
     blockchain_service.load_contracts(deployment_file)
 
+@base_api_bp.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for base API."""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'service': 'base-api'
+    })
+
+
 @base_api_bp.route('/markets/create', methods=['POST'])
 def create_market():
     """Create a new prediction market on BASE blockchain - Phase 7 Chain-Only"""

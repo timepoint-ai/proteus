@@ -9,12 +9,17 @@ from unittest.mock import Mock, MagicMock
 from datetime import datetime, timezone
 import os
 
+# Save original modules so we can restore them after import
+_orig_blockchain_base = sys.modules.get('services.blockchain_base')
+_orig_xcom_api = sys.modules.get('services.xcom_api_service')
+_orig_node_comm = sys.modules.get('services.node_communication')
+
 # Mock all dependencies before importing HealthCheckService
 mock_blockchain_service = MagicMock()
 mock_xcom_service = MagicMock()
 mock_node_comm_service = MagicMock()
 
-# Create mock modules
+# Temporarily inject mock modules so HealthCheckService can be imported
 sys.modules['services.blockchain_base'] = MagicMock()
 sys.modules['services.blockchain_base'].BaseBlockchainService = mock_blockchain_service
 sys.modules['services.xcom_api_service'] = MagicMock()
@@ -24,6 +29,17 @@ sys.modules['services.node_communication'].NodeCommunicationService = mock_node_
 
 # Now import the module
 from services.health_check import HealthCheckService
+
+# Restore original modules to avoid polluting other test modules
+for mod_name, orig in [
+    ('services.blockchain_base', _orig_blockchain_base),
+    ('services.xcom_api_service', _orig_xcom_api),
+    ('services.node_communication', _orig_node_comm),
+]:
+    if orig is not None:
+        sys.modules[mod_name] = orig
+    else:
+        sys.modules.pop(mod_name, None)
 
 
 class TestCheckBaseRPC:
