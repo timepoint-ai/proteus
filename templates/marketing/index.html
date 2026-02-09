@@ -10,7 +10,7 @@
         overflow: hidden;
         background: linear-gradient(180deg, var(--darker-bg) 0%, rgba(0, 217, 255, 0.02) 50%, var(--darker-bg) 100%);
     }
-    
+
     /* Animated Grid Background */
     .grid-animation {
         position: absolute;
@@ -21,33 +21,44 @@
         opacity: 0.3;
         pointer-events: none;
     }
-    
+
     .hero-graphic {
-        position: absolute;
-        right: -5%;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0.6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
         z-index: 0;
     }
-    
+
     .hero-content {
         position: relative;
         z-index: 1;
     }
-    
+
     .hero-title {
         font-size: 3.5rem;
         font-weight: 300;
         letter-spacing: -1px;
         margin-bottom: 1.5rem;
     }
-    
+
     .hero-title .gradient-text {
         font-weight: 600;
         text-shadow: 0 0 30px var(--glow-color);
     }
-    
+
+    .alpha-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid rgba(255, 170, 0, 0.6);
+        color: #ffaa00;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        vertical-align: middle;
+        margin-left: 1rem;
+    }
+
     .email-form {
         background: rgba(0, 0, 0, 0.6);
         border: 1px solid rgba(0, 217, 255, 0.2);
@@ -57,7 +68,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .email-form::before {
         content: '';
         position: absolute;
@@ -68,12 +79,12 @@
         background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
         animation: scan 3s infinite;
     }
-    
+
     @keyframes scan {
         0% { transform: translateX(-100%); }
         100% { transform: translateX(100%); }
     }
-    
+
     .form-control {
         background: rgba(0, 0, 0, 0.5);
         border: 1px solid rgba(0, 217, 255, 0.2);
@@ -82,20 +93,20 @@
         padding: 0.875rem 1rem;
         font-size: 1rem;
     }
-    
+
     .form-control:focus {
         background: rgba(0, 0, 0, 0.7);
         border-color: var(--primary-color);
         box-shadow: 0 0 0 0.25rem rgba(0, 217, 255, 0.25);
         color: white;
     }
-    
+
     .infographic-section {
         background: linear-gradient(180deg, var(--darker-bg) 0%, rgba(0, 217, 255, 0.01) 50%, var(--darker-bg) 100%);
         padding: 6rem 0;
         position: relative;
     }
-    
+
     .timeline-step {
         position: relative;
         padding: 2.5rem;
@@ -103,7 +114,7 @@
         margin-left: 3rem;
         margin-bottom: 3rem;
     }
-    
+
     .timeline-step::before {
         content: '';
         position: absolute;
@@ -117,14 +128,14 @@
         transform: rotate(45deg);
         box-shadow: 0 0 20px var(--glow-color);
     }
-    
+
     .timeline-step h4 {
         font-weight: 400;
         font-size: 1.5rem;
         margin-bottom: 1rem;
         color: var(--primary-color);
     }
-    
+
     .feature-icon {
         width: 80px;
         height: 80px;
@@ -139,7 +150,7 @@
         position: relative;
         clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
     }
-    
+
     .example-card {
         background: rgba(0, 0, 0, 0.5);
         border: 1px solid rgba(0, 217, 255, 0.2);
@@ -149,7 +160,7 @@
         font-family: 'Consolas', 'Monaco', monospace;
         font-size: 0.9rem;
     }
-    
+
     .tech-badge {
         display: inline-block;
         padding: 0.375rem 1rem;
@@ -163,7 +174,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .tech-badge::before {
         content: '';
         position: absolute;
@@ -174,41 +185,11 @@
         background: rgba(0, 217, 255, 0.1);
         transition: left 0.3s ease;
     }
-    
+
     .tech-badge:hover::before {
         left: 0;
     }
-    
-    /* Circular Process Diagram */
-    .process-circle {
-        width: 200px;
-        height: 200px;
-        margin: 2rem auto;
-        position: relative;
-        border: 1px solid rgba(0, 217, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .process-circle::before {
-        content: '';
-        position: absolute;
-        width: calc(100% + 20px);
-        height: calc(100% + 20px);
-        border: 1px solid rgba(0, 217, 255, 0.1);
-        border-radius: 50%;
-        top: -10px;
-        left: -10px;
-        animation: rotate 20s linear infinite;
-    }
-    
-    @keyframes rotate {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
+
     /* Geometric Patterns */
     .geometric-bg {
         position: absolute;
@@ -218,8 +199,59 @@
         left: 0;
         pointer-events: none;
         opacity: 0.05;
-        background-image: 
+        background-image:
             repeating-linear-gradient(45deg, transparent, transparent 35px, var(--primary-color) 35px, var(--primary-color) 70px);
+    }
+
+    /* Thesis section */
+    .thesis-point {
+        padding: 1.5rem;
+        border-left: 2px solid rgba(0, 217, 255, 0.3);
+        margin-bottom: 1.5rem;
+    }
+
+    .thesis-point h5 {
+        color: var(--primary-color);
+        font-weight: 400;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+    }
+
+    .thesis-point p {
+        color: #b8b8b8;
+        margin-bottom: 0;
+        line-height: 1.7;
+    }
+
+    /* Status section */
+    .status-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .status-list li {
+        padding: 0.6rem 0;
+        color: #b8b8b8;
+        font-size: 0.95rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .status-list li:last-child {
+        border-bottom: none;
+    }
+
+    .status-check {
+        color: #00ff00;
+        margin-right: 0.75rem;
+        font-weight: bold;
+    }
+
+    .status-pending {
+        color: #555;
+        margin-right: 0.75rem;
     }
 </style>
 {% endblock %}
@@ -241,177 +273,164 @@
         <div class="row align-items-center">
             <div class="col-lg-7 hero-content">
                 <h1 class="hero-title">
-                    PREDICT THE FUTURE OF<br/>
-                    <span class="gradient-text">LANGUAGE</span>
+                    <span class="gradient-text">CLOCKCHAIN</span>
+                    <span class="alpha-badge">v0 ALPHA</span>
                 </h1>
-                <p class="lead mb-4" style="font-size: 1.25rem; color: #cccccc;">
-                    Fully decentralized prediction markets for linguistic events on BASE blockchain. 
-                    Phase 7 Complete: Zero database dependencies, 100% on-chain data, production-grade performance.
+                <p class="lead mb-4" style="font-size: 1.2rem; color: #cccccc; line-height: 1.7;">
+                    A research prototype: on-chain Levenshtein distance as a prediction market primitive.
+                    Stake ETH on the exact text a public figure will post. Closest match wins.
                 </p>
                 <div class="d-flex gap-3 mb-4">
                     <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
-                        ENTER DEMO
+                        TRY THE DEMO
                     </a>
-                    <a href="#how-it-works" class="btn btn-outline-light btn-lg">
-                        LEARN MORE
+                    <a href="#thesis" class="btn btn-outline-light btn-lg">
+                        READ THE THESIS
                     </a>
                 </div>
-                
+
                 <!-- Email Capture Form -->
                 <div class="email-form">
-                    <h4 class="mb-3" style="font-weight: 300; letter-spacing: 2px;">EARLY ACCESS</h4>
+                    <h4 class="mb-3" style="font-weight: 300; letter-spacing: 2px;">GET UPDATES</h4>
                     <form action="{{ url_for('marketing.capture_email') }}" method="POST" class="row g-3">
                         <div class="col-md-8">
-                            <input type="email" class="form-control form-control-lg" name="email" 
+                            <input type="email" class="form-control form-control-lg" name="email"
                                    placeholder="your@email.com" required>
                         </div>
                         <div class="col-md-4">
                             <button type="submit" class="btn btn-primary btn-lg w-100">
-                                NOTIFY ME
+                                SUBSCRIBE
                             </button>
                         </div>
                     </form>
                     <small class="text-muted mt-3 d-block" style="letter-spacing: 0.5px;">
-                        JOIN THE WAITLIST FOR MAINNET LAUNCH
+                        Follow the research. No spam.
                     </small>
                 </div>
             </div>
-            <div class="col-lg-5">
-                <!-- Hero Graphic SVG -->
-                <svg class="hero-graphic" width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <div class="col-lg-5 hero-graphic">
+                <!-- Hero Sundial SVG -->
+                <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <linearGradient id="sundialGlow" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.3" />
                         </linearGradient>
-                        <filter id="heroGlow">
-                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <linearGradient id="shadowFade" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:0.6" />
+                            <stop offset="100%" style="stop-color:#00d9ff;stop-opacity:0" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                             <feMerge>
                                 <feMergeNode in="coloredBlur"/>
                                 <feMergeNode in="SourceGraphic"/>
                             </feMerge>
                         </filter>
                     </defs>
-                    <g transform="translate(250,250)">
-                        <!-- Grid pattern -->
-                        <g opacity="0.2">
-                            <line x1="-250" y1="0" x2="250" y2="0" stroke="#00d9ff" stroke-width="0.5"/>
-                            <line x1="0" y1="-250" x2="0" y2="250" stroke="#00d9ff" stroke-width="0.5"/>
-                            <circle r="50" fill="none" stroke="#00d9ff" stroke-width="0.5"/>
-                            <circle r="100" fill="none" stroke="#00d9ff" stroke-width="0.5"/>
-                            <circle r="150" fill="none" stroke="#00d9ff" stroke-width="0.5"/>
-                            <circle r="200" fill="none" stroke="#00d9ff" stroke-width="0.5"/>
-                        </g>
-                        
-                        <!-- Central hexagon -->
-                        <polygon points="0,-100 87,-50 87,50 0,100 -87,50 -87,-50" 
-                                fill="none" stroke="url(#heroGradient)" stroke-width="2" filter="url(#heroGlow)"/>
-                        
-                        <!-- Clock elements -->
-                        <line x1="0" y1="0" x2="0" y2="-70" stroke="#00d9ff" stroke-width="3" stroke-linecap="round" filter="url(#heroGlow)"/>
-                        <line x1="0" y1="0" x2="50" y2="0" stroke="#00d9ff" stroke-width="3" stroke-linecap="round" filter="url(#heroGlow)"/>
-                        
-                        <!-- Chain links -->
-                        <g transform="rotate(0)">
-                            <rect x="-15" y="-130" width="30" height="50" fill="none" stroke="#00d9ff" stroke-width="1.5" rx="15" filter="url(#heroGlow)"/>
-                        </g>
-                        <g transform="rotate(72)">
-                            <rect x="-15" y="-130" width="30" height="50" fill="none" stroke="#00d9ff" stroke-width="1.5" rx="15" filter="url(#heroGlow)"/>
-                        </g>
-                        <g transform="rotate(144)">
-                            <rect x="-15" y="-130" width="30" height="50" fill="none" stroke="#00d9ff" stroke-width="1.5" rx="15" filter="url(#heroGlow)"/>
-                        </g>
-                        <g transform="rotate(216)">
-                            <rect x="-15" y="-130" width="30" height="50" fill="none" stroke="#00d9ff" stroke-width="1.5" rx="15" filter="url(#heroGlow)"/>
-                        </g>
-                        <g transform="rotate(288)">
-                            <rect x="-15" y="-130" width="30" height="50" fill="none" stroke="#00d9ff" stroke-width="1.5" rx="15" filter="url(#heroGlow)"/>
-                        </g>
-                        
-                        <!-- Center dot -->
-                        <circle r="5" fill="#00d9ff" filter="url(#heroGlow)"/>
-                        
-                        <!-- Animated rotation -->
-                        <animateTransform
-                            attributeName="transform"
-                            attributeType="XML"
-                            type="rotate"
-                            from="0 0 0"
-                            to="360 0 0"
-                            dur="60s"
-                            repeatCount="indefinite"/>
-                    </g>
+
+                    <!-- Chain-link texture around circumference -->
+                    <circle cx="150" cy="150" r="140" fill="none" stroke="#00d9ff" stroke-width="1" stroke-dasharray="8,6" opacity="0.25"/>
+
+                    <!-- Outer dial ring -->
+                    <circle cx="150" cy="150" r="135" fill="none" stroke="#00d9ff" stroke-width="2" filter="url(#glow)"/>
+
+                    <!-- Latitude arc lines on base plate -->
+                    <ellipse cx="150" cy="150" rx="135" ry="40" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
+                    <ellipse cx="150" cy="150" rx="135" ry="70" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
+                    <ellipse cx="150" cy="150" rx="135" ry="100" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
+
+                    <!-- Inner rings -->
+                    <circle cx="150" cy="150" r="105" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.3"/>
+                    <circle cx="150" cy="150" r="75" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.2"/>
+
+                    <!-- 12 hour lines radiating from center -->
+                    <!-- Major: 12, 3, 6, 9 -->
+                    <line x1="150" y1="18" x2="150" y2="50" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
+                    <line x1="150" y1="250" x2="150" y2="282" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
+                    <line x1="18" y1="150" x2="50" y2="150" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
+                    <line x1="250" y1="150" x2="282" y2="150" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
+
+                    <!-- Minor: 1, 2, 4, 5, 7, 8, 10, 11 -->
+                    <line x1="82.5" y1="32.5" x2="96" y2="53" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="32.5" y1="82.5" x2="53" y2="96" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="267.5" y1="82.5" x2="247" y2="96" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="217.5" y1="32.5" x2="204" y2="53" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="267.5" y1="217.5" x2="247" y2="204" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="217.5" y1="267.5" x2="204" y2="247" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="32.5" y1="217.5" x2="53" y2="204" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+                    <line x1="82.5" y1="267.5" x2="96" y2="247" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
+
+                    <!-- Shadow cast by gnomon (gradient fade) -->
+                    <line x1="150" y1="150" x2="240" y2="80" stroke="url(#shadowFade)" stroke-width="4" stroke-linecap="round"/>
+
+                    <!-- Gnomon (triangular, geometric detail) -->
+                    <polygon points="150,45 140,200 160,200" fill="none" stroke="url(#sundialGlow)" stroke-width="2" stroke-linejoin="round" filter="url(#glow)"/>
+                    <!-- Gnomon center spine -->
+                    <line x1="150" y1="55" x2="150" y2="190" stroke="#00d9ff" stroke-width="0.5" opacity="0.3"/>
+                    <!-- Gnomon base detail -->
+                    <line x1="137" y1="200" x2="163" y2="200" stroke="#00d9ff" stroke-width="1" opacity="0.4"/>
+
+                    <!-- Center pivot point -->
+                    <circle cx="150" cy="150" r="4" fill="#00d9ff" filter="url(#glow)"/>
+                    <circle cx="150" cy="150" r="8" fill="none" stroke="#00d9ff" stroke-width="1" opacity="0.4"/>
                 </svg>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Philosophy Section -->
-<section class="section">
+<!-- Thesis Section -->
+<section id="thesis" class="section">
     <div class="container">
         <div class="row">
-            <div class="col-lg-10 mx-auto text-center">
-                <h2 class="display-5 mb-4" style="font-weight: 300; letter-spacing: 2px;">
-                    THE POWER OF <span class="gradient-text">LINGUISTIC MARKETS</span>
+            <div class="col-lg-10 mx-auto">
+                <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
+                    THE <span class="gradient-text">THESIS</span>
                 </h2>
-                <p class="lead" style="color: #cccccc; font-weight: 300;">
-                    Words shape reality. In politics, business, and culture, what influential people say moves markets, 
-                    changes policies, and defines narratives. Clockchain creates a decentralized oracle for linguistic events,
-                    turning speech prediction into a powerful consensus mechanism.
-                </p>
-                
-                <!-- Process Circle Diagram -->
-                <div class="process-circle mx-auto my-5">
-                    <div class="text-center">
-                        <h3 class="gradient-text" style="font-size: 2rem; font-weight: 600;">∞</h3>
-                        <p class="mb-0" style="color: var(--primary-color); letter-spacing: 1px;">CONSENSUS</p>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="thesis-point">
+                            <h5>Binary = 1 bit</h5>
+                            <p>Binary prediction markets encode exactly one bit of information per contract. As AI approaches superhuman forecasting, the edge any participant can capture collapses toward zero -- the correct answer becomes trivially computable.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="thesis-point">
+                            <h5>Text = exponential space</h5>
+                            <p>Text prediction over an alphabet with strings up to length <em>n</em> has a combinatorially explosive outcome space. Information density per market scales as O(<em>n</em> log|alphabet|) versus O(1) for yes/no contracts.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="thesis-point">
+                            <h5>Levenshtein = continuous scoring</h5>
+                            <p>Levenshtein distance induces a proper metric on the outcome space. Payoffs aren't a binary cliff but a continuous gradient -- every character of precision is rewarded. Marginal improvements in language modeling always translate to marginal improvements in expected payout.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="thesis-point">
+                            <h5>AI deepens the game</h5>
+                            <p>Binary markets commoditize as models converge -- everyone says 87% yes and the spread vanishes. In text prediction, the gap between the 99th and 99.9th percentile language model is still dozens of edit operations, each worth money. The AI capability explosion doesn't destroy the game. It deepens it.</p>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="mt-5">
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="feature-icon mx-auto">
-                                    <i class="fas fa-brain"></i>
-                                </div>
-                                <h5 style="font-weight: 400; letter-spacing: 1px;">COLLECTIVE INTELLIGENCE</h5>
-                                <p style="font-size: 0.9rem; color: #b8b8b8;">
-                                    Harness the wisdom of crowds to predict linguistic events with unprecedented accuracy
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="feature-icon mx-auto">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <h5 style="font-weight: 400; letter-spacing: 1px;">CRYPTOGRAPHIC TRUTH</h5>
-                                <p style="font-size: 0.9rem; color: #b8b8b8;">
-                                    Every prediction and outcome secured by blockchain consensus and mathematical proofs
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="feature-icon mx-auto">
-                                    <i class="fas fa-hourglass-half"></i>
-                                </div>
-                                <h5 style="font-weight: 400; letter-spacing: 1px;">TEMPORAL INTEGRITY</h5>
-                                <p style="font-size: 0.9rem; color: #b8b8b8;">
-                                    Immutable time windows ensure fair markets with no retroactive manipulation
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+
+                <div class="example-card mt-4" style="border-left: 3px solid var(--primary-color);">
+                    <p style="color: #cccccc; margin: 0; line-height: 1.7;">
+                        <strong style="color: var(--primary-color);">Context:</strong>
+                        Polymarket does ~$12B/month in binary yes/no volume on Polygon.
+                        Coinbase/Kalshi launched binary prediction markets to all 50 US states in January 2026.
+                        Neither supports text prediction. Neither scores on a continuous distance metric.
+                        That's the gap this prototype explores.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- How It Works Infographic -->
+<!-- How It Works Infographic (PRESERVED) -->
 <section id="how-it-works" class="infographic-section">
     <div class="geometric-bg"></div>
     <div class="container">
@@ -521,240 +540,92 @@
     </div>
 </section>
 
-<!-- Fun Examples Section -->
-<section class="section">
+<!-- What Works (and What Doesn't) -->
+<section id="status" class="section">
     <div class="container">
-        <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
-            REAL-WORLD <span class="gradient-text">APPLICATIONS</span>
-        </h2>
-        
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <h5 class="mb-3" style="font-weight: 400; color: var(--primary-color);">
-                        <i class="fas fa-chart-line me-2"></i>MARKET MOVING STATEMENTS
-                    </h5>
-                    <p style="color: #b8b8b8;">Predict Fed Chair statements about interest rates. Winners could hedge against market volatility.</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> TARGET: "Jerome Powell"</code><br>
-                        <code style="color: #b8b8b8;">> TEXT: "rates will remain elevated"</code><br>
-                        <code style="color: #b8b8b8;">> IMPACT: $100B+ market movements</code>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <h5 class="mb-3" style="font-weight: 400; color: var(--primary-color);">
-                        <i class="fas fa-star me-2"></i>CULTURAL MOMENTS
-                    </h5>
-                    <p style="color: #b8b8b8;">Bet on award show speeches, viral catchphrases, or celebrity announcements.</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> TARGET: "Taylor Swift"</code><br>
-                        <code style="color: #b8b8b8;">> EVENT: "Grammy Awards 2025"</code><br>
-                        <code style="color: #b8b8b8;">> STAKES: Fans vs. Skeptics</code>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <h5 class="mb-3" style="font-weight: 400; color: var(--primary-color);">
-                        <i class="fas fa-landmark me-2"></i>POLITICAL PROPHECIES
-                    </h5>
-                    <p style="color: #b8b8b8;">Predict campaign promises, debate zingers, or policy announcements.</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> TARGET: "President"</code><br>
-                        <code style="color: #b8b8b8;">> PHRASE: "infrastructure" (5+ times)</code><br>
-                        <code style="color: #b8b8b8;">> ORACLE: Official transcript</code>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <h5 class="mb-3" style="font-weight: 400; color: var(--primary-color);">
-                        <i class="fas fa-microchip me-2"></i>TECH PREDICTIONS
-                    </h5>
-                    <p style="color: #b8b8b8;">Anticipate product launches, feature announcements, or industry pivots.</p>
-                    <div class="example-card">
-                        <code style="color: var(--primary-color);">> TARGET: "OpenAI"</code><br>
-                        <code style="color: #b8b8b8;">> ANNOUNCE: "GPT-5 before Q3 2025"</code><br>
-                        <code style="color: #b8b8b8;">> VERIFY: Blog timestamp</code>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
+                    WHAT <span class="gradient-text">WORKS</span> (AND WHAT DOESN'T)
+                </h2>
 
-<!-- Bittensor AI Integration Section -->
-<section class="section">
-    <div class="container">
-        <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
-            POWERED BY <span class="gradient-text">BITTENSOR AI</span>
-        </h2>
-        
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h3 style="font-weight: 400; color: var(--primary-color); margin-bottom: 1.5rem;">
-                    Decentralized AI Meets Prediction Markets
-                </h3>
-                <p style="color: #cccccc; font-size: 1.1rem; line-height: 1.8;">
-                    Clockchain integrates with Bittensor's revolutionary decentralized AI network, 
-                    enabling AI models from across the network to participate in linguistic predictions.
-                </p>
-                
-                <div class="mt-4">
-                    <h5 style="font-weight: 400; letter-spacing: 1px; color: var(--text-light);">KEY FEATURES</h5>
-                    <ul style="list-style: none; padding: 0;">
-                        <li style="margin: 0.5rem 0; color: #b8b8b8;">
-                            <i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
-                            <strong>TAO Token Integration:</strong> AI agents stake and earn TAO for predictions
-                        </li>
-                        <li style="margin: 0.5rem 0; color: #b8b8b8;">
-                            <i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
-                            <strong>Subnet Support:</strong> Validators and miners from any Bittensor subnet
-                        </li>
-                        <li style="margin: 0.5rem 0; color: #b8b8b8;">
-                            <i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
-                            <strong>Yuma Consensus:</strong> Performance tracking via network trust scores
-                        </li>
-                        <li style="margin: 0.5rem 0; color: #b8b8b8;">
-                            <i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
-                            <strong>60% Bonus Rewards:</strong> Transparency incentives for AI models
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card" style="background: rgba(0, 217, 255, 0.05); border: 1px solid var(--primary-color);">
-                    <div class="card-body">
-                        <h5 style="color: var(--primary-color); margin-bottom: 1rem;">AI TRANSPARENCY FRAMEWORK</h5>
-                        <div class="example-card">
-                            <code style="color: var(--primary-color);">> AGENT_TYPE: "Bittensor Validator"</code><br>
-                            <code style="color: #b8b8b8;">> SUBNET_ID: 18</code><br>
-                            <code style="color: #b8b8b8;">> YUMA_SCORE: 0.95</code><br>
-                            <code style="color: #00ff00;">> TRANSPARENCY_LEVEL: 4/4</code><br>
-                            <code style="color: var(--primary-color);">> MODULES: [</code><br>
-                            <code style="color: #b8b8b8;">    "open_source": true,</code><br>
-                            <code style="color: #b8b8b8;">    "architecture": "Transformer-XL",</code><br>
-                            <code style="color: #b8b8b8;">    "reasoning": "detailed_trace",</code><br>
-                            <code style="color: #b8b8b8;">    "audit": "verified"</code><br>
-                            <code style="color: var(--primary-color);">> ]</code><br>
-                            <code style="color: #00ff00;">> BONUS_EARNED: +60% TAO</code>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card" style="border-color: rgba(0, 255, 0, 0.2);">
+                            <h5 style="font-weight: 400; letter-spacing: 1px; color: #00ff00; margin-bottom: 1.5rem;">
+                                WHAT WORKS
+                            </h5>
+                            <ul class="status-list">
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    Full market lifecycle: create, predict, resolve, claim
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    On-chain Levenshtein distance (PredictionMarketV2)
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    259+ passing tests (109 contract, 135 unit, 15 integration)
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    Genesis NFT (60/100 minted, finalized) with on-chain SVG
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    JWT wallet auth (MetaMask) + email OTP
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    Admin resolution dashboard
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    Redis caching, rate limiting, structured logging
+                                </li>
+                                <li>
+                                    <span class="status-check"><i class="fas fa-check"></i></span>
+                                    CI/CD pipeline, Slither static analysis
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row mt-5">
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="process-circle" style="width: 100px; height: 100px;">
-                        <i class="fas fa-brain" style="font-size: 2rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h6 style="margin-top: 1rem; color: var(--text-light);">Neural Networks</h6>
-                    <p style="font-size: 0.9rem; color: #b8b8b8;">Advanced AI models analyze linguistic patterns</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="process-circle" style="width: 100px; height: 100px;">
-                        <i class="fas fa-coins" style="font-size: 2rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h6 style="margin-top: 1rem; color: var(--text-light);">TAO Economics</h6>
-                    <p style="font-size: 0.9rem; color: #b8b8b8;">Stake TAO tokens to back predictions</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="process-circle" style="width: 100px; height: 100px;">
-                        <i class="fas fa-handshake" style="font-size: 2rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h6 style="margin-top: 1rem; color: var(--text-light);">Consensus Scoring</h6>
-                    <p style="font-size: 0.9rem; color: #b8b8b8;">Yuma consensus validates AI performance</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="text-center">
-                    <div class="process-circle" style="width: 100px; height: 100px;">
-                        <i class="fas fa-shield-alt" style="font-size: 2rem; color: var(--primary-color);"></i>
-                    </div>
-                    <h6 style="margin-top: 1rem; color: var(--text-light);">Secure Auth</h6>
-                    <p style="font-size: 0.9rem; color: #b8b8b8;">Hotkey/coldkey wallet authentication</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Technical Features -->
-<section class="section" style="background: linear-gradient(180deg, var(--darker-bg) 0%, rgba(0, 217, 255, 0.02) 50%, var(--darker-bg) 100%);">
-    <div class="container">
-        <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
-            BUILT FOR <span class="gradient-text">DEVELOPERS</span>
-        </h2>
-        
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="feature-icon mx-auto mb-3">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h5 class="mb-3 text-center" style="font-weight: 400; letter-spacing: 1px;">API DOCUMENTATION</h5>
-                    <p class="text-center" style="color: #b8b8b8;">Comprehensive REST API for programmatic access to all platform features</p>
-                    <div class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
-                        <div class="tech-badge">RATE LIMITING</div>
-                        <div class="tech-badge">WEBSOCKET</div>
-                        <div class="tech-badge">JSON-RPC</div>
-                    </div>
-                    <div class="text-center">
-                        <a href="{{ url_for('marketing.docs') }}#api" class="btn btn-sm btn-outline-light mt-3">
-                            VIEW API DOCS
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="feature-icon mx-auto mb-3">
-                        <i class="fas fa-network-wired"></i>
-                    </div>
-                    <h5 class="mb-3 text-center" style="font-weight: 400; letter-spacing: 1px;">STATUS WORKFLOW</h5>
-                    <p class="text-center" style="color: #b8b8b8;">Transparent state machine for all entities with clear progression paths</p>
-                    <div class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
-                        <div class="tech-badge">BET LIFECYCLE</div>
-                        <div class="tech-badge">ORACLE STATES</div>
-                        <div class="tech-badge">TX FLOW</div>
-                    </div>
-                    <div class="text-center">
-                        <a href="{{ url_for('marketing.docs') }}#status" class="btn btn-sm btn-outline-light mt-3">
-                            VIEW WORKFLOW
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="feature-icon mx-auto mb-3">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h5 class="mb-3 text-center" style="font-weight: 400; letter-spacing: 1px;">AI TRANSPARENCY</h5>
-                    <p class="text-center" style="color: #b8b8b8;">Advanced verification modules for AI-generated predictions with TAO integration</p>
-                    <div class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
-                        <div class="tech-badge">BITTENSOR</div>
-                        <div class="tech-badge">NLP ANALYSIS</div>
-                        <div class="tech-badge">BIAS DETECT</div>
-                    </div>
-                    <div class="text-center">
-                        <a href="{{ url_for('marketing.docs') }}#ai" class="btn btn-sm btn-outline-light mt-3">
-                            LEARN MORE
-                        </a>
+                    <div class="col-md-6">
+                        <div class="card" style="border-color: rgba(255, 255, 255, 0.1);">
+                            <h5 style="font-weight: 400; letter-spacing: 1px; color: #666; margin-bottom: 1.5rem;">
+                                INTENTIONALLY NOT DONE
+                            </h5>
+                            <ul class="status-list">
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    External security audit
+                                </li>
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    Real Coinbase CDP wallet integration
+                                </li>
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    Multisig for contract owner key
+                                </li>
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    Production RPC (Alchemy / QuickNode)
+                                </li>
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    Production monitoring (Sentry)
+                                </li>
+                                <li>
+                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
+                                    Decentralized oracle resolution
+                                </li>
+                            </ul>
+                            <p style="color: #555; font-size: 0.85rem; margin-top: 1.5rem; margin-bottom: 0;">
+                                This is a v0 alpha research project, largely vibe-coded. These are the things that would need to exist before anyone should put real money near it.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -767,19 +638,17 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
-                <h2 class="display-5 mb-4" style="font-weight: 300; letter-spacing: 2px;">
-                    READY TO PREDICT THE <span class="gradient-text">FUTURE</span>?
-                </h2>
-                <p class="lead mb-4" style="color: #b8b8b8; font-weight: 300;">
-                    Join the revolution in decentralized prediction markets. 
-                    Test the platform today and be first when we launch on mainnet.
-                </p>
-                <div class="d-flex gap-3 justify-content-center">
+                <div class="d-flex gap-3 justify-content-center mb-4">
                     <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
-                        LAUNCH DEMO
+                        TRY THE TESTNET DEMO
                     </a>
-                    <a href="https://x.com/seanmcdonaldxyz" target="_blank" class="btn btn-outline-light btn-lg">
-                        FOLLOW UPDATES
+                </div>
+                <div class="d-flex gap-4 justify-content-center" style="font-size: 0.95rem;">
+                    <a href="https://github.com/seanmcdonald/clockchain-prediction-market" target="_blank" class="text-decoration-none" style="color: var(--text-muted);">
+                        <i class="fab fa-github me-1"></i> View source on GitHub
+                    </a>
+                    <a href="https://x.com/seanmcdonaldxyz" target="_blank" class="text-decoration-none" style="color: var(--text-muted);">
+                        <i class="fab fa-x-twitter me-1"></i> @seanmcdonaldxyz
                     </a>
                 </div>
             </div>
@@ -805,13 +674,13 @@
             }
         });
     });
-    
+
     // Add animation on scroll
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -100px 0px'
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -820,9 +689,9 @@
             }
         });
     }, observerOptions);
-    
-    // Observe all cards and timeline steps
-    document.querySelectorAll('.card, .timeline-step').forEach(el => {
+
+    // Observe all cards, timeline steps, and thesis points
+    document.querySelectorAll('.card, .timeline-step, .thesis-point').forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
