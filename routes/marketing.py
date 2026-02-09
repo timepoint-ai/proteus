@@ -5,6 +5,8 @@ Marketing routes for landing page and promotional content
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from datetime import datetime, timezone
 import logging
+import os
+import markdown
 
 logger = logging.getLogger(__name__)
 
@@ -58,3 +60,22 @@ def demo():
     """Redirect to clockchain demo"""
     logger.debug("Redirecting from marketing demo to clockchain view")
     return redirect(url_for('clockchain.clockchain_view'))
+
+@marketing_bp.route('/whitepaper')
+def whitepaper():
+    """Render WHITEPAPER.md as a styled HTML page"""
+    logger.debug("Serving whitepaper page")
+    whitepaper_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'WHITEPAPER.md')
+    try:
+        with open(whitepaper_path, 'r', encoding='utf-8') as f:
+            md_content = f.read()
+        html_content = markdown.markdown(
+            md_content,
+            extensions=['tables', 'fenced_code', 'toc', 'smarty'],
+            output_format='html5'
+        )
+        return render_template('marketing/whitepaper.html', content=html_content)
+    except FileNotFoundError:
+        logger.error("WHITEPAPER.md not found")
+        flash('Whitepaper not found.', 'error')
+        return redirect(url_for('marketing.index'))

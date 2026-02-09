@@ -3,10 +3,16 @@
 ### On the Information-Theoretic Collapse of Binary Markets and the Case for Metric-Scored Text Prediction
 
 **Sean McDonald**
+**with many AI models**
 
 *February 2026*
 
 ---
+
+tl;dr written by a human:
+
+If a fast takeoff happens, AI-driven forecasting may radically reduce the available rewards in prediction markets as models finetune around predictive performance. Submissions to prediction markets with TRUE / FALSE may have decreasing entropy, thus decreasing rewards and incentives, as this happens. Exact text prediction, in this case roleplaying as public figures and predicting the exact text of their X posts within a given timeline - while an early-stage idea with many known issues to solve before implementing - would offer a much more difficult challenge for even the most advanced AI roleplaying models to forecast precisely, and a larger surface over which participants can bet and win. 
+
 
 ## Abstract
 

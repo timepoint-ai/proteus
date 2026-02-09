@@ -1,0 +1,285 @@
+{% extends "marketing/base.html" %}
+
+{% block title %}Whitepaper - Clockchain{% endblock %}
+
+{% block extra_css %}
+<style>
+    .whitepaper-container {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 6rem 1.5rem;
+    }
+
+    /* Typography for rendered markdown */
+    .whitepaper-content h1 {
+        font-size: 2.2rem;
+        font-weight: 300;
+        letter-spacing: -0.5px;
+        margin-bottom: 0.5rem;
+        color: var(--text-light);
+        line-height: 1.3;
+    }
+
+    .whitepaper-content h2 {
+        font-size: 1.6rem;
+        font-weight: 400;
+        color: var(--primary-color);
+        margin-top: 3.5rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0, 217, 255, 0.15);
+        letter-spacing: 0.5px;
+    }
+
+    .whitepaper-content h3 {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--text-light);
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .whitepaper-content h4 {
+        font-size: 1.05rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .whitepaper-content h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .whitepaper-content p {
+        color: #c8c8c8;
+        line-height: 1.85;
+        margin-bottom: 1.25rem;
+        font-size: 0.95rem;
+    }
+
+    .whitepaper-content strong {
+        color: var(--text-light);
+        font-weight: 600;
+    }
+
+    .whitepaper-content em {
+        color: #ddd;
+        font-style: italic;
+    }
+
+    .whitepaper-content a {
+        color: var(--primary-color);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        text-decoration-color: rgba(0, 217, 255, 0.4);
+    }
+
+    .whitepaper-content a:hover {
+        color: var(--accent-color);
+        text-decoration-color: var(--accent-color);
+    }
+
+    /* Horizontal rules */
+    .whitepaper-content hr {
+        border: none;
+        border-top: 1px solid rgba(0, 217, 255, 0.1);
+        margin: 3rem 0;
+    }
+
+    /* Lists */
+    .whitepaper-content ul, .whitepaper-content ol {
+        color: #c8c8c8;
+        line-height: 1.85;
+        margin-bottom: 1.25rem;
+        padding-left: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .whitepaper-content li {
+        margin-bottom: 0.4rem;
+    }
+
+    .whitepaper-content li strong {
+        color: var(--text-light);
+    }
+
+    /* Block quotes */
+    .whitepaper-content blockquote {
+        border-left: 3px solid rgba(0, 217, 255, 0.3);
+        padding: 0.75rem 1.25rem;
+        margin: 1.5rem 0;
+        background: rgba(0, 217, 255, 0.03);
+    }
+
+    .whitepaper-content blockquote p {
+        color: #b8b8b8;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .whitepaper-content blockquote p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Code blocks */
+    .whitepaper-content pre {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 217, 255, 0.15);
+        padding: 1.25rem;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+
+    .whitepaper-content pre code {
+        color: #b8d8e8;
+        background: none;
+        padding: 0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+
+    .whitepaper-content code {
+        color: var(--primary-color);
+        background: rgba(0, 217, 255, 0.08);
+        padding: 0.15rem 0.4rem;
+        font-size: 0.875em;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+
+    /* Tables */
+    .whitepaper-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        font-size: 0.9rem;
+        overflow-x: auto;
+        display: block;
+    }
+
+    .whitepaper-content thead th {
+        background: rgba(0, 217, 255, 0.08);
+        color: var(--primary-color);
+        font-weight: 500;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+        white-space: nowrap;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
+
+    .whitepaper-content tbody td {
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #b8b8b8;
+        vertical-align: top;
+    }
+
+    .whitepaper-content tbody tr:hover {
+        background: rgba(0, 217, 255, 0.03);
+    }
+
+    /* Scrollable wrapper for wide tables */
+    .whitepaper-content .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Back to top link */
+    .back-to-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(0, 217, 255, 0.3);
+        color: var(--primary-color);
+        text-decoration: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 50;
+    }
+
+    .back-to-top.visible {
+        opacity: 1;
+    }
+
+    .back-to-top:hover {
+        background: rgba(0, 217, 255, 0.1);
+        border-color: var(--primary-color);
+        color: var(--accent-color);
+    }
+
+    /* Print-friendly */
+    @media print {
+        .demo-banner, .navbar, .footer, .back-to-top { display: none; }
+        .whitepaper-content h2 { color: #000; border-bottom-color: #ccc; }
+        .whitepaper-content p, .whitepaper-content li { color: #333; }
+        .whitepaper-content pre { border-color: #ccc; }
+        body { background: #fff; }
+        body::before { display: none; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .whitepaper-container {
+            padding: 2rem 1rem 4rem 1rem;
+        }
+        .whitepaper-content h1 {
+            font-size: 1.6rem;
+        }
+        .whitepaper-content h2 {
+            font-size: 1.3rem;
+        }
+        .whitepaper-content table {
+            font-size: 0.8rem;
+        }
+        .whitepaper-content thead th,
+        .whitepaper-content tbody td {
+            padding: 0.5rem 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="whitepaper-container">
+    <div class="whitepaper-content">
+        {{ content|safe }}
+    </div>
+</div>
+
+<a href="#" class="back-to-top" id="backToTop" title="Back to top">
+    <i class="fas fa-chevron-up"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Back to top button visibility
+    const btn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        btn.classList.toggle('visible', window.scrollY > 600);
+    });
+
+    // Wrap tables for horizontal scroll on mobile
+    document.querySelectorAll('.whitepaper-content table').forEach(table => {
+        table.style.display = '';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        wrapper.style.overflowX = 'auto';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+</script>
+{% endblock %}
