@@ -47,6 +47,12 @@ def capture_email():
     flash('Thank you! We\'ll notify you when Clockchain launches.', 'success')
     return redirect(url_for('marketing.index'))
 
+@marketing_bp.route('/dev')
+def dev():
+    """Developer notes and known issues"""
+    logger.debug("Serving dev notes page")
+    return render_template('marketing/dev.html')
+
 @marketing_bp.route('/demo')
 def demo():
     """Redirect to clockchain demo"""

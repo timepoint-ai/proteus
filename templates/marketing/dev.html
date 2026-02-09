@@ -1,0 +1,460 @@
+{% extends "marketing/base.html" %}
+
+{% block title %}Dev Notes - Clockchain{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dev-section {
+        padding: 4rem 0;
+    }
+
+    .dev-section + .dev-section {
+        border-top: 1px solid var(--border-color);
+    }
+
+    .dev-header {
+        padding: 5rem 0 2rem;
+    }
+
+    .dev-header h1 {
+        font-weight: 300;
+        letter-spacing: 2px;
+    }
+
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .audit-table th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        color: var(--primary-color);
+        border-bottom: 1px solid rgba(0, 217, 255, 0.3);
+        font-weight: 400;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+
+    .audit-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #b8b8b8;
+        vertical-align: top;
+    }
+
+    .audit-table tr:hover td {
+        background: rgba(0, 217, 255, 0.03);
+    }
+
+    .audit-table code {
+        color: var(--primary-color);
+        font-size: 0.8rem;
+        word-break: break-all;
+    }
+
+    .status-real {
+        color: #00ff00;
+        font-weight: 500;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .status-shimmed {
+        color: #ffaa00;
+        font-weight: 500;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .status-fake {
+        color: #ff4444;
+        font-weight: 500;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .status-missing {
+        color: #666;
+        font-weight: 500;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .dev-card {
+        background: var(--card-bg);
+        border: 1px solid rgba(0, 217, 255, 0.1);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .dev-card h4 {
+        color: var(--primary-color);
+        font-weight: 400;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+
+    .dev-card p, .dev-card li {
+        color: #b8b8b8;
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .dev-card ul {
+        padding-left: 1.25rem;
+    }
+
+    .dev-card li {
+        margin-bottom: 0.5rem;
+    }
+
+    .file-ref {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .code-block {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 217, 255, 0.15);
+        padding: 1rem 1.25rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.8rem;
+        color: #b8b8b8;
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+
+    .code-block .comment {
+        color: #555;
+    }
+
+    .contract-addr {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.8rem;
+    }
+
+    .section-label {
+        font-weight: 300;
+        letter-spacing: 2px;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Header -->
+    <div class="dev-header">
+        <h1>
+            <span class="gradient-text">/DEV</span> NOTES
+        </h1>
+        <p style="color: #666; font-size: 0.95rem; max-width: 600px;">
+            Honest audit of what's real, what's shimmed, and what's missing.
+            Last updated: Feb 2026.
+        </p>
+    </div>
+
+    <!-- Section: On-Chain (Real) -->
+    <section class="dev-section">
+        <h2 class="section-label">
+            WHAT'S <span class="gradient-text">ON-CHAIN</span> (REAL)
+        </h2>
+
+        <p style="color: #b8b8b8; margin-bottom: 2rem;">
+            The core prediction market loop &mdash; connect wallet, create market, submit prediction, resolve with Levenshtein, claim payout &mdash; is real blockchain transactions on BASE Sepolia.
+        </p>
+
+        <div class="table-responsive">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>RPC Endpoint</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td><code>https://sepolia.base.org</code> &mdash; official BASE public RPC, chain ID 84532</td>
+                    </tr>
+                    <tr>
+                        <td>PredictionMarketV2</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>
+                            <code class="contract-addr">0x5174Da96BCA87c78591038DEe9DB1811288c9286</code><br>
+                            <a href="https://sepolia.basescan.org/address/0x5174Da96BCA87c78591038DEe9DB1811288c9286" target="_blank" style="color: var(--primary-color); font-size: 0.8rem;">Verify on BaseScan</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>GenesisNFT</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>
+                            <code class="contract-addr">0x1A5D4475881B93e876251303757E60E524286A24</code> &mdash; 60/100 minted, finalized, on-chain SVG art<br>
+                            <a href="https://sepolia.basescan.org/address/0x1A5D4475881B93e876251303757E60E524286A24" target="_blank" style="color: var(--primary-color); font-size: 0.8rem;">Verify on BaseScan</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ActorRegistry</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td><code class="contract-addr">0xC71CC19C5573C5E1E144829800cD0005D0eDB723</code></td>
+                    </tr>
+                    <tr>
+                        <td>PayoutManager</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td><code class="contract-addr">0x88d399C949Ff2f1aaa8eA5a859Ae4d97c74f6871</code></td>
+                    </tr>
+                    <tr>
+                        <td>DecentralizedOracle</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td><code class="contract-addr">0x7EF22e27D44E3f4Cc2f133BB4ab2065D180be3C1</code> &mdash; deployed but resolution is admin-only</td>
+                    </tr>
+                    <tr>
+                        <td>Wallet Connection</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>MetaMask + Coinbase Wallet via EIP-1193. Real <code>personal_sign</code>, real network switching to BASE Sepolia.</td>
+                    </tr>
+                    <tr>
+                        <td>Market Creation</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>Real <code>createMarket()</code> transaction, real gas, real testnet ETH</td>
+                    </tr>
+                    <tr>
+                        <td>Prediction Submissions</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>Real payable <code>createSubmission()</code> &mdash; sends actual testnet ETH to contract</td>
+                    </tr>
+                    <tr>
+                        <td>Levenshtein Scoring</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>Computed on-chain as a pure function in PredictionMarketV2 Solidity contract</td>
+                    </tr>
+                    <tr>
+                        <td>Payout Claims</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>Real <code>claimPayout()</code> sends ETH back to winner</td>
+                    </tr>
+                    <tr>
+                        <td>Explorer Data</td>
+                        <td><span class="status-real">Real</span></td>
+                        <td>Reads live contract state. No hardcoded markets, no placeholders. Shows empty state if nothing exists.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section: Shimmed / Fake -->
+    <section class="dev-section">
+        <h2 class="section-label">
+            WHAT'S <span style="color: #ffaa00;">SHIMMED</span> (3 THINGS)
+        </h2>
+
+        <div class="dev-card" style="border-left: 3px solid #ffaa00;">
+            <h4>1. Embedded Wallet Key Derivation</h4>
+            <p class="file-ref">services/embedded_wallet.py &rarr; _generate_seed()</p>
+            <p>
+                Uses PBKDF2 with a <code>MASTER_WALLET_SECRET</code> env var instead of the real
+                Coinbase CDP Server Signer API. The derived wallets <em>do</em> send real transactions
+                on BASE Sepolia, but the key management is not production-grade.
+            </p>
+            <div class="code-block">
+                <span class="comment"># WARNING: This PBKDF2 shim is for testnet ONLY.</span><br>
+                <span class="comment"># For mainnet, replace with Coinbase CDP wallet creation</span><br>
+                <span class="comment"># via the Server Signer API.</span><br>
+                master_secret = os.environ.get('MASTER_WALLET_SECRET', 'default-secret-change-in-production')<br>
+                combined = f"{master_secret}:{identifier}"<br>
+                return hashlib.pbkdf2_hmac('sha256', combined.encode(), b'clockchain', 100000)
+            </div>
+        </div>
+
+        <div class="dev-card" style="border-left: 3px solid #ff4444;">
+            <h4>2. USDC Balance is Hardcoded</h4>
+            <p class="file-ref">services/embedded_wallet.py:389</p>
+            <p>
+                Returns <code>balance_usdc: 100.0</code> always. There is no USDC token contract
+                interaction. ETH balance is real (fetched via <code>eth_getBalance</code>).
+            </p>
+        </div>
+
+        <div class="dev-card" style="border-left: 3px solid #ff4444;">
+            <h4>3. OTP Verification Accepts Any 6 Digits</h4>
+            <p class="file-ref">services/embedded_wallet.py:366</p>
+            <p>
+                No real email sending. No real OTP validation. Any 6-digit code passes.
+                This is a testnet convenience &mdash; the flow exists but the auth is not enforced.
+            </p>
+        </div>
+    </section>
+
+    <!-- Section: Not Implemented -->
+    <section class="dev-section">
+        <h2 class="section-label">
+            NOT <span style="color: #666;">IMPLEMENTED</span>
+        </h2>
+
+        <p style="color: #b8b8b8; margin-bottom: 2rem;">
+            Things that would need to exist before anyone should put real money near this.
+        </p>
+
+        <div class="table-responsive">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>External Security Audit</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>No third-party audit of smart contracts or backend</td>
+                    </tr>
+                    <tr>
+                        <td>Real Coinbase CDP Integration</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>No CDP credentials. Embedded wallet uses PBKDF2 shim (see above)</td>
+                    </tr>
+                    <tr>
+                        <td>Multisig for Contract Owner</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>Single EOA owner: <code class="contract-addr">0x21a85AD98641827BFd89F4d5bC2fEB72F98aaecA</code></td>
+                    </tr>
+                    <tr>
+                        <td>Production RPC</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>Uses public <code>sepolia.base.org</code>. No Alchemy/QuickNode for reliability or rate limits.</td>
+                    </tr>
+                    <tr>
+                        <td>Production Monitoring</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>No Sentry, no alerting, no uptime monitoring</td>
+                    </tr>
+                    <tr>
+                        <td>Decentralized Oracle</td>
+                        <td><span class="status-missing">Not done</span></td>
+                        <td>Contract deployed but resolution is admin-only. No Chainlink, no UMA, no multi-party oracle.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section: Known Issues -->
+    <section class="dev-section">
+        <h2 class="section-label">
+            KNOWN <span class="gradient-text">ISSUES</span>
+        </h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="dev-card">
+                    <h4>Public RPC Rate Limits</h4>
+                    <p>
+                        <code>sepolia.base.org</code> is a free public endpoint. Under load it will throttle
+                        or drop requests. The explorer page makes multiple <code>eth_call</code> reads per
+                        page load (one per market + submissions). Heavy traffic will cause timeouts.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="dev-card">
+                    <h4>Single-Owner Resolution</h4>
+                    <p>
+                        Market resolution requires the contract owner's private key. There is no fallback,
+                        no timeout-based auto-resolution, and no dispute mechanism. If the owner key is
+                        unavailable, markets cannot be resolved.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="dev-card">
+                    <h4>No Gas Sponsorship</h4>
+                    <p>
+                        Users need BASE Sepolia testnet ETH to interact. There's no paymaster, no gas
+                        relayer, no faucet integration. Users must get testnet ETH from an external faucet
+                        before they can create markets or submit predictions.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="dev-card">
+                    <h4>Embedded Wallet Security</h4>
+                    <p>
+                        The PBKDF2-derived embedded wallet stores derived keys server-side. The master
+                        secret defaults to <code>'default-secret-change-in-production'</code> if the env
+                        var isn't set. This is adequate for testnet demos, not for anything with value.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Architecture Quick Ref -->
+    <section class="dev-section" style="padding-bottom: 4rem;">
+        <h2 class="section-label">
+            ARCHITECTURE <span class="gradient-text">QUICK REF</span>
+        </h2>
+
+        <div class="table-responsive">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Tech</th>
+                        <th>Key Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Smart Contracts</td>
+                        <td>Solidity 0.8.x, Hardhat, BASE Sepolia</td>
+                        <td class="file-ref">contracts/PredictionMarketV2.sol, contracts/GenesisNFT.sol</td>
+                    </tr>
+                    <tr>
+                        <td>Backend</td>
+                        <td>Flask, Web3.py, Redis, JWT auth</td>
+                        <td class="file-ref">app.py, routes/, services/blockchain_base.py</td>
+                    </tr>
+                    <tr>
+                        <td>Frontend</td>
+                        <td>Bootstrap 5, vanilla JS, ethers.js/Web3.js</td>
+                        <td class="file-ref">templates/, static/js/wallet.js, static/js/betting-contract.js</td>
+                    </tr>
+                    <tr>
+                        <td>Contract ABIs</td>
+                        <td>Hardhat artifacts</td>
+                        <td class="file-ref">static/abi/PredictionMarketV2.json</td>
+                    </tr>
+                    <tr>
+                        <td>Deployment Config</td>
+                        <td>JSON deployment manifest</td>
+                        <td class="file-ref">deployment-base-sepolia.json, config_chain.py</td>
+                    </tr>
+                    <tr>
+                        <td>Tests</td>
+                        <td>pytest (unit/integration), Hardhat (contract)</td>
+                        <td class="file-ref">tests/unit/, tests/integration/, test/</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
