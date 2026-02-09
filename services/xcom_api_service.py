@@ -13,7 +13,12 @@ from io import BytesIO
 logger = logging.getLogger(__name__)
 
 class XComAPIService:
-    """Enhanced X.com API service with both API integration and manual fallback"""
+    """Enhanced X.com API service with both API integration and manual fallback.
+
+    X API access: As of Feb 2026, X offers pay-per-use pricing (credit-based,
+    no subscriptions or monthly caps) alongside legacy tiers (Basic $200/mo,
+    Pro $5,000/mo). Generate credentials at https://developer.x.com/
+    """
     
     def __init__(self):
         # Initialize X.com API credentials from environment

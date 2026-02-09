@@ -29,7 +29,7 @@ The core primitive works:
 | External security audit | Smart contracts hold real ETH | NOT STARTED |
 | Multisig for owner key | Single EOA = single point of failure | NOT STARTED |
 | Real CDP wallet integration | PBKDF2 shim is not production-safe | BLOCKED (no credentials) |
-| Decentralized resolution | Owner-based resolution is centralized | DESIGNED, not built |
+| Decentralized resolution | Owner-based resolution is centralized | DESIGNED, not built. X API pay-per-use access now available ([developer.x.com](https://developer.x.com/)) -- unblocks multi-oracle verification |
 | Production RPC | Public RPCs have rate limits and no SLA | NOT CONFIGURED |
 
 ### Should-have for credibility
@@ -79,6 +79,8 @@ The core primitive works:
 | **Clockchain** | Text prediction | Yes (BASE) | Levenshtein distance |
 
 The gap we're exploring: continuous scoring on a metric space vs binary outcomes. As AI capabilities improve, binary markets lose edge (trivially computable). Text prediction markets gain depth (exponential outcome space, continuous payoff gradient).
+
+**X API Access (Feb 2026 update):** X's new [pay-per-use API model](https://developer.x.com/) removes the subscription barrier for oracle resolution. Individual developers can now access the X API v2 (post lookup, user verification, timestamps) with credit-based billing -- no $200/mo minimum. This makes multi-oracle tweet verification economically viable and is a key infrastructure prerequisite that was previously a blocker.
 
 ---
 

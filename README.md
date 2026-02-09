@@ -15,6 +15,8 @@ Binary prediction markets encode exactly one bit of information per contract. Th
 
 Coinbase/Kalshi launched binary prediction markets to all 50 US states in January 2026. They run off-chain through Kalshi's CFTC-regulated backend. Polymarket does ~$12B/month in binary yes/no volume on Polygon. Neither supports text prediction. Neither scores on a continuous distance metric. That's the gap this prototype explores.
 
+> **X API Update (Feb 2026):** X now offers [pay-per-use API access](https://developer.x.com/) for individual developers -- no subscriptions, no monthly caps, just credit-based billing. This is a significant unlock for oracle resolution: each oracle node can independently fetch posts by ID, verify authorship, and confirm timestamps via the X API v2. Previously, the $200/mo Basic tier (15K reads) or $5,000/mo Pro tier (1M reads) made multi-oracle verification cost-prohibitive. Pay-per-use makes it feasible for multiple independent oracles to verify the same post at minimal cost.
+
 ## What This Is (and Isn't)
 
 **This is a v0 alpha.** It was largely vibe-coded to validate the core idea: that on-chain Levenshtein distance creates a viable, AI-resistant prediction market primitive. The smart contracts work. The market lifecycle works. The math works. Everything else -- the Flask backend, the wallet auth, the admin dashboard -- is scaffolding around that proof of concept.
@@ -286,7 +288,7 @@ In rough priority order:
 
 1. **Validate demand** -- Do people actually want to bet on exact tweet text? Ship the testnet demo and find out.
 2. **Security audit** -- The ~1,025 lines of in-scope Solidity need a real audit before touching mainnet.
-3. **Decentralize resolution** -- Replace single-EOA resolution with oracle consensus (commit-reveal).
+3. **Decentralize resolution** -- Replace single-EOA resolution with oracle consensus (commit-reveal). X API pay-per-use access now makes multi-oracle tweet verification economically viable.
 4. **Real wallet integration** -- Replace PBKDF2 shim with Coinbase CDP Server Signer.
 5. **Multisig** -- Gnosis Safe 2-of-3 for contract owner key.
 6. **Production infra** -- Alchemy/QuickNode RPC, Sentry monitoring, proper deployment pipeline.

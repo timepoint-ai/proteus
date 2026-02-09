@@ -101,6 +101,9 @@ After mainnet is stable and has users.
 - [ ] Node operator onboarding (staked participation)
 - [ ] Migration to EnhancedPredictionMarket (full governance)
 - [ ] Consider Kalshi API integration as data source
+- [ ] X API pay-per-use integration for multi-oracle tweet verification
+
+> **X API Update (Feb 2026):** X now offers [pay-per-use API access](https://developer.x.com/) for individual developers -- credit-based billing, no subscriptions or monthly caps. This unblocks the multi-oracle verification model: each oracle node can independently call the X API v2 to fetch a post by ID, verify the author handle, and confirm the timestamp, paying only for the API calls it actually makes. Previously the $200/mo Basic tier (15K reads) or $5,000/mo Pro tier (1M reads) made independent per-oracle verification cost-prohibitive. This is a prerequisite for decentralized resolution.
 
 ---
 

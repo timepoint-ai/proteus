@@ -444,6 +444,7 @@ POST /api/admin/auto-resolve-market/<market_id>
 ```
 
 > **Note:** Requires `X_BEARER_TOKEN` environment variable for X.com API access.
+> X now offers [pay-per-use API pricing](https://developer.x.com/) -- credit-based billing, no subscriptions or monthly caps. Generate a bearer token at the [X Developer Portal](https://developer.x.com/).
 
 **Response:**
 ```json

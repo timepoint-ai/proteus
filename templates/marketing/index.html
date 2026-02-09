@@ -253,6 +253,47 @@
         color: #555;
         margin-right: 0.75rem;
     }
+
+    /* News Flash Alert */
+    .news-flash {
+        background: rgba(0, 255, 100, 0.05);
+        border: 1px solid rgba(0, 255, 100, 0.3);
+        border-left: 3px solid #00ff64;
+        padding: 1rem 1.5rem;
+        margin: 0 auto 0 auto;
+        max-width: 800px;
+        position: relative;
+        font-size: 0.9rem;
+    }
+
+    .news-flash-label {
+        display: inline-block;
+        background: rgba(0, 255, 100, 0.15);
+        color: #00ff64;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 0.15rem 0.5rem;
+        margin-right: 0.75rem;
+        vertical-align: middle;
+    }
+
+    .news-flash p {
+        color: #b8b8b8;
+        margin: 0.5rem 0 0 0;
+        line-height: 1.6;
+    }
+
+    .news-flash a {
+        color: #00ff64;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+
+    .news-flash a:hover {
+        color: #00ffaa;
+    }
 </style>
 {% endblock %}
 
@@ -376,6 +417,23 @@
                     <circle cx="150" cy="150" r="8" fill="none" stroke="#00d9ff" stroke-width="1" opacity="0.4"/>
                 </svg>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- News Flash -->
+<section style="padding: 2rem 0 0 0;">
+    <div class="container">
+        <div class="news-flash">
+            <span class="news-flash-label">New</span>
+            <strong style="color: #ccc;">X API now offers pay-per-use access for individual developers.</strong>
+            <p>
+                No subscriptions, no monthly caps -- just credit-based billing for what you use.
+                This unlocks direct, programmatic tweet verification for oracle resolution:
+                fetch posts by ID, verify authorship, and confirm timestamps via the
+                <a href="https://developer.x.com/" target="_blank">X Developer Platform</a>.
+                A prerequisite for decentralized oracle consensus that was previously cost-prohibitive.
+            </p>
         </div>
     </div>
 </section>
