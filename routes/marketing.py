@@ -6,7 +6,6 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from datetime import datetime, timezone
 import logging
 import os
-import markdown
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +64,17 @@ def demo():
 def whitepaper():
     """Render WHITEPAPER.md as a styled HTML page"""
     logger.debug("Serving whitepaper page")
+    try:
+        import markdown as md_lib
+    except ImportError:
+        logger.error("markdown package not installed, install with: pip install markdown")
+        flash('Whitepaper renderer not available.', 'error')
+        return redirect(url_for('marketing.index'))
     whitepaper_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'WHITEPAPER.md')
     try:
         with open(whitepaper_path, 'r', encoding='utf-8') as f:
             md_content = f.read()
-        html_content = markdown.markdown(
+        html_content = md_lib.markdown(
             md_content,
             extensions=['tables', 'fenced_code', 'toc', 'smarty'],
             output_format='html5'
