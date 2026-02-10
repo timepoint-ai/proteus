@@ -190,6 +190,77 @@
         line-height: 1.7;
         font-size: 0.9rem;
     }
+
+    /* Levenshtein explainer */
+    .lev-explainer {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .lev-explainer h4 {
+        font-weight: 400;
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .ascii-diagram {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.85rem;
+        line-height: 1.8;
+        color: #999;
+        overflow-x: auto;
+        white-space: pre;
+        margin: 1.25rem 0;
+        padding: 1.25rem;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ascii-diagram .match {
+        color: #666;
+    }
+
+    .ascii-diagram .edit {
+        color: #00ff00;
+        font-weight: bold;
+    }
+
+    .ascii-diagram .edit-amber {
+        color: #ffaa00;
+        font-weight: bold;
+    }
+
+    .ascii-diagram .label {
+        color: #888;
+    }
+
+    .ascii-diagram .arrow {
+        color: #555;
+    }
+
+    .lev-steps {
+        margin: 1.5rem 0 0 0;
+        padding: 0;
+        list-style: none;
+        color: #b8b8b8;
+        font-size: 0.9rem;
+        line-height: 1.8;
+    }
+
+    .lev-steps li {
+        padding: 0.25rem 0;
+    }
+
+    .lev-steps .op-type {
+        display: inline-block;
+        width: 90px;
+        color: #888;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
 </style>
 {% endblock %}
 
@@ -204,8 +275,8 @@
                     <span class="alpha-badge">v0 ALPHA</span>
                 </h1>
                 <p class="lead mb-4" style="font-size: 1.15rem; color: #ccc; line-height: 1.8; max-width: 720px;">
-                    Stake ETH on the exact text a public figure will post. Winners determined by on-chain Levenshtein distance.
-                    A research prototype exploring why text prediction is a fundamentally different market structure than binary yes/no.
+                    Prediction markets today ask yes/no questions. This prototype asks: <strong style="color: #fff;">what exactly will someone post?</strong>
+                    Players bet on the precise wording. The closer your guess, the more you win &mdash; scored character by character.
                 </p>
                 <p style="color: #888; font-size: 0.95rem; margin-bottom: 2rem;">
                     <span class="stat-number">$40B</span> in prediction market volume in 2025. All binary.
@@ -256,8 +327,46 @@
                     </div>
 
                     <p style="color: #b8b8b8; margin-top: 1.5rem; margin-bottom: 0; line-height: 1.7;">
-                        A binary market splits nothing &mdash; both AIs "predicted correctly."
-                        Levenshtein rewards the 7-edit gap. <strong style="color: #fff;">Winner takes the pool.</strong>
+                        On a yes/no market, both AIs "predicted correctly" &mdash; no one wins anything interesting.
+                        Here, the 7-edit gap between them decides everything. <strong style="color: #fff;">Closest guess takes the pool.</strong>
+                    </p>
+                </div>
+
+                <!-- Levenshtein Explainer -->
+                <div class="lev-explainer" id="levenshtein">
+                    <h4>How is "closeness" measured? <span style="color: var(--primary-color);">Edit distance.</span></h4>
+                    <p style="color: #b8b8b8; line-height: 1.7; margin-bottom: 0.5rem;">
+                        <strong style="color: #ccc;">Levenshtein distance</strong> counts the minimum number of single-character changes
+                        (insertions, deletions, or substitutions) needed to turn one string into another.
+                        It's the same algorithm your spellchecker uses. Here's how it scores the two predictions above:
+                    </p>
+
+                    <div class="ascii-diagram"><span class="label">ACTUAL:</span>  ...generating <span class="edit">46</span>% ...software <span class="match">is just beginning.</span>
+<span class="label">CLAUDE:</span>  ...generating <span class="edit">45</span>% ...software <span class="match">is just beginning.</span>
+                                  <span class="arrow">^^</span>
+                        <span class="label">1 substitution: "5" &rarr; "6"</span>
+                        <span class="label" style="color: #00ff00;">Total edits: 1</span>
+
+
+<span class="label">ACTUAL:</span>  ...generating <span class="edit-amber">46</span>% ...software <span class="match">is just beginning</span>.
+<span class="label">GPT:   </span>  ...generating <span class="edit-amber">43</span>% ...software <span class="edit-amber">has just begun</span>.
+                                  <span class="arrow">^^                      ^^^^ ^^^^ ^^^^</span>
+                        <span class="label">1 substitution: "3" &rarr; "6"</span>
+                        <span class="label">7 more edits to transform "has just begun" &rarr; "is just beginning"</span>
+                        <span class="label" style="color: #ffaa00;">Total edits: 8</span></div>
+
+                    <p style="color: #b8b8b8; line-height: 1.7; font-size: 0.9rem;">
+                        Lower edit distance = closer prediction = bigger share of the prize pool.
+                        The smart contract computes this on-chain for every submission, so scoring is transparent and tamper-proof.
+                    </p>
+
+                    <ul class="lev-steps">
+                        <li><span class="op-type">Insert</span> Add a character &mdash; <code style="color: #b8b8b8;">cat &rarr; ca<span style="color: #00ff00;">r</span>t</code></li>
+                        <li><span class="op-type">Delete</span> Remove a character &mdash; <code style="color: #b8b8b8;">ca<span style="color: #ff4444; text-decoration: line-through;">r</span>t &rarr; cat</code></li>
+                        <li><span class="op-type">Substitute</span> Swap a character &mdash; <code style="color: #b8b8b8;">c<span style="color: #ffaa00;">a</span>t &rarr; c<span style="color: #ffaa00;">u</span>t</code></li>
+                    </ul>
+                    <p style="color: #666; font-size: 0.8rem; margin-top: 1rem; margin-bottom: 0;">
+                        Each operation costs 1 edit. The total count is the Levenshtein distance between two strings.
                     </p>
                 </div>
             </div>
@@ -275,40 +384,39 @@
                 </h2>
 
                 <div class="thesis-point">
-                    <h5>Binary = 1 bit. Text = 2,240 bits.</h5>
+                    <h5>Yes/no = 1 bit of information. Text = 2,240 bits.</h5>
                     <p>
-                        A binary prediction market encodes exactly one bit of information per contract.
-                        A 280-character post over a 256-symbol alphabet encodes ~2,240 bits.
-                        The information density per market scales as O(<em>n</em> log|alphabet|) versus O(1) for yes/no.
-                        That's not an incremental improvement &mdash; it's a different category of instrument.
+                        A yes/no prediction market captures one binary outcome per question.
+                        A 280-character post has ~2,240 bits of possible variation &mdash;
+                        every word choice, every number, every comma is a dimension you can be right or wrong about.
+                        That's not a small upgrade. It's a different category of game.
                     </p>
                 </div>
 
                 <div class="thesis-point">
-                    <h5>Levenshtein distance: continuous payoffs</h5>
+                    <h5>No cliff. Every character counts.</h5>
                     <p>
-                        Levenshtein distance induces a proper metric on the outcome space.
-                        Payoffs aren't a binary cliff but a continuous gradient &mdash; every character of precision is rewarded.
-                        Marginal improvements in language modeling always translate to marginal improvements in expected payout.
-                        No wasted accuracy.
+                        In a yes/no market, you're either right or wrong &mdash; there's no partial credit.
+                        With edit distance scoring, getting 95% of the words right pays more than getting 90% right.
+                        There's no wasted accuracy. If you predict better, you earn more, always.
                     </p>
                 </div>
 
                 <div class="thesis-point">
                     <h5>AI makes the game deeper, not shallower</h5>
                     <p>
-                        Binary markets commoditize as models converge &mdash; everyone says 87% yes and the spread vanishes.
-                        In text prediction, the gap between the 99th and 99.9th percentile language model is still dozens of edit operations, each worth money.
-                        The AI capability explosion doesn't destroy the game. It deepens it.
+                        As AI gets better at yes/no prediction, everyone converges on the same answer and there's nothing left to compete over.
+                        With text prediction, smarter models just raise the bar &mdash; the gap between a good guess and a great guess
+                        is still dozens of characters, each worth money. Better AI means bigger prizes, not smaller ones.
                     </p>
                 </div>
 
                 <div class="context-box">
                     <strong style="color: #ccc;">Market context:</strong>
-                    Polymarket + Kalshi: <span class="stat-number">$40B</span> combined in 2025.
-                    <span class="stat-number">$222.5B</span> projected for 2026.
-                    Neither supports text prediction. Neither scores on a continuous distance metric.
-                    Meanwhile, X API now offers pay-per-use access, making multi-oracle post verification economically viable.
+                    Polymarket + Kalshi did <span class="stat-number">$40B</span> combined in 2025,
+                    projected to reach <span class="stat-number">$222.5B</span> by 2026.
+                    All of it is yes/no. None of it rewards precision.
+                    Meanwhile, X (formerly Twitter) now offers pay-per-use API access, making it practical to verify posts programmatically.
                 </div>
             </div>
         </div>
@@ -338,8 +446,8 @@
 
                 <div class="step">
                     <span class="step-number">3</span>
-                    <h5>Oracle resolves</h5>
-                    <p>Actual text submitted. On-chain Levenshtein distance scores every submission. Closest match wins the pool (minus 7% fee).</p>
+                    <h5>The real post arrives</h5>
+                    <p>The actual text is submitted. A smart contract counts the <a href="#levenshtein" style="color: var(--primary-color);">edit distance</a> between every guess and the real post. Closest match wins the pool (minus 7% fee).</p>
                 </div>
             </div>
         </div>
