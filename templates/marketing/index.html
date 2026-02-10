@@ -3,40 +3,11 @@
 {% block extra_css %}
 <style>
     .hero-section {
-        min-height: 90vh;
-        display: flex;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(180deg, var(--darker-bg) 0%, rgba(0, 217, 255, 0.02) 50%, var(--darker-bg) 100%);
-    }
-
-    /* Animated Grid Background */
-    .grid-animation {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0.3;
-        pointer-events: none;
-    }
-
-    .hero-graphic {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        z-index: 0;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 1;
+        padding: 6rem 0 4rem;
     }
 
     .hero-title {
-        font-size: 3.5rem;
+        font-size: 3rem;
         font-weight: 300;
         letter-spacing: -1px;
         margin-bottom: 1.5rem;
@@ -44,7 +15,6 @@
 
     .hero-title .gradient-text {
         font-weight: 600;
-        text-shadow: 0 0 30px var(--glow-color);
     }
 
     .alpha-badge {
@@ -59,151 +29,78 @@
         margin-left: 1rem;
     }
 
-    .email-form {
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(0, 217, 255, 0.2);
-        border-radius: 0;
-        padding: 2.5rem;
-        margin: 3rem 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .email-form::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-        animation: scan 3s infinite;
-    }
-
-    @keyframes scan {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-
-    .form-control {
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(0, 217, 255, 0.2);
-        color: white;
-        border-radius: 0;
-        padding: 0.875rem 1rem;
-        font-size: 1rem;
-    }
-
-    .form-control:focus {
-        background: rgba(0, 0, 0, 0.7);
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(0, 217, 255, 0.25);
-        color: white;
-    }
-
-    .infographic-section {
-        background: linear-gradient(180deg, var(--darker-bg) 0%, rgba(0, 217, 255, 0.01) 50%, var(--darker-bg) 100%);
-        padding: 6rem 0;
-        position: relative;
-    }
-
-    .timeline-step {
-        position: relative;
-        padding: 2.5rem;
-        border-left: 1px solid rgba(0, 217, 255, 0.3);
-        margin-left: 3rem;
-        margin-bottom: 3rem;
-    }
-
-    .timeline-step::before {
-        content: '';
-        position: absolute;
-        left: -8px;
-        top: 2.5rem;
-        width: 15px;
-        height: 15px;
-        background: var(--darker-bg);
-        border: 2px solid var(--primary-color);
-        border-radius: 0;
-        transform: rotate(45deg);
-        box-shadow: 0 0 20px var(--glow-color);
-    }
-
-    .timeline-step h4 {
-        font-weight: 400;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+    .stat-number {
         color: var(--primary-color);
+        font-weight: 600;
     }
 
-    .feature-icon {
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: 1px solid rgba(0, 217, 255, 0.3);
+    /* Thesis example */
+    .thesis-example {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+
+    .thesis-example .actual-post {
+        background: rgba(0, 217, 255, 0.05);
+        border: 1px solid rgba(0, 217, 255, 0.2);
+        padding: 1rem 1.25rem;
         margin-bottom: 1.5rem;
-        font-size: 32px;
-        color: var(--primary-color);
-        position: relative;
-        clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
-    }
-
-    .example-card {
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(0, 217, 255, 0.2);
-        border-radius: 0;
-        padding: 1.5rem;
-        margin: 1rem 0;
         font-family: 'Consolas', 'Monaco', monospace;
         font-size: 0.9rem;
-    }
-
-    .tech-badge {
-        display: inline-block;
-        padding: 0.375rem 1rem;
-        background: transparent;
-        border: 1px solid rgba(0, 217, 255, 0.3);
         color: var(--primary-color);
-        font-size: 0.75rem;
-        margin: 0.25rem;
+    }
+
+    .prediction-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .prediction-row .prediction {
+        flex: 1;
+        padding: 1rem 1.25rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.85rem;
+        color: #ccc;
+        border: 1px solid var(--border-color);
+    }
+
+    .prediction-row .prediction.winner {
+        border-color: rgba(0, 255, 0, 0.3);
+    }
+
+    .prediction-row .prediction.runner-up {
+        border-color: rgba(255, 170, 0, 0.3);
+    }
+
+    .prediction-label {
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        position: relative;
-        overflow: hidden;
+        margin-bottom: 0.5rem;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    .tech-badge::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 217, 255, 0.1);
-        transition: left 0.3s ease;
+    .diff-green {
+        color: #00ff00;
+        font-weight: bold;
     }
 
-    .tech-badge:hover::before {
-        left: 0;
+    .diff-amber {
+        color: #ffaa00;
+        font-weight: bold;
     }
 
-    /* Geometric Patterns */
-    .geometric-bg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        opacity: 0.05;
-        background-image:
-            repeating-linear-gradient(45deg, transparent, transparent 35px, var(--primary-color) 35px, var(--primary-color) 70px);
+    @media (max-width: 767px) {
+        .prediction-row {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
     }
 
-    /* Thesis section */
+    /* Thesis points */
     .thesis-point {
         padding: 1.5rem;
         border-left: 2px solid rgba(0, 217, 255, 0.3);
@@ -212,10 +109,8 @@
 
     .thesis-point h5 {
         color: var(--primary-color);
-        font-weight: 400;
+        font-weight: 500;
         font-size: 1rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
         margin-bottom: 0.75rem;
     }
 
@@ -225,7 +120,44 @@
         line-height: 1.7;
     }
 
-    /* Status section */
+    /* Steps */
+    .step {
+        margin-bottom: 2rem;
+    }
+
+    .step-number {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+        text-align: center;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-right: 0.75rem;
+    }
+
+    .step h5 {
+        display: inline;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    .step p {
+        color: #b8b8b8;
+        margin-top: 0.5rem;
+        margin-left: 2.5rem;
+        line-height: 1.7;
+    }
+
+    /* Status lists */
+    .status-col h5 {
+        font-weight: 400;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+    }
+
     .status-list {
         list-style: none;
         padding: 0;
@@ -233,20 +165,14 @@
     }
 
     .status-list li {
-        padding: 0.6rem 0;
+        padding: 0.5rem 0;
         color: #b8b8b8;
-        font-size: 0.95rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .status-list li:last-child {
-        border-bottom: none;
+        font-size: 0.9rem;
     }
 
     .status-check {
         color: #00ff00;
         margin-right: 0.75rem;
-        font-weight: bold;
     }
 
     .status-pending {
@@ -254,45 +180,15 @@
         margin-right: 0.75rem;
     }
 
-    /* News Flash Alert */
-    .news-flash {
-        background: rgba(0, 255, 100, 0.05);
-        border: 1px solid rgba(0, 255, 100, 0.3);
-        border-left: 3px solid #00ff64;
-        padding: 1rem 1.5rem;
-        margin: 0 auto 0 auto;
-        max-width: 800px;
-        position: relative;
-        font-size: 0.9rem;
-    }
-
-    .news-flash-label {
-        display: inline-block;
-        background: rgba(0, 255, 100, 0.15);
-        color: #00ff64;
-        font-size: 0.65rem;
-        font-weight: 600;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        padding: 0.15rem 0.5rem;
-        margin-right: 0.75rem;
-        vertical-align: middle;
-    }
-
-    .news-flash p {
+    /* Context box */
+    .context-box {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        padding: 1.25rem 1.5rem;
+        margin: 2rem 0;
         color: #b8b8b8;
-        margin: 0.5rem 0 0 0;
-        line-height: 1.6;
-    }
-
-    .news-flash a {
-        color: #00ff64;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-    }
-
-    .news-flash a:hover {
-        color: #00ffaa;
+        line-height: 1.7;
+        font-size: 0.9rem;
     }
 </style>
 {% endblock %}
@@ -300,390 +196,195 @@
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
-    <div class="grid-animation">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <pattern id="heroGrid" width="50" height="50" patternUnits="userSpaceOnUse">
-                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,217,255,0.05)" stroke-width="1"/>
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#heroGrid)"/>
-        </svg>
-    </div>
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-7 hero-content">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
                 <h1 class="hero-title">
                     <span class="gradient-text">CLOCKCHAIN</span>
                     <span class="alpha-badge">v0 ALPHA</span>
                 </h1>
-                <p class="lead mb-4" style="font-size: 1.2rem; color: #cccccc; line-height: 1.7;">
-                    A research prototype: on-chain Levenshtein distance as a prediction market primitive.
-                    Stake ETH on the exact text a public figure will post. Closest match wins.
+                <p class="lead mb-4" style="font-size: 1.15rem; color: #ccc; line-height: 1.8; max-width: 720px;">
+                    Stake ETH on the exact text a public figure will post. Winners determined by on-chain Levenshtein distance.
+                    A research prototype exploring why text prediction is a fundamentally different market structure than binary yes/no.
                 </p>
-                <div class="d-flex gap-3 mb-4">
-                    <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
-                        TRY THE DEMO
-                    </a>
-                    <a href="{{ url_for('marketing.whitepaper') }}" class="btn btn-outline-light btn-lg">
+                <p style="color: #888; font-size: 0.95rem; margin-bottom: 2rem;">
+                    <span class="stat-number">$40B</span> in prediction market volume in 2025. All binary.
+                    This prototype explores what comes next.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('marketing.whitepaper') }}" class="btn btn-primary btn-lg">
                         READ THE WHITEPAPER
                     </a>
+                    <a href="{{ url_for('marketing.demo') }}" class="btn btn-outline-light btn-lg">
+                        TRY THE DEMO
+                    </a>
                 </div>
-
-                <!-- Email Capture Form -->
-                <div class="email-form">
-                    <h4 class="mb-3" style="font-weight: 300; letter-spacing: 2px;">GET UPDATES</h4>
-                    <form action="{{ url_for('marketing.capture_email') }}" method="POST" class="row g-3">
-                        <div class="col-md-8">
-                            <input type="email" class="form-control form-control-lg" name="email"
-                                   placeholder="your@email.com" required>
-                        </div>
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary btn-lg w-100">
-                                SUBSCRIBE
-                            </button>
-                        </div>
-                    </form>
-                    <small class="text-muted mt-3 d-block" style="letter-spacing: 0.5px;">
-                        Follow the research. No spam.
-                    </small>
-                </div>
-            </div>
-            <div class="col-lg-5 hero-graphic">
-                <!-- Hero Sundial SVG -->
-                <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="sundialGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.3" />
-                        </linearGradient>
-                        <linearGradient id="shadowFade" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:0.6" />
-                            <stop offset="100%" style="stop-color:#00d9ff;stop-opacity:0" />
-                        </linearGradient>
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                            <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                    </defs>
-
-                    <!-- Chain-link texture around circumference -->
-                    <circle cx="150" cy="150" r="140" fill="none" stroke="#00d9ff" stroke-width="1" stroke-dasharray="8,6" opacity="0.25"/>
-
-                    <!-- Outer dial ring -->
-                    <circle cx="150" cy="150" r="135" fill="none" stroke="#00d9ff" stroke-width="2" filter="url(#glow)"/>
-
-                    <!-- Latitude arc lines on base plate -->
-                    <ellipse cx="150" cy="150" rx="135" ry="40" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
-                    <ellipse cx="150" cy="150" rx="135" ry="70" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
-                    <ellipse cx="150" cy="150" rx="135" ry="100" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.15"/>
-
-                    <!-- Inner rings -->
-                    <circle cx="150" cy="150" r="105" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.3"/>
-                    <circle cx="150" cy="150" r="75" fill="none" stroke="#00d9ff" stroke-width="0.5" opacity="0.2"/>
-
-                    <!-- 12 hour lines radiating from center -->
-                    <!-- Major: 12, 3, 6, 9 -->
-                    <line x1="150" y1="18" x2="150" y2="50" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
-                    <line x1="150" y1="250" x2="150" y2="282" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
-                    <line x1="18" y1="150" x2="50" y2="150" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
-                    <line x1="250" y1="150" x2="282" y2="150" stroke="#00d9ff" stroke-width="2" opacity="0.8"/>
-
-                    <!-- Minor: 1, 2, 4, 5, 7, 8, 10, 11 -->
-                    <line x1="82.5" y1="32.5" x2="96" y2="53" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="32.5" y1="82.5" x2="53" y2="96" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="267.5" y1="82.5" x2="247" y2="96" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="217.5" y1="32.5" x2="204" y2="53" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="267.5" y1="217.5" x2="247" y2="204" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="217.5" y1="267.5" x2="204" y2="247" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="32.5" y1="217.5" x2="53" y2="204" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-                    <line x1="82.5" y1="267.5" x2="96" y2="247" stroke="#00d9ff" stroke-width="1.2" opacity="0.5"/>
-
-                    <!-- Shadow cast by gnomon (gradient fade) -->
-                    <line x1="150" y1="150" x2="240" y2="80" stroke="url(#shadowFade)" stroke-width="4" stroke-linecap="round"/>
-
-                    <!-- Gnomon (triangular, geometric detail) -->
-                    <polygon points="150,45 140,200 160,200" fill="none" stroke="url(#sundialGlow)" stroke-width="2" stroke-linejoin="round" filter="url(#glow)"/>
-                    <!-- Gnomon center spine -->
-                    <line x1="150" y1="55" x2="150" y2="190" stroke="#00d9ff" stroke-width="0.5" opacity="0.3"/>
-                    <!-- Gnomon base detail -->
-                    <line x1="137" y1="200" x2="163" y2="200" stroke="#00d9ff" stroke-width="1" opacity="0.4"/>
-
-                    <!-- Center pivot point -->
-                    <circle cx="150" cy="150" r="4" fill="#00d9ff" filter="url(#glow)"/>
-                    <circle cx="150" cy="150" r="8" fill="none" stroke="#00d9ff" stroke-width="1" opacity="0.4"/>
-                </svg>
             </div>
         </div>
     </div>
 </section>
 
-<!-- News Flash -->
-<section style="padding: 2rem 0 0 0;">
+<!-- The Thesis Example -->
+<section id="example" class="section" style="padding-top: 2rem;">
     <div class="container">
-        <div class="news-flash">
-            <span class="news-flash-label">New</span>
-            <strong style="color: #ccc;">X API now offers pay-per-use access for individual developers.</strong>
-            <p>
-                No subscriptions, no monthly caps -- just credit-based billing for what you use.
-                This unlocks direct, programmatic tweet verification for oracle resolution:
-                fetch posts by ID, verify authorship, and confirm timestamps via the
-                <a href="https://developer.x.com/" target="_blank">X Developer Platform</a>.
-                A prerequisite for decentralized oracle consensus that was previously cost-prohibitive.
-            </p>
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <h2 class="display-6 mb-4" style="font-weight: 300; letter-spacing: 1px;">
+                    WHY <span class="gradient-text">TEXT</span>, NOT BINARY
+                </h2>
+
+                <p style="color: #b8b8b8; margin-bottom: 1.5rem;">
+                    A market opens: <strong style="color: #fff;">What will @satyanadella post?</strong>
+                    Two frontier AI models and a human submit predictions. Then the actual post arrives:
+                </p>
+
+                <div class="thesis-example">
+                    <div class="actual-post">
+                        <small style="color: #888; font-family: -apple-system, sans-serif; letter-spacing: 1px; text-transform: uppercase; font-size: 0.65rem;">Actual Post</small><br>
+                        Copilot is now generating <strong>46</strong>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.
+                    </div>
+
+                    <div class="prediction-row">
+                        <div class="prediction winner">
+                            <div class="prediction-label" style="color: #00ff00;">Claude &mdash; 1 edit</div>
+                            Copilot is now generating <span class="diff-green">45</span>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.
+                        </div>
+                        <div class="prediction runner-up">
+                            <div class="prediction-label" style="color: #ffaa00;">GPT &mdash; 8 edits</div>
+                            Copilot is now generating <span class="diff-amber">43</span>% of all new code at GitHub-connected enterprises. The AI transformation of software <span class="diff-amber">has just begun</span>.
+                        </div>
+                    </div>
+
+                    <p style="color: #b8b8b8; margin-top: 1.5rem; margin-bottom: 0; line-height: 1.7;">
+                        A binary market splits nothing &mdash; both AIs "predicted correctly."
+                        Levenshtein rewards the 7-edit gap. <strong style="color: #fff;">Winner takes the pool.</strong>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Thesis Section -->
+<!-- The Thesis -->
 <section id="thesis" class="section">
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
+                <h2 class="display-6 mb-5" style="font-weight: 300; letter-spacing: 1px;">
                     THE <span class="gradient-text">THESIS</span>
                 </h2>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="thesis-point">
-                            <h5>Binary = 1 bit</h5>
-                            <p>Binary prediction markets encode exactly one bit of information per contract. As AI approaches superhuman forecasting, the edge any participant can capture collapses toward zero -- the correct answer becomes trivially computable.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="thesis-point">
-                            <h5>Text = exponential space</h5>
-                            <p>Text prediction over an alphabet with strings up to length <em>n</em> has a combinatorially explosive outcome space. Information density per market scales as O(<em>n</em> log|alphabet|) versus O(1) for yes/no contracts.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="thesis-point">
-                            <h5>Levenshtein = continuous scoring</h5>
-                            <p>Levenshtein distance induces a proper metric on the outcome space. Payoffs aren't a binary cliff but a continuous gradient -- every character of precision is rewarded. Marginal improvements in language modeling always translate to marginal improvements in expected payout.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="thesis-point">
-                            <h5>AI deepens the game</h5>
-                            <p>Binary markets commoditize as models converge -- everyone says 87% yes and the spread vanishes. In text prediction, the gap between the 99th and 99.9th percentile language model is still dozens of edit operations, each worth money. The AI capability explosion doesn't destroy the game. It deepens it.</p>
-                        </div>
-                    </div>
+                <div class="thesis-point">
+                    <h5>Binary = 1 bit. Text = 1,840 bits.</h5>
+                    <p>
+                        A binary prediction market encodes exactly one bit of information per contract.
+                        A 230-character tweet over a 256-symbol alphabet encodes ~1,840 bits.
+                        The information density per market scales as O(<em>n</em> log|alphabet|) versus O(1) for yes/no.
+                        That's not an incremental improvement &mdash; it's a different category of instrument.
+                    </p>
                 </div>
 
-                <div class="example-card mt-4" style="border-left: 3px solid var(--primary-color);">
-                    <p style="color: #cccccc; margin: 0; line-height: 1.7;">
-                        <strong style="color: var(--primary-color);">Context:</strong>
-                        Polymarket does ~$12B/month in binary yes/no volume on Polygon.
-                        Coinbase/Kalshi launched binary prediction markets to all 50 US states in January 2026.
-                        Neither supports text prediction. Neither scores on a continuous distance metric.
-                        That's the gap this prototype explores.
+                <div class="thesis-point">
+                    <h5>Levenshtein distance: continuous payoffs</h5>
+                    <p>
+                        Levenshtein distance induces a proper metric on the outcome space.
+                        Payoffs aren't a binary cliff but a continuous gradient &mdash; every character of precision is rewarded.
+                        Marginal improvements in language modeling always translate to marginal improvements in expected payout.
+                        No wasted accuracy.
                     </p>
+                </div>
+
+                <div class="thesis-point">
+                    <h5>AI makes the game deeper, not shallower</h5>
+                    <p>
+                        Binary markets commoditize as models converge &mdash; everyone says 87% yes and the spread vanishes.
+                        In text prediction, the gap between the 99th and 99.9th percentile language model is still dozens of edit operations, each worth money.
+                        The AI capability explosion doesn't destroy the game. It deepens it.
+                    </p>
+                </div>
+
+                <div class="context-box">
+                    <strong style="color: #ccc;">Market context:</strong>
+                    Polymarket + Kalshi: <span class="stat-number">$40B</span> combined in 2025.
+                    <span class="stat-number">$222.5B</span> projected for 2026.
+                    Neither supports text prediction. Neither scores on a continuous distance metric.
+                    Meanwhile, X API now offers pay-per-use access, making multi-oracle tweet verification economically viable.
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- How It Works Infographic (PRESERVED) -->
-<section id="how-it-works" class="infographic-section">
-    <div class="geometric-bg"></div>
+<!-- How It Works -->
+<section id="how-it-works" class="section">
     <div class="container">
-        <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
-            HOW <span class="gradient-text">CLOCKCHAIN</span> WORKS
-        </h2>
-
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <!-- Step 1: The Market -->
-                <div class="timeline-step">
-                    <h4>[01] THE MARKET</h4>
-                    <p style="color: #b8b8b8;">A market opens: <strong style="color: #fff;">What will @satyanadella post?</strong></p>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="tech-badge">ACTOR: SATYA NADELLA</div>
-                        <div class="tech-badge">DURATION: 1 HOUR</div>
-                        <div class="tech-badge">STAKE: 0.001 ETH</div>
-                    </div>
+                <h2 class="display-6 mb-5" style="font-weight: 300; letter-spacing: 1px;">
+                    HOW <span class="gradient-text">IT WORKS</span>
+                </h2>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h5>Market opens</h5>
+                    <p>Someone creates a market: "What will @elonmusk post?" with a deadline and minimum stake.</p>
                 </div>
 
-                <!-- Step 2: Competing Predictions -->
-                <div class="timeline-step">
-                    <h4>[02] THREE AI &amp; HUMAN PREDICTIONS COMPETE</h4>
-                    <p style="color: #b8b8b8;">Submitters stake ETH on their best guess of the exact text</p>
-
-                    <div class="example-card" style="border-left: 3px solid #00ff00; margin-bottom: 0.75rem;">
-                        <div style="margin-bottom: 0.25rem;">
-                            <span class="tech-badge" style="border-color: #00ff00; color: #00ff00; font-size: 0.65rem;">CLAUDE ROLEPLAY</span>
-                        </div>
-                        <code style="color: #cccccc;">Copilot is now generating <span style="color: #00ff00; font-weight: bold;">45</span>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.</code>
-                    </div>
-
-                    <div class="example-card" style="border-left: 3px solid #ffaa00; margin-bottom: 0.75rem;">
-                        <div style="margin-bottom: 0.25rem;">
-                            <span class="tech-badge" style="border-color: #ffaa00; color: #ffaa00; font-size: 0.65rem;">GPT ROLEPLAY</span>
-                        </div>
-                        <code style="color: #cccccc;">Copilot is now generating <span style="color: #ffaa00; font-weight: bold;">43</span>% of all new code at GitHub-connected enterprises. The AI transformation of software <span style="color: #ffaa00; font-weight: bold;">has just begun</span>.</code>
-                    </div>
-
-                    <div class="example-card" style="border-left: 3px solid #ff4444;">
-                        <div style="margin-bottom: 0.25rem;">
-                            <span class="tech-badge" style="border-color: #ff4444; color: #ff4444; font-size: 0.65rem;">HUMAN (VAGUE)</span>
-                        </div>
-                        <code style="color: #cccccc;">Microsoft AI is great and will change the world of coding forever</code>
-                    </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h5>Participants predict</h5>
+                    <p>Submit exact text predictions + stake ETH. AI roleplayers, insiders, humans all compete.</p>
                 </div>
 
-                <!-- Step 3: The Actual Post -->
-                <div class="timeline-step">
-                    <h4>[03] THE ACTUAL POST</h4>
-                    <p style="color: #b8b8b8;">Market ends. Oracle submits the real text:</p>
-                    <div class="example-card" style="border: 1px solid var(--primary-color); background: rgba(0, 217, 255, 0.05);">
-                        <code style="color: var(--primary-color);">Copilot is now generating <strong>46</strong>% of all new code at GitHub-connected enterprises. The AI transformation of software is just beginning.</code>
-                    </div>
-                </div>
-
-                <!-- Step 4: Levenshtein Scoring -->
-                <div class="timeline-step">
-                    <h4>[04] ON-CHAIN LEVENSHTEIN DISTANCE</h4>
-                    <p style="color: #b8b8b8;">Smart contract computes edit distance for every submission</p>
-                    <div class="example-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,217,255,0.1);">
-                            <span style="color: #00ff00;">Claude Roleplay</span>
-                            <span style="color: #00ff00; font-size: 1.5rem; font-weight: bold;">1 edit</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,217,255,0.1);">
-                            <span style="color: #ffaa00;">GPT Roleplay</span>
-                            <span style="color: #ffaa00; font-size: 1.5rem; font-weight: bold;">8 edits</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
-                            <span style="color: #ff4444;">Human (vague)</span>
-                            <span style="color: #ff4444; font-size: 1.5rem; font-weight: bold;">101 edits</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 5: The Punchline -->
-                <div class="timeline-step">
-                    <h4>[05] WINNER TAKES THE POOL</h4>
-                    <p style="color: #b8b8b8; font-size: 1.1rem;">
-                        Claude wins with <strong style="color: #00ff00;">1 edit</strong> (the digit <code style="color: #00ff00;">5</code> &rarr; <code style="color: #00ff00;">6</code>).
-                        GPT had <strong style="color: #ffaa00;">8 edits</strong>. Same training data. Same prompt.
-                    </p>
-                    <div class="example-card" style="border: 1px solid var(--primary-color); text-align: center; padding: 2rem;">
-                        <p style="color: var(--primary-color); font-size: 1.25rem; font-weight: 400; margin: 0; letter-spacing: 0.5px;">
-                            The 7-edit gap between two frontier AI models<br/>is worth the <strong>entire pool</strong>.
-                        </p>
-                        <p style="color: #b8b8b8; margin-top: 1rem; margin-bottom: 0; font-size: 0.9rem;">
-                            A binary market would split nothing &mdash; both AIs "predicted correctly."<br/>
-                            Levenshtein rewards marginal calibration. The game deepens as models improve.
-                        </p>
-                    </div>
-                    <div class="d-flex gap-2 flex-wrap mt-3">
-                        <div class="tech-badge">CONTINUOUS SCORING</div>
-                        <div class="tech-badge">93% TO WINNER</div>
-                        <div class="tech-badge">7% PLATFORM FEE</div>
-                    </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h5>Oracle resolves</h5>
+                    <p>Actual text submitted. On-chain Levenshtein distance scores every submission. Closest match wins the pool (minus 7% fee).</p>
                 </div>
             </div>
-        </div>
-
-        <div class="text-center mt-5">
-            <a href="{{ url_for('clockchain.clockchain_view') }}" class="btn btn-primary btn-lg">
-                EXPLORE LIVE PREDICTIONS
-            </a>
         </div>
     </div>
 </section>
 
-<!-- What Works (and What Doesn't) -->
+<!-- What Works / What Doesn't -->
 <section id="status" class="section">
     <div class="container">
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <h2 class="display-5 text-center mb-5" style="font-weight: 300; letter-spacing: 2px;">
+                <h2 class="display-6 mb-3" style="font-weight: 300; letter-spacing: 1px;">
                     WHAT <span class="gradient-text">WORKS</span> (AND WHAT DOESN'T)
                 </h2>
+                <p style="color: #888; margin-bottom: 2rem; font-size: 0.9rem;">
+                    v0 alpha. Largely vibe-coded. The smart contracts work. The math works. Everything else is scaffolding.
+                </p>
 
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="card" style="border-color: rgba(0, 255, 0, 0.2);">
-                            <h5 style="font-weight: 400; letter-spacing: 1px; color: #00ff00; margin-bottom: 1.5rem;">
-                                WHAT WORKS
-                            </h5>
-                            <ul class="status-list">
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    Full market lifecycle: create, predict, resolve, claim
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    On-chain Levenshtein distance (PredictionMarketV2)
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    259+ passing tests (109 contract, 135 unit, 15 integration)
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    Genesis NFT (60/100 minted, finalized) with on-chain SVG
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    JWT wallet auth (MetaMask) + email OTP
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    Admin resolution dashboard
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    Redis caching, rate limiting, structured logging
-                                </li>
-                                <li>
-                                    <span class="status-check"><i class="fas fa-check"></i></span>
-                                    CI/CD pipeline, Slither static analysis
-                                </li>
-                            </ul>
-                        </div>
+                <div class="row">
+                    <div class="col-md-6 status-col">
+                        <h5 style="color: #00ff00;">Works</h5>
+                        <ul class="status-list">
+                            <li><span class="status-check">&#10003;</span> Full market lifecycle: create, predict, resolve, claim</li>
+                            <li><span class="status-check">&#10003;</span> On-chain Levenshtein distance (PredictionMarketV2)</li>
+                            <li><span class="status-check">&#10003;</span> 259+ passing tests (109 contract, 135 unit, 15 integration)</li>
+                            <li><span class="status-check">&#10003;</span> Genesis NFT (60/100 minted, finalized) with on-chain SVG</li>
+                            <li><span class="status-check">&#10003;</span> JWT wallet auth (MetaMask) + email OTP</li>
+                            <li><span class="status-check">&#10003;</span> Admin resolution dashboard</li>
+                            <li><span class="status-check">&#10003;</span> Redis caching, rate limiting, structured logging</li>
+                            <li><span class="status-check">&#10003;</span> CI/CD pipeline, Slither static analysis</li>
+                        </ul>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card" style="border-color: rgba(255, 255, 255, 0.1);">
-                            <h5 style="font-weight: 400; letter-spacing: 1px; color: #666; margin-bottom: 1.5rem;">
-                                INTENTIONALLY NOT DONE
-                            </h5>
-                            <ul class="status-list">
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    External security audit
-                                </li>
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    Real Coinbase CDP wallet integration
-                                </li>
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    Multisig for contract owner key
-                                </li>
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    Production RPC (Alchemy / QuickNode)
-                                </li>
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    Production monitoring (Sentry)
-                                </li>
-                                <li>
-                                    <span class="status-pending"><i class="fas fa-minus"></i></span>
-                                    Decentralized oracle resolution
-                                </li>
-                            </ul>
-                            <p style="color: #555; font-size: 0.85rem; margin-top: 1.5rem; margin-bottom: 0;">
-                                This is a v0 alpha research project, largely vibe-coded. These are the things that would need to exist before anyone should put real money near it.
-                            </p>
-                        </div>
+                    <div class="col-md-6 status-col">
+                        <h5 style="color: #666;">Intentionally Not Done</h5>
+                        <ul class="status-list">
+                            <li><span class="status-pending">&ndash;</span> External security audit</li>
+                            <li><span class="status-pending">&ndash;</span> Real Coinbase CDP wallet integration</li>
+                            <li><span class="status-pending">&ndash;</span> Multisig for contract owner key</li>
+                            <li><span class="status-pending">&ndash;</span> Production RPC (Alchemy / QuickNode)</li>
+                            <li><span class="status-pending">&ndash;</span> Production monitoring (Sentry)</li>
+                            <li><span class="status-pending">&ndash;</span> Decentralized oracle resolution</li>
+                        </ul>
+                        <p style="color: #555; font-size: 0.85rem; margin-top: 1.5rem;">
+                            These are the things that would need to exist before anyone should put real money near it.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -691,14 +392,14 @@
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="section">
+<!-- Links / CTA -->
+<section class="section" style="padding-top: 2rem;">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto text-center">
                 <div class="d-flex gap-3 justify-content-center mb-4">
                     <a href="{{ url_for('marketing.demo') }}" class="btn btn-primary btn-lg">
-                        TRY THE TESTNET DEMO
+                        TRY THE DEMO
                     </a>
                 </div>
                 <div class="d-flex gap-4 justify-content-center" style="font-size: 0.95rem;">
@@ -723,7 +424,7 @@
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
-                const offset = 100; // Account for fixed header
+                const offset = 100;
                 const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
                 window.scrollTo({
                     top: targetPosition,
@@ -731,29 +432,6 @@
                 });
             }
         });
-    });
-
-    // Add animation on scroll
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Observe all cards, timeline steps, and thesis points
-    document.querySelectorAll('.card, .timeline-step, .thesis-point').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
     });
 </script>
 {% endblock %}

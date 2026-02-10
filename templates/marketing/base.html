@@ -35,15 +35,13 @@
         :root {
             --primary-color: #00d9ff;
             --secondary-color: #00a3cc;
-            --accent-color: #00ffff;
+            --accent-color: #00d9ff;
             --dark-bg: #0a0a0a;
             --darker-bg: #000000;
             --card-bg: #0f0f0f;
             --text-light: #ffffff;
             --text-muted: #b8b8b8;
             --border-color: #1a1a1a;
-            --grid-color: rgba(0, 217, 255, 0.1);
-            --glow-color: rgba(0, 217, 255, 0.6);
         }
         
         * {
@@ -58,22 +56,6 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-        }
-        
-        /* Grid Background Pattern */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
         }
         
         .demo-banner {
@@ -132,22 +114,6 @@
         
         .nav-link:hover {
             color: var(--primary-color) !important;
-            text-shadow: 0 0 10px var(--glow-color);
-        }
-        
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-        
-        .nav-link:hover::after {
-            width: 100%;
         }
         
         .btn-primary {
@@ -156,34 +122,14 @@
             color: var(--primary-color);
             font-weight: 500;
             padding: 0.75rem 2rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
         }
-        
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--primary-color);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-        
+
         .btn-primary:hover {
-            color: var(--darker-bg);
-            box-shadow: 0 0 20px var(--glow-color);
-            transform: translateY(-2px);
-            border-color: var(--primary-color);
-        }
-        
-        .btn-primary:hover::before {
-            left: 0;
+            background: var(--primary-color);
+            color: #000;
         }
         
         .btn-outline-light {
@@ -219,31 +165,11 @@
             border-radius: 0;
             padding: 2rem;
             height: 100%;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: border-color 0.2s ease;
         }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-        
+
         .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
-        }
-        
-        .card:hover::before {
-            transform: translateX(0);
+            border-color: rgba(0, 217, 255, 0.3);
         }
         
         .footer {
