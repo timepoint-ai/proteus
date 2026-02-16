@@ -1,5 +1,5 @@
 """
-Production Monitoring Service for Clockchain
+Production Monitoring Service for Proteus Markets
 Chain-only monitoring implementation (Phase 1 Cleanup)
 """
 
@@ -257,7 +257,7 @@ class MonitoringService:
             # Check each contract for events
             contracts_to_monitor = [
                 ('PredictionMarket', os.getenv('PREDICTION_MARKET_ADDRESS')),
-                ('ClockchainOracle', os.getenv('ORACLE_CONTRACT_ADDRESS')),
+                ('ClockchainOracle', os.getenv('ORACLE_CONTRACT_ADDRESS')),  # Legacy contract name
                 ('NodeRegistry', os.getenv('NODE_REGISTRY_ADDRESS')),
                 ('PayoutManager', os.getenv('PAYOUT_MANAGER_ADDRESS'))
             ]

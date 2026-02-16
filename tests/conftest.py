@@ -1,5 +1,5 @@
 """
-Shared pytest fixtures for Clockchain tests.
+Shared pytest fixtures for Proteus Markets tests.
 """
 
 import pytest

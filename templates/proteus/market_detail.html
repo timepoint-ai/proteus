@@ -1,0 +1,599 @@
+{% extends "base.html" %}
+
+{% block title %}Market {{ market.id }} Details - Proteus Markets{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Market Details</h1>
+                <div class="d-flex gap-2">
+                    <a href="/proteus" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Timeline
+                    </a>
+                    <a href="/" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Overview Card -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Market #{{ market.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Actor</label>
+                            <div class="fw-bold">{{ market.actor }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Status</label>
+                            <div>
+                                {% if market.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif market.status == 'resolved' %}
+                                    <span class="badge bg-info">Resolved</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ market.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small">Market Topic</label>
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-question-circle"></i> 
+                            What will {{ market.actor }} say during this time period?
+                            <br><small class="text-muted mt-2 d-block">Initial submission: "{{ market.predicted_text }}"</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small">Time Range</label>
+                            <div>{{ market.time_range }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Creator</label>
+                            <div class="font-monospace small">{{ market.creator }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submissions/Predictions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Competing Predictions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Always show initial submission -->
+                    <div class="list-group">
+                        <div class="list-group-item bg-warning bg-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong><i class="fas fa-crown text-warning"></i> Initial Submission</strong>
+                                    <div class="text-info">"{{ market.predicted_text }}"</div>
+                                    <small class="text-muted">Created by: {{ market.creator }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold">0.001 ETH</div>
+                                    <div class="text-muted small">Initial Stake</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if market.submissions %}
+                            {% for submission in market.submissions %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Submission #{{ loop.index + 1 }}</strong>
+                                        <div class="text-info">"{{ submission.predicted_text }}"</div>
+                                        <small class="text-muted">By: {{ submission.creator }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold">{{ submission.stake }} ETH</div>
+                                        <div class="text-muted small">{{ submission.timestamp }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3 text-muted">
+                                <small><i class="fas fa-info-circle"></i> No competing predictions yet. Be the first to challenge!</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Statistics -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Market Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Total Volume</label>
+                        <h4 class="text-primary mb-0">{{ market.total_volume }}</h4>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Initial Stake</label>
+                        <h5 class="mb-0">{{ market.initial_stake }}</h5>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Bets Placed</label>
+                        <h5 class="mb-0">{{ market.bets_placed }}</h5>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Oracle Eligible</label>
+                        <div>
+                            {% if market.oracle_eligible %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check"></i> Yes
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock"></i> Not Yet
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt"></i> Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Only show actions for real markets -->
+                    {% if market and market.id %}
+                        <!-- Gas Fee Warning -->
+                        <div class="alert alert-warning mb-3">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Testnet Gas Fees</strong><br>
+                            <small>
+                                Gas fees on BASE Sepolia can be high. We've set default amounts to 0.0001 ETH to leave room for gas.<br>
+                                <a href="https://www.alchemy.com/faucets/base-sepolia" target="_blank" class="text-info">
+                                    Need more testnet ETH? Get it from the BASE Sepolia Faucet →
+                                </a>
+                            </small>
+                        </div>
+                        
+                        {% if market.status == 'active' %}
+                        <!-- Initial action buttons -->
+                        <div id="actionButtons">
+                            <button id="betExistingBtn" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-coins"></i> Bet on Existing Submission
+                            </button>
+                            <button id="createNewBtn" class="btn btn-success w-100 mb-2">
+                                <i class="fas fa-plus"></i> Create New Prediction
+                            </button>
+                        </div>
+                        
+                        <!-- Existing submissions list (hidden initially) -->
+                        <div id="existingSubmissions" class="d-none">
+                            <h6 class="mb-3">Select a submission to bet on:</h6>
+                            <div id="submissionsList" class="list-group mb-3">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                            <div class="mb-3">
+                                <label for="existingBetAmount" class="form-label">Bet Amount (ETH)</label>
+                                <input type="number" class="form-control" id="existingBetAmount" step="0.0001" min="0.0001" value="0.0001">
+                                <small class="text-muted">Reduced amount to leave room for gas fees</small>
+                            </div>
+                            <button id="confirmExistingBet" class="btn btn-primary w-100">
+                                <i class="fas fa-check"></i> Place Bet
+                            </button>
+                            <button id="cancelExistingBet" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                        
+                        <!-- New prediction form (hidden initially) -->
+                        <div id="newPredictionForm" class="d-none">
+                            <h6 class="mb-3">Create a new prediction:</h6>
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle"></i> <strong>How it works:</strong> Submit your prediction with an initial stake. Others can bet on your submission if they think it will win.
+                                <br><small><a href="/docs/CHAIN_SUBMISSION_GUIDE.md" target="_blank">View detailed guide →</a></small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPredictionText" class="form-label">Your Prediction</label>
+                                <textarea class="form-control" id="newPredictionText" rows="3" placeholder="Enter your predicted text"></textarea>
+                                <small class="text-warning d-none" id="duplicateWarning">
+                                    <i class="fas fa-exclamation-triangle"></i> This prediction already exists
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPredictionAmount" class="form-label">Initial Stake (ETH)</label>
+                                <input type="number" class="form-control" id="newPredictionAmount" step="0.0001" min="0.0001" value="0.0001">
+                                <small class="text-muted">Minimum: 0.0001 ETH. Amount reduced to leave room for gas fees.</small>
+                            </div>
+                            <button id="confirmNewPrediction" class="btn btn-success w-100">
+                                <i class="fas fa-check"></i> Submit Prediction
+                            </button>
+                            <button id="cancelNewPrediction" class="btn btn-secondary w-100 mt-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                        
+                        <!-- Transaction status -->
+                        <div id="transactionStatus" class="alert alert-info d-none mt-3">
+                            <i class="fas fa-spinner fa-spin"></i> Processing transaction...
+                        </div>
+                        
+                        {% if market.oracle_eligible %}
+                        <button id="submitOracleBtn" class="btn btn-warning w-100 mt-2">
+                            <i class="fas fa-eye"></i> Submit Oracle Data
+                        </button>
+                        {% endif %}
+                        {% else %}
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle"></i> This market has been resolved
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bs-dark);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.alert-info {
+    background: rgba(13, 110, 253, 0.1);
+    border: 1px solid rgba(13, 110, 253, 0.3);
+    color: #6ea8fe;
+}
+
+.list-group-item {
+    background: var(--bs-dark);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.list-group-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.submission-item.active {
+    background: rgba(13, 110, 253, 0.2);
+    border-color: var(--bs-primary);
+}
+
+.submission-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#transactionStatus {
+    word-break: break-all;
+}
+</style>
+
+<script>
+// Initialize market detail page
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize market detail functionality on this page
+    const marketId = "{{ market.id }}";
+    console.log('Market Detail Page loaded for market:', marketId);
+    
+    // Prevent other scripts from running on this page
+    window.isMarketDetailPage = true;
+    
+    // Load betting contract script
+    const script = document.createElement('script');
+    script.src = '/static/js/betting-contract.js';
+    document.head.appendChild(script);
+    
+    // Initialize betting contract after loading
+    let bettingContract = null;
+    let selectedSubmissionId = null;
+    
+    script.onload = async function() {
+        try {
+            bettingContract = new BettingContract();
+            await bettingContract.init();
+            console.log('Betting contract initialized with account:', bettingContract.account);
+            
+            // Load existing submissions
+            await loadSubmissions();
+        } catch (error) {
+            console.error('Failed to initialize betting contract:', error);
+        }
+    };
+    
+    // Function to load existing submissions from blockchain
+    async function loadSubmissions() {
+        if (!bettingContract) return;
+        
+        try {
+            const submissionsList = document.getElementById('submissionsList');
+            let submissionsHTML = '';
+            
+            // Try to load submissions from blockchain
+            try {
+                const submissions = await bettingContract.getMarketSubmissions(marketId);
+                
+                // Check if there are any submissions
+                if (submissions && submissions.length > 0) {
+                    // Submissions exist - show them
+                    submissions.forEach((sub, index) => {
+                        const isFirst = index === 0;
+                        submissionsHTML += `
+                            <div class="list-group-item submission-item ${isFirst ? 'bg-warning bg-opacity-10' : ''}" data-submission-id="${sub.id || index}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            ${isFirst ? '<i class="fas fa-crown text-warning"></i> Initial' : 'Competing'} Submission #${index + 1}
+                                        </h6>
+                                        <p class="mb-1 text-info">"${sub.predictedText}"</p>
+                                        <small class="text-muted">
+                                            By: ${sub.submitter ? sub.submitter.slice(0, 6) + '...' + sub.submitter.slice(-4) : 'Unknown'}
+                                            | Stake: ${sub.totalStake ? bettingContract.web3.utils.fromWei(sub.totalStake, 'ether') : '0'} ETH
+                                        </small>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary select-submission" data-submission-id="${sub.id || index}">
+                                        Select to Bet
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    submissionsList.innerHTML = submissionsHTML;
+                } else {
+                    // No submissions yet - show message
+                    submissionsList.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i> <strong>No submissions yet!</strong><br>
+                            This market doesn't have any submissions on the blockchain yet.<br>
+                            Be the first to create a prediction using the "Create New Prediction" button.
+                        </div>
+                    `;
+                    return; // Exit early, no submissions to select
+                }
+            } catch (error) {
+                console.error('Error fetching submissions:', error);
+                submissionsList.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Error loading submissions</strong><br>
+                        Could not load submissions from the blockchain. The market may not exist yet.<br>
+                        <small class="text-muted">Error: ${error.message}</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Add click handlers for all selection buttons
+            document.querySelectorAll('.select-submission').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectedSubmissionId = parseInt(this.dataset.submissionId);
+                    // Remove active class from all items
+                    document.querySelectorAll('.submission-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    // Reset all buttons
+                    document.querySelectorAll('.select-submission').forEach(b => {
+                        b.textContent = 'Select to Bet';
+                        b.classList.remove('btn-success');
+                        b.classList.add('btn-primary');
+                    });
+                    // Set this item as active
+                    this.closest('.submission-item').classList.add('active');
+                    this.textContent = 'Selected ✓';
+                    this.classList.remove('btn-primary');
+                    this.classList.add('btn-success');
+                });
+            });
+            
+        } catch (error) {
+            console.error('Failed to load submissions:', error);
+            // Show error message
+            const submissionsList = document.getElementById('submissionsList');
+            submissionsList.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Error loading submissions</strong><br>
+                    Could not load submissions from the blockchain. The market may not exist yet.<br>
+                    <small class="text-muted">Error: ${error.message}</small>
+                </div>
+            `;
+        }
+    }
+    
+    // Initialize Web3 connection button handlers
+    const betExistingBtn = document.getElementById('betExistingBtn');
+    const createNewBtn = document.getElementById('createNewBtn');
+    const actionButtons = document.getElementById('actionButtons');
+    const existingSubmissions = document.getElementById('existingSubmissions');
+    const newPredictionForm = document.getElementById('newPredictionForm');
+    const transactionStatus = document.getElementById('transactionStatus');
+    const submitOracleBtn = document.getElementById('submitOracleBtn');
+    
+    // Bet on existing submission
+    if (betExistingBtn) {
+        betExistingBtn.onclick = async function() {
+            if (!bettingContract) {
+                alert('Please wait for wallet connection...');
+                return;
+            }
+            actionButtons.classList.add('d-none');
+            existingSubmissions.classList.remove('d-none');
+        };
+    }
+    
+    // Create new prediction
+    if (createNewBtn) {
+        createNewBtn.onclick = async function() {
+            if (!bettingContract) {
+                alert('Please wait for wallet connection...');
+                return;
+            }
+            actionButtons.classList.add('d-none');
+            newPredictionForm.classList.remove('d-none');
+        };
+    }
+    
+    // Confirm bet on existing submission
+    document.getElementById('confirmExistingBet').onclick = async function() {
+        if (selectedSubmissionId === null) {
+            alert('Please select a submission to bet on');
+            return;
+        }
+        
+        const amount = document.getElementById('existingBetAmount').value;
+        
+        try {
+            transactionStatus.classList.remove('d-none');
+            transactionStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending transaction to blockchain...';
+            
+            const tx = await bettingContract.betOnExistingSubmission(marketId, selectedSubmissionId, amount);
+            
+            transactionStatus.innerHTML = '<i class="fas fa-check"></i> Transaction successful! Hash: ' + tx.transactionHash;
+            transactionStatus.classList.remove('alert-info');
+            transactionStatus.classList.add('alert-success');
+            
+            // Reset form after 3 seconds
+            setTimeout(() => {
+                existingSubmissions.classList.add('d-none');
+                actionButtons.classList.remove('d-none');
+                transactionStatus.classList.add('d-none');
+                selectedSubmissionId = null;
+                loadSubmissions(); // Reload to show updated stakes
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Transaction failed:', error);
+            transactionStatus.innerHTML = '<i class="fas fa-times"></i> Transaction failed: ' + error.message;
+            transactionStatus.classList.remove('alert-info');
+            transactionStatus.classList.add('alert-danger');
+        }
+    };
+    
+    // Confirm new prediction
+    document.getElementById('confirmNewPrediction').onclick = async function() {
+        const predictedText = document.getElementById('newPredictionText').value.trim();
+        const amount = document.getElementById('newPredictionAmount').value;
+        
+        if (!predictedText) {
+            alert('Please enter your predicted text');
+            return;
+        }
+        
+        try {
+            // Check for duplicate first
+            const isDuplicate = await bettingContract.checkDuplicate(marketId, predictedText);
+            if (isDuplicate) {
+                document.getElementById('duplicateWarning').classList.remove('d-none');
+                return;
+            }
+            
+            transactionStatus.classList.remove('d-none');
+            transactionStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending transaction to blockchain...';
+            
+            const tx = await bettingContract.submitNewPrediction(marketId, predictedText, amount);
+            
+            transactionStatus.innerHTML = '<i class="fas fa-check"></i> Prediction submitted! Hash: ' + tx.transactionHash;
+            transactionStatus.classList.remove('alert-info');
+            transactionStatus.classList.add('alert-success');
+            
+            // Reset form after 3 seconds
+            setTimeout(() => {
+                newPredictionForm.classList.add('d-none');
+                actionButtons.classList.remove('d-none');
+                transactionStatus.classList.add('d-none');
+                document.getElementById('newPredictionText').value = '';
+                loadSubmissions(); // Reload to show new submission
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Transaction failed:', error);
+            transactionStatus.innerHTML = '<i class="fas fa-times"></i> Transaction failed: ' + error.message;
+            transactionStatus.classList.remove('alert-info');
+            transactionStatus.classList.add('alert-danger');
+        }
+    };
+    
+    // Cancel buttons
+    document.getElementById('cancelExistingBet').onclick = function() {
+        existingSubmissions.classList.add('d-none');
+        actionButtons.classList.remove('d-none');
+        selectedSubmissionId = null;
+    };
+    
+    document.getElementById('cancelNewPrediction').onclick = function() {
+        newPredictionForm.classList.add('d-none');
+        actionButtons.classList.remove('d-none');
+        document.getElementById('newPredictionText').value = '';
+        document.getElementById('duplicateWarning').classList.add('d-none');
+    };
+    
+    // Check for duplicates as user types
+    document.getElementById('newPredictionText').addEventListener('input', async function() {
+        const text = this.value.trim();
+        if (text && bettingContract) {
+            const isDuplicate = await bettingContract.checkDuplicate(marketId, text);
+            if (isDuplicate) {
+                document.getElementById('duplicateWarning').classList.remove('d-none');
+            } else {
+                document.getElementById('duplicateWarning').classList.add('d-none');
+            }
+        }
+    });
+    
+    if (submitOracleBtn) {
+        submitOracleBtn.onclick = async function() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        alert(`Oracle submission for market #${marketId} will be available once oracle functions are deployed on BASE Sepolia.`);
+                    } else {
+                        // Request wallet connection
+                        await window.ethereum.request({ method: 'eth_requestAccounts' });
+                        alert('Wallet connected. Oracle submission will be available once deployed.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to connect wallet for oracle submission.');
+                }
+            } else {
+                alert('Please install MetaMask to submit oracle data.');
+            }
+        };
+    }
+});
+</script>
+{% endblock %}

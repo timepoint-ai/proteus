@@ -1,11 +1,11 @@
 /**
- * Clockchain Wallet Integration for BASE Blockchain
+ * Proteus Markets Wallet Integration for BASE Blockchain
  * Following Coinbase BASE platform best practices
  */
 
-class ClockchainWallet {
+class ProteusWallet {
     constructor() {
-        // Session storage key
+        // Legacy key — changing would log out existing users
         this.SESSION_KEY = 'clockchain_wallet_session';
         this.SESSION_EXPIRY_HOURS = 24;
 
@@ -644,7 +644,9 @@ class ClockchainWallet {
 }
 
 // Initialize wallet on page load
-let clockchainWallet;
+let proteusWallet;
 document.addEventListener('DOMContentLoaded', () => {
-    clockchainWallet = new ClockchainWallet();
+    proteusWallet = new ProteusWallet();
+    window.proteusWallet = proteusWallet;
+    window.clockchainWallet = window.proteusWallet;  // Backward-compat alias — remove in v2
 });

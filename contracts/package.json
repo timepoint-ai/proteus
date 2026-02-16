@@ -1,7 +1,7 @@
 {
-  "name": "clockchain-contracts",
+  "name": "proteus-contracts",
   "version": "1.0.0",
-  "description": "Clockchain prediction market smart contracts for BASE",
+  "description": "Proteus Markets prediction market smart contracts for BASE",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",

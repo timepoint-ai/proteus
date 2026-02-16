@@ -1,5 +1,5 @@
 """
-Deploy Clockchain contracts to BASE Sepolia testnet with micro transactions
+Deploy Proteus Markets contracts to BASE Sepolia testnet with micro transactions
 Uses industry best practices for penny contracts (0.001 BASE or less)
 """
 
@@ -111,7 +111,7 @@ class TestContractDeployer:
             return None
     
     async def deploy_all_contracts(self):
-        """Deploy all Clockchain contracts with micro amounts"""
+        """Deploy all Proteus Markets contracts with micro amounts"""
         deployed = {}
         
         # 1. Deploy PredictionMarket first (no constructor args)
@@ -120,7 +120,7 @@ class TestContractDeployer:
         if prediction_market:
             deployed['PredictionMarket'] = prediction_market
         
-        # 2. Deploy ClockchainOracle (needs PredictionMarket address)
+        # 2. Deploy ClockchainOracle (legacy contract name — needs PredictionMarket address)
         if prediction_market:
             logger.info("\n2. Deploying ClockchainOracle...")
             oracle = await self.deploy_contract("ClockchainOracle", prediction_market)
@@ -193,7 +193,7 @@ class TestContractDeployer:
             
         logger.info("\n🔧 Setting up test environment...")
         
-        # Register oracle in ClockchainOracle contract
+        # Register oracle in ClockchainOracle contract (legacy contract name)
         if 'ClockchainOracle' in deployed:
             try:
                 oracle_abi, _ = self.load_contract_artifact('ClockchainOracle')
@@ -232,7 +232,7 @@ class TestContractDeployer:
 
 async def main():
     """Deploy test contracts with micro transactions"""
-    logger.info("🚀 Clockchain Test Contract Deployment")
+    logger.info("🚀 Proteus Markets Test Contract Deployment")
     logger.info("=====================================")
     logger.info("Using micro transactions (penny contracts)")
     logger.info("Network: BASE Sepolia (Chain ID: 84532)")

@@ -162,12 +162,12 @@ class BettingContract {
 
     async init() {
         // Check if wallet is connected
-        if (!window.clockchainWallet || !window.clockchainWallet.isConnected) {
+        if (!window.proteusWallet || !window.proteusWallet.isConnected) {
             throw new Error('Please connect your wallet first');
         }
 
         // Get wallet adapter (works with both MetaMask and Coinbase)
-        const wallet = window.clockchainWallet;
+        const wallet = window.proteusWallet;
         const provider = wallet.adapter || wallet.provider || window.ethereum;
 
         if (!provider) {
@@ -214,7 +214,7 @@ class BettingContract {
     async switchToBaseSepolia() {
         try {
             // Use wallet adapter if available
-            const wallet = window.clockchainWallet;
+            const wallet = window.proteusWallet;
             const provider = wallet?.adapter || wallet?.provider || window.ethereum;
 
             await provider.request({

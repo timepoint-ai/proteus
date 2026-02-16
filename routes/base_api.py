@@ -230,7 +230,7 @@ def network_status():
             },
             'contracts_loaded': {
                 'PredictionMarket': blockchain_service.contracts['PredictionMarket'] is not None,
-                'ClockchainOracle': blockchain_service.contracts['ClockchainOracle'] is not None,
+                'ClockchainOracle': blockchain_service.contracts['ClockchainOracle'] is not None,  # Legacy contract name
                 'NodeRegistry': blockchain_service.contracts['NodeRegistry'] is not None,
                 'PayoutManager': blockchain_service.contracts['PayoutManager'] is not None
             }

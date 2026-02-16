@@ -1,6 +1,6 @@
 # Setup Guide
 
-**v0 Alpha** -- Development environment setup for the Clockchain prototype.
+**v0 Alpha** -- Development environment setup for the Proteus Markets prototype.
 
 ## Prerequisites
 
@@ -12,8 +12,8 @@
 ## 1. Clone and Install
 
 ```bash
-git clone https://github.com/clockchain/clockchain-prediction-market
-cd clockchain-prediction-market
+git clone https://github.com/proteus-markets/proteus-markets
+cd proteus-markets
 
 # Install Node dependencies
 npm install

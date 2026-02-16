@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title PredictionMarket
- * @dev Core prediction market contract for Clockchain on BASE
+ * @dev Core prediction market contract for Proteus Markets on BASE (originally deployed as Clockchain)
  */
 contract PredictionMarket is ReentrancyGuard, Ownable {
 

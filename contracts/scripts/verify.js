@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  console.log("Starting contract verification on Basescan...");
+  console.log("Starting Proteus Markets contract verification on Basescan...");
 
   // Load deployment info
   const network = hre.network.name;
@@ -27,7 +27,7 @@ async function main() {
     console.log("❌ PredictionMarket verification failed:", error.message);
   }
 
-  // Verify ClockchainOracle
+  // Verify ClockchainOracle (legacy contract name)
   console.log("\n2. Verifying ClockchainOracle...");
   try {
     await hre.run("verify:verify", {

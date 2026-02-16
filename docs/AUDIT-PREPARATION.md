@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Clockchain is a v0 alpha prediction market protocol where users stake ETH on predicting the exact text of social media posts. Winner determination uses **on-chain Levenshtein distance** -- a continuous scoring metric, not binary yes/no. The protocol currently uses an **owner-based resolution model** (centralized prototype) with a designed upgrade path to decentralized oracle consensus.
+Proteus Markets is a v0 alpha prediction market protocol where users stake ETH on predicting the exact text of social media posts. Winner determination uses **on-chain Levenshtein distance** -- a continuous scoring metric, not binary yes/no. The protocol currently uses an **owner-based resolution model** (centralized prototype) with a designed upgrade path to decentralized oracle consensus.
 
 **Audit Focus:** The MVP contracts that would handle real user funds on BASE mainnet. No audit has been engaged yet -- this document is prepared for when that happens.
 

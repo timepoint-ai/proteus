@@ -122,7 +122,7 @@ All data is fetched from blockchain. Zero database.
 routes/
 ├── api_chain.py            # /api/chain/* - blockchain queries
 ├── auth.py                 # /auth/* - JWT wallet auth + OTP (Redis-backed)
-├── clockchain.py           # /clockchain/* - market operations + admin resolution
+├── proteus.py              # /proteus/* - market operations + admin resolution
 ├── embedded_auth.py        # /api/embedded/* - Coinbase wallet auth
 ├── admin.py                # /admin/* - resolution dashboard
 ├── error_handlers.py       # Standardized error handling

@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting Phase 9 & 10 deployment to BASE Sepolia...");
+  console.log("Starting Proteus Markets Phase 9 & 10 deployment to BASE Sepolia...");
 
   // Get deployer account
   const [deployer] = await ethers.getSigners();
@@ -28,7 +28,7 @@ async function main() {
   await enhancedMarket.deployed();
   console.log("EnhancedPredictionMarket deployed to:", enhancedMarket.address);
 
-  // Deploy updated ClockchainOracle that works with new contracts
+  // Deploy updated ClockchainOracle that works with new contracts (legacy contract name)
   console.log("\n=== Deploying Enhanced ClockchainOracle ===");
   
   const ClockchainOracle = await hre.ethers.getContractFactory("ClockchainOracle");

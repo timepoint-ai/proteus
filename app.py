@@ -61,11 +61,11 @@ def create_app():
     from routes.api_chain import api_chain_bp  # Phase 3: Chain-only API routes
     from routes.embedded_auth import embedded_auth  # Coinbase Embedded Wallet authentication
 
-    from routes.clockchain import clockchain_bp
+    from routes.proteus import proteus_bp
     from routes.ai_agent_api import ai_agent_api_bp, init_limiter
     from routes.marketing import marketing_bp
     from routes.actors import actors_bp
-    from routes.clockchain_api import clockchain_api_bp
+    from routes.proteus_api import proteus_api_bp
     from routes.oracles import oracles_bp
     from routes.base_api import base_api_bp
     from routes.oracle_manual import oracle_manual_bp
@@ -81,10 +81,10 @@ def create_app():
     app.register_blueprint(base_api_bp, url_prefix='/api/base')
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    app.register_blueprint(clockchain_bp)
+    app.register_blueprint(proteus_bp)
     app.register_blueprint(ai_agent_api_bp, url_prefix='/ai_agent')
     app.register_blueprint(actors_bp)
-    app.register_blueprint(clockchain_api_bp)
+    app.register_blueprint(proteus_api_bp)
     app.register_blueprint(oracles_bp)
     app.register_blueprint(oracle_manual_bp)
     app.register_blueprint(node_api_bp)

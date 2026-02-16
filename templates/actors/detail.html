@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ actor.name }} - Clockchain{% endblock %}
+{% block title %}{{ actor.name }} - Proteus Markets{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -24,7 +24,7 @@
                     <a href="/actors" class="btn btn-secondary">
                         <i class="fas fa-users"></i> All Actors
                     </a>
-                    <a href="/clockchain" class="btn btn-secondary">
+                    <a href="/proteus" class="btn btn-secondary">
                         <i class="fas fa-clock"></i> Timeline
                     </a>
                 </div>
@@ -95,7 +95,7 @@
                                     <td>{{ market_data.submissions|length }}</td>
                                     <td>{{ market_data.volume }} ETH</td>
                                     <td>
-                                        <a href="/clockchain/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="/proteus/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
                                             View Details
                                         </a>
                                     </td>
@@ -161,7 +161,7 @@
                                     </td>
                                     <td>{{ market_data.volume }} ETH</td>
                                     <td>
-                                        <a href="/clockchain/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="/proteus/market/{{ market_data.market.id }}" class="btn btn-sm btn-outline-primary">
                                             View Details
                                         </a>
                                     </td>

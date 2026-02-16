@@ -1,5 +1,5 @@
 """
-Health Check Service for Clockchain
+Health Check Service for Proteus Markets
 Provides production monitoring for blockchain and API health.
 
 Note: Database-dependent checks were removed in Phase 7 (chain-only mode).

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Oracle {{ oracle_info.wallet[:8] }}...{{ oracle_info.wallet[-6:] }} - Clockchain{% endblock %}
+{% block title %}Oracle {{ oracle_info.wallet[:8] }}...{{ oracle_info.wallet[-6:] }} - Proteus Markets{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -91,7 +91,7 @@
                                 <td>{{ data.submission.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                 <td>
                                     {% if data.market %}
-                                        <a href="{{ url_for('clockchain.submission_detail', submission_id=data.submission.market_id) }}" class="text-decoration-none">
+                                        <a href="{{ url_for('proteus.submission_detail', submission_id=data.submission.market_id) }}" class="text-decoration-none">
                                             #{{ data.market.id|string|truncate(8, True, '') }}
                                         </a>
                                     {% else %}

@@ -1,5 +1,5 @@
 {
-  "name": "clockchain-prediction-market",
+  "name": "proteus-markets",
   "version": "1.0.0",
   "description": "Decentralized prediction market on BASE blockchain",
   "main": "index.js",

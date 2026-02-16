@@ -1,8 +1,8 @@
-# Clockchain Launch Guide - BASE Blockchain Deployment
+# Proteus Markets Launch Guide - BASE Blockchain Deployment
 
 ## Executive Summary
 
-This guide outlines the complete process for launching Clockchain as a fully decentralized, wallet-connected platform on Coinbase BASE blockchain. Like OpenSea, all user interactions will be determined by their connected wallet, with complete transparency of on-chain data.
+This guide outlines the complete process for launching Proteus Markets as a fully decentralized, wallet-connected platform on Coinbase BASE blockchain. Like OpenSea, all user interactions will be determined by their connected wallet, with complete transparency of on-chain data.
 
 ## Phase 1: Pre-Launch Requirements
 
@@ -37,8 +37,8 @@ npm install @coinbase/wallet-sdk
 // Initialize in app
 import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
 
-const APP_NAME = 'Clockchain';
-const APP_LOGO_URL = 'https://clockchain.io/logo.svg';
+const APP_NAME = 'Proteus Markets';
+const APP_LOGO_URL = 'https://proteus.markets/logo.svg';
 const DEFAULT_ETH_JSONRPC_URL = 'https://mainnet.base.org';
 const DEFAULT_CHAIN_ID = 8453; // BASE mainnet
 
@@ -211,7 +211,7 @@ const getGenesisDirectory = async () => {
 ```javascript
 // scripts/test-full-platform.js
 async function testPlatform() {
-  console.log("🧪 Testing Clockchain on BASE Sepolia");
+  console.log("🧪 Testing Proteus Markets on BASE Sepolia");
   
   // 1. Test Genesis NFT minting
   await testGenesisMinting();

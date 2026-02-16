@@ -98,7 +98,7 @@ class TimelineBlockchain {
                 <div class="text-center py-5">
                     <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
                     <p class="text-muted">No markets found on blockchain yet</p>
-                    <a href="/clockchain/create" class="btn btn-primary mt-3">
+                    <a href="/proteus/create" class="btn btn-primary mt-3">
                         <i class="fas fa-plus"></i> Create First Market
                     </a>
                 </div>
@@ -263,11 +263,11 @@ class TimelineBlockchain {
                                     </span>
                                 </div>
                                 <div>
-                                    <a href="/clockchain/market/${market.id}" class="btn btn-sm btn-outline-primary">
+                                    <a href="/proteus/market/${market.id}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye me-1"></i> View Details
                                     </a>
                                     ${status === 'active' ? `
-                                        <button class="btn btn-sm btn-primary ms-2" onclick="window.location.href='/clockchain/market/${market.id}#submit'">
+                                        <button class="btn btn-sm btn-primary ms-2" onclick="window.location.href='/proteus/market/${market.id}#submit'">
                                             <i class="fas fa-plus me-1"></i> Submit Prediction
                                         </button>
                                     ` : ''}
@@ -409,7 +409,7 @@ class TimelineBlockchain {
 
 // Initialize on timeline pages
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.includes('/clockchain')) {
+    if (window.location.pathname.includes('/proteus')) {
         // Wait for marketBlockchain to initialize
         const checkInterval = setInterval(() => {
             if (window.marketBlockchain?.initialized) {

@@ -74,7 +74,7 @@ class WalletAuthService:
             
     def generate_auth_message(self, address: str, nonce: str) -> str:
         """Generate a message for the user to sign"""
-        return f"Sign this message to authenticate with Clockchain.\n\nWallet: {address}\nNonce: {nonce}\nTimestamp: {datetime.now(timezone.utc).isoformat()}"
+        return f"Sign this message to authenticate with Proteus Markets.\n\nWallet: {address}\nNonce: {nonce}\nTimestamp: {datetime.now(timezone.utc).isoformat()}"
         
     def create_jwt_token(self, address: str) -> str:
         """Create a JWT token for the authenticated wallet"""

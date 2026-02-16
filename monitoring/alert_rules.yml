@@ -1,7 +1,7 @@
 {
   "groups": [
     {
-      "name": "clockchain_alerts",
+      "name": "proteus_alerts",
       "interval": "30s",
       "rules": [
         {

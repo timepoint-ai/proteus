@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Detail - {{ submission.actor.name }} - Proteus Markets{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Submission Detail</h1>
+                <div class="d-flex gap-2">
+                    <a href="/proteus" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Timeline
+                    </a>
+                    <a href="/proteus/market/{{ submission.market.id }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-line"></i> View Full Market
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Overview -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <span class="text-primary">{{ submission.actor.name }}</span> - 
+                        <span class="badge bg-{{ 'success' if submission.is_winner else 'secondary' }}">
+                            {{ 'Winner' if submission.is_winner else submission.submission_type|title }} Submission
+                        </span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="prediction-text mb-4">
+                        <h6>Predicted Text:</h6>
+                        <div class="bg-dark text-white p-3 rounded border">
+                            <em>"{{ submission.predicted_text or '[No prediction - Null submission]' }}"</em>
+                        </div>
+                    </div>
+
+                    {% if submission.market.status == 'resolved' and submission.resolution %}
+                    <div class="resolution-info mb-4">
+                        <h6>Resolution:</h6>
+                        <div class="bg-success text-white p-3 rounded border">
+                            <div>Actual Text: <em>"{{ submission.resolution.text }}"</em></div>
+                            {% if submission.levenshtein_distance is not none %}
+                            <div class="mt-2">
+                                <span class="badge bg-info">Levenshtein Distance: {{ submission.levenshtein_distance }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Market Details:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Time Window:</strong> {{ submission.market.start_time.strftime('%Y-%m-%d %H:%M') }} to {{ submission.market.end_time.strftime('%Y-%m-%d %H:%M') }}</li>
+                                <li><strong>Market Status:</strong> <span class="badge bg-{{ 'success' if submission.market.status == 'resolved' else 'primary' if submission.market.status == 'active' else 'secondary' }}">{{ submission.market.status|title }}</span></li>
+                                <li><strong>Created:</strong> {{ submission.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Submission Details:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Creator:</strong> <code>{{ submission.creator_wallet }}</code></li>
+                                <li><strong>Initial Stake:</strong> {{ submission.initial_stake_amount }} {{ submission.currency }}</li>
+                                <li><strong>Transaction:</strong> <a href="#" class="text-decoration-none"><code>{{ submission.transaction_hash[:20] }}...</code></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Betting Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h2 class="mb-0">{{ submission.total_volume }} {{ submission.currency }}</h2>
+                        <small class="text-muted">Total Volume</small>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="mb-0">{{ submission.bet_count }}</h4>
+                            <small class="text-muted">Total Bets</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="mb-0">{{ submission.competing_submissions|length }}</h4>
+                            <small class="text-muted">Competing</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competing Submissions -->
+    {% if submission.competing_submissions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Competing Submissions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Predicted Text</th>
+                                    <th>Creator</th>
+                                    <th>Initial Stake</th>
+                                    <th>Status</th>
+                                    {% if submission.market.status == 'resolved' %}
+                                    <th>Levenshtein Distance</th>
+                                    {% endif %}
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in submission.competing_submissions %}
+                                <tr>
+                                    <td>
+                                        <em>"{{ comp.predicted_text[:50] }}{% if comp.predicted_text|length > 50 %}...{% endif %}"</em>
+                                    </td>
+                                    <td><code>{{ comp.creator_wallet[:10] }}...</code></td>
+                                    <td>{{ comp.initial_stake }} {{ comp.currency }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if comp.is_winner else 'secondary' }}">
+                                            {{ 'Winner' if comp.is_winner else 'Competing' }}
+                                        </span>
+                                    </td>
+                                    {% if submission.market.status == 'resolved' %}
+                                    <td>
+                                        {% if comp.levenshtein_distance is not none %}
+                                        <span class="badge bg-info">{{ comp.levenshtein_distance }}</span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <a href="/proteus/submission/{{ comp.id }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bets Placed -->
+    {% if submission.bets %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Bets Placed on This Submission</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Bettor</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bet in submission.bets %}
+                                <tr>
+                                    <td><code>{{ bet.bettor_wallet[:10] }}...{{ bet.bettor_wallet[-6:] }}</code></td>
+                                    <td>{{ bet.amount }} {{ bet.currency }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if bet.status == 'won' else 'danger' if bet.status == 'lost' else 'primary' if bet.status == 'confirmed' else 'secondary' }}">
+                                            {{ bet.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ bet.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Oracle Submissions -->
+    {% if submission.oracle_submissions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Oracle Submissions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Oracle</th>
+                                    <th>Submitted Text</th>
+                                    <th>Votes</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for oracle in submission.oracle_submissions %}
+                                <tr>
+                                    <td><code>{{ oracle.oracle_wallet[:10] }}...{{ oracle.oracle_wallet[-6:] }}</code></td>
+                                    <td>
+                                        <em>"{{ oracle.submitted_text[:50] }}{% if oracle.submitted_text and oracle.submitted_text|length > 50 %}...{% endif %}"</em>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ oracle.votes_for }}</span>
+                                        <span class="badge bg-danger">{{ oracle.votes_against }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if oracle.is_consensus else 'warning' if oracle.status == 'pending' else 'danger' }}">
+                                            {{ oracle.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ oracle.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

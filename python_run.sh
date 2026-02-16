@@ -1,7 +1,7 @@
 #!/bin/bash
-# Clockchain Secondary Node Run Script
+# Proteus Markets Secondary Node Run Script
 
-echo "Starting Clockchain Secondary Node..."
+echo "Starting Proteus Markets Secondary Node..."
 
 # Load node environment
 if [ -f ".env.node" ]; then
@@ -14,4 +14,4 @@ if [ -d "node_venv" ]; then
 fi
 
 # Run the node
-python3 clockchain_node_monolith.py
+python3 proteus_node_monolith.py

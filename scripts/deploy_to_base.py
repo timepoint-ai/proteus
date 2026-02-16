@@ -20,7 +20,7 @@ def load_contract_artifact(contract_name):
         return json.load(f)
 
 def deploy_contracts(network='testnet'):
-    """Deploy all Clockchain contracts to BASE"""
+    """Deploy all Proteus Markets contracts to BASE"""
     
     # Network configuration
     if network == 'mainnet':
@@ -66,6 +66,7 @@ def deploy_contracts(network='testnet'):
     
     try:
         # Deploy contracts in order
+        # Note: ClockchainOracle is a legacy contract name — deployed on-chain as ClockchainOracle
         contracts_to_deploy = [
             'NodeRegistry',
             'ClockchainOracle',
@@ -204,7 +205,7 @@ def verify_deployment(network='testnet'):
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser(description='Deploy Clockchain contracts to BASE')
+    parser = argparse.ArgumentParser(description='Deploy Proteus Markets contracts to BASE')
     parser.add_argument('--network', choices=['testnet', 'mainnet'], default='testnet',
                        help='Network to deploy to')
     parser.add_argument('--verify', action='store_true',

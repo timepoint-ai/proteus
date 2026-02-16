@@ -94,7 +94,7 @@ async function main() {
   
   console.log("\n💰 REVENUE BREAKDOWN AT SCALE");
   console.log("═══════════════════════════════════════════════════════════");
-  console.log("If Clockchain reaches $1M daily volume:");
+  console.log("If Proteus Markets reaches $1M daily volume:");
   console.log("• Platform fees (7%):        $70,000/day");
   console.log("• Genesis share (20% of fees): $14,000/day");
   console.log("• YOUR INCOME (100 NFTs):    $14,000/day = $420,000/month!");

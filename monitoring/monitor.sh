@@ -1,11 +1,11 @@
 #!/bin/bash
-# Clockchain Production Monitoring Script
+# Proteus Markets Production Monitoring Script
 # Run this every 5 minutes via cron
 
 # Configuration
 WEBHOOK_URL="${MONITORING_WEBHOOK_URL}"
-LOG_FILE="/var/log/clockchain/monitoring.log"
-ALERT_FILE="/var/log/clockchain/alerts.json"
+LOG_FILE="/var/log/proteus/monitoring.log"
+ALERT_FILE="/var/log/proteus/alerts.json"
 
 # Function to send alert
 send_alert() {

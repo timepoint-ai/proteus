@@ -76,7 +76,7 @@ The core primitive works:
 |----------|-------|-----------|---------|
 | Coinbase/Kalshi | Binary yes/no | No (Kalshi backend) | Binary |
 | Polymarket | Binary yes/no | Yes (Polygon) | Binary |
-| **Clockchain** | Text prediction | Yes (BASE) | Levenshtein distance |
+| **Proteus Markets** | Text prediction | Yes (BASE) | Levenshtein distance |
 
 The gap we're exploring: continuous scoring on a metric space vs binary outcomes. As AI capabilities improve, binary markets lose edge (trivially computable). Text prediction markets gain depth (exponential outcome space, continuous payoff gradient).
 

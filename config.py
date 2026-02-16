@@ -3,7 +3,7 @@ from datetime import timedelta
 
 
 class Config:
-    """Application configuration for Clockchain prediction market.
+    """Application configuration for Proteus Markets prediction market.
 
     Contains settings for:
     - Celery (background task processing)

@@ -1,5 +1,5 @@
 /**
- * Market Blockchain Integration for Clockchain
+ * Market Blockchain Integration for Proteus Markets
  * Handles direct blockchain queries for market data
  * Uses PredictionMarketV2 contract with full resolution mechanism
  */
@@ -38,8 +38,8 @@ class MarketBlockchain {
             }
 
             // Use wallet provider if available, otherwise use read-only provider
-            if (window.clockchainWallet && window.clockchainWallet.provider) {
-                this.web3 = new Web3(window.clockchainWallet.provider);
+            if (window.proteusWallet && window.proteusWallet.provider) {
+                this.web3 = new Web3(window.proteusWallet.provider);
             } else {
                 // Use read-only provider for BASE Sepolia (for querying without wallet)
                 this.web3 = new Web3('https://sepolia.base.org');

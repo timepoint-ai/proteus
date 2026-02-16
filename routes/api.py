@@ -75,7 +75,7 @@ def health_check():
         return jsonify({
             'status': 'healthy',
             'timestamp': datetime.now(timezone.utc).isoformat(),
-            'service': 'clockchain-node'
+            'service': 'proteus-node'
         })
     except Exception as e:
         logger.error(f"Health check failed: {e}")

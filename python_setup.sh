@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Clockchain Secondary Node Setup Script
+# Proteus Markets Secondary Node Setup Script
 # Usage: ./python_setup.sh [--venv] [--no-install] [--generate-reqs]
 
 echo "============================================"
-echo "Clockchain Secondary Node Setup"
+echo "Proteus Markets Secondary Node Setup"
 echo "============================================"
 
 # Parse command line arguments
@@ -54,7 +54,7 @@ fi
 if [ "$GENERATE_REQS" = true ]; then
     echo "Generating requirements.txt..."
     cat > requirements_node.txt << EOF
-# Clockchain Secondary Node Requirements
+# Proteus Markets Secondary Node Requirements
 eth-account==0.11.0
 web3==6.15.1
 python-dotenv==1.0.1
@@ -100,7 +100,7 @@ print(f'{account.address}:{account.key.hex()}')
     
     # Create .env.node file
     cat > .env.node << EOF
-# Clockchain Secondary Node Configuration
+# Proteus Markets Secondary Node Configuration
 # Generated on $(date)
 
 # Node Identity
@@ -154,9 +154,9 @@ if [ ! -f "python_run.sh" ]; then
     echo "Creating run script..."
     cat > python_run.sh << 'EOF'
 #!/bin/bash
-# Clockchain Secondary Node Run Script
+# Proteus Markets Secondary Node Run Script
 
-echo "Starting Clockchain Secondary Node..."
+echo "Starting Proteus Markets Secondary Node..."
 
 # Load node environment
 if [ -f ".env.node" ]; then
@@ -169,7 +169,7 @@ if [ -d "node_venv" ]; then
 fi
 
 # Run the node
-python3 clockchain_node_monolith.py
+python3 proteus_node_monolith.py
 EOF
     chmod +x python_run.sh
 fi
@@ -178,9 +178,9 @@ if [ ! -f "python_test.sh" ]; then
     echo "Creating test script..."
     cat > python_test.sh << 'EOF'
 #!/bin/bash
-# Clockchain Secondary Node Test Script
+# Proteus Markets Secondary Node Test Script
 
-echo "Testing Clockchain Secondary Node Setup..."
+echo "Testing Proteus Markets Secondary Node Setup..."
 
 # Load node environment
 if [ -f ".env.node" ]; then

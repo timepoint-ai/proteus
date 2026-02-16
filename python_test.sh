@@ -1,7 +1,7 @@
 #!/bin/bash
-# Clockchain Secondary Node Test Script
+# Proteus Markets Secondary Node Test Script
 
-echo "Testing Clockchain Secondary Node Setup..."
+echo "Testing Proteus Markets Secondary Node Setup..."
 
 # Load node environment
 if [ -f ".env.node" ]; then

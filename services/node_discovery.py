@@ -28,9 +28,9 @@ class NodeDiscovery:
         self.known_nodes: Set[str] = set(Config.KNOWN_NODES)
         self.active_peers: Dict[str, Dict] = {}
         self.bootstrap_nodes = [
-            "ws://clockchain-seed1.base.org:8545",
-            "ws://clockchain-seed2.base.org:8545", 
-            "ws://clockchain-seed3.base.org:8545"
+            "ws://proteus-seed1.base.org:8545",
+            "ws://proteus-seed2.base.org:8545",
+            "ws://proteus-seed3.base.org:8545"
         ]
         self.dht: Dict[str, List[str]] = {}  # Simplified DHT
         self.node_id = Config.NODE_OPERATOR_ID

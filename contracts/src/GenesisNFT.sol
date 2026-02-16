@@ -8,7 +8,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title GenesisNFT
- * @dev Fixed supply of 100 Genesis NFTs providing founder rewards
+ * @dev Part of the Proteus Markets protocol (formerly Clockchain).
+ * Fixed supply of 100 Genesis NFTs providing founder rewards.
  * Features:
  * - Immutable 100 NFT cap
  * - On-chain SVG art generation
@@ -35,6 +36,7 @@ contract GenesisNFT is ERC721Enumerable {
     /**
      * @dev Constructor sets up the NFT with a 24-hour minting window
      */
+    // Legacy: ERC721 name is immutable on-chain. 60 NFTs already minted with "Clockchain Genesis" branding.
     constructor() ERC721("Clockchain Genesis", "GENESIS") {
         mintingDeadline = block.timestamp + MINTING_WINDOW;
         _tokenIdCounter = 1; // Start from token ID 1
@@ -127,6 +129,7 @@ contract GenesisNFT is ERC721Enumerable {
             'GENESIS #', tokenId.toString(),
             '</text>',
             '<text x="250" y="475" font-family="monospace" font-size="14" fill="white" text-anchor="middle" opacity="0.8">',
+            // Legacy: on-chain SVG text for all minted Genesis NFTs. Cannot be changed retroactively.
             'CLOCKCHAIN FOUNDER',
             '</text>',
             '</svg>'

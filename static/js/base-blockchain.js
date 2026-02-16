@@ -1,5 +1,5 @@
 /**
- * BASE Blockchain Integration for Clockchain
+ * BASE Blockchain Integration for Proteus Markets
  * Handles smart contract interactions and transaction management
  */
 
@@ -29,7 +29,7 @@ class BaseBlockchain {
         // Contract addresses (will be set from environment)
         this.contracts = {
             PredictionMarket: null,
-            ClockchainOracle: null,
+            ClockchainOracle: null, // Legacy contract name — deployed on-chain as ClockchainOracle
             NodeRegistry: null,
             PayoutManager: null
         };
@@ -130,7 +130,7 @@ class BaseBlockchain {
                     this.wallet.showSuccess('Market created successfully!');
                     
                     // Redirect to market detail page
-                    window.location.href = `/clockchain/market/${marketId}`;
+                    window.location.href = `/proteus/market/${marketId}`;
                 } else {
                     throw new Error('Web3 provider not found. Please connect your wallet.');
                 }
@@ -355,8 +355,8 @@ class BaseBlockchain {
 document.addEventListener('DOMContentLoaded', () => {
     // Wait for wallet to be initialized
     setTimeout(() => {
-        if (typeof clockchainWallet !== 'undefined') {
-            window.baseBlockchain = new BaseBlockchain(clockchainWallet);
+        if (typeof proteusWallet !== 'undefined') {
+            window.baseBlockchain = new BaseBlockchain(proteusWallet);
         }
     }, 100);
 });

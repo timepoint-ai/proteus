@@ -55,7 +55,7 @@ class TestEmailServiceInit:
             os.environ.pop('FROM_EMAIL', None)
             from services.email_service import EmailService
             service = EmailService()
-            assert service.from_email == 'noreply@clockchain.app'
+            assert service.from_email == 'noreply@proteus.markets'
 
     @pytest.mark.unit
     def test_custom_from_email(self):

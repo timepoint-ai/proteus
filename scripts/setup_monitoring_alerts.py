@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Monitoring Alert Setup for Clockchain
+Production Monitoring Alert Setup for Proteus Markets
 Sets up comprehensive monitoring for BASE mainnet deployment
 """
 
@@ -23,7 +23,7 @@ class MonitoringSetup:
         """Create comprehensive monitoring configuration"""
         
         config = {
-            "name": "Clockchain Production Monitoring",
+            "name": "Proteus Markets Production Monitoring",
             "created": datetime.now(timezone.utc).isoformat(),
             "network": "base-mainnet",
             "alerts": []
@@ -194,13 +194,13 @@ class MonitoringSetup:
         """Generate monitoring script for cron job"""
         
         script = """#!/bin/bash
-# Clockchain Production Monitoring Script
+# Proteus Markets Production Monitoring Script
 # Run this every 5 minutes via cron
 
 # Configuration
 WEBHOOK_URL="${MONITORING_WEBHOOK_URL}"
-LOG_FILE="/var/log/clockchain/monitoring.log"
-ALERT_FILE="/var/log/clockchain/alerts.json"
+LOG_FILE="/var/log/proteus/monitoring.log"
+ALERT_FILE="/var/log/proteus/alerts.json"
 
 # Function to send alert
 send_alert() {
@@ -260,7 +260,7 @@ main
         rules = {
             "groups": [
                 {
-                    "name": "clockchain_alerts",
+                    "name": "proteus_alerts",
                     "interval": "30s",
                     "rules": [
                         {
@@ -322,7 +322,7 @@ main
         """Generate setup instructions for monitoring"""
         
         instructions = """
-# Clockchain Production Monitoring Setup Guide
+# Proteus Markets Production Monitoring Setup Guide
 
 ## 1. Free Monitoring Options
 

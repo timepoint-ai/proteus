@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate Test Wallet Configuration for Clockchain
+Validate Test Wallet Configuration for Proteus Markets
 
 This script checks that all required test wallet environment variables are properly configured
 for BASE Sepolia testnet testing.
@@ -81,7 +81,7 @@ def check_wallet_balance(w3, address):
 
 def main():
     """Main validation function"""
-    print(f"\n{Colors.BOLD}Clockchain Test Wallet Configuration Validator{Colors.RESET}")
+    print(f"\n{Colors.BOLD}Proteus Markets Test Wallet Configuration Validator{Colors.RESET}")
     print(f"Validating configuration for BASE Sepolia (Chain ID: {BASE_SEPOLIA_CHAIN_ID})\n")
     
     # Initialize Web3

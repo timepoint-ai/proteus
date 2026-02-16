@@ -22,7 +22,7 @@ with open('deployment-base-sepolia.json', 'r') as f:
 # Initialize Web3
 w3 = Web3(Web3.HTTPProvider('https://sepolia.base.org'))
 print("=" * 60)
-print("CLOCKCHAIN TEST TRANSACTIONS - SIMPLE")
+print("PROTEUS MARKETS TEST TRANSACTIONS - SIMPLE")
 print("Phase 7 Complete - Blockchain-Only System")
 print("=" * 60)
 

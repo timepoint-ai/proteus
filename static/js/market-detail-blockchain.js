@@ -69,8 +69,8 @@ class MarketDetailBlockchain {
         }
 
         // Get user address if wallet connected
-        if (window.clockchainWallet?.isConnected) {
-            this.userAddress = window.clockchainWallet.address?.toLowerCase();
+        if (window.proteusWallet?.isConnected) {
+            this.userAddress = window.proteusWallet.address?.toLowerCase();
         }
     }
 
@@ -300,7 +300,7 @@ class MarketDetailBlockchain {
     async handleSubmissionCreate() {
         try {
             // Check wallet connection
-            if (!window.clockchainWallet?.isConnected) {
+            if (!window.proteusWallet?.isConnected) {
                 alert('Please connect your wallet first');
                 return;
             }
@@ -369,7 +369,7 @@ class MarketDetailBlockchain {
     async handleClaimPayout(submissionId) {
         try {
             // Check wallet connection
-            if (!window.clockchainWallet?.isConnected) {
+            if (!window.proteusWallet?.isConnected) {
                 alert('Please connect your wallet first');
                 return;
             }
@@ -421,7 +421,7 @@ class MarketDetailBlockchain {
     async handleRefund() {
         try {
             // Check wallet connection
-            if (!window.clockchainWallet?.isConnected) {
+            if (!window.proteusWallet?.isConnected) {
                 alert('Please connect your wallet first');
                 return;
             }
@@ -473,7 +473,7 @@ class MarketDetailBlockchain {
 // Initialize on market detail pages
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
-    const marketMatch = path.match(/\/clockchain\/market\/(\d+)/);
+    const marketMatch = path.match(/\/proteus\/market\/(\d+)/);
 
     if (marketMatch) {
         const marketId = parseInt(marketMatch[1]);

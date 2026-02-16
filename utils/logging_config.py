@@ -23,7 +23,7 @@ def add_app_context(
     logger: logging.Logger, method_name: str, event_dict: dict[str, Any]
 ) -> dict[str, Any]:
     """Add application context to log entries."""
-    event_dict["app"] = "clockchain"
+    event_dict["app"] = "proteus"
     event_dict["environment"] = os.environ.get("FLASK_ENV", "development")
     return event_dict
 

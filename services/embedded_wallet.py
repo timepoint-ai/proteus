@@ -333,6 +333,7 @@ class EmbeddedWalletService:
             )
         master_secret = os.environ.get('MASTER_WALLET_SECRET', 'default-secret-change-in-production')
         combined = f"{master_secret}:{identifier}"
+        # Legacy salt — do not change without migrating existing wallets
         return hashlib.pbkdf2_hmac('sha256', combined.encode(), b'clockchain', 100000)
     
     def _generate_jwt(self, wallet_data: Dict) -> str:

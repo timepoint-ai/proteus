@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Clockchain Contracts - Phase 1 Test", function () {
+describe("Proteus Markets Contracts - Phase 1 Test", function () {
   let predictionMarket, oracle, nodeRegistry, payoutManager;
   let owner, oracle1, oracle2, oracle3, user1, user2;
 
@@ -134,7 +134,7 @@ describe("Clockchain Contracts - Phase 1 Test", function () {
 
   describe("NodeRegistry", function () {
     it("Should register a node", async function () {
-      const endpoint = "https://node1.clockchain.io";
+      const endpoint = "https://node1.proteus.markets";
       const stakeAmount = ethers.parseEther("100");
 
       const tx = await nodeRegistry.connect(user1).registerNode(
@@ -164,7 +164,7 @@ describe("Clockchain Contracts - Phase 1 Test", function () {
       // 1. Register nodes
       console.log("1. Registering nodes...");
       await nodeRegistry.connect(oracle1).registerNode(
-        "https://oracle1.clockchain.io",
+        "https://oracle1.proteus.markets",
         { value: ethers.parseEther("100") }
       );
       console.log("✅ Node registered");

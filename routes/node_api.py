@@ -17,7 +17,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.now(timezone.utc).isoformat(),
-        'service': 'clockchain_node'
+        'service': 'proteus_node'
     })
 
 @node_api_bp.route('/nodes/<address>', methods=['GET'])

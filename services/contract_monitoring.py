@@ -42,7 +42,7 @@ class ContractMonitoringService:
                 self.event_filters['MarketResolved'] = market_contract.events.MarketResolved.build_filter()
                 logger.info("PredictionMarket event filters initialized")
             
-            # ClockchainOracle events
+            # ClockchainOracle events (legacy contract name — deployed on-chain as ClockchainOracle)
             oracle_contract = self.blockchain_service.get_contract('ClockchainOracle')
             if oracle_contract:
                 self.event_filters['OracleDataSubmitted'] = oracle_contract.events.OracleDataSubmitted.build_filter()
@@ -129,7 +129,7 @@ class ContractMonitoringService:
                 if contract:
                     event = getattr(contract.events, event_name, None)
             elif event_name in ['OracleDataSubmitted', 'ConsensusReached']:
-                contract = self.blockchain_service.get_contract('ClockchainOracle')
+                contract = self.blockchain_service.get_contract('ClockchainOracle')  # Legacy contract name
                 if contract:
                     event = getattr(contract.events, event_name, None)
             elif event_name in ['NodeRegistered', 'NodeStaked', 'NodeSlashed']:

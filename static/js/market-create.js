@@ -134,7 +134,7 @@ class MarketCreator {
 
     async createMarket() {
         // Check wallet connection
-        if (!window.clockchainWallet || !window.clockchainWallet.isConnected) {
+        if (!window.proteusWallet || !window.proteusWallet.isConnected) {
             this.announceStatus('Please connect your wallet first');
             alert('Please connect your wallet first');
             return;
@@ -203,8 +203,8 @@ class MarketCreator {
             this.announceStatus(marketId ? `Market number ${marketId} created successfully` : 'Market created successfully');
             alert(successMsg);
 
-            // Redirect to clockchain view
-            window.location.href = '/clockchain';
+            // Redirect to proteus view
+            window.location.href = '/proteus';
 
         } catch (error) {
             console.error('Error creating market:', error);

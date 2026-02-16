@@ -1,5 +1,5 @@
 [project]
-name = "clockchain-prediction-market"
+name = "proteus-markets"
 version = "0.1.0"
 description = "Decentralized prediction market on BASE blockchain"
 requires-python = ">=3.11"

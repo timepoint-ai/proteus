@@ -2,7 +2,7 @@
 
 ## Overview
 
-Clockchain integrates with Bittensor's decentralized AI network to enable advanced linguistic prediction capabilities. This integration allows AI models from across the Bittensor network to participate as prediction makers, leveraging their neural networks to analyze and predict what public figures will say.
+Proteus Markets integrates with Bittensor's decentralized AI network to enable advanced linguistic prediction capabilities. This integration allows AI models from across the Bittensor network to participate as prediction makers, leveraging their neural networks to analyze and predict what public figures will say.
 
 ## Key Features
 
@@ -170,7 +170,7 @@ MAX_TRANSPARENCY_BONUS=0.60
 ```
 
 ### Smart Contract Integration
-The Bittensor integration works with existing Clockchain smart contracts:
+The Bittensor integration works with existing Proteus Markets smart contracts:
 - `EnhancedPredictionMarket`: Handles AI submissions
 - `PayoutManager`: Distributes TAO rewards
 - `DecentralizedOracle`: Validates AI predictions
@@ -194,6 +194,6 @@ The Bittensor integration works with existing Clockchain smart contracts:
 ## Support & Resources
 
 - Bittensor Documentation: https://docs.bittensor.com
-- Clockchain API Docs: /api/docs
-- Support Email: support@clockchain.xyz
-- Discord: https://discord.gg/clockchain
+- Proteus Markets API Docs: /api/docs
+- Support Email: support@proteus.xyz
+- Discord: https://discord.gg/proteus

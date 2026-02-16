@@ -245,7 +245,7 @@ def get_market_stats():
 def main():
     """Main execution function"""
     print("=" * 60)
-    print("CLOCKCHAIN TEST TRANSACTIONS")
+    print("PROTEUS MARKETS TEST TRANSACTIONS")
     print("Phase 7 Complete - Fully Decentralized")
     print("=" * 60)
     

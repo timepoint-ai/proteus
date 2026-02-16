@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting deployment to BASE Mainnet...");
+  console.log("Starting Proteus Markets deployment to BASE Mainnet...");
   console.log("⚠️  WARNING: This is a mainnet deployment!");
   
   // Safety check
@@ -26,7 +26,7 @@ async function main() {
   await predictionMarket.deployed();
   console.log("PredictionMarket deployed to:", predictionMarket.address);
 
-  // Deploy ClockchainOracle
+  // Deploy ClockchainOracle (legacy contract name — deployed on-chain as ClockchainOracle)
   console.log("\n2. Deploying ClockchainOracle...");
   const ClockchainOracle = await hre.ethers.getContractFactory("ClockchainOracle");
   const oracle = await ClockchainOracle.deploy(predictionMarket.address);

@@ -1,4 +1,4 @@
-# Clockchain: Continuous-Gradient Prediction Markets via On-Chain Levenshtein Distance
+# Proteus Markets: Continuous-Gradient Prediction Markets via On-Chain Levenshtein Distance
 
 ### On the Information-Theoretic Collapse of Binary Markets and the Case for Metric-Scored Text Prediction
 
@@ -211,7 +211,7 @@ Each text prediction market encodes approximately 1,840 times more information t
 
 ### 4.4 Payoff Surface
 
-The Clockchain payout mechanism is winner-take-all:
+The Proteus Markets payout mechanism is winner-take-all:
 
 ```
 fee = ⌊pool × 700 / 10000⌋       // 7% platform fee (700 basis points)
@@ -253,7 +253,7 @@ This creates an incentive to submit early and confidently. Waiting to see others
 
 ### 5.1 Architecture
 
-Clockchain is deployed on BASE (Coinbase L2, OP Stack) with the following stack:
+Proteus Markets is deployed on BASE (Coinbase L2, OP Stack) with the following stack:
 
 ```
 Frontend (Web3.js, MetaMask / Coinbase Wallet SDK)
@@ -348,7 +348,7 @@ X is the only major platform where short-form text is the primary medium, posts 
 
 ### 6.1 The Roleplay Mechanism
 
-The dominant strategy for text prediction in Clockchain markets is to prompt a frontier large language model with a persona simulation request:
+The dominant strategy for text prediction in Proteus Markets is to prompt a frontier large language model with a persona simulation request:
 
 > *"You are @elonmusk. You are about to post on X about Starship. Write your exact post, including punctuation, numbers, and phrasing."*
 
@@ -605,7 +605,7 @@ If an AI predicts your exact words and publishes that prediction on-chain (publi
 - **Self-fulfilling**: The target sees the prediction and, consciously or unconsciously, uses similar phrasing. The prediction becomes accurate because it was made.
 - **Self-defeating**: The target deliberately avoids the predicted phrasing, increasing d_L for the AI predictor.
 
-On-chain predictions are publicly visible. A public figure who monitors Clockchain markets for their handle could game the system by deliberately deviating from predictions, penalizing AI predictors.
+On-chain predictions are publicly visible. A public figure who monitors Proteus Markets for their handle could game the system by deliberately deviating from predictions, penalizing AI predictors.
 
 **Open question:** Should predictions be hidden until resolution? A commit-reveal scheme for predictions would prevent this dynamic but would also prevent the price discovery that comes from observing others' predictions. The tradeoff between market transparency and prediction independence is unresolved.
 
@@ -751,7 +751,7 @@ This work has significant limitations that we state explicitly:
 
 ### Summary
 
-We have presented Clockchain, a prediction market protocol that scores predictions by on-chain Levenshtein edit distance rather than binary yes/no resolution. The key properties are:
+We have presented Proteus Markets, a prediction market protocol that scores predictions by on-chain Levenshtein edit distance rather than binary yes/no resolution. The key properties are:
 
 - **Information density**: ~1,840 bits per market versus 1 bit for binary contracts — a 1,840:1 improvement.
 - **Continuous payoff gradient**: Levenshtein distance is a proper metric, ensuring that every character of precision is rewarded and marginal improvements in modeling always translate to marginal improvements in expected payout.
@@ -768,7 +768,7 @@ The thesis example — Claude at distance 1 versus GPT at distance 8 on the same
 2. **External security audit.** The ~513 lines of in-scope Solidity require professional auditing before any mainnet deployment.
 3. **Live market validation.** Deploy to mainnet with real economic stakes and measure actual strategic behavior, market depth, and the relationship between AI capability and market outcomes.
 4. **Formal game-theoretic equilibrium analysis.** Characterize Nash equilibria for the Levenshtein-scored market under various competitor distributions and information structures.
-5. **Capability benchmarking.** Use Clockchain markets as a benchmark for AI language modeling capability, measuring d_L trends over time as a proxy for model improvement.
+5. **Capability benchmarking.** Use Proteus Markets as a benchmark for AI language modeling capability, measuring d_L trends over time as a proxy for model improvement.
 6. **Alternative scoring metrics.** Investigate Damerau-Levenshtein (adding transpositions), weighted edit distance (substitutions between similar characters cost less), or semantic-aware hybrid metrics.
 7. **Multi-prediction markets.** Extend from single-text prediction to predicting sequences of posts, enabling temporal modeling.
 8. **Regulatory engagement.** Work with CFTC staff during the event contract rulemaking process to establish text prediction markets as a well-defined contract category with appropriate integrity monitoring and insider trading surveillance.

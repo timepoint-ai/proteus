@@ -45,7 +45,7 @@ def capture_email():
     # Log the email capture (database removed in Phase 7)
     logger.info(f"Email capture: {email} from landing_page at {datetime.now(timezone.utc).isoformat()}")
 
-    flash('Thank you! We\'ll notify you when Clockchain launches.', 'success')
+    flash('Thank you! We\'ll notify you when Proteus Markets launches.', 'success')
     return redirect(url_for('marketing.index'))
 
 @marketing_bp.route('/dev')
@@ -56,9 +56,9 @@ def dev():
 
 @marketing_bp.route('/demo')
 def demo():
-    """Redirect to clockchain demo"""
-    logger.debug("Redirecting from marketing demo to clockchain view")
-    return redirect(url_for('clockchain.clockchain_view'))
+    """Redirect to proteus demo"""
+    logger.debug("Redirecting from marketing demo to proteus view")
+    return redirect(url_for('proteus.proteus_view'))
 
 @marketing_bp.route('/whitepaper')
 def whitepaper():

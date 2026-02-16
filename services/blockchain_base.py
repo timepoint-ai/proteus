@@ -31,7 +31,7 @@ class BaseBlockchainService:
         self.contracts = {
             'PredictionMarket': None,
             'PredictionMarketV2': None,  # New V2 with resolution mechanism
-            'ClockchainOracle': None,
+            'ClockchainOracle': None,  # Legacy contract name — deployed on-chain as ClockchainOracle
             'NodeRegistry': None,
             'PayoutManager': None,
             'ActorRegistry': None,

@@ -271,16 +271,19 @@
         <div class="row">
             <div class="col-lg-10 mx-auto">
                 <h1 class="hero-title">
-                    <span class="gradient-text">CLOCKCHAIN</span>
+                    <span class="gradient-text">PROTEUS</span>
                     <span class="alpha-badge">v0 ALPHA</span>
                 </h1>
                 <p class="lead mb-4" style="font-size: 1.15rem; color: #ccc; line-height: 1.8; max-width: 720px;">
-                    Prediction markets today ask yes/no questions. This prototype asks: <strong style="color: #fff;">what exactly will someone post?</strong>
-                    Players bet on the precise wording. The closer your guess, the more you win &mdash; scored character by character.
+                    <strong style="color: #fff;">Roleplaying markets.</strong>
+                    Assume a persona. Predict the exact text someone will post.
+                    The closer your words, the more you win &mdash; scored character by character
+                    via Levenshtein distance on Coinbase BASE.
                 </p>
                 <p style="color: #888; font-size: 0.95rem; margin-bottom: 2rem;">
-                    <span class="stat-number">$40B</span> in prediction market volume in 2025. All binary.
-                    This prototype explores what comes next.
+                    Named for the shapeshifting Greek oracle &mdash; Proteus rewards those who can
+                    become anyone and predict anything. <span class="stat-number">$40B</span> in prediction market
+                    volume in 2025. All binary. This is what comes next.
                 </p>
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="{{ url_for('marketing.whitepaper') }}" class="btn btn-primary btn-lg">
@@ -306,7 +309,8 @@
 
                 <p style="color: #b8b8b8; margin-bottom: 1.5rem;">
                     A market opens: <strong style="color: #fff;">What will @satyanadella post?</strong>
-                    Two frontier AI models and a human submit predictions. Then the actual post arrives:
+                    Players roleplay as Nadella &mdash; channeling his voice, anticipating his numbers, matching his syntax.
+                    Two frontier AI models submit predictions. Then the actual post arrives:
                 </p>
 
                 <div class="thesis-example">
@@ -389,6 +393,7 @@
                         A yes/no prediction market captures one binary outcome per question.
                         A 280-character post has ~2,240 bits of possible variation &mdash;
                         every word choice, every number, every comma is a dimension you can be right or wrong about.
+                        Proteus operates on a combinatorial outcome space with continuous-gradient payoff.
                         That's not a small upgrade. It's a different category of game.
                     </p>
                 </div>
@@ -397,17 +402,19 @@
                     <h5>No cliff. Every character counts.</h5>
                     <p>
                         In a yes/no market, you're either right or wrong &mdash; there's no partial credit.
-                        With edit distance scoring, getting 95% of the words right pays more than getting 90% right.
-                        There's no wasted accuracy. If you predict better, you earn more, always.
+                        Proteus uses distance-based scoring: getting 95% of the words right pays more than getting 90% right.
+                        There's no wasted accuracy. The payoff gradient is continuous &mdash; if you predict better, you earn more, always.
                     </p>
                 </div>
 
                 <div class="thesis-point">
-                    <h5>AI makes the game deeper, not shallower</h5>
+                    <h5>A reaction to AI fast takeoff</h5>
                     <p>
-                        As AI gets better at yes/no prediction, everyone converges on the same answer and there's nothing left to compete over.
-                        With text prediction, smarter models just raise the bar &mdash; the gap between a good guess and a great guess
-                        is still dozens of characters, each worth money. Better AI means bigger prizes, not smaller ones.
+                        As AI agents conquer binary prediction markets with advanced forecasting, everyone converges on the same answer
+                        and there's nothing left to compete over. Proteus thrives on this. Its O(m&times;n) Levenshtein complexity
+                        means smarter models just raise the bar &mdash; the gap between a good guess and a great guess
+                        is still dozens of characters, each worth money. Forecasting is the real sign of model intelligence,
+                        and Proteus tests it through highly constrained roleplaying.
                     </p>
                 </div>
 
@@ -416,7 +423,7 @@
                     Polymarket + Kalshi did <span class="stat-number">$40B</span> combined in 2025,
                     projected to reach <span class="stat-number">$222.5B</span> by 2026.
                     All of it is yes/no. None of it rewards precision.
-                    Meanwhile, X (formerly Twitter) now offers pay-per-use API access, making it practical to verify posts programmatically.
+                    Proteus connects the X Developer API for post verification and settles on Coinbase BASE for transparent, on-chain scoring.
                 </div>
             </div>
         </div>
@@ -435,19 +442,19 @@
                 <div class="step">
                     <span class="step-number">1</span>
                     <h5>Market opens</h5>
-                    <p>Someone creates a market: "What will @elonmusk post?" with a deadline and minimum stake.</p>
+                    <p>Someone creates a market: "What will @elonmusk post?" with a deadline and minimum stake on Coinbase BASE.</p>
                 </div>
 
                 <div class="step">
                     <span class="step-number">2</span>
-                    <h5>Participants predict</h5>
-                    <p>Submit exact text predictions + stake ETH. AI roleplayers, insiders, humans all compete.</p>
+                    <h5>Players roleplay</h5>
+                    <p>Become the persona. Submit the exact text you think they'll post + stake ETH. AI agents, humans, insiders &mdash; all compete in the same arena.</p>
                 </div>
 
                 <div class="step">
                     <span class="step-number">3</span>
                     <h5>The real post arrives</h5>
-                    <p>The actual text is submitted. A smart contract counts the <a href="#levenshtein" style="color: var(--primary-color);">edit distance</a> between every guess and the real post. Closest match wins the pool (minus 7% fee).</p>
+                    <p>Verified via the X Developer API. The smart contract computes <a href="#levenshtein" style="color: var(--primary-color);">Levenshtein distance</a> between every prediction and the real post. Closest match wins the pool (minus 7% fee).</p>
                 </div>
             </div>
         </div>
@@ -511,7 +518,7 @@
                     </a>
                 </div>
                 <div class="d-flex gap-4 justify-content-center" style="font-size: 0.95rem;">
-                    <a href="https://github.com/seanmcdonald/clockchain-prediction-market" target="_blank" class="text-decoration-none" style="color: var(--text-muted);">
+                    <a href="https://github.com/seanmcdonald/proteus-markets" target="_blank" class="text-decoration-none" style="color: var(--text-muted);">
                         <i class="fab fa-github me-1"></i> View source on GitHub
                     </a>
                     <a href="https://x.com/seanmcdonaldxyz" target="_blank" class="text-decoration-none" style="color: var(--text-muted);">

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Create Market - Clockchain{% endblock %}
+{% block title %}Create Market - Proteus Markets{% endblock %}
 
 {% block content %}
 <div class="container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('clockchain.clockchain_view') }}">Clockchain</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('proteus.proteus_view') }}">Proteus</a></li>
             <li class="breadcrumb-item"><a href="{{ url_for('admin.markets_view') }}">Markets</a></li>
             <li class="breadcrumb-item active">Create Market</li>
         </ol>
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check wallet status periodically
     setInterval(() => {
         const warning = document.getElementById('wallet-warning');
-        if (warning && clockchainWallet && clockchainWallet.isConnected) {
+        if (warning && proteusWallet && proteusWallet.isConnected) {
             warning.style.display = 'none';
         }
     }, 1000);

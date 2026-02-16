@@ -1,8 +1,8 @@
-# Clockchain Betting & Submission Guide
+# Proteus Markets Betting & Submission Guide
 
 ## Quick Start: Interact with Markets on BASE Sepolia
 
-This guide shows you how to easily place bets or create competing predictions on Clockchain markets using the BASE Sepolia testnet.
+This guide shows you how to easily place bets or create competing predictions on Proteus Markets using the BASE Sepolia testnet.
 
 ---
 
@@ -46,7 +46,7 @@ There are two prediction market contracts available:
 ### Step-by-Step Process:
 
 1. **Navigate to Market**
-   - Go to the market detail page (e.g., `/clockchain/market/0`)
+   - Go to the market detail page (e.g., `/proteus/market/0`)
    - You'll see the market details and current submissions
 
 2. **Connect Wallet**
@@ -202,7 +202,7 @@ function getMarketSubmissions(uint256 marketId) view returns (Submission[] memor
 ## Support
 
 For additional help:
-- View live markets: [/clockchain/timeline](/clockchain/timeline)
+- View live markets: [/proteus/timeline](/proteus/timeline)
 - Check your transactions: [BASE Sepolia Explorer](https://sepolia.basescan.org)
 - Contract verification: [Contract on Etherscan](https://sepolia.basescan.org/address/0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C)
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Clockchain Node Operator{% endblock %}</title>
+    <title>{% block title %}Proteus Node Operator{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
@@ -30,7 +30,7 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
                 <i class="fas fa-cube me-2"></i>
-                Clockchain Node
+                Proteus Node
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,9 +76,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('clockchain.clockchain_view') }}">
+                        <a class="nav-link" href="{{ url_for('proteus.proteus_view') }}">
                             <i class="fas fa-clock me-1"></i>
-                            Clockchain
+                            Proteus
                         </a>
                     </li>
                     <li class="nav-item">
@@ -135,7 +135,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ url_for('clockchain.resolution_dashboard') }}">
+                                <a class="dropdown-item" href="{{ url_for('proteus.resolution_dashboard') }}">
                                     <i class="fas fa-gavel me-1"></i>
                                     V2 Market Resolution
                                 </a>
@@ -210,7 +210,7 @@
                 <div class="col-md-6">
                     <p class="mb-0">
                         <i class="fas fa-cube me-2"></i>
-                        Clockchain Node Operator Dashboard
+                        Proteus Node Operator Dashboard
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">

@@ -15,14 +15,14 @@ class WalletAuth {
      * Initialize Web3 and connect wallet
      */
     async initWeb3() {
-        if (window.clockchainWallet && window.clockchainWallet.provider) {
+        if (window.proteusWallet && window.proteusWallet.provider) {
             try {
                 // Request account access
-                await window.clockchainWallet.provider.request({ method: 'eth_requestAccounts' });
+                await window.proteusWallet.provider.request({ method: 'eth_requestAccounts' });
                 
                 // Create Web3 instance
-                this.web3 = new Web3(window.clockchainWallet.provider);
-                this.provider = window.clockchainWallet.provider;
+                this.web3 = new Web3(window.proteusWallet.provider);
+                this.provider = window.proteusWallet.provider;
                 
                 // Get connected accounts
                 const accounts = await this.web3.eth.getAccounts();
@@ -315,8 +315,8 @@ class WalletAuth {
         }
 
         // Listen for account changes
-        if (window.clockchainWallet.provider) {
-            window.clockchainWallet.provider.on('accountsChanged', (accounts) => {
+        if (window.proteusWallet.provider) {
+            window.proteusWallet.provider.on('accountsChanged', (accounts) => {
                 if (accounts.length === 0) {
                     // User disconnected wallet
                     this.logout();
@@ -329,7 +329,7 @@ class WalletAuth {
             });
 
             // Listen for chain changes
-            window.clockchainWallet.provider.on('chainChanged', (chainId) => {
+            window.proteusWallet.provider.on('chainChanged', (chainId) => {
                 // Reload page on chain change
                 window.location.reload();
             });

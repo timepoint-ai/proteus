@@ -1,6 +1,6 @@
 # Smart Contracts
 
-Reference for deployed Clockchain smart contracts.
+Reference for deployed Proteus Markets smart contracts.
 
 ## BASE Sepolia (Testnet)
 

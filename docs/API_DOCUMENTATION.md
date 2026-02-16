@@ -1,6 +1,6 @@
 # API Documentation
 
-REST API reference for Clockchain. All data is fetched from blockchain.
+REST API reference for Proteus Markets. All data is fetched from blockchain.
 
 ## Base URL
 
@@ -31,7 +31,7 @@ GET /auth/nonce/{address}
 ```json
 {
   "nonce": "abc123...",
-  "message": "Sign this message to authenticate with Clockchain: abc123..."
+  "message": "Sign this message to authenticate with Proteus Markets: abc123..."
 }
 ```
 
@@ -144,7 +144,7 @@ GET /api/health
 ```json
 {
   "status": "healthy",
-  "service": "clockchain-node"
+  "service": "proteus-node"
 }
 ```
 
@@ -323,7 +323,7 @@ GET /api/chain/oracle/<market_id>
 
 Endpoints for managing PredictionMarketV2 market resolution. Requires admin authentication.
 
-> **Dashboard:** Web UI available at `/clockchain/admin/resolution`
+> **Dashboard:** Web UI available at `/proteus/admin/resolution`
 
 ### Get Resolution Stats
 

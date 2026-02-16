@@ -1,9 +1,9 @@
-# Clockchain Prediction Market - Development Commands
+# Proteus Markets - Development Commands
 
 .PHONY: help install test test-unit test-integration test-cov test-contracts test-all lint clean
 
 help:
-	@echo "Clockchain Development Commands"
+	@echo "Proteus Markets Development Commands"
 	@echo ""
 	@echo "Setup:"
 	@echo "  install        Install all dependencies"

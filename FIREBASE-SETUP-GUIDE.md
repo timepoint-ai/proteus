@@ -1,7 +1,7 @@
 # Firebase Setup Guide for Coinbase Embedded Wallet Integration
 
 ## Overview
-This guide documents the exact Firebase Console configuration required for email/SMS authentication with the Clockchain platform. Firebase handles the OTP delivery for passwordless authentication.
+This guide documents the exact Firebase Console configuration required for email/SMS authentication with the Proteus Markets platform. Firebase handles the OTP delivery for passwordless authentication.
 
 ## Prerequisites
 - Firebase project created
@@ -38,12 +38,12 @@ This guide documents the exact Firebase Console configuration required for email
 2. Click on **Email address verification**
 3. Customize the template:
    ```
-   Subject: Verify your Clockchain account
+   Subject: Verify your Proteus Markets account
    
    Message:
    Hello,
    
-   Click the link below to verify your email and access your Clockchain wallet:
+   Click the link below to verify your email and access your Proteus Markets wallet:
    %LINK%
    
    This link will expire in 1 hour.
@@ -51,7 +51,7 @@ This guide documents the exact Firebase Console configuration required for email
    If you didn't request this, please ignore this email.
    
    Thanks,
-   The Clockchain Team
+   The Proteus Markets Team
    ```
 4. Click **Save**
 

@@ -1,5 +1,5 @@
 """
-Load testing for Clockchain Prediction Market API.
+Load testing for Proteus Markets Prediction Market API.
 
 Uses Locust to simulate concurrent users hitting various endpoints.
 Run with: locust -f tests/load/locustfile.py --host=http://localhost:5000
@@ -111,7 +111,7 @@ class AuthenticatedUser(HttpUser):
             json={
                 "address": self.test_address,
                 "signature": "0x" + "a" * 130,
-                "message": "Sign in to Clockchain"
+                "message": "Sign in to Proteus Markets"
             },
             name="/auth/verify",
             catch_response=True
@@ -202,7 +202,7 @@ class BrowsingUser(HttpUser):
     @tag("pages")
     def view_markets_page(self):
         """View markets page."""
-        self.client.get("/clockchain/", name="/clockchain/ (markets)")
+        self.client.get("/proteus/", name="/proteus/ (markets)")
 
     @task(2)
     @tag("pages")

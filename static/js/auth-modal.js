@@ -19,7 +19,7 @@ class AuthModal {
         this.modal.innerHTML = `
             <div class="modal-backdrop"></div>
             <div class="email-auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" aria-describedby="auth-modal-desc">
-                <h3 id="auth-modal-title">Sign In to Clockchain</h3>
+                <h3 id="auth-modal-title">Sign In to Proteus Markets</h3>
                 <p id="auth-modal-desc" class="auth-description">Enter your email to securely access your wallet</p>
 
                 <!-- Live region for status announcements -->
@@ -280,13 +280,13 @@ class AuthModal {
         localStorage.setItem('wallet_type', 'coinbase');
         
         // Connect wallet
-        if (window.clockchainWallet) {
-            window.clockchainWallet.walletType = 'coinbase';
-            await window.clockchainWallet.connect();
+        if (window.proteusWallet) {
+            window.proteusWallet.walletType = 'coinbase';
+            await window.proteusWallet.connect();
         } else {
             // Create new wallet instance
-            window.clockchainWallet = new ClockchainWallet();
-            await window.clockchainWallet.connect();
+            window.proteusWallet = new ProteusWallet();
+            await window.proteusWallet.connect();
         }
     }
     
@@ -294,12 +294,12 @@ class AuthModal {
         // Switch to MetaMask
         localStorage.setItem('wallet_type', 'metamask');
         
-        if (window.clockchainWallet) {
-            window.clockchainWallet.walletType = 'metamask';
-            window.clockchainWallet.connect();
+        if (window.proteusWallet) {
+            window.proteusWallet.walletType = 'metamask';
+            window.proteusWallet.connect();
         } else {
-            window.clockchainWallet = new ClockchainWallet();
-            window.clockchainWallet.connect();
+            window.proteusWallet = new ProteusWallet();
+            window.proteusWallet.connect();
         }
     }
     

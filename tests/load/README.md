@@ -1,6 +1,6 @@
 # Load Testing
 
-Load tests for Clockchain Prediction Market API using [Locust](https://locust.io/).
+Load tests for Proteus Markets Prediction Market API using [Locust](https://locust.io/).
 
 ## Installation
 
@@ -63,7 +63,7 @@ locust -f tests/load/locustfile.py --host=http://localhost:5000 --headless -u 50
 **Pages:**
 - `GET /` - Homepage
 - `GET /dashboard` - User dashboard
-- `GET /clockchain/` - Markets list
+- `GET /proteus/` - Markets list
 - `GET /actors/` - Actors list
 
 ## Configuration Presets

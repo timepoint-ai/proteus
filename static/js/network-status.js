@@ -38,19 +38,19 @@ class NetworkStatus {
     }
     
     async updateStatus() {
-        if (!clockchainWallet || !clockchainWallet.isConnected) {
+        if (!proteusWallet || !proteusWallet.isConnected) {
             this.showDisconnected();
             return;
         }
         
         try {
             // Get network info
-            const chainId = await window.clockchainWallet.provider.request({ method: 'eth_chainId' });
+            const chainId = await window.proteusWallet.provider.request({ method: 'eth_chainId' });
             const networkName = this.getNetworkName(chainId);
             
             // Get gas price (optional)
             try {
-                const gasPrice = await window.clockchainWallet.provider.request({
+                const gasPrice = await window.proteusWallet.provider.request({
                     method: 'eth_gasPrice',
                     params: []
                 });
@@ -111,11 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
         networkStatus = new NetworkStatus();
         
         // Update when wallet connects/disconnects
-        if (window.clockchainWallet && window.clockchainWallet.provider) {
-            window.clockchainWallet.provider.on('accountsChanged', () => {
+        if (window.proteusWallet && window.proteusWallet.provider) {
+            window.proteusWallet.provider.on('accountsChanged', () => {
                 networkStatus.updateStatus();
             });
-            window.clockchainWallet.provider.on('chainChanged', () => {
+            window.proteusWallet.provider.on('chainChanged', () => {
                 networkStatus.updateStatus();
             });
         }

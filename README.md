@@ -1,4 +1,4 @@
-# Clockchain
+# Proteus Markets
 
 **v0 Alpha -- Proof of Concept**
 

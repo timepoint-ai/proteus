@@ -46,7 +46,7 @@ SPIKE_CONFIG = {
 
 # Testnet configuration
 TESTNET_CONFIG = {
-    "host": "https://testnet.clockchain.app",  # Replace with actual
+    "host": "https://testnet.proteus.markets",  # Replace with actual
     "users": 20,
     "spawn_rate": 2,
     "run_time": "120s",

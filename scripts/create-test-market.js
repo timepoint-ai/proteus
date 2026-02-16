@@ -124,7 +124,7 @@ async function main() {
         console.log('✅ Initial submission created!');
         
         console.log('\n🎉 Success! Market and initial submission created.');
-        console.log('📍 View your market at: http://localhost:5000/clockchain/market/0');
+        console.log('📍 View your market at: http://localhost:5000/proteus/market/0');
         console.log('🔗 View on Basescan: https://sepolia.basescan.org/tx/' + receipt.transactionHash);
         
     } catch (error) {
