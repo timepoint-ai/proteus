@@ -1,9 +1,9 @@
-# Proteus Markets - Development Commands
+# Proteus - Development Commands
 
 .PHONY: help install test test-unit test-integration test-cov test-contracts test-all lint clean
 
 help:
-	@echo "Proteus Markets Development Commands"
+	@echo "Proteus Development Commands"
 	@echo ""
 	@echo "Setup:"
 	@echo "  install        Install all dependencies"

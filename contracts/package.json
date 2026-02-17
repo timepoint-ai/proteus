@@ -1,7 +1,7 @@
 {
   "name": "proteus-contracts",
   "version": "1.0.0",
-  "description": "Proteus Markets prediction market smart contracts for BASE",
+  "description": "Proteus prediction market smart contracts for BASE",
   "scripts": {
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",

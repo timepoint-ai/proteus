@@ -1,5 +1,5 @@
 {
-  "_note": "Contract names reflect original Clockchain deployment. Protocol renamed to Proteus Markets.",
+  "_note": "Contract names reflect original Clockchain deployment. Protocol renamed to Proteus.",
   "PredictionMarket": {
     "address": "0xBca969b80D7Fb4b68c0529beEA19DB8Ecf96c5Ad",
     "deployedAt": "2025-01-27T00:00:00.000Z",

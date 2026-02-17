@@ -1,5 +1,5 @@
 """
-Production Monitoring Service for Proteus Markets
+Production Monitoring Service for Proteus
 Chain-only monitoring implementation (Phase 1 Cleanup)
 """
 

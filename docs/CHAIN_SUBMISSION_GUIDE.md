@@ -1,8 +1,8 @@
-# Proteus Markets Betting & Submission Guide
+# Proteus Betting & Submission Guide
 
 ## Quick Start: Interact with Markets on BASE Sepolia
 
-This guide shows you how to easily place bets or create competing predictions on Proteus Markets using the BASE Sepolia testnet.
+This guide shows you how to easily place bets or create competing predictions on Proteus using the BASE Sepolia testnet.
 
 ---
 

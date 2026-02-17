@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting Proteus Markets deployment to BASE Sepolia...");
+  console.log("Starting Proteus deployment to BASE Sepolia...");
 
   // Get the deployer account
   const [deployer] = await hre.ethers.getSigners();

@@ -1,4 +1,4 @@
-# Proteus Markets
+# Proteus
 
 **v0 Alpha -- Proof of Concept**
 

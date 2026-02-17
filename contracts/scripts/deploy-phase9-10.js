@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting Proteus Markets Phase 9 & 10 deployment to BASE Sepolia...");
+  console.log("Starting Proteus Phase 9 & 10 deployment to BASE Sepolia...");
 
   // Get deployer account
   const [deployer] = await ethers.getSigners();

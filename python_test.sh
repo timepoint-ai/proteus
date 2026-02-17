@@ -1,7 +1,7 @@
 #!/bin/bash
-# Proteus Markets Secondary Node Test Script
+# Proteus Secondary Node Test Script
 
-echo "Testing Proteus Markets Secondary Node Setup..."
+echo "Testing Proteus Secondary Node Setup..."
 
 # Load node environment
 if [ -f ".env.node" ]; then

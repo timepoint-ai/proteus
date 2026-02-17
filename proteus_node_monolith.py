@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Proteus Markets Secondary Node Monolith
+Proteus Secondary Node Monolith
 A simple, self-contained node implementation for testing multi-node functionality
 """
 

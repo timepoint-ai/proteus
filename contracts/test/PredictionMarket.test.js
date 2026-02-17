@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Proteus Markets Contracts - Phase 1 Test", function () {
+describe("Proteus Contracts - Phase 1 Test", function () {
   let predictionMarket, oracle, nodeRegistry, payoutManager;
   let owner, oracle1, oracle2, oracle3, user1, user2;
 

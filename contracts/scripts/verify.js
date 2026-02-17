@@ -2,7 +2,7 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  console.log("Starting Proteus Markets contract verification on Basescan...");
+  console.log("Starting Proteus contract verification on Basescan...");
 
   // Load deployment info
   const network = hre.network.name;

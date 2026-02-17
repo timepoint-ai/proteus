@@ -1,4 +1,4 @@
-"""API endpoints for Proteus Markets pagination"""
+"""API endpoints for Proteus pagination"""
 import logging
 from flask import Blueprint, request, jsonify
 # from models import PredictionMarket, Actor, Submission, Bet  # Phase 7: Models removed

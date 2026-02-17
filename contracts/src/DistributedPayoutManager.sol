@@ -51,7 +51,7 @@ interface IGenesisNFT is IERC721 {
 
 /**
  * @title DistributedPayoutManager
- * @dev Manages distributed payouts for the Proteus Markets prediction market (originally deployed as Clockchain)
+ * @dev Manages distributed payouts for the Proteus prediction market (originally deployed as Clockchain)
  * Distributes fees to multiple stakeholders including Genesis NFT holders
  */
 contract DistributedPayoutManager is ReentrancyGuard, Pausable {

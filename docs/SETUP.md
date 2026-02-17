@@ -1,6 +1,6 @@
 # Setup Guide
 
-**v0 Alpha** -- Development environment setup for the Proteus Markets prototype.
+**v0 Alpha** -- Development environment setup for the Proteus prototype.
 
 ## Prerequisites
 

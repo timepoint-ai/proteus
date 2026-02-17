@@ -45,7 +45,7 @@ def capture_email():
     # Log the email capture (database removed in Phase 7)
     logger.info(f"Email capture: {email} from landing_page at {datetime.now(timezone.utc).isoformat()}")
 
-    flash('Thank you! We\'ll notify you when Proteus Markets launches.', 'success')
+    flash('Thank you! We\'ll notify you when Proteus launches.', 'success')
     return redirect(url_for('marketing.index'))
 
 @marketing_bp.route('/dev')

@@ -22,7 +22,7 @@ blockchain_service = BaseBlockchainService()
 
 @proteus_bp.route('/proteus')
 def proteus_view():
-    """Display the Proteus Markets timeline view - PredictionMarketV2"""
+    """Display the Proteus timeline view - PredictionMarketV2"""
     try:
         # Get current Pacific time
         time_status = time_sync_service.get_time_health_status()

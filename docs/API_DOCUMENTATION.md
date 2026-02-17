@@ -1,6 +1,6 @@
 # API Documentation
 
-REST API reference for Proteus Markets. All data is fetched from blockchain.
+REST API reference for Proteus. All data is fetched from blockchain.
 
 ## Base URL
 
@@ -31,7 +31,7 @@ GET /auth/nonce/{address}
 ```json
 {
   "nonce": "abc123...",
-  "message": "Sign this message to authenticate with Proteus Markets: abc123..."
+  "message": "Sign this message to authenticate with Proteus: abc123..."
 }
 ```
 

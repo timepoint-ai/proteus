@@ -15,7 +15,7 @@ class EmailService:
     def __init__(self):
         self.api_key = os.environ.get('SENDGRID_API_KEY')
         self.from_email = os.environ.get('FROM_EMAIL', 'noreply@proteus.markets')
-        self.from_name = 'Proteus Markets'
+        self.from_name = 'Proteus'
         
         if self.api_key:
             self.client = SendGridAPIClient(self.api_key)
@@ -46,12 +46,12 @@ class EmailService:
         
         try:
             # Create email content
-            subject = f"Your Proteus Markets verification code: {otp_code}"
+            subject = f"Your Proteus verification code: {otp_code}"
             
             html_content = f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
-                    <h1 style="color: white; margin: 0;">Proteus Markets</h1>
+                    <h1 style="color: white; margin: 0;">Proteus</h1>
                 </div>
                 <div style="padding: 40px; background: #f5f5f5;">
                     <h2 style="color: #333; margin-bottom: 20px;">Verify your email</h2>
@@ -75,7 +75,7 @@ class EmailService:
             """
             
             text_content = f"""
-            Proteus Markets Verification Code
+            Proteus Verification Code
             
             Your verification code is: {otp_code}
             

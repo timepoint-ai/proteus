@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-Static analysis was performed on all Proteus Markets smart contracts using Slither. The analysis identified:
+Static analysis was performed on all Proteus smart contracts using Slither. The analysis identified:
 
 | Severity | Count | Action Required |
 |----------|-------|-----------------|

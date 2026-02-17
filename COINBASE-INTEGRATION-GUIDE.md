@@ -1,10 +1,10 @@
 # Coinbase Wallet Integration
 
-Guide for integrating Coinbase Embedded Wallet with Proteus Markets.
+Guide for integrating Coinbase Embedded Wallet with Proteus.
 
 ## Overview
 
-Proteus Markets uses Coinbase Embedded Wallet for seamless Web3 onboarding:
+Proteus uses Coinbase Embedded Wallet for seamless Web3 onboarding:
 - Email/SMS authentication (no seed phrases)
 - TEE-secured wallet creation
 - Coinbase Onramp for easy funding

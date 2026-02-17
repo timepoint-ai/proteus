@@ -1,5 +1,5 @@
 /**
- * BASE Blockchain Integration for Proteus Markets
+ * BASE Blockchain Integration for Proteus
  * Handles smart contract interactions and transaction management
  */
 

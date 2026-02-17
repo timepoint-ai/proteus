@@ -7,7 +7,7 @@ import "./PredictionMarket.sol";
 
 /**
  * @title ClockchainOracle
- * @notice Legacy contract name. Part of the Proteus Markets protocol (formerly Clockchain).
+ * @notice Legacy contract name. Part of the Proteus protocol (formerly Clockchain).
  * @dev Oracle contract for X.com post verification and market resolution
  */
 contract ClockchainOracle is AccessControl, ReentrancyGuard {

@@ -1,8 +1,8 @@
-# Proteus Markets Cleanup Documentation
+# Proteus Cleanup Documentation
 
 ## Executive Summary
 
-The Proteus Markets project has been successfully migrated from a database-dependent architecture to a fully decentralized, blockchain-only system on BASE Sepolia. All user interactions are now wallet-based, with data stored entirely on-chain.
+The Proteus project has been successfully migrated from a database-dependent architecture to a fully decentralized, blockchain-only system on BASE Sepolia. All user interactions are now wallet-based, with data stored entirely on-chain.
 
 ## Completed Phases (August 13, 2025)
 

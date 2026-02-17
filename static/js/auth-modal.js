@@ -19,7 +19,7 @@ class AuthModal {
         this.modal.innerHTML = `
             <div class="modal-backdrop"></div>
             <div class="email-auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" aria-describedby="auth-modal-desc">
-                <h3 id="auth-modal-title">Sign In to Proteus Markets</h3>
+                <h3 id="auth-modal-title">Sign In to Proteus</h3>
                 <p id="auth-modal-desc" class="auth-description">Enter your email to securely access your wallet</p>
 
                 <!-- Live region for status announcements -->

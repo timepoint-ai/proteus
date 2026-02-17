@@ -1,5 +1,5 @@
 """
-Standardized API error handling for Proteus Markets.
+Standardized API error handling for Proteus.
 
 Usage:
     from utils.api_errors import error_response, success_response, APIError, ErrorCode

@@ -79,7 +79,7 @@ async function main() {
   
   console.log("\n🚀 AT SCALE (When Platform Succeeds):");
   console.log("═══════════════════════════════════════════════════════════");
-  console.log("If Proteus Markets reaches $1M daily volume (at $4,000/ETH):");
+  console.log("If Proteus reaches $1M daily volume (at $4,000/ETH):");
   console.log("├─ Platform collects: $70,000/day in fees (7%)");
   console.log("├─ Genesis pool gets: $14,000/day (20% of fees)");
   console.log("└─ Your income (100 NFTs): $14,000/day = $420,000/month!");

@@ -1,5 +1,5 @@
 /**
- * Market Blockchain Integration for Proteus Markets
+ * Market Blockchain Integration for Proteus
  * Handles direct blockchain queries for market data
  * Uses PredictionMarketV2 contract with full resolution mechanism
  */

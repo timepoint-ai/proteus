@@ -1,5 +1,5 @@
 /**
- * Proteus Markets Wallet Integration for BASE Blockchain
+ * Proteus Wallet Integration for BASE Blockchain
  * Following Coinbase BASE platform best practices
  */
 

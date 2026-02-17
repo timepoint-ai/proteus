@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting Proteus Markets deployment to BASE Mainnet...");
+  console.log("Starting Proteus deployment to BASE Mainnet...");
   console.log("⚠️  WARNING: This is a mainnet deployment!");
   
   // Safety check

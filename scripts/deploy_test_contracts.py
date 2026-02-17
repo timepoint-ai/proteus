@@ -1,5 +1,5 @@
 """
-Deploy Proteus Markets contracts to BASE Sepolia testnet with micro transactions
+Deploy Proteus contracts to BASE Sepolia testnet with micro transactions
 Uses industry best practices for penny contracts (0.001 BASE or less)
 """
 
@@ -111,7 +111,7 @@ class TestContractDeployer:
             return None
     
     async def deploy_all_contracts(self):
-        """Deploy all Proteus Markets contracts with micro amounts"""
+        """Deploy all Proteus contracts with micro amounts"""
         deployed = {}
         
         # 1. Deploy PredictionMarket first (no constructor args)
@@ -232,7 +232,7 @@ class TestContractDeployer:
 
 async def main():
     """Deploy test contracts with micro transactions"""
-    logger.info("🚀 Proteus Markets Test Contract Deployment")
+    logger.info("🚀 Proteus Test Contract Deployment")
     logger.info("=====================================")
     logger.info("Using micro transactions (penny contracts)")
     logger.info("Network: BASE Sepolia (Chain ID: 84532)")

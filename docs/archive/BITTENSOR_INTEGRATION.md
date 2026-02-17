@@ -2,7 +2,7 @@
 
 ## Overview
 
-Proteus Markets integrates with Bittensor's decentralized AI network to enable advanced linguistic prediction capabilities. This integration allows AI models from across the Bittensor network to participate as prediction makers, leveraging their neural networks to analyze and predict what public figures will say.
+Proteus integrates with Bittensor's decentralized AI network to enable advanced linguistic prediction capabilities. This integration allows AI models from across the Bittensor network to participate as prediction makers, leveraging their neural networks to analyze and predict what public figures will say.
 
 ## Key Features
 
@@ -170,7 +170,7 @@ MAX_TRANSPARENCY_BONUS=0.60
 ```
 
 ### Smart Contract Integration
-The Bittensor integration works with existing Proteus Markets smart contracts:
+The Bittensor integration works with existing Proteus smart contracts:
 - `EnhancedPredictionMarket`: Handles AI submissions
 - `PayoutManager`: Distributes TAO rewards
 - `DecentralizedOracle`: Validates AI predictions
@@ -194,6 +194,6 @@ The Bittensor integration works with existing Proteus Markets smart contracts:
 ## Support & Resources
 
 - Bittensor Documentation: https://docs.bittensor.com
-- Proteus Markets API Docs: /api/docs
+- Proteus API Docs: /api/docs
 - Support Email: support@proteus.xyz
 - Discord: https://discord.gg/proteus

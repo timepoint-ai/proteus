@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Monitoring Alert Setup for Proteus Markets
+Production Monitoring Alert Setup for Proteus
 Sets up comprehensive monitoring for BASE mainnet deployment
 """
 
@@ -23,7 +23,7 @@ class MonitoringSetup:
         """Create comprehensive monitoring configuration"""
         
         config = {
-            "name": "Proteus Markets Production Monitoring",
+            "name": "Proteus Production Monitoring",
             "created": datetime.now(timezone.utc).isoformat(),
             "network": "base-mainnet",
             "alerts": []
@@ -194,7 +194,7 @@ class MonitoringSetup:
         """Generate monitoring script for cron job"""
         
         script = """#!/bin/bash
-# Proteus Markets Production Monitoring Script
+# Proteus Production Monitoring Script
 # Run this every 5 minutes via cron
 
 # Configuration
@@ -322,7 +322,7 @@ main
         """Generate setup instructions for monitoring"""
         
         instructions = """
-# Proteus Markets Production Monitoring Setup Guide
+# Proteus Production Monitoring Setup Guide
 
 ## 1. Free Monitoring Options
 

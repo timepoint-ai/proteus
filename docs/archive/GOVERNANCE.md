@@ -1,7 +1,7 @@
-# Proteus Markets Governance & Genesis NFT Implementation Plan
+# Proteus Governance & Genesis NFT Implementation Plan
 
 ## Executive Summary
-Proteus Markets transitions from centralized to fully distributed governance through immutable smart contracts and 100 Genesis NFTs that provide founder rewards without control privileges.
+Proteus transitions from centralized to fully distributed governance through immutable smart contracts and 100 Genesis NFTs that provide founder rewards without control privileges.
 
 ## Genesis NFT System
 

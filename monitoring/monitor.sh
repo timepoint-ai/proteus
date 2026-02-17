@@ -1,5 +1,5 @@
 #!/bin/bash
-# Proteus Markets Production Monitoring Script
+# Proteus Production Monitoring Script
 # Run this every 5 minutes via cron
 
 # Configuration

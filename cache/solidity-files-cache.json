@@ -82,8 +82,45 @@
         "NodeRegistry"
       ]
     },
+    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
+      "lastModificationDate": 1771300210161,
+      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/access/AccessControl.sol": {
-      "lastModificationDate": 1769527407864,
+      "lastModificationDate": 1771300210151,
       "contentHash": "d0e2c05f09a3aea7cd299bbd4a435ee2",
       "sourceName": "@openzeppelin/contracts/access/AccessControl.sol",
       "solcConfig": {
@@ -123,45 +160,8 @@
         "AccessControl"
       ]
     },
-    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
-      "lastModificationDate": 1769527407865,
-      "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "ReentrancyGuard"
-      ]
-    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
-      "lastModificationDate": 1769527407861,
+      "lastModificationDate": 1771300210077,
       "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
       "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
@@ -200,7 +200,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/Context.sol": {
-      "lastModificationDate": 1769527407876,
+      "lastModificationDate": 1771300210522,
       "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
@@ -237,7 +237,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol": {
-      "lastModificationDate": 1769527407871,
+      "lastModificationDate": 1771300210348,
       "contentHash": "0906d06dca25210d4696dcef6dad2909",
       "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
       "solcConfig": {
@@ -276,7 +276,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/access/IAccessControl.sol": {
-      "lastModificationDate": 1769527407864,
+      "lastModificationDate": 1771300210149,
       "contentHash": "def1e8f7b6cac577cf2600655bf3bdf8",
       "sourceName": "@openzeppelin/contracts/access/IAccessControl.sol",
       "solcConfig": {
@@ -313,7 +313,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol": {
-      "lastModificationDate": 1769527407871,
+      "lastModificationDate": 1771300210349,
       "contentHash": "7074c93b1ea0a122063f26ddd1db1032",
       "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
       "solcConfig": {
@@ -432,7 +432,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/Pausable.sol": {
-      "lastModificationDate": 1769527407866,
+      "lastModificationDate": 1771300210194,
       "contentHash": "0d47b53e10b1985efbb396f937626279",
       "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
       "solcConfig": {
@@ -471,7 +471,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol": {
-      "lastModificationDate": 1769527407851,
+      "lastModificationDate": 1771300209976,
       "contentHash": "522ec023bce510c30dfbf61584f5a190",
       "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
       "solcConfig": {
@@ -516,7 +516,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
-      "lastModificationDate": 1769527407876,
+      "lastModificationDate": 1771300210523,
       "contentHash": "d8f70caf0e0c77dc908176ed44812fb7",
       "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
       "solcConfig": {
@@ -557,7 +557,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol": {
-      "lastModificationDate": 1769527407851,
+      "lastModificationDate": 1771300209978,
       "contentHash": "f62e11dbd302e17a5621a1438f4e054c",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
       "solcConfig": {
@@ -596,7 +596,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/interfaces/draft-IERC6093.sol": {
-      "lastModificationDate": 1769527407997,
+      "lastModificationDate": 1771300211708,
       "contentHash": "5041977bbe908de2e6ed0270447f79ad",
       "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
       "solcConfig": {
@@ -634,47 +634,8 @@
         "IERC721Errors"
       ]
     },
-    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
-      "lastModificationDate": 1769527407852,
-      "contentHash": "136c64eca25bcb8a68f43ac6605559f9",
-      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../IERC721.sol"
-      ],
-      "versionPragmas": [
-        ">=0.6.2"
-      ],
-      "artifacts": [
-        "IERC721Metadata"
-      ]
-    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol": {
-      "lastModificationDate": 1769527407852,
+      "lastModificationDate": 1771300209991,
       "contentHash": "4cefad279a37c895b709bce2b901816e",
       "sourceName": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol",
       "solcConfig": {
@@ -713,8 +674,47 @@
         "ERC721Utils"
       ]
     },
+    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "lastModificationDate": 1771300209998,
+      "contentHash": "136c64eca25bcb8a68f43ac6605559f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.2"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol": {
-      "lastModificationDate": 1769527407872,
+      "lastModificationDate": 1771300210359,
       "contentHash": "2adca1150f58fc6f3d1f0a0f22ee7cca",
       "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
       "solcConfig": {
@@ -750,47 +750,8 @@
         "SafeCast"
       ]
     },
-    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
-      "lastModificationDate": 1769527407872,
-      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
-      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
-      "solcConfig": {
-        "version": "0.8.20",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./SafeCast.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "SignedMath"
-      ]
-    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
-      "lastModificationDate": 1769527407872,
+      "lastModificationDate": 1771300210357,
       "contentHash": "5ec781e33d3a9ac91ffdc83d94420412",
       "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
       "solcConfig": {
@@ -829,8 +790,47 @@
         "Math"
       ]
     },
+    "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol": {
+      "lastModificationDate": 1771300210355,
+      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SignedMath"
+      ]
+    },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/Panic.sol": {
-      "lastModificationDate": 1769527407871,
+      "lastModificationDate": 1771300210332,
       "contentHash": "2133dc13536b4a6a98131e431fac59e1",
       "sourceName": "@openzeppelin/contracts/utils/Panic.sol",
       "solcConfig": {
@@ -867,7 +867,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol": {
-      "lastModificationDate": 1769527407851,
+      "lastModificationDate": 1771300209976,
       "contentHash": "d61660a41ce200e99816e4734f7fd202",
       "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
       "solcConfig": {
@@ -904,7 +904,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol": {
-      "lastModificationDate": 1769527407853,
+      "lastModificationDate": 1771300210007,
       "contentHash": "1e4b432e9069bd6f5935e071b74d180c",
       "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol",
       "solcConfig": {
@@ -945,7 +945,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol": {
-      "lastModificationDate": 1769527407852,
+      "lastModificationDate": 1771300209997,
       "contentHash": "09d80d577d5abfc679455e7b67c5b537",
       "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol",
       "solcConfig": {
@@ -984,8 +984,8 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/contracts/src/ClockchainOracle.sol": {
-      "lastModificationDate": 1771251118807,
-      "contentHash": "78980fb16d4315ab822a89b66d02f465",
+      "lastModificationDate": 1771300202547,
+      "contentHash": "f0a2ea66f2c02214d20ba6924d227a6f",
       "sourceName": "contracts/src/ClockchainOracle.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1025,8 +1025,8 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/contracts/src/PredictionMarket.sol": {
-      "lastModificationDate": 1771251175611,
-      "contentHash": "f9087da60aabb3890f2a8727badc7e89",
+      "lastModificationDate": 1771300184966,
+      "contentHash": "2f0dd74043c721bb28034873ead41c95",
       "sourceName": "contracts/src/PredictionMarket.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1194,8 +1194,8 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/contracts/src/DistributedPayoutManager.sol": {
-      "lastModificationDate": 1771251191522,
-      "contentHash": "ac9c25c2ae17b1c50e0e834a990ea102",
+      "lastModificationDate": 1771300202487,
+      "contentHash": "490ed31cfe6e0b8e64ba88a3e3092e82",
       "sourceName": "contracts/src/DistributedPayoutManager.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1361,8 +1361,8 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/contracts/src/GenesisNFT.sol": {
-      "lastModificationDate": 1771251155867,
-      "contentHash": "ab64f359e83d32635bceb342052b7f57",
+      "lastModificationDate": 1771300185166,
+      "contentHash": "10b33ee26feadedb71155d6ed35a26a3",
       "sourceName": "contracts/src/GenesisNFT.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1403,7 +1403,7 @@
       ]
     },
     "/Users/seanmcdonald/Documents/GitHub/proteus-markets/node_modules/@openzeppelin/contracts/utils/Base64.sol": {
-      "lastModificationDate": 1769527407876,
+      "lastModificationDate": 1771300210530,
       "contentHash": "e94470e74f65d3ba43da7bf2ac027b38",
       "sourceName": "@openzeppelin/contracts/utils/Base64.sol",
       "solcConfig": {

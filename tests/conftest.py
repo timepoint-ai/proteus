@@ -1,5 +1,5 @@
 """
-Shared pytest fixtures for Proteus Markets tests.
+Shared pytest fixtures for Proteus tests.
 """
 
 import pytest

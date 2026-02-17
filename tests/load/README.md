@@ -1,6 +1,6 @@
 # Load Testing
 
-Load tests for Proteus Markets Prediction Market API using [Locust](https://locust.io/).
+Load tests for Proteus Prediction Market API using [Locust](https://locust.io/).
 
 ## Installation
 

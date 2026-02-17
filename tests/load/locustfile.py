@@ -1,5 +1,5 @@
 """
-Load testing for Proteus Markets Prediction Market API.
+Load testing for Proteus Prediction Market API.
 
 Uses Locust to simulate concurrent users hitting various endpoints.
 Run with: locust -f tests/load/locustfile.py --host=http://localhost:5000
@@ -111,7 +111,7 @@ class AuthenticatedUser(HttpUser):
             json={
                 "address": self.test_address,
                 "signature": "0x" + "a" * 130,
-                "message": "Sign in to Proteus Markets"
+                "message": "Sign in to Proteus"
             },
             name="/auth/verify",
             catch_response=True

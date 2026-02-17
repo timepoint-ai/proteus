@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title GenesisNFT
- * @dev Part of the Proteus Markets protocol (formerly Clockchain).
+ * @dev Part of the Proteus protocol (formerly Clockchain).
  * Fixed supply of 100 Genesis NFTs providing founder rewards.
  * Features:
  * - Immutable 100 NFT cap

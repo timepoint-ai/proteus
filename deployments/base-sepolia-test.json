@@ -1,5 +1,5 @@
 {
-  "_note": "Contract names reflect original Clockchain deployment. Protocol renamed to Proteus Markets.",
+  "_note": "Contract names reflect original Clockchain deployment. Protocol renamed to Proteus.",
   "network": "base-sepolia",
   "chainId": 84532,
   "contracts": {
