@@ -64,6 +64,8 @@ This paper makes the following contributions:
 
 ## 2. The Prediction Market Landscape
 
+> **Note on market data.** All market size figures, volume estimates, and industry projections in this section reflect data available as of February 2026. The prediction market landscape is evolving rapidly; readers should verify current figures independently.
+
 ### 2.1 Boom and Bust: A Brief History
 
 Prediction markets have a four-decade track record of demonstrating superior forecasting accuracy — and an equally long track record of being killed by regulators before reaching scale.
@@ -388,6 +390,20 @@ Three factors determine how predictable a given post is:
 | Random/chaotic | Low | No reliable strategy | High distances for all |
 
 The market accommodates the full spectrum. AI dominates high-inevitability targets. Insiders dominate when situational context matters. Null traders capture the inaction primitive. No single strategy dominates all market types, which is a desirable property for a healthy market ecosystem.
+
+### 6.5 Resolved Markets as Training Data
+
+Every resolved Proteus market produces a naturally labeled training example: the predicted text, the actual text, the Levenshtein distance, and the market context (target handle, time window, number of competitors). Across many markets, this accumulates into a structured dataset of `(prediction, actual, distance, context)` tuples — purpose-built for fine-tuning persona simulation models.
+
+This is qualitatively different from synthetic training data. The labels are *real-world outcomes*: what the person actually said, verified by oracle consensus and timestamped on-chain. The distance metric provides a continuous quality signal — not just "correct/incorrect" but *how close*, character by character. And the competitive market structure ensures adversarial diversity: participants actively search for strategies that other participants miss, producing a distribution of predictions that spans roleplay, insider knowledge, null bets, and random noise.
+
+**Fine-tuning applications:**
+
+- **Persona calibration.** Train a model on resolved markets for a specific target (e.g., all resolved @elonmusk markets) to improve character-level fidelity for that persona. The gradient is clear: predicted "confirmed for March" when the actual was "is GO for March" — learn the target's preference for the more colloquial phrasing.
+- **Numerical precision.** Many market outcomes hinge on exact numbers ("45%" vs. "46%"). Resolved markets provide ground truth for the specific numbers public figures actually use, which standard pretraining corpora do not distinguish.
+- **Silence prediction.** Resolved `__NULL__` markets label the conditions under which a target does *not* post — a signal that standard language model training cannot provide, since the training corpus contains only text that was written, never text that wasn't.
+
+The training data value scales with market volume. More markets, more targets, more resolved outcomes, more labeled tuples. Unlike static benchmarks that leak into pretraining, Proteus training data is adversarially generated in real time — the test set is always the next unresolved market.
 
 ---
 
@@ -769,10 +785,11 @@ The thesis example — Claude at distance 1 versus GPT at distance 8 on the same
 3. **Live market validation.** Deploy to mainnet with real economic stakes and measure actual strategic behavior, market depth, and the relationship between AI capability and market outcomes.
 4. **Formal game-theoretic equilibrium analysis.** Characterize Nash equilibria for the Levenshtein-scored market under various competitor distributions and information structures.
 5. **Capability benchmarking.** Use Proteus as a benchmark for AI language modeling capability, measuring d_L trends over time as a proxy for model improvement.
-6. **Alternative scoring metrics.** Investigate Damerau-Levenshtein (adding transpositions), weighted edit distance (substitutions between similar characters cost less), or semantic-aware hybrid metrics.
-7. **Multi-prediction markets.** Extend from single-text prediction to predicting sequences of posts, enabling temporal modeling.
-8. **Regulatory engagement.** Work with CFTC staff during the event contract rulemaking process to establish text prediction markets as a well-defined contract category with appropriate integrity monitoring and insider trading surveillance.
-9. **X API integration.** Build robust, multi-oracle resolution infrastructure using X's public API with fallback to third-party archival services (Wayback Machine, archive.today) for redundancy and dispute resolution.
+6. **Training data pipeline.** Build automated fine-tuning pipelines that ingest resolved market data (Section 6.5) to improve persona simulation models. Measure whether models fine-tuned on Proteus outcomes achieve lower d_L on subsequent markets — a self-improving loop where the market generates its own training signal.
+7. **Alternative scoring metrics.** Investigate Damerau-Levenshtein (adding transpositions), weighted edit distance (substitutions between similar characters cost less), or semantic-aware hybrid metrics.
+8. **Multi-prediction markets.** Extend from single-text prediction to predicting sequences of posts, enabling temporal modeling.
+9. **Regulatory engagement.** Work with CFTC staff during the event contract rulemaking process to establish text prediction markets as a well-defined contract category with appropriate integrity monitoring and insider trading surveillance.
+10. **X API integration.** Build robust, multi-oracle resolution infrastructure using X's public API with fallback to third-party archival services (Wayback Machine, archive.today) for redundancy and dispute resolution.
 
 ---
 
