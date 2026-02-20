@@ -36,13 +36,23 @@ class AuthStore:
         otp_max_verify_attempts: int = 5,
         otp_verify_lockout: int = 900,
     ):
-        self.redis = redis_client or redis.Redis(
-            host=os.environ.get("REDIS_HOST", "localhost"),
-            port=int(os.environ.get("REDIS_PORT", 6379)),
-            decode_responses=True,
-            socket_connect_timeout=5,
-            socket_timeout=5,
-        )
+        if redis_client:
+            self.redis = redis_client
+        elif os.environ.get("REDIS_URL"):
+            self.redis = redis.from_url(
+                os.environ["REDIS_URL"],
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
+            )
+        else:
+            self.redis = redis.Redis(
+                host=os.environ.get("REDIS_HOST", "localhost"),
+                port=int(os.environ.get("REDIS_PORT", 6379)),
+                decode_responses=True,
+                socket_connect_timeout=5,
+                socket_timeout=5,
+            )
         self.nonce_ttl = nonce_ttl
         self.otp_ttl = otp_ttl
         self.otp_max_send_per_window = otp_max_send_per_window
