@@ -23,12 +23,16 @@ def make_celery(app):
     celery.conf.update(app.config)
     return celery
 
-# Initialize Redis
-redis_client = redis.Redis(
-    host=os.environ.get('REDIS_HOST', 'localhost'),
-    port=int(os.environ.get('REDIS_PORT', 6379)),
-    decode_responses=True
-)
+# Initialize Redis — prefer REDIS_URL (Railway/production), fall back to host/port
+_redis_url = os.environ.get('REDIS_URL')
+if _redis_url:
+    redis_client = redis.from_url(_redis_url, decode_responses=True)
+else:
+    redis_client = redis.Redis(
+        host=os.environ.get('REDIS_HOST', 'localhost'),
+        port=int(os.environ.get('REDIS_PORT', 6379)),
+        decode_responses=True
+    )
 
 def create_app():
     logger = get_logger(__name__)
