@@ -47,7 +47,9 @@ class Config:
     # X.com Oracle configuration
     XCOM_API_URL = os.environ.get('XCOM_API_URL') or 'https://api.x.com/v2'
     XCOM_BEARER_TOKEN = os.environ.get('XCOM_BEARER_TOKEN')
-    SCREENSHOT_SERVICE_URL = os.environ.get('SCREENSHOT_SERVICE_URL') or 'http://localhost:3000'
+    # Screenshot capture uses Playwright directly (see xcom_api_service.py).
+    # This URL is reserved for a future dedicated screenshot microservice.
+    SCREENSHOT_SERVICE_URL = os.environ.get('SCREENSHOT_SERVICE_URL', '')
     IPFS_GATEWAY_URL = os.environ.get('IPFS_GATEWAY_URL') or 'https://ipfs.io/ipfs/'
     
     # Time configuration

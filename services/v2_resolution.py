@@ -12,6 +12,7 @@ from web3 import Web3
 from eth_account import Account
 
 from services.blockchain_base import BaseBlockchainService
+from services.event_hooks import emit_event
 from services.xcom_api_service import XComAPIService
 from utils.logging_config import get_logger
 
@@ -259,6 +260,15 @@ class V2ResolutionService:
                 result['gas_used'] = receipt['gasUsed']
                 result['block_number'] = receipt['blockNumber']
                 logger.info(f"Market {market_id} resolved successfully in block {receipt['blockNumber']}")
+
+                # Emit event for external consumers (Pro, SNAG-Bench)
+                emit_event('market.resolved', {
+                    'market_id': market_id,
+                    'actual_text': actual_text,
+                    'tx_hash': tx_hash_hex,
+                    'block_number': receipt['blockNumber'],
+                    'gas_used': receipt['gasUsed'],
+                })
             else:
                 result['error'] = "Transaction failed"
                 result['tx_hash'] = tx_hash_hex

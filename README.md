@@ -288,10 +288,6 @@ All market data lives on-chain. Zero database. Redis is used only for caching RP
 - **Auth**: JWT (MetaMask) + Firebase email OTP (Coinbase Embedded Wallet shim)
 - **Infra**: Railway (auto-deploy from GitHub)
 
-## Part of Timepoint
-
-Proteus is one component of the [Timepoint](https://timepointai.com) platform. Other services in the suite include Flash (scene generation), Pro (social simulation / SNAG), SNAG Bench (evaluation), Clockchain (spatiotemporal graph index), and Billing (payments). Proteus operates independently -- it has no runtime dependencies on other Timepoint services -- but resolved market data may feed back into Pro and SNAG Bench as training signal.
-
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) - System design and contract stack
