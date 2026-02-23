@@ -17,6 +17,7 @@ The core primitive works:
 - [x] Flask backend with JWT auth and Redis-backed OTP
 - [x] CI/CD pipeline
 - [x] Genesis NFT with on-chain SVG art
+- [x] Railway deployment (gunicorn, Redis, auto-deploy from GitHub)
 
 ---
 
@@ -36,7 +37,7 @@ The core primitive works:
 
 | Gap | Why it matters | Status |
 |-----|---------------|--------|
-| Production monitoring (Sentry) | Need to know when things break | NOT STARTED |
+| Production monitoring (Sentry) | Need to know when things break | Basic monitoring running (gas, oracle failures), no Sentry |
 | Mobile device testing | Wallet UX varies wildly across devices | NOT STARTED |
 | Incident response plan | What happens when something goes wrong | NOT WRITTEN |
 | Load testing in production-like env | Redis caching untested under real load | SCRIPTS WRITTEN, not validated |

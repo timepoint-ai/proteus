@@ -20,8 +20,9 @@ Validate that on-chain Levenshtein distance works as a prediction market scoring
 - [x] Redis-backed auth storage with rate limiting
 - [x] CI/CD pipeline, Slither static analysis
 - [x] Structured logging, request tracing
+- [x] Railway deployment (gunicorn + Redis, auto-deploy from GitHub)
 
-**Result:** The primitive works. Smart contracts handle the full lifecycle. Levenshtein scoring resolves markets deterministically on-chain.
+**Result:** The primitive works. Smart contracts handle the full lifecycle. Levenshtein scoring resolves markets deterministically on-chain. Backend deployed on Railway at `proteus-production-6213.up.railway.app`.
 
 **Known tradeoffs (acceptable for prototype):**
 - PBKDF2 embedded wallet shim (not real CDP)

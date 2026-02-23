@@ -34,9 +34,9 @@ The novel piece is on-chain Levenshtein distance as a scoring function for predi
 └─────────────────────┬───────────────────────────────────┘
                       │
 ┌─────────────────────▼───────────────────────────────────┐
-│                   Flask Backend                           │
-│  (API Routes, Wallet Auth, Redis Cache)                  │
-│  Status: Testnet scaffolding                             │
+│              Flask Backend (Railway)                      │
+│  (gunicorn, API Routes, Wallet Auth, Redis Cache)        │
+│  proteus-production-6213.up.railway.app                  │
 └─────────────────────┬───────────────────────────────────┘
                       │
 ┌─────────────────────▼───────────────────────────────────┐

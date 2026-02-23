@@ -207,7 +207,18 @@ Six scenarios showing the full spectrum of prediction quality in a Levenshtein-s
 
 Use **PredictionMarketV2** for everything. V1 lacks a resolution mechanism.
 
-## Quick Start
+## Deployment
+
+The backend runs on **Railway** at `proteus-production-6213.up.railway.app`, auto-deploying from `main` on [github.com/timepoint-ai/proteus](https://github.com/timepoint-ai/proteus).
+
+| Service | Provider | Purpose |
+|---------|----------|---------|
+| Backend (gunicorn + Flask) | Railway | API, admin dashboard, marketing pages |
+| Redis | Railway | Caching, Celery broker, auth stores |
+| Postgres | Railway | Available but unused (chain-only mode) |
+| Smart contracts | BASE Sepolia | All market data on-chain |
+
+### Local Development
 
 ```bash
 # Install dependencies
@@ -221,9 +232,9 @@ make test-all             # Everything
 make test-unit            # Python unit tests
 make test-contracts       # Solidity tests (Hardhat)
 
-# Start the app (testnet only)
+# Start the app locally
 redis-server &
-python main.py
+python main.py            # http://localhost:5000
 ```
 
 You'll need BASE Sepolia ETH from the [faucet](https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet).
@@ -237,9 +248,10 @@ services/          # Python backend services (prototype scaffolding)
 routes/            # Flask API endpoints
 scripts/           # Deployment, seeding, and utility scripts
 static/js/         # Frontend JavaScript
-templates/         # HTML templates
+templates/         # HTML templates (marketing, app, admin)
 tests/             # Python tests (unit, integration, load)
 docs/              # Documentation
+railway.json       # Railway start command config
 ```
 
 ## Architecture
@@ -247,9 +259,11 @@ docs/              # Documentation
 ```
 Frontend (Web3.js, wallet connect)
     |  JWT Auth
-Flask Backend (routes/, services/)
-    |  Web3.py
-BASE Sepolia (PredictionMarketV2, GenesisNFT, + 12 others)
+Flask Backend (gunicorn, Railway)
+    |  Web3.py          |  Redis
+BASE Sepolia            Cache, Celery, Auth
+(PredictionMarketV2,    (nonces, OTPs,
+ GenesisNFT, + 12)      rate limiting)
 ```
 
 All market data lives on-chain. Zero database. Redis is used only for caching RPC responses, auth nonces/OTPs, and rate limiting.
@@ -270,17 +284,25 @@ All market data lives on-chain. Zero database. Redis is used only for caching RP
 
 - **Blockchain**: BASE (Coinbase L2, OP Stack)
 - **Contracts**: Solidity 0.8.20, OpenZeppelin, Hardhat
-- **Backend**: Flask, Web3.py, Celery, Redis
+- **Backend**: Python 3.11+, Flask, gunicorn, Web3.py, Celery, Redis
 - **Auth**: JWT (MetaMask) + Firebase email OTP (Coinbase Embedded Wallet shim)
+- **Infra**: Railway (auto-deploy from GitHub)
+
+## Part of Timepoint
+
+Proteus is one component of the [Timepoint](https://timepointai.com) platform. Other services in the suite include Flash (scene generation), Pro (social simulation / SNAG), SNAG Bench (evaluation), Clockchain (spatiotemporal graph index), and Billing (payments). Proteus operates independently -- it has no runtime dependencies on other Timepoint services -- but resolved market data may feed back into Pro and SNAG Bench as training signal.
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md) - System design and contract stack
 - [Setup Guide](docs/SETUP.md) - Development environment
+- [API Reference](docs/API_DOCUMENTATION.md) - REST API endpoints
+- [Contracts](docs/CONTRACTS.md) - Smart contract reference
 - [Roadmap](docs/ROADMAP.md) - What's done, what's next
 - [Gap Analysis](docs/GAPS.md) - Honest accounting of remaining work
 - [Security Analysis](docs/SECURITY-ANALYSIS.md) - Slither static analysis results
 - [Audit Preparation](docs/AUDIT-PREPARATION.md) - Contract inventory for future audit
+- [Whitepaper](WHITEPAPER.md) - Full research paper
 
 ## What Would Make This Real
 
@@ -291,7 +313,7 @@ In rough priority order:
 3. **Decentralize resolution** -- Replace single-EOA resolution with oracle consensus (commit-reveal). X API pay-per-use access now makes multi-oracle tweet verification economically viable.
 4. **Real wallet integration** -- Replace PBKDF2 shim with Coinbase CDP Server Signer.
 5. **Multisig** -- Gnosis Safe 2-of-3 for contract owner key.
-6. **Production infra** -- Alchemy/QuickNode RPC, Sentry monitoring, proper deployment pipeline.
+6. **Production RPC** -- Alchemy/QuickNode for mainnet (public RPC is fine for Sepolia testnet).
 
 ## License
 

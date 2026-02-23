@@ -85,7 +85,7 @@ This guide documents the exact Firebase Console configuration required for email
 5. Under **Application restrictions**:
    - Select **HTTP referrers**
    - Add:
-     - `https://*.repl.co/*`
+     - `https://proteus-production-6213.up.railway.app/*`
      - `https://yourdomain.com/*`
 6. Under **API restrictions**:
    - Select **Restrict key**
@@ -100,7 +100,7 @@ This guide documents the exact Firebase Console configuration required for email
 1. Go to **Project settings** → **Service accounts**
 2. Click **Generate new private key**
 3. Save the JSON file securely
-4. Add to Replit Secrets as `FIREBASE_SERVICE_ACCOUNT` (JSON string)
+4. Add to Railway environment variables as `FIREBASE_SERVICE_ACCOUNT` (JSON string)
 
 ### 5.2 Initialize Admin SDK
 The service account enables:
@@ -155,7 +155,7 @@ Before going live:
 - Ensure Email/Password is enabled
 
 #### "Invalid API Key" Error
-- Verify API key in Replit Secrets
+- Verify API key in Railway environment variables
 - Check API key restrictions
 - Ensure project ID matches
 

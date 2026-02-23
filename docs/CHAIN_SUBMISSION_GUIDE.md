@@ -2,20 +2,19 @@
 
 ## Quick Start: Interact with Markets on BASE Sepolia
 
-This guide shows you how to easily place bets or create competing predictions on Proteus using the BASE Sepolia testnet.
+This guide shows you how to place bets or create competing predictions on Proteus using the BASE Sepolia testnet.
 
 ---
 
-## Important: Contract Selection
-
-There are two prediction market contracts available:
+## Contract Selection
 
 | Contract | Address | Use Case |
 |----------|---------|----------|
-| **PredictionMarket (simple)** | `0x667121e8f22570F2c521454D93D6A87e44488d93` | Testing - no governance required |
-| EnhancedPredictionMarket | `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` | Full governance - requires active actors |
+| **PredictionMarketV2** | `0x5174Da96BCA87c78591038DEe9DB1811288c9286` | **Recommended** -- full lifecycle with Levenshtein resolution |
+| PredictionMarket (V1) | `0x667121e8f22570F2c521454D93D6A87e44488d93` | Deprecated -- no resolution mechanism |
+| EnhancedPredictionMarket | `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` | Requires governance bootstrap (0 active actors) |
 
-> **Note:** EnhancedPredictionMarket currently has 0 active actors (governance not bootstrapped). Use PredictionMarket (simple) for testing.
+> **Use PredictionMarketV2 for everything.** V1 is deprecated. EnhancedPredictionMarket requires active node operators.
 
 ---
 
@@ -34,8 +33,7 @@ There are two prediction market contracts available:
 
 ## Contract Information
 
-**PredictionMarket (simple):** `0x667121e8f22570F2c521454D93D6A87e44488d93` (recommended for testing)
-**EnhancedPredictionMarket:** `0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C` (requires governance)
+**PredictionMarketV2:** `0x5174Da96BCA87c78591038DEe9DB1811288c9286` (recommended)
 **Network:** BASE Sepolia Testnet
 **Chain ID:** 84532
 
@@ -228,6 +226,6 @@ Result: Others can now bet on your submission vs existing ones
 
 ---
 
-*Last Updated: December 2024*
+*Last Updated: February 2026*
 *Network: BASE Sepolia Testnet*
-*Contracts: PredictionMarket (simple) + EnhancedPredictionMarket*
+*Contract: PredictionMarketV2 (`0x5174Da96BCA87c78591038DEe9DB1811288c9286`)*

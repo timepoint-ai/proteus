@@ -5,15 +5,15 @@
 ## Prerequisites
 
 - Node.js 18+
-- Python 3.10+
+- Python 3.11+
 - Redis server
 - MetaMask or Coinbase Wallet
 
 ## 1. Clone and Install
 
 ```bash
-git clone https://github.com/proteus-markets/proteus-markets
-cd proteus-markets
+git clone https://github.com/timepoint-ai/proteus.git
+cd proteus
 
 # Install Node dependencies
 npm install
@@ -291,9 +291,21 @@ python scripts/seed_examples.py --resolve
 
 See the README "Worked Examples" section for details on each example market.
 
-## Production Deployment
+## Railway Deployment
 
-For mainnet deployment:
+The app is deployed on Railway, auto-deploying from `main` on [github.com/timepoint-ai/proteus](https://github.com/timepoint-ai/proteus).
+
+| Component | Provider |
+|-----------|----------|
+| Backend | Railway (gunicorn via `railway.json`) |
+| Redis | Railway Redis plugin |
+| Postgres | Railway (available, unused in chain-only mode) |
+
+Railway environment variables to configure: `REDIS_URL`, `JWT_SECRET_KEY`, `XCOM_BEARER_TOKEN`, `FIREBASE_*`, `COINBASE_*`, `DEPLOYER_PRIVATE_KEY`, `SESSION_SECRET`.
+
+## Production Deployment (Mainnet)
+
+For mainnet deployment (not yet done):
 
 1. Change `NETWORK=base-mainnet` and `CHAIN_ID=8453`
 2. Use production RPC endpoints (Alchemy, QuickNode)
