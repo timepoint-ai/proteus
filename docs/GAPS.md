@@ -12,7 +12,7 @@ The core primitive works:
 
 - [x] On-chain Levenshtein distance scoring (PredictionMarketV2)
 - [x] Full market lifecycle on BASE Sepolia
-- [x] 250+ passing tests
+- [x] 259+ passing tests (109 contract, 135 unit, 15 integration)
 - [x] Slither static analysis (1 real bug found and fixed)
 - [x] Flask backend with JWT auth and Redis-backed OTP
 - [x] CI/CD pipeline
@@ -64,6 +64,8 @@ The core primitive works:
 - `services/embedded_wallet.py` -- PBKDF2 key derivation is a testnet shim. Runtime warning added for mainnet. Must be replaced with CDP Server Signer before any real deployment.
 - `services/v2_resolution.py` -- Resolution is owner-based (single EOA). This is the biggest centralization risk.
 - Several deprecated service files still in the repo (`.deprecated` suffix)
+- Dead `SCREENSHOT_SERVICE_URL` config removed (screenshots use Playwright directly via `xcom_api_service.py`)
+- Webhook event hooks added (`services/event_hooks.py`) but no consumers connected yet
 
 ### Frontend
 - Vanilla JS, no framework, no build step. Works but not scalable.

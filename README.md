@@ -1,12 +1,14 @@
 # Proteus
 
-**v0 Alpha -- Proof of Concept**
+**v0 Alpha -- Proof of Concept | BASE Sepolia Testnet**
 
 A prediction market protocol on BASE where users stake ETH on the exact text a public figure will post. Winners are determined by on-chain Levenshtein distance. This is a working prototype that demonstrates why text prediction markets are a fundamentally different -- and more durable -- market structure than binary yes/no contracts.
 
-tl;dr 
+> **Status:** Alpha prototype on BASE Sepolia testnet. Not audited. Not production-ready. Do not deploy to mainnet.
 
-Research project, not intended for commercial use, exploring how AIs can roleplay as public figures and bet on the *exact* words they will use on posts on X. "I bet 1 ETH that @elonmusk will post 'Mars by 2030' on X between Mar 1 2026 and Apr 1 2026." and then if the real post is "Moon base by 2030" the Levenshtein distance between the real text posted (or lack thereof) is calculated among all competitors and the closest to the exact character-by-character post within the time period wins. 
+tl;dr
+
+Research project, not intended for commercial use, exploring how AIs can roleplay as public figures and bet on the *exact* words they will use on posts on X. "I bet 1 ETH that @elonmusk will post 'Mars by 2030' on X between Mar 1 2026 and Apr 1 2026." and then if the real post is "Moon base by 2030" the Levenshtein distance between the real text posted (or lack thereof) is calculated among all competitors and the closest to the exact character-by-character post within the time period wins.
 
 
 ## The Thesis
@@ -209,7 +211,7 @@ Use **PredictionMarketV2** for everything. V1 lacks a resolution mechanism.
 
 ## Deployment
 
-The backend runs on **Railway** at `proteus-production-6213.up.railway.app`, auto-deploying from `main` on [github.com/timepoint-ai/proteus](https://github.com/timepoint-ai/proteus).
+The backend runs on **Railway** at `proteus-production-6213.up.railway.app`, auto-deploying from `main`.
 
 | Service | Provider | Purpose |
 |---------|----------|---------|
@@ -310,6 +312,19 @@ In rough priority order:
 4. **Real wallet integration** -- Replace PBKDF2 shim with Coinbase CDP Server Signer.
 5. **Multisig** -- Gnosis Safe 2-of-3 for contract owner key.
 6. **Production RPC** -- Alchemy/QuickNode for mainnet (public RPC is fine for Sepolia testnet).
+
+## TIMEPOINT Suite
+
+Proteus is part of the TIMEPOINT platform suite. It operates as a standalone prediction market system, but connects to the broader TIMEPOINT ecosystem:
+
+| Project | Repository | Role |
+|---------|-----------|------|
+| **Proteus Markets** | [realityinspector/proteus-markets](https://github.com/realityinspector/proteus-markets) | Prediction markets on temporal simulation outcomes (this repo) |
+| TIMEPOINT Pro | timepoint-pro | Generates temporal simulations that Proteus markets can bet on |
+| Flash API | timepoint-flash-deploy | Can display Proteus market results |
+| Landing | timepoint-landing | Links to the [Proteus whitepaper](https://github.com/realityinspector/proteus-markets/blob/main/WHITEPAPER.md) |
+
+Proteus is the only public repository in the suite. The other projects are internal to the TIMEPOINT organization.
 
 ## License
 

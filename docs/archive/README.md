@@ -6,6 +6,8 @@ Historical documents preserved for reference. These are **not** current and shou
 
 | File | Original Purpose | Why Archived |
 |------|------------------|--------------|
+| COINBASE-INTEGRATION-GUIDE.md | Coinbase embedded wallet setup | Superseded by SETUP.md (wallet uses PBKDF2 shim, not real CDP) |
+| FIREBASE-SETUP-GUIDE.md | Firebase email OTP setup | Superseded by SETUP.md (still useful for Firebase Console steps) |
 | CRYPTO-USERS-PLAN.md | Coinbase wallet integration plan | Superseded by SETUP.md |
 | CLEAN.md | Phase 7 cleanup checklist | Work completed |
 | LAUNCH.md | Launch planning | Superseded by ROADMAP.md |

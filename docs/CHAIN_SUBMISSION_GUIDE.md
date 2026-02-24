@@ -104,11 +104,11 @@ This guide shows you how to place bets or create competing predictions on Proteu
 
 ## Direct Contract Interaction (Advanced)
 
-### Using Etherscan:
+### Using Basescan:
 
-1. **Go to Contract on Etherscan**
+1. **Go to Contract on Basescan**
    ```
-   https://sepolia.basescan.org/address/0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C#writeContract
+   https://sepolia.basescan.org/address/0x5174Da96BCA87c78591038DEe9DB1811288c9286#writeContract
    ```
 
 2. **Connect Wallet**
@@ -116,39 +116,43 @@ This guide shows you how to place bets or create competing predictions on Proteu
    - Select MetaMask
 
 3. **Submit New Prediction**
-   - Find `submitPrediction` function
+   - Find `createSubmission` function
    - Enter:
-     - `marketId`: The market number (e.g., 0, 1, 2)
-     - `predictedText`: Your prediction text
-     - `payableAmount`: Your stake in ETH
+     - `_marketId`: The market number (e.g., 0, 1, 2)
+     - `_predictedText`: Your prediction text
+     - `payableAmount`: Your stake in ETH (minimum 0.001 ETH)
    - Click "Write"
 
-4. **Place Bet on Existing**
-   - Find `placeBet` function
+4. **Claim Payout (after resolution)**
+   - Find `claimPayout` function
    - Enter:
-     - `marketId`: The market number
-     - `submissionId`: The submission to bet on
-     - `payableAmount`: Your bet amount in ETH
+     - `_submissionId`: Your winning submission ID
    - Click "Write"
 
 ---
 
-## Contract Methods Reference
+## Contract Methods Reference (PredictionMarketV2)
 
 ### Key Functions:
 
 ```solidity
-// Submit a new prediction
-function submitPrediction(uint256 marketId, string memory predictedText) payable
+// Create a new prediction market
+function createMarket(string calldata _actorHandle, uint256 _duration) external returns (uint256)
 
-// Bet on existing submission
-function placeBet(uint256 marketId, uint256 submissionId) payable
+// Submit a prediction with ETH stake (min 0.001 ETH)
+function createSubmission(uint256 _marketId, string calldata _predictedText) external payable returns (uint256)
 
-// Check if text is duplicate
-function isDuplicateSubmission(uint256 marketId, string memory predictedText) view returns (bool)
+// Resolve market with actual text (owner only)
+function resolveMarket(uint256 _marketId, string calldata _actualText) external
+
+// Winner claims payout
+function claimPayout(uint256 _submissionId) external
 
 // Get all submissions for a market
-function getMarketSubmissions(uint256 marketId) view returns (Submission[] memory)
+function getMarketSubmissions(uint256 _marketId) external view returns (uint256[] memory)
+
+// Calculate Levenshtein distance between two strings
+function levenshteinDistance(string memory a, string memory b) public pure returns (uint256)
 ```
 
 ---
@@ -161,9 +165,10 @@ function getMarketSubmissions(uint256 marketId) view returns (Submission[] memor
 - This ensures fair competition between submissions
 
 ### Winning Conditions:
-- The submission with text closest to actual outcome wins (Levenshtein distance)
-- Payouts distributed proportionally to bet amounts
-- Platform fee: 7% (distributed to validators, creators, and governance)
+- The submission with text closest to actual outcome wins (lowest Levenshtein distance)
+- Winner takes the entire pool minus the 7% platform fee (winner-take-all)
+- Ties broken by submission order (first submitter wins)
+- Minimum 2 submissions required for resolution; single submissions get a full refund
 
 ### Gas Costs:
 - Typical submission: ~0.0002 ETH in gas
@@ -202,7 +207,7 @@ function getMarketSubmissions(uint256 marketId) view returns (Submission[] memor
 For additional help:
 - View live markets: [/proteus/timeline](/proteus/timeline)
 - Check your transactions: [BASE Sepolia Explorer](https://sepolia.basescan.org)
-- Contract verification: [Contract on Etherscan](https://sepolia.basescan.org/address/0x6B67Cb0DaAf78f63BD11195Df0FD9FFe4361b93C)
+- Contract verification: [PredictionMarketV2 on Basescan](https://sepolia.basescan.org/address/0x5174Da96BCA87c78591038DEe9DB1811288c9286#code)
 
 ---
 

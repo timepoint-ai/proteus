@@ -100,8 +100,9 @@ Currently: single EOA calls `resolveMarket(marketId, actualText)`. This is the b
 services/
 ├── blockchain_base.py      # Web3 contract interactions
 ├── v2_resolution.py        # Market resolution service (owner-based)
+├── event_hooks.py          # Webhook event emitter (market.resolved, etc.)
 ├── auth_store.py           # Redis-backed nonce/OTP storage
-├── oracle.py               # X.com API + Playwright screenshots
+├── xcom_api_service.py     # X.com API + Playwright screenshots
 ├── text_analysis.py        # Levenshtein distance (Python side)
 ├── cache_manager.py        # Redis caching for RPC responses
 ├── firebase_auth.py        # Email OTP authentication

@@ -313,9 +313,9 @@ See `docs/SECURITY-ANALYSIS.md` for full Slither report.
 | Test Suite | Tests | Status |
 |------------|-------|--------|
 | Hardhat (Contracts) | 109 | Passing |
-| Python Unit Tests | 56 | Passing |
-| Integration Tests | 15 | Passing |
-| **Total** | **180** | **All Passing** |
+| Python Unit Tests | 135 | Passing |
+| Integration Tests | 15 | Passing (2 expected skips) |
+| **Total** | **259** | **All Passing** |
 
 ### Test Categories
 
@@ -427,7 +427,7 @@ BASE Mainnet
 
 ## Contact and Access
 
-**Repository:** [GitHub link]
+**Repository:** [github.com/realityinspector/proteus-markets](https://github.com/realityinspector/proteus-markets)
 **Testnet Explorer:** https://sepolia.basescan.org/
 
 **Verified Contracts:**

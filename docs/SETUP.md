@@ -12,8 +12,8 @@
 ## 1. Clone and Install
 
 ```bash
-git clone https://github.com/timepoint-ai/proteus.git
-cd proteus
+git clone https://github.com/realityinspector/proteus-markets.git
+cd proteus-markets
 
 # Install Node dependencies
 npm install
@@ -67,9 +67,11 @@ COINBASE_PROJECT_ID=your_project_id
 5. Add your domain to Authorized domains
 6. Copy credentials to `.env`
 
-See [FIREBASE-SETUP-GUIDE.md](../FIREBASE-SETUP-GUIDE.md) for detailed steps.
+See [archived guide](archive/FIREBASE-SETUP-GUIDE.md) for reference (written for an earlier architecture; still useful for Firebase Console steps).
 
-## 4. Coinbase Developer Platform
+## 4. Coinbase Developer Platform (NOT YET IMPLEMENTED)
+
+The embedded wallet currently uses a **PBKDF2 testnet shim**, not real CDP. When credentials become available:
 
 1. Sign up at [CDP Console](https://portal.cdp.coinbase.com/)
 2. Create a project
@@ -79,7 +81,7 @@ See [FIREBASE-SETUP-GUIDE.md](../FIREBASE-SETUP-GUIDE.md) for detailed steps.
    - `wallet:transactions:send`
 4. Copy Project ID and API keys to `.env`
 
-See [COINBASE-INTEGRATION-GUIDE.md](../COINBASE-INTEGRATION-GUIDE.md) for detailed steps.
+See [archived guide](archive/COINBASE-INTEGRATION-GUIDE.md) for the planned integration flow.
 
 ## 5. Get Test ETH
 
@@ -293,7 +295,7 @@ See the README "Worked Examples" section for details on each example market.
 
 ## Railway Deployment
 
-The app is deployed on Railway, auto-deploying from `main` on [github.com/timepoint-ai/proteus](https://github.com/timepoint-ai/proteus).
+The app is deployed on Railway, auto-deploying from `main`.
 
 | Component | Provider |
 |-----------|----------|

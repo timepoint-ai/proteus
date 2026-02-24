@@ -35,10 +35,27 @@ Validate that on-chain Levenshtein distance works as a prediction market scoring
 
 Populate 6 worked examples demonstrating the full spectrum of prediction quality.
 
+
 - [x] README: 6 collapsible worked examples with verified Levenshtein distances
 - [x] Seed script (`scripts/seed_examples.py`): create example markets on BASE Sepolia
 - [x] Landing page: thesis example (AI vs AI, Satya Nadella) in "How It Works" section
 - [x] Fix 4 pre-existing unit test failures (135 unit tests now pass)
+
+---
+
+## Phase 0.75: Standalone Cleanup (COMPLETE)
+
+Make Proteus fully standalone. Remove sibling service references. Fix dead config. Prepare integration hooks.
+
+- [x] Remove "Part of Timepoint" section from landing page and README
+- [x] Remove dead `SCREENSHOT_SERVICE_URL` config (localhost:3000 default was never consumed; screenshots use Playwright via `xcom_api_service.py`)
+- [x] Add `services/event_hooks.py` -- fire-and-forget webhook emitter for `market.resolved` events
+- [x] Wire webhook into `v2_resolution.py` on successful resolution
+- [x] Document webhook API in ROADMAP (env vars, payload schemas, planned events)
+- [x] Archive stale `FIREBASE-SETUP-GUIDE.md` and `COINBASE-INTEGRATION-GUIDE.md` to `docs/archive/`
+- [x] Delete temporary files (CHART_GENERATION_PROMPT.md, INFOGRAPHIC_PROMPT.md, TIMEPOINT_PROTEUS_SUITE_INTEGRATION_ANALYSIS.md)
+- [x] Add `docs/VISUALIZATION_SPEC.md` -- chart spec for whitepaper companion graphics
+- [x] Verify Railway deployment: `/api/health` 200, all market endpoints operational
 
 ---
 
