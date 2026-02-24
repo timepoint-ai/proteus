@@ -84,10 +84,9 @@ class ChainConfig:
     # X.com Oracle settings
     XCOM_API_URL = os.environ.get('XCOM_API_URL', 'https://api.x.com/v2')
     XCOM_BEARER_TOKEN = os.environ.get('XCOM_BEARER_TOKEN')
-    # Screenshot capture uses Playwright directly (see xcom_api_service.py).
-    # This URL is reserved for a future dedicated screenshot microservice.
-    SCREENSHOT_SERVICE_URL = os.environ.get('SCREENSHOT_SERVICE_URL', '')
-    
+    # Screenshot capture uses Playwright headless browser (xcom_api_service.py).
+    # No external screenshot service is needed.
+
     # IPFS for decentralized storage
     IPFS_GATEWAY_URL = os.environ.get('IPFS_GATEWAY_URL', 'https://ipfs.io/ipfs/')
     

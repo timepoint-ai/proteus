@@ -93,10 +93,11 @@ Only worth doing if Phase 1 shows demand.
 
 ---
 
-## Phase 4: Decentralize (FUTURE)
+## Phase 4: Decentralize & Integrate (FUTURE)
 
 After mainnet is stable and has users.
 
+### Decentralized Resolution
 - [ ] Oracle commit-reveal (prevent front-running)
 - [ ] Slashing mechanism for dishonest oracles
 - [ ] Node operator onboarding (staked participation)
@@ -105,6 +106,36 @@ After mainnet is stable and has users.
 - [ ] X API pay-per-use integration for multi-oracle tweet verification
 
 > **X API Update (Feb 2026):** X now offers [pay-per-use API access](https://developer.x.com/) for individual developers -- credit-based billing, no subscriptions or monthly caps. This unblocks the multi-oracle verification model: each oracle node can independently call the X API v2 to fetch a post by ID, verify the author handle, and confirm the timestamp, paying only for the API calls it actually makes. Previously the $200/mo Basic tier (15K reads) or $5,000/mo Pro tier (1M reads) made independent per-oracle verification cost-prohibitive. This is a prerequisite for decentralized resolution.
+
+### Webhook Event Export (infrastructure ready, consumers not yet connected)
+
+Proteus emits structured webhook events via `services/event_hooks.py`. The hook is wired into `v2_resolution.py` and fires on every successful market resolution. Configure via Railway env vars:
+
+| Env Var | Purpose |
+|---------|---------|
+| `PROTEUS_WEBHOOK_URL` | POST endpoint for event delivery |
+| `PROTEUS_WEBHOOK_SECRET` | Optional HMAC-SHA256 signing key |
+
+**Current events:**
+
+| Event | Trigger | Payload |
+|-------|---------|---------|
+| `market.resolved` | Successful `resolveMarket()` tx | `market_id`, `actual_text`, `tx_hash`, `block_number`, `gas_used` |
+
+**Planned events (not yet wired):**
+
+| Event | Trigger | Payload |
+|-------|---------|---------|
+| `market.created` | New market via `createMarket()` | `market_id`, `actor_handle`, `end_time`, `creator` |
+| `submission.created` | New prediction via `createSubmission()` | `market_id`, `submission_id`, `submitter`, `predicted_text` |
+| `payout.claimed` | Winner claims via `claimPayout()` | `submission_id`, `amount`, `claimer` |
+
+**Intended consumers:**
+
+- **Pro (SNAG)**: Ingest `market.resolved` events as training data for persona simulation fine-tuning (see WHITEPAPER.md Section 6.5). Each resolved market = one `(prediction, actual, distance, context)` training tuple.
+- **SNAG-Bench**: Ingest `market.resolved` events to score predictive precision as a benchmark dimension alongside grounding fidelity and temporal coherence.
+
+Delivery is fire-and-forget (5s timeout, no retries). Downstream consumers must be idempotent. Webhook payloads include `X-Proteus-Event` header and optional `X-Proteus-Signature: sha256=<hmac>` for verification.
 
 ---
 
