@@ -320,9 +320,14 @@ Proteus is part of the TIMEPOINT platform suite. It operates as a standalone pre
 | Project | Repository | Role |
 |---------|-----------|------|
 | **Proteus Markets** | [realityinspector/proteus-markets](https://github.com/realityinspector/proteus-markets) | Prediction markets on temporal simulation outcomes (this repo) |
-| TIMEPOINT Pro | timepoint-pro | Generates temporal simulations that Proteus markets can bet on |
-| Flash API | timepoint-flash-deploy | Can display Proteus market results |
-| Landing | timepoint-landing | Links to the [Proteus whitepaper](https://github.com/realityinspector/proteus-markets/blob/main/WHITEPAPER.md) |
+| Flash API | timepoint-flash-deploy | Unified API gateway -- auth, credits, generation, billing + clockchain proxy |
+| Pro / Oxen | timepoint-pro | Temporal social physics engine -- 21 mechanisms, persistent agent memory, SNAG |
+| Clockchain | timepoint-clockchain | Spatiotemporal graph index -- NetworkX graph, canonical URLs, autonomous workers |
+| Billing | timepoint-billing | Stripe + Apple IAP, subscriptions, refunds, disputes |
+| SNAG Bench | timepoint-snag-bench | Scoring framework for temporal AI -- grounding, coherence, prediction |
+| Landing | timepoint-landing | Marketing site at `timepointai.com`, links to the [Proteus whitepaper](https://github.com/realityinspector/proteus-markets/blob/main/WHITEPAPER.md) |
+| Web App | timepoint-web-app | Web frontend at `app.timepointai.com` (FastAPI + Jinja2 + HTMX) |
+| iPhone App | timepoint-iphone-app | Native iOS client (SwiftUI, v1.0.0 build 2, TestFlight-ready) |
 
 Proteus is the only public repository in the suite. The other projects are internal to the TIMEPOINT organization.
 
