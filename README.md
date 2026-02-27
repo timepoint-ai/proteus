@@ -15,6 +15,14 @@ Research project, not intended for commercial use, exploring how AIs can rolepla
 
 Binary prediction markets encode exactly one bit of information per contract. The outcome space is {0, 1}, and as AI systems approach superhuman forecasting along an exponential capability curve, the edge any participant can capture in a binary market collapses toward zero because the correct answer becomes trivially computable. Text prediction over an alphabet with strings up to length *n* has a combinatorially explosive outcome space, and Levenshtein distance induces a proper metric on that space, meaning payoffs aren't a binary cliff but a continuous gradient surface where every character of precision is rewarded. Information density per market scales as O(*n* log|alphabet|) versus O(1) for yes/no contracts, and the Levenshtein metric ensures the payoff function is Lipschitz-continuous with respect to prediction quality, so marginal improvements in language modeling *always* translate to marginal improvements in expected payout. As AI capabilities hit the steep part of the curve, binary markets become commoditized -- everyone's model says 87% yes and the spread vanishes -- but the text prediction space remains strategically rich because the distance between the 99th and 99.9th percentile language model still corresponds to dozens of edit operations, each worth money. This is a market structure where the approaching AI capability explosion doesn't destroy the game -- it deepens it.
 
+|  | Binary (Polymarket, Kalshi) | Text (Proteus) |
+|--|----------------------------|----------------|
+| **Outcome space** | {0, 1} | Σⁿ — all strings up to length *n* |
+| **Information density** | O(1) — one bit per market | O(*n* log\|Σ\|) — scales with text length |
+| **Payoff function** | Cliff: right or wrong | Continuous gradient: every character pays |
+| **AI resistance** | Collapses — models converge on same probability | Deepens — edit gap between frontier models is monetizable |
+| **Scoring** | None (binary) | Levenshtein distance (proper metric space) |
+
 Coinbase/Kalshi launched binary prediction markets to all 50 US states in January 2026. They run off-chain through Kalshi's CFTC-regulated backend. Polymarket does ~$12B/month in binary yes/no volume on Polygon. Neither supports text prediction. Neither scores on a continuous distance metric. That's the gap this prototype explores.
 
 > **X API Update (Feb 2026):** X now offers [pay-per-use API access](https://developer.x.com/) for individual developers -- no subscriptions, no monthly caps, just credit-based billing. This is a significant unlock for oracle resolution: each oracle node can independently fetch posts by ID, verify authorship, and confirm timestamps via the X API v2. Previously, the $200/mo Basic tier (15K reads) or $5,000/mo Pro tier (1M reads) made multi-oracle verification cost-prohibitive. Pay-per-use makes it feasible for multiple independent oracles to verify the same post at minimal cost.
@@ -23,9 +31,26 @@ Coinbase/Kalshi launched binary prediction markets to all 50 US states in Januar
 
 Proteus validates Rendered Futures against reality. Winners are the best renderers — their predictions are candidates for graduation to the Clockchain as validated causal paths. Every resolved market strengthens the Bayesian prior.
 
-The distance metric evolves: Levenshtein on text (V1) → event descriptions (V2) → graph distance on causal subgraphs (V3). The continuous-metric primitive generalizes across all these levels.
+```mermaid
+flowchart LR
+    V1["V1: Exact text\n(Levenshtein)"] --> V2["V2: Event descriptions\n(semantic distance)"]
+    V2 --> V3["V3: Causal subgraphs\n(graph distance)"]
+    V3 --> CC["Clockchain\n(validated paths)"]
+    CC -. "strengthens\nBayesian prior" .-> V1
+```
+
+The distance metric evolves across three levels. The continuous-metric primitive — closest match wins on a gradient, not a cliff — generalizes at every level.
 
 Proteus predictions will be expressible as TDF records (Phase 2), enabling direct interoperability with the Clockchain and the broader Timepoint suite.
+
+```mermaid
+flowchart TD
+    P["Proteus\n(resolve markets)"] --> |"validated predictions"| CC["Clockchain"]
+    CC --> |"grounding"| Pro["Pro\n(simulate futures)"]
+    Pro --> |"rendered futures"| P
+    CC --> |"stronger prior"| F["Flash\n(render past)"]
+    F --> |"verified events"| CC
+```
 
 ## What This Is (and Isn't)
 
